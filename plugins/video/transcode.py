@@ -45,6 +45,7 @@ def transcode(inFile, outFile, tsn=''):
     settings['audio_fr'] = select_audiofr(inFile, tsn)
     settings['audio_ch'] = select_audioch(tsn)
     settings['audio_codec'] = select_audiocodec(inFile, tsn)
+    settings['copy_ts'] = select_copyts(tsn)
     settings['ffmpeg_pram'] = select_ffmpegprams(tsn)
     settings['format'] = select_format(tsn)
 
@@ -90,6 +91,11 @@ def select_audiofr(inFile, tsn):
 def select_audioch(tsn):
     if config.getAudioCH(tsn) != None:
         return '-ac '+config.getAudioCH(tsn)
+    return ''
+
+def select_copyts(tsn):
+    if config.getCopyTS(tsn):
+        return '-copyts'
     return ''
 
 def select_videofps(tsn):

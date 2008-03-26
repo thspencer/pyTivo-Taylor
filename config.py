@@ -136,7 +136,7 @@ def getFFmpegTemplate(tsn):
     except NoOptionError: #default
         return '%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s \
                 %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s \
-                %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s'
+                %(audio_fr)s %(audio_ch)s %(audio_codec)s %(copy_ts)s %(ffmpeg_pram)s %(format)s'
 
 def getFFmpegPrams(tsn):
     if tsn and config.has_section('_tivo_' + tsn):
@@ -292,6 +292,20 @@ def getAudioFR(tsn = None):
         return config.get('Server', 'audio_fr')
     except NoOptionError:
         return None
+
+def getCopyTS(tsn = None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        if config.has_option('_tivo_' + tsn, 'copy_ts'):
+            try:
+                return config.getboolean('_tivo_' + tsn, 'copy_ts')
+            except NoOptionError, ValueError:
+                pass
+    if config.has_option('Server', 'copy_ts'):
+        try:
+            return config.getboolean('Server', 'copy_ts')
+        except NoOptionError, ValueError:
+            pass
+    return True
 
 def getVideoFPS(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
