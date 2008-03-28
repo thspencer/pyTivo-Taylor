@@ -347,7 +347,7 @@ def tivo_compatable(inFile, tsn = ''):
         return False
 
     if tsn[:3] == '540':
-        if vdar == None or vdar != float(4)/float(3):
+        if vdar == None or not vdar in (float(4)/float(3), float(8)/float(9)):
             debug_write(__name__, fn_attr(), ['FALSE, ratio', vdar, 'not supported by 540 tivo.', inFile])
             return False
 
