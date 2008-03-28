@@ -55,7 +55,7 @@ def transcode(inFile, outFile, tsn=''):
     print 'transcoding to tivo model '+tsn[:3]+' using ffmpeg command:'
     print ' '.join(cmd)
     debug_write(__name__, fn_attr(), ['ffmpeg command is ', ' '.join(cmd)])
-    ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    ffmpeg = subprocess.Popen(cmd, bufsize=512*1024, stdout=subprocess.PIPE)
     try:
         shutil.copyfileobj(ffmpeg.stdout, outFile)
     except:
