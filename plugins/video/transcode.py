@@ -184,7 +184,10 @@ def select_aspect(inFile, tsn = ''):
             # pass all resolutions to S3, except heights greater than conf height
             return []
         # else, resize video.
-    if (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)]:
+    if (rwidth, rheight) in [(1, 1)] and vpar == 8.0/9.0:
+        debug_write(__name__, fn_attr(), ['File + PAR is within 4:3.'])
+        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
+    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)]:
         debug_write(__name__, fn_attr(), ['File is within 4:3 list.'])
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
     elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)]) and aspect169:
