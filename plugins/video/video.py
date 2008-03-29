@@ -375,6 +375,8 @@ class Video(Plugin):
             video['name'] = os.path.split(file)[1]
             video['path'] = file
             video['part_path'] = file.replace(local_base_path, '', 1)
+            if not video['part_path'].startswith(os.path.sep):
+                video['part_path'] = os.path.sep + video['part_path']
             video['title'] = os.path.split(file)[1]
             video['is_dir'] = self.__isdir(file)
             if video['is_dir']:
