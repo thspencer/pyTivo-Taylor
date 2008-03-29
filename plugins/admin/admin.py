@@ -288,7 +288,8 @@ class Admin(Plugin):
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
         t.redirect = quote(unquote_plus(handler.path).split('/')[1])
-        handler.wfile.write(t)
+        o = ''.join([i for i in unicode(t) if i not in (u'\u200b')])
+        handler.wfile.write(o.encode('latin-1'))
 
     def get_tivo_file(self, url, mak, tivoIP, outfile):
         #global status
