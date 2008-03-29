@@ -72,7 +72,7 @@ def getShares(tsn=''):
         try:
             for item in os.listdir(base_path):
                 item_path = os.path.join(base_path, item)
-                if not os.path.isdir(item_path):
+                if not os.path.isdir(item_path) or item.startswith('.'):
                     continue
 
                 new_name = name + '/' + item
