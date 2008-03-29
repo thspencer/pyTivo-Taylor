@@ -299,7 +299,7 @@ def select_aspect(inFile, tsn = ''):
             return settings
 
 def tivo_compatable(inFile, tsn = ''):
-    supportedModes = [[720, 480], [704, 480], [544, 480], [480, 480], [352, 480]]
+    supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], [480, 480], [352, 480]]
     type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
     #print type, width, height, fps, millisecs, kbps, akbps, acodec
 
