@@ -346,7 +346,7 @@ class Video(Plugin):
                 handler.send_header('Location ', 'http://' +
                                     handler.headers.getheader('host') +
                                     '/TiVoConnect?Command=QueryContainer&' +
-                                    'AnchorItem=Hack8.3&Container=' + hackPath)
+                                    'AnchorItem=Hack8.3&Container=' + quote(hackPath))
                 handler.end_headers()
                 return
 
