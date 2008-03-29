@@ -181,6 +181,12 @@ class Video(Plugin):
                               'ItemCount': query['ItemCount'],
                               'Filter': query['Filter'],
                               'Container': ['/'.join(path)]}
+            files, total, start = self.get_files(handler, state['query'],
+                                                 self.video_file_filter)
+            if files:
+                state['page'] = files[0]
+            else:
+                state['page'] = ''
             return None, path
 
         # just in case we missed something.
