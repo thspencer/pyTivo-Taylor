@@ -1,4 +1,4 @@
-import subprocess, shutil, os, re, sys, ConfigParser, time, lrucache, math
+import subprocess, shutil, os, re, sys, tempfile, ConfigParser, time, lrucache, math
 import config
 from debug import debug_write, fn_attr
 
@@ -361,8 +361,10 @@ def video_info(inFile):
         debug_write(__name__, fn_attr(), ['VALID, ends in .tivo.', inFile])
         return True, True, True, True, True, True, True, True, True, True
 
-    cmd = [ffmpeg_path(), '-i', inFile ] 
-    ffmpeg = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    cmd = [ffmpeg_path(), '-i', inFile ]
+    # Windows and other OS buffer 4096 and ffmpeg can output more than that.
+    err_tmp = tempfile.TemporaryFile()
+    ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 
     # wait 10 sec if ffmpeg is not back give up
     for i in xrange(200):
@@ -375,7 +377,9 @@ def video_info(inFile):
         info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None))
         return None, None, None, None, None, None, None, None, None, None
 
-    output = ffmpeg.stderr.read()
+    err_tmp.seek(0) 
+    output = err_tmp.read() 
+    err_tmp.close() 
     debug_write(__name__, fn_attr(), ['ffmpeg output=', output])
 
     rezre = re.compile(r'.*Video: ([^,]+),.*')
