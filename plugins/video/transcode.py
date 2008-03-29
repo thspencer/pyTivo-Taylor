@@ -349,9 +349,9 @@ def tivo_compatable(inFile, tsn = ''):
         debug_write(__name__, fn_attr(), ['FALSE,', fps, 'fps, should be 29.97.', inFile])
         return False
 
-    if tsn[:3] == '540':
-        if vdar == None or not vdar in (float(4)/float(3), float(8)/float(9)):
-            debug_write(__name__, fn_attr(), ['FALSE, ratio', vdar, 'not supported by 540 tivo.', inFile])
+    if not config.get169Setting(tsn):
+        if vdar == None or not vdar in (4.0/3.0, 8.0/9.0):
+            debug_write(__name__, fn_attr(), ['FALSE, DAR', vdar, 'not supported by BLACKLIST_169 tivos.', inFile])
             return False
 
     for mode in supportedModes:
@@ -494,7 +494,6 @@ def video_info(inFile):
         vdar = float(x.group(1))/float(x.group(2))
     else:
         vdar = None
-    print vdar
  
     info_cache[inFile] = (mtime, (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar, vdar))
     debug_write(__name__, fn_attr(), ['Codec=', codec, ' width=', width, ' height=', height, ' fps=', fps, ' millisecs=', millisecs, ' kbps=', kbps, ' akbps=', akbps, ' acodec=', acodec, ' afreq=', afreq, ' par=', vpar, ' dar=', vdar])
