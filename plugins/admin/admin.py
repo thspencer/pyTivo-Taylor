@@ -287,7 +287,6 @@ class Admin(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
-        t.redirect = quote(unquote_plus(handler.path).split('/')[1])
         o = ''.join([i for i in unicode(t) if i not in (u'\u200b')])
         handler.wfile.write(o.encode('latin-1'))
 
@@ -338,6 +337,7 @@ class Admin(Plugin):
     def ToGo(self, handler, query):
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
+        tivoIP = query['TiVo'][0]
         for name, data in config.getShares():
             if cname == name:
                 if 'tivo_mak' in data:
@@ -352,7 +352,6 @@ class Admin(Plugin):
             parse_url = urlparse(str(query['Url'][0]))
             theurl = 'http://' + parse_url[1].split(':')[0] + parse_url[2] + "?" + parse_url[4]
             password = tivo_mak #TiVo MAK
-            tivoIP = query['TiVo'][0]
             name = unquote(parse_url[2])[10:300].split('.')
             name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
             outfile = os.path.join(togo_path, "".join(name))
@@ -364,21 +363,21 @@ class Admin(Plugin):
             handler.send_response(200)
             handler.end_headers()
             t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
-            t.container = cname
+            command = query['Redirect'][0]
             t.time = '3'
-            t.url = '/'+ query['Redirect'][0]
+            t.url = '/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP
             t.text = '<h3>Transfer Initiated.</h3>  <br>You selected transfer has been initiated.'+\
-                     '<br> The <a href="/'+ query['Redirect'][0] +'"> ToGo</a> page will reload in 3 seconds.'
+                     '<br> The <a href="/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP +'"> ToGo</a> page will reload in 3 seconds.'
             handler.wfile.write(t)
         else:
             handler.send_response(200)
             handler.end_headers()
             t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
-            t.container = cname
+            command = query['Redirect'][0]
             t.time = '10'
-            t.url = '/'+ query['Redirect'][0]
+            t.url = '/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP
             t.text = '<h3>Missing Data.</h3>  <br>You must set both "tivo_mak" and "togo_path" before using this function.'+\
-                     '<br> The <a href="/'+ query['Redirect'][0] +'"> ToGo</a> page will reload in 10 seconds.'
+                     '<br> The <a href="/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP +'"> ToGo</a> page will reload in 10 seconds.'
             handler.wfile.write(t)
 
     def ToGoStop(self, handler, query):
@@ -389,14 +388,15 @@ class Admin(Plugin):
         
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
+        tivoIP = query['TiVo'][0]
+        command = query['Redirect'][0]
         handler.send_response(200)
         handler.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
-        t.container = cname
         t.time = '3'
-        t.url = '/'+ query['Redirect'][0]
+        t.url = '/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP
         t.text = '<h3>Transfer Stopped.</h3>  <br>Your transfer has been stopped.'+\
-                 '<br> The <a href="/'+ query['Redirect'][0] +'"> ToGo</a> page will reload in 3 seconds.'
+                 '<br> The <a href="/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP +'"> ToGo</a> page will reload in 3 seconds.'
         handler.wfile.write(t)
 
 
