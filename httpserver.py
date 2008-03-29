@@ -107,6 +107,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.containers = tsncontainers
         t.hostname = socket.gethostname()
         t.escape = escape
+        t.quote = quote
         self.send_response(200)
         self.end_headers()
         self.wfile.write(t)
@@ -120,9 +121,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.admin = ''
         for section, settings in config.getShares():
             if 'type' in settings and settings['type'] == 'admin':
-                t.admin += '<a href="/TiVoConnect?Command=Admin&Container=' + section\
+                t.admin += '<a href="/TiVoConnect?Command=Admin&Container=' + quote(section)\
                            + '">pyTivo Web Configuration</a><br>'\
-                           + '<a href="/TiVoConnect?Command=NPL&Container=' + section\
+                           + '<a href="/TiVoConnect?Command=NPL&Container=' + quote(section)\
                            + '">pyTivo ToGo</a><br>'
         if t.admin == '':
             t.admin = '<br><b>No Admin plugin installed in pyTivo.conf</b><br> If you wish to use'\
