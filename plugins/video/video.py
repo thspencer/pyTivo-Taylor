@@ -181,6 +181,12 @@ class Video(Plugin):
                               'ItemCount': query['ItemCount'],
                               'Filter': query['Filter'],
                               'Container': ['/'.join(path)]}
+            files, total, start = self.get_files(handler, state['query'],
+                                                 self.video_file_filter)
+            if files:
+                state['page'] = files[0]
+            else:
+                state['page'] = ''
             return None, path
 
         # just in case we missed something.
@@ -346,7 +352,7 @@ class Video(Plugin):
                 handler.send_header('Location ', 'http://' +
                                     handler.headers.getheader('host') +
                                     '/TiVoConnect?Command=QueryContainer&' +
-                                    'AnchorItem=Hack8.3&Container=' + hackPath)
+                                    'AnchorItem=Hack8.3&Container=' + quote(hackPath))
                 handler.end_headers()
                 return
 
@@ -375,6 +381,8 @@ class Video(Plugin):
             video['name'] = os.path.split(file)[1]
             video['path'] = file
             video['part_path'] = file.replace(local_base_path, '', 1)
+            if not video['part_path'].startswith(os.path.sep):
+                video['part_path'] = os.path.sep + video['part_path']
             video['title'] = os.path.split(file)[1]
             video['is_dir'] = self.__isdir(file)
             if video['is_dir']:

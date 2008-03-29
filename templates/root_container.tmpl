@@ -16,7 +16,7 @@
         </Details>
         <Links>
             <Content>
-                <Url>/TiVoConnect?Command=QueryContainer&amp;Container=$escape($name)</Url>
+                <Url>/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)</Url>
                 <ContentType>$escape($details.content_type)</ContentType>
             </Content>
         </Links>
