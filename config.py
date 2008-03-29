@@ -2,7 +2,7 @@ import ConfigParser, os
 import re
 from ConfigParser import NoOptionError
 
-BLACKLIST_169 = ('540', '649')
+BLACKLIST_169 = ('540')
 
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
