@@ -5,6 +5,7 @@ import string
 from ConfigParser import NoOptionError
 
 BLACKLIST_169 = ('540', '649')
+guid = ''.join([random.choice(string.letters) for i in range(10)])
 
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
@@ -24,8 +25,7 @@ def getGUID():
     if config.has_option('Server', 'GUID'):
         return config.get('Server', 'GUID')
     else:
-        return ''.join([random.choice(string.letters) for i in range(10)])
-    return guid
+        return guid
 
 def getTivoUsername():
     return config.get('Server', 'tivo_username')
