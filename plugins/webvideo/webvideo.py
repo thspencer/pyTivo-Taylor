@@ -9,6 +9,8 @@ import urllib2
 import os.path
 import shutil
 import os.path
+import os
+import urlparse
 import urllib
 import xml.etree.ElementTree as ElementTree
 import Queue
@@ -139,3 +141,13 @@ class WebVideo(Video):
         shutil.copyfileobj(infile, outfile, 8192)
 
         print 'done downloading %s to %s' % (url, file_path)
+
+    def send_file(self, handler, container, name):
+        Video.send_file(self, handler, container, name)
+
+        o = urlparse.urlparse("http://fake.host" + handler.path)
+        path = urllib.unquote(o[2])
+        file_path = container['path'] + path[len(name) + 1:]
+        if os.path.exists(file_path):
+            os.unlink(file_path)
+
