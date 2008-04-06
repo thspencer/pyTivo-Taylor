@@ -288,7 +288,7 @@ class Video(Plugin):
 
         return metadata
 
-    def __metadata_basic(self, full_path):
+    def metadata_basic(self, full_path):
         metadata = {}
 
         base_path, title = os.path.split(full_path)
@@ -302,9 +302,9 @@ class Video(Plugin):
 
         return metadata
 
-    def __metadata_full(self, full_path, tsn=''):
+    def metadata_full(self, full_path, tsn=''):
         metadata = {}
-        metadata.update(self.__metadata_basic(full_path))
+        metadata.update(self.metadata_basic(full_path))
 
         now = datetime.utcnow()
 
@@ -385,10 +385,10 @@ class Video(Plugin):
                 if precache or len(files) == 1 or file in transcode.info_cache:
                     video['valid'] = transcode.supported_format(file)
                     if video['valid']:
-                        video.update(self.__metadata_full(file, tsn))
+                        video.update(self.metadata_full(file, tsn))
                 else:
                     video['valid'] = True
-                    video.update(self.__metadata_basic(file))
+                    video.update(self.metadata_basic(file))
 
             videos.append(video)
 
@@ -416,7 +416,7 @@ class Video(Plugin):
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
         if file_info['valid']:
-            file_info.update(self.__metadata_full(file_path, tsn))
+            file_info.update(self.metadata_full(file_path, tsn))
 
         handler.send_response(200)
         handler.end_headers()
@@ -441,7 +441,7 @@ class Video(Plugin):
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
         if file_info['valid']:
-            file_info.update(self.__metadata_full(file_path, tsn))
+            file_info.update(self.metadata_full(file_path, tsn))
 
         import socket
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
