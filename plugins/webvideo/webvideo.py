@@ -5,6 +5,11 @@ import config
 import xmpp
 
 import threading
+import urllib2
+import os.path
+import shutil
+import os.path
+import urllib
 import xml.etree.ElementTree as ElementTree
 import Queue
 
@@ -82,10 +87,6 @@ class WebVideo(Video):
             self.in_progress_lock.release()
 
     def processDlRequest(self):
-        import shutil
-        import os.path
-        import urllib2
-        import urllib
 
         while True:
             data = self.work_queue.get()
@@ -98,14 +99,7 @@ class WebVideo(Video):
             path = settings['path']
             file_name = os.path.join(path, '%s-%s' % (data['bodyOfferId'] ,data['url'].split('/')[-1]))
 
-            print 'downloading %s to %s' % (data['url'], file_name)
-
-            outfile = open(file_name, 'wb')
-
-            infile = urllib2.urlopen(data['url'])
-            shutil.copyfileobj(infile, outfile)
-
-            print 'done downloading %s to %s' % (data['url'], file_name)
+            self.downloadFile(data['url'], file_name)
 
             tsn = data['bodyId']
             file_info = VideoDetails()
@@ -132,3 +126,16 @@ class WebVideo(Video):
             finally:
                 self.in_progress_lock.release()
 
+
+    def downloadFile(self, url, file_path):
+        print 'downloading %s to %s' % (url, file_path)
+
+        outfile = open(file_path, 'awb')
+        size = os.path.getsize(file_path)
+        r = urllib2.Request(url)
+        if size:
+            r.add_header('Range', 'bytes=%s-' % size)
+        infile = urllib2.urlopen(r)
+        shutil.copyfileobj(infile, outfile, 8192)
+
+        print 'done downloading %s to %s' % (url, file_path)
