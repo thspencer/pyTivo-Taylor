@@ -61,8 +61,15 @@ def get169Setting(tsn):
 
 def getShares(tsn=''):
     shares = [(section, dict(config.items(section)))
-              for section in config.sections()
-              if not(section.startswith('_tivo_') or section == 'Server')]
+                for section in config.sections()
+                if not (
+                    section.startswith('_tivo_')
+                    or section in ('Server', 'loggers', 'handlers', 'formatters')
+                    or section.startswith('logger_')
+                    or section.startswith('handler_')
+                    or section.startswith('formatter_')
+                )
+    ]
 
     if config.has_section('_tivo_' + tsn):
         if config.has_option('_tivo_' + tsn, 'shares'):
@@ -314,7 +321,7 @@ def getVideoFPS(tsn = None):
         return config.get('Server', 'video_fps')
     except NoOptionError:
         return None
-    
+
 def getVideoCodec(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:

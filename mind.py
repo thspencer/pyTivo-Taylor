@@ -7,6 +7,7 @@ import time
 import warnings
 import itertools
 import config
+import logging
 
 try:
     import xml.etree.ElementTree as ElementTree
@@ -25,14 +26,13 @@ if 'ElementTree' not in locals():
 else:
 
     class Mind:
-        def __init__(self, username, password, debug=False):
+        def __init__(self, username, password):
+            self.__logger = logging.getLogger('pyTivo.mind')
             self.__username = username
             self.__password = password
 
-            self.__debug = debug
-
             self.__cj = cookielib.CookieJar()
-            self.__opener = urllib2.build_opener(urllib2.HTTPSHandler(debuglevel=1), urllib2.HTTPCookieProcessor(self.__cj))
+            self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cj))
 
             self.__login()
 
@@ -120,11 +120,6 @@ else:
 
             return results
 
-        def __log(self, message):
-            if self.__debug:
-                print message
-                print
-
         def __login(self):
 
             data = {
@@ -144,7 +139,7 @@ else:
             except:
                 pass
 
-            self.__log('__login\n%s' % (data))
+            self.__logger.debug('__login\n%s' % (data))
 
         def __bodyOfferModify(self, data):
             """Create an offer"""
@@ -157,7 +152,7 @@ else:
 
             xml = ElementTree.parse(result).find('.')
 
-            self.__log('__bodyOfferModify\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('__bodyOfferModify\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
 
             if xml.findtext('state') != 'complete':
                 raise Exception(ElementTree.tostring(xml))
@@ -190,7 +185,7 @@ else:
 
             xml = ElementTree.parse(result).find('.')
 
-            self.__log('__subscribe\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('__subscribe\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
 
             return xml
 
@@ -207,7 +202,7 @@ else:
 
             xml = ElementTree.parse(result).find('.')
 
-            self.__log('bodyOfferSchedule\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('bodyOfferSchedule\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
 
             return xml
 
@@ -225,7 +220,7 @@ else:
             xml = ElementTree.parse(result).find('.')
 
 
-            self.__log('__pcBodySearch\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('__pcBodySearch\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
 
             return [id.text for id in xml.findall('pcBody/pcBodyId')]
 
@@ -243,7 +238,7 @@ else:
             xml = ElementTree.parse( result ).find('.')
             collection_id = xml.findtext('collectionId')
 
-            self.__log('__collectionIdSearch\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('__collectionIdSearch\n%s\n\n%sg' % (data, ElementTree.tostring(xml)))
 
             return collection_id
 
@@ -264,7 +259,7 @@ else:
 
             xml = ElementTree.parse(result).find('.')
 
-            self.__log('__pcBodySearch\n%s\n\n%s' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('__pcBodySearch\n%s\n\n%s' % (data, ElementTree.tostring(xml)))
 
             return xml
 
@@ -284,7 +279,7 @@ else:
 
             xml = ElementTree.parse(result).find('.')
 
-            self.__log('__bodyXmppInfoGe\n%s\n\n%s' % (data, ElementTree.tostring(xml)))
+            self.__logger.debug('__bodyXmppInfoGe\n%s\n\n%s' % (data, ElementTree.tostring(xml)))
 
             return xml
 
@@ -352,7 +347,7 @@ def getMind():
     if not username or not password:
        raise Exception("tivo_username and tivo_password required")
 
-    m = Mind(username, password, True)
+    m = Mind(username, password)
 
     return m
 

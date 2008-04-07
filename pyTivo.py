@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import beacon, httpserver, os, sys
 import config
 from plugin import GetPlugin
@@ -36,7 +39,8 @@ b.start()
 if 'listen' in config.getBeaconAddresses():
     b.listen()
 
-print 'pyTivo is ready.'
+logging.getLogger('pyTivo').info('pyTivo is ready.')
+
 try:
     httpd.serve_forever()
 except KeyboardInterrupt:

@@ -14,6 +14,7 @@ import urlparse
 import urllib
 import xml.etree.ElementTree as ElementTree
 import Queue
+import logging
 
 CLASS_NAME = 'WebVideo'
 
@@ -23,6 +24,7 @@ class WebVideo(Video):
     CONTENT_TYPE = 'x-not-for/tivo'
 
     def init(self):
+        self.__logger = logging.getLogger('pyTivo.webvideo')
         self.work_queue = Queue.Queue()
         self.download_thread_num = 1
         self.in_progress = {}
@@ -40,15 +42,18 @@ class WebVideo(Video):
         cl=xmpp.Client(
             server=xmpp_info['server'],
             port=xmpp_info['port'],
+            debug=[],
         )
-
+        self.__logger.debug('Connecting to %s:%s' % (xmpp_info['server'], xmpp_info['port']))
         cl.connect()
         cl.RegisterHandler('message', self.processMessage)
+        self.__logger.debug('Loging in as %s/pyTivo' % xmpp_info['username'])
         cl.auth(user=jid.getNode(), password=config.getTivoPassword(), resource='pyTivo')
 
         cl.sendInitPresence(requestRoster=0)
 
         for user_name in xmpp_info['presence_list']:
+            self.__logger.debug('Sending presence to %s' % user_name)
             jid=xmpp.protocol.JID(user_name)
             cl.sendPresence(jid)
 
@@ -66,7 +71,8 @@ class WebVideo(Video):
         while client.Process():
             pass
 
-    def processMessage(self, sess,mess):
+    def processMessage(self, sess, mess):
+        self.__logger.debug('Got message\n %s' % mess.getBody())
         xmpp_action = ElementTree.fromstring(mess.getBody())
 
         method_name = 'xmpp_' + xmpp_action.findtext('action').lower()
@@ -83,6 +89,7 @@ class WebVideo(Video):
         try:
             for request in m.getDownloadRequests():
                 if not request['bodyOfferId'] in self.in_progress:
+                    self.__logger.debug('Adding request to queue, %s' % request)
                     self.in_progress[request['bodyOfferId']] = True
                     self.work_queue.put(request)
         finally:
@@ -96,7 +103,7 @@ class WebVideo(Video):
             for share_name, settings in config.getShares():
                 if settings['type'] == 'webvideo':
                     break
-
+            self.__logger.debug('Processing request: %s' % data)
 
             path = settings['path']
             file_name = os.path.join(path, '%s-%s' % (data['bodyOfferId'] ,data['url'].split('/')[-1]))
@@ -117,7 +124,7 @@ class WebVideo(Video):
             data['duration'] = file_info['duration'] / 1000
             data['size'] = file_info['size']
 
-            print data
+            self.__logger.debug('Complete request: %s' % data)
 
             m = mind.getMind()
             m.completeDownloadRequest(data)
@@ -128,19 +135,32 @@ class WebVideo(Video):
             finally:
                 self.in_progress_lock.release()
 
-
     def downloadFile(self, url, file_path):
-        print 'downloading %s to %s' % (url, file_path)
+        self.__logger.info('Downloading %s to %s' % (url, file_path))
 
         outfile = open(file_path, 'awb')
         size = os.path.getsize(file_path)
         r = urllib2.Request(url)
         if size:
             r.add_header('Range', 'bytes=%s-' % size)
-        infile = urllib2.urlopen(r)
+
+        try:
+            infile = urllib2.urlopen(r)
+        except urllib2.HTTPError, e:
+            if not e.code == 416:
+                raise
+            infile = urllib2.urlopen(url)
+            if int(infile.info()['Content-Length']) == size:
+                self.__logger.debug('File was alraedy done. %s' % url)
+                return
+            else:
+                self.__logger.debug('File was not done byut could not resume. %s' % url)
+                outfile.close()
+                outfile = open(file_path, 'wb')
+
         shutil.copyfileobj(infile, outfile, 8192)
 
-        print 'done downloading %s to %s' % (url, file_path)
+        self.__logger.info('Done downloading %s to %s' % (url, file_path))
 
     def send_file(self, handler, container, name):
         Video.send_file(self, handler, container, name)
@@ -149,5 +169,6 @@ class WebVideo(Video):
         path = urllib.unquote(o[2])
         file_path = container['path'] + path[len(name) + 1:]
         if os.path.exists(file_path):
+            self.__logger.info('Deleting file %s' % file_path)
             os.unlink(file_path)
 
