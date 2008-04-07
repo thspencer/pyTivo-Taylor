@@ -498,7 +498,7 @@ def supported_format(inFile):
         return False
 
 def kill(pid):
-    loger.debug('killing pid=%s' % str(pid))
+    logger.debug('killing pid=%s' % str(pid))
     if mswindows:
         win32kill(pid)
     else:
