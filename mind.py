@@ -40,6 +40,9 @@ else:
                 self.__pcBodyStore('pyTivo', True)
 
         def pushVideo(self, tsn, url, description, duration, size, title, subtitle):
+            # It looks like tivo only supports one pc per house
+            pc_body_id = self.__pcBodySearch()[0]
+
             data = {
                 'bodyId' : 'tsn:' + tsn,
                 'description' : description,
@@ -56,8 +59,6 @@ else:
                 'url' : url,
             }
 
-            # It looks like tivo only supports one pc per house
-            pc_body_id = self.__pcBodySearch()[0]
             offer_id, content_id = self.__bodyOfferModify(data)
             self.__subscribe(offer_id, content_id, tsn)
 
