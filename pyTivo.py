@@ -1,11 +1,29 @@
 #!/usr/bin/env python
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
+import logging.config
+import os
+import ConfigParser
 import beacon, httpserver, os, sys
 import config
 from plugin import GetPlugin
+
+def init_logging():
+    config.config_files
+    p = os.path.dirname(__file__)
+
+    if config.config.has_section('loggers') and\
+      config.config.has_section('handlers') and\
+      config.config.has_section('formatters'):
+
+        logging.config.fileConfig(config.config_files)
+
+    elif config.getDebug(0):
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+init_logging()
 
 port = config.getPort()
 
