@@ -68,7 +68,7 @@ class WebVideo(Video):
             t.start()
 
     def processXMPP(self, client):
-        while client.Process():
+        while client.Process(3):
             pass
 
     def processMessage(self, sess, mess):
