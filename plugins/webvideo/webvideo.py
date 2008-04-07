@@ -9,6 +9,7 @@ import urllib2
 import os.path
 import shutil
 import os.path
+import time
 import os
 import urlparse
 import urllib
@@ -31,7 +32,6 @@ class WebVideo(Video):
         self.in_progress_lock = threading.Lock()
 
         self.startXMPP()
-        self.xmpp_cdsupdate()
         self.startWorkerThreads()
 
     def startXMPP(self):
@@ -63,9 +63,13 @@ class WebVideo(Video):
 
     def startWorkerThreads(self):
         for i in range(self.download_thread_num):
-            t = threading.Thread(target=self.processDlRequest)
+            t = threading.Thread(target=self.processDlRequest, name='webvideo downloader')
             t.setDaemon(True)
             t.start()
+
+        t = threading.Thread(target=self.watchQueue, name='webvideo queue watcher')
+        t.setDaemon(True)
+        t.start()
 
     def processXMPP(self, client):
         while client.Process(3):
@@ -81,6 +85,11 @@ class WebVideo(Video):
 
         method = getattr(self, method_name)
         method(xmpp_action)
+
+    def watchQueue(self):
+        while True:
+            self.xmpp_cdsupdate()
+            time.sleep(60*15)
 
     def xmpp_cdsupdate(self, xml=None):
         m = mind.getMind()
