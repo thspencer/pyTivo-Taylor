@@ -115,7 +115,7 @@ class WebVideo(Video):
             self.__logger.debug('Processing request: %s' % data)
 
             path = settings['path']
-            file_name = os.path.join(path, '%s-%s' % (data['bodyOfferId'] ,data['url'].split('/')[-1]))
+            file_name = os.path.join(path, '%s-%s' % (data['bodyOfferId'].replace(':', '-'),data['url'].split('/')[-1]))
 
             self.downloadFile(data['url'], file_name)
 
@@ -163,7 +163,7 @@ class WebVideo(Video):
                 self.__logger.debug('File was alraedy done. %s' % url)
                 return
             else:
-                self.__logger.debug('File was not done byut could not resume. %s' % url)
+                self.__logger.debug('File was not done but could not resume. %s' % url)
                 outfile.close()
                 outfile = open(file_path, 'wb')
 
