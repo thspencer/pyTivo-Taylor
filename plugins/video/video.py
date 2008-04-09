@@ -399,7 +399,7 @@ class Video(Plugin):
         handler.wfile.write(t)
 
     def TVBusQuery(self, handler, query):
-        tsn = handler.headers.getheader('tsn', '')       
+        tsn = handler.headers.getheader('tsn', '')
         file = query['File'][0]
         path = self.get_local_path(handler, query)
         file_path = path + file
@@ -422,7 +422,7 @@ class Video(Plugin):
         handler.end_headers()
         handler.wfile.write(file.read())
 
-    
+
     def Push(self, handler, query):
         file = unquote(query['File'][0])
         tsn = query['tsn'][0]
@@ -443,21 +443,11 @@ class Video(Plugin):
 
         url = 'http://%s:%s/%s%s' % (ip, port, container, quote(file))
 
-        print 'tsn', tsn
-        print 'url', url
-        print query
-
-        username = config.getTivoUsername()
-        password = config.getTivoPassword()
-
-        if not username or not password:
-            raise Exception("tivo_username and tivo_password required")
-
         try:
-            m = mind.Mind(username, password, True)
+            m = mind.getMind()
             m.pushVideo(
-                tsn = tsn, 
-                url = url, 
+                tsn = tsn,
+                url = url,
                 description = file_info['description'],
                 duration = file_info['duration'] / 1000,
                 size = file_info['size'],
