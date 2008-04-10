@@ -297,7 +297,9 @@ class Video(Plugin):
         metadata = {}
 
         base_path, title = os.path.split(full_path)
-        originalAirDate = datetime.fromtimestamp(os.stat(full_path).st_ctime)
+        ctime = os.stat(full_path).st_ctime
+        if (ctime < 0): ctime = 0
+        originalAirDate = datetime.fromtimestamp(ctime)
 
         metadata['title'] = '.'.join(title.split('.')[:-1])
         metadata['seriesTitle'] = metadata['title'] # default to the filename
@@ -309,6 +311,7 @@ class Video(Plugin):
 
     def __metadata_full(self, full_path, tsn=''):
         metadata = {}
+        metadata.update(self.__metadata_basic(full_path))
 
         now = datetime.utcnow()
 
@@ -320,7 +323,6 @@ class Video(Plugin):
         metadata['stopTime'] = (now + duration_delta).isoformat()
         metadata['size'] = self.__est_size(full_path, tsn)
         metadata['duration'] = duration
-        metadata.update(self.__metadata_basic(full_path))
 
         min = duration_delta.seconds / 60
         sec = duration_delta.seconds % 60
@@ -375,7 +377,9 @@ class Video(Plugin):
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
         for file in files:
-            mtime = datetime.fromtimestamp(os.stat(file).st_mtime)
+            mtime = os.stat(file).st_mtime
+            if (mtime < 0): mtime = 0
+            mtime = datetime.fromtimestamp(mtime)
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
             video['name'] = os.path.split(file)[1]
