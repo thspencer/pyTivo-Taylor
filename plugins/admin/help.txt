@@ -232,6 +232,16 @@ You may want to change this setting to mp2 if you only have an S2, or have speci
 Example Settings: mp2, ac3
 Available In: Server, Tivos
 
+copy_ts
+
+Default Setting: True
+Valid Entries: blank, True, False
+Required: No
+Skill: Basic
+Description: Adds the copy timestamps setting (-copyts) to the ffmpeg command.  This setting helps correct audio synchronization problems that commonly occur during transcoding.  You can leave this field blank unless you wish to disable it. pyTivo defaults to True except when pyTivo uses acodec copy, in which case copyts is not needed, and a conflict could also occur if the source file has really corrupt sections.<br><br>+\
+Example Settings: blank, True, False
+Available In: Server, Tivos
+
 ffmpeg_pram
 
 Default Setting: blank
@@ -244,7 +254,7 @@ Available In: Server, Tivos
 
 ffmpeg_tmpl
 
-Default Setting: "%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(fmpeg_pram)s %(format)s
+Default Setting: "%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s
 Valid Entries: A valid ffmpeg command
 Required: No
 Skill: Very Advanced

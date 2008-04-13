@@ -2,7 +2,7 @@ import ConfigParser, os
 import re
 from ConfigParser import NoOptionError
 
-BLACKLIST_169 = ('540', '649')
+BLACKLIST_169 = ('540')
 
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
@@ -292,6 +292,20 @@ def getAudioFR(tsn = None):
         return config.get('Server', 'audio_fr')
     except NoOptionError:
         return None
+
+def getCopyTS(tsn = None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        if config.has_option('_tivo_' + tsn, 'copy_ts'):
+            try:
+                return config.get('_tivo_' + tsn, 'copy_ts')
+            except NoOptionError, ValueError:
+                pass
+    if config.has_option('Server', 'copy_ts'):
+        try:
+            return config.get('Server', 'copy_ts')
+        except NoOptionError, ValueError:
+            pass
+    return 'none'
 
 def getVideoFPS(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):

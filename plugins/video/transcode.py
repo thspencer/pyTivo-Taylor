@@ -54,7 +54,7 @@ def transcode(inFile, outFile, tsn=''):
     print 'transcoding to tivo model '+tsn[:3]+' using ffmpeg command:'
     print ' '.join(cmd)
     debug_write(__name__, fn_attr(), ['ffmpeg command is ', ' '.join(cmd)])
-    ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    ffmpeg = subprocess.Popen(cmd, bufsize=512*1024, stdout=subprocess.PIPE)
     try:
         shutil.copyfileobj(ffmpeg.stdout, outFile)
     except:
@@ -64,22 +64,26 @@ def select_audiocodec(inFile, tsn = ''):
     # Default, compatible with all TiVo's
     codec = 'ac3'
     if config.getAudioCodec(tsn) == None:
-        type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar =  video_info(inFile)
+        type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
         if acodec in ('ac3', 'liba52', 'mp2'):
             if akbps == None:
                 cmd_string = '-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy -t 00:00:01 -f vob -'
                 if video_check(inFile, cmd_string):
-                    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar =  video_info(videotest)
+                    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(videotest)
             if not akbps == None and int(akbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
     else:
         codec = config.getAudioCodec(tsn)
-    return '-acodec '+codec
+    copyts = ' -copyts'
+    if (codec == 'copy' and config.getCopyTS(tsn).lower() == 'none') \
+        or config.getCopyTS(tsn).lower() == 'false':
+        copyts = ''
+    return '-acodec '+codec+copyts
 
 def select_audiofr(inFile, tsn):
     freq = '48000'  #default
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar =  video_info(inFile)
+    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
     if not afreq == None and afreq in ('44100', '48000'):
         # compatible frequency
         freq = afreq
@@ -133,7 +137,7 @@ def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
     TIVO_HEIGHT = config.getTivoHeight(tsn)
 
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar =  video_info(inFile)
+    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
 
     debug_write(__name__, fn_attr(), ['tsn:', tsn])
 
@@ -164,10 +168,10 @@ def select_aspect(inFile, tsn = ''):
 
     if config.isHDtivo(tsn) and not optres:
         if config.getPixelAR(0):
-            if vpar == None:
+            if par2 == None:
                 npar = config.getPixelAR(1)
             else:
-                npar = vpar
+                npar = par2
             # adjust for pixel aspect ratio, if set, because TiVo expects square pixels
             if npar<1.0:
                 return ['-s', str(width) + 'x' + str(int(math.ceil(height/npar)))]
@@ -178,10 +182,13 @@ def select_aspect(inFile, tsn = ''):
             # pass all resolutions to S3, except heights greater than conf height
             return []
         # else, resize video.
-    if (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)]:
+    if (rwidth, rheight) in [(1, 1)] and par1 == '8:9':
+        debug_write(__name__, fn_attr(), ['File + PAR is within 4:3.'])
+        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
+    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)] or dar1 == '4:3':
         debug_write(__name__, fn_attr(), ['File is within 4:3 list.'])
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)]) and aspect169:
+    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or dar1 == '16:9') and aspect169:
         debug_write(__name__, fn_attr(), ['File is within 16:9 list and 16:9 allowed.'])
         return ['-aspect', '16:9', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
     else:
@@ -290,8 +297,8 @@ def select_aspect(inFile, tsn = ''):
             return settings
 
 def tivo_compatable(inFile, tsn = ''):
-    supportedModes = [[720, 480], [704, 480], [544, 480], [480, 480], [352, 480]]
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar =  video_info(inFile)
+    supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], [480, 480], [352, 480]]
+    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
     #print type, width, height, fps, millisecs, kbps, akbps, acodec
 
     if (inFile[-5:]).lower() == '.tivo':
@@ -327,10 +334,10 @@ def tivo_compatable(inFile, tsn = ''):
         return False
 
     if config.isHDtivo(tsn):
-        if vpar != 1.0:
+        if par2 != 1.0:
             if config.getPixelAR(0):
-                if vpar != None or config.getPixelAR(1) != 1.0:
-                    debug_write(__name__, fn_attr(), ['FALSE,', vpar, 'not correct PAR,', inFile])
+                if par2 != None or config.getPixelAR(1) != 1.0:
+                    debug_write(__name__, fn_attr(), ['FALSE,', par2, 'not correct PAR,', inFile])
                     return False
         debug_write(__name__, fn_attr(), ['TRUE, HD Tivo detected, skipping remaining tests', inFile])
         return True
@@ -339,6 +346,11 @@ def tivo_compatable(inFile, tsn = ''):
         #print 'Not Tivo fps'
         debug_write(__name__, fn_attr(), ['FALSE,', fps, 'fps, should be 29.97.', inFile])
         return False
+
+    if not config.get169Setting(tsn):
+        if dar1 == None or not dar1 in ('4:3', '8:9'):
+            debug_write(__name__, fn_attr(), ['FALSE, DAR', dar1, 'not supported by BLACKLIST_169 tivos.', inFile])
+            return False
 
     for mode in supportedModes:
         if (mode[0], mode[1]) == (width, height):
@@ -357,9 +369,9 @@ def video_info(inFile):
             return info_cache[inFile][1]
 
     if (inFile[-5:]).lower() == '.tivo':
-        info_cache[inFile] = (mtime, (True, True, True, True, True, True, True, True, True, True))
+        info_cache[inFile] = (mtime, (True, True, True, True, True, True, True, True, True, True, True, True, True))
         debug_write(__name__, fn_attr(), ['VALID, ends in .tivo.', inFile])
-        return True, True, True, True, True, True, True, True, True, True
+        return True, True, True, True, True, True, True, True, True, True, True, True, True
 
     cmd = [ffmpeg_path(), '-i', inFile ]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
@@ -374,8 +386,8 @@ def video_info(inFile):
     
     if ffmpeg.poll() == None:
         kill(ffmpeg.pid)
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None))
-        return None, None, None, None, None, None, None, None, None, None
+        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
+        return None, None, None, None, None, None, None, None, None, None, None, None, None
 
     err_tmp.seek(0) 
     output = err_tmp.read() 
@@ -387,9 +399,9 @@ def video_info(inFile):
     if x:
         codec = x.group(1)
     else:
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None))
+        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
         debug_write(__name__, fn_attr(), ['failed at video codec'])
-        return None, None, None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None, None, None, None, None
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
@@ -397,18 +409,18 @@ def video_info(inFile):
         width = int(x.group(1))
         height = int(x.group(2))
     else:
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None))
+        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
         debug_write(__name__, fn_attr(), ['failed at width/height'])
-        return None, None, None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None, None, None, None, None
 
     rezre = re.compile(r'.*Video: .+, (.+) (?:fps|tb).*')
     x = rezre.search(output)
     if x:
         fps = x.group(1)
     else:
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None))
+        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
         debug_write(__name__, fn_attr(), ['failed at fps'])
-        return None, None, None, None, None, None, None, None, None, None
+        return None, None, None, None, None, None, None, None, None, None, None, None, None
 
     # Allow override only if it is mpeg2 and frame rate was doubled to 59.94
     if (not fps == '29.97') and (codec == 'mpeg2video'):
@@ -473,13 +485,21 @@ def video_info(inFile):
     rezre = re.compile(r'.*Video: .+PAR ([0-9]+):([0-9]+) DAR [0-9:]+.*')
     x = rezre.search(output)
     if x and x.group(1)!="0" and x.group(2)!="0":
-        vpar = float(x.group(1))/float(x.group(2))
+        par1, par2 = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
     else:
-        vpar = None
+        par1, par2 = None, None
  
-    info_cache[inFile] = (mtime, (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar))
-    debug_write(__name__, fn_attr(), ['Codec=', codec, ' width=', width, ' height=', height, ' fps=', fps, ' millisecs=', millisecs, ' kbps=', kbps, ' akbps=', akbps, ' acodec=', acodec, ' afreq=', afreq, ' par=', vpar])
-    return codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar
+    #get dar.
+    rezre = re.compile(r'.*Video: .+DAR ([0-9]+):([0-9]+).*')
+    x = rezre.search(output)
+    if x and x.group(1)!="0" and x.group(2)!="0":
+        dar1, dar2 = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
+    else:
+        dar1, dar2 = None, None
+ 
+    info_cache[inFile] = (mtime, (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2))
+    debug_write(__name__, fn_attr(), ['Codec=', codec, ' width=', width, ' height=', height, ' fps=', fps, ' millisecs=', millisecs, ' kbps=', kbps, ' akbps=', akbps, ' acodec=', acodec, ' afreq=', afreq, ' par=', par1, par2, ' dar=', dar1, dar2])
+    return codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2
 
 def video_check(inFile, cmd_string):
     cmd = [ffmpeg_path(), '-i', inFile] + cmd_string.split()
