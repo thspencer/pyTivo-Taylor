@@ -311,7 +311,6 @@ class Video(Plugin):
 
     def __metadata_full(self, full_path, tsn=''):
         metadata = {}
-        metadata.update(self.__metadata_basic(full_path))
 
         now = datetime.utcnow()
 
@@ -323,6 +322,7 @@ class Video(Plugin):
         metadata['stopTime'] = (now + duration_delta).isoformat()
         metadata['size'] = self.__est_size(full_path, tsn)
         metadata['duration'] = duration
+        metadata.update(self.__metadata_basic(full_path))
 
         min = duration_delta.seconds / 60
         sec = duration_delta.seconds % 60
