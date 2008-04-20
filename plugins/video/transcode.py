@@ -289,7 +289,7 @@ def select_aspect(inFile, tsn = ''):
                 settings.append('-s')
                 settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
 
-            logger.debug_write('File is taller than 4:3 padding left and right\n%s' % ' '.join(settings))
+            logger.debug('File is taller than 4:3 padding left and right\n%s' % ' '.join(settings))
 
             return settings
 
