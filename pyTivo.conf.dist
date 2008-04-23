@@ -22,7 +22,7 @@ ffmpeg=/usr/bin/ffmpeg
 # debugs transcode.py right now.
 #debug=false
 
-# Max video bitrate, default 17408k
+# Max video bitrate, default 30000k
 # sets ffmpeg -maxrate setting to minimize bitrate peak playback issues.
 # mpegs with video bitrate above this setting will also be transcoded.
 #MAX_VIDEO_BR=17408k

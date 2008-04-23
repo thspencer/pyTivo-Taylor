@@ -142,12 +142,13 @@ Available In: Server, Tivos
 
 max_video_br
 
-Default Setting: 17408k
+Recommended Setting: blank
+pyTivo Defaults to: 30000k
 Valid Entries: Any valid Bit rate. 1024K = 1Mi
 Required: No
 Skill: Advanced
-Description: This allows you to choose the maximum bit rate and is more strict than the video_br setting above. However setting this can cause buffer overflows and can cause issues with ffmpeg. In addition to setting the ffmpeg maxrate option, this setting is used to determine if the video bitrate of the source video file is too high for the TiVo. Otherwise compatible mpeg's with a video bitrate above this setting will be transcoded rather than sent to the TiVo untouched. Raising this setting much higher than the default will likly result in pixelation during playback. Recommended only for skilled users. Note: there is a report that ffmpeg throws an error with 17Mi but accepts 17408K just fine.
-Example Settings: 17408k
+Description: This allows you to choose the maximum bit rate and is more strict than the video_br setting above. However setting this can cause buffer overflows and can cause issues with ffmpeg. In addition to setting the ffmpeg maxrate option, this setting is used to determine if the video bitrate of the source video file is too high for the TiVo. mpeg's with a video bitrate above this setting will be transcoded rather than sent to the TiVo untouched.  Lower this setting below the bitrate of your source file if you wish to force high bitrate sources to be transcoded.  Recommended only for skilled users. Note: there is a report that ffmpeg throws an error with 17Mi but accepts 17408K just fine.
+Example Settings: 17408k, 30000k
 Available In: Server
 
 bufsize

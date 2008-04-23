@@ -239,8 +239,8 @@ def getVideoBR(tsn = None):
 def getMaxVideoBR():
     try:
         return str(int(strtod(config.get('Server', 'max_video_br'))/1000)) + 'k'
-    except NoOptionError: #default to 17Mi
-        return '17408k'
+    except NoOptionError: #default to 30000k
+        return '30000k'
 
 def getBuffSize():
     try:
