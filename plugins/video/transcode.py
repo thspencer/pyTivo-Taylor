@@ -63,21 +63,21 @@ def transcode(inFile, outFile, tsn=''):
 def select_audiocodec(inFile, tsn = ''):
     # Default, compatible with all TiVo's
     codec = 'ac3'
+    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
     if config.getAudioCodec(tsn) == None:
-        type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
         if acodec in ('ac3', 'liba52', 'mp2'):
             if akbps == None:
                 cmd_string = '-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy -t 00:00:01 -f vob -'
                 if video_check(inFile, cmd_string):
-                    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(videotest)
+                    typetest, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(videotest)
             if not akbps == None and int(akbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
     else:
         codec = config.getAudioCodec(tsn)
     copyts = ' -copyts'
-    if (codec == 'copy' and config.getCopyTS(tsn).lower() == 'none') \
-        or config.getCopyTS(tsn).lower() == 'false':
+    if (codec == 'copy' and config.getCopyTS(tsn).lower() == 'none' \
+        and type == 'mpeg2video') or config.getCopyTS(tsn).lower() == 'false':
         copyts = ''
     return '-acodec '+codec+copyts
 
