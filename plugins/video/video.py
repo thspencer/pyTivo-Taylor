@@ -143,7 +143,7 @@ class Video(Plugin):
         if 'AnchorOffset' in query:
             logger.debug('Anchor offset was in query. leftAnchor needs to match %s' % '/'.join(path))
             if leftAnchor == str('/'.join(path)):
-                logger.debug(__name__, fn_attr(), ['leftAnchor matched.'])
+                logger.debug('leftAnchor matched.')
                 query['Container'] = ['/'.join(path)]
                 files, total, start = self.get_files(handler, query,
                                                      self.video_file_filter)
