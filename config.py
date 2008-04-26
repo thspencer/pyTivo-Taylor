@@ -242,6 +242,12 @@ def getMaxVideoBR():
     except NoOptionError: #default to 30000k
         return '30000k'
 
+def getVideoPCT():
+    try:
+        return config.getfloat('Server', 'video_pct')
+    except NoOptionError:
+        return 0.70
+
 def getBuffSize():
     try:
         return str(int(strtod(config.get('Server', 'bufsize'))))

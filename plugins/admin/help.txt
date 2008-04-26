@@ -140,6 +140,17 @@ Description: This allows you to choose the default server video bit rate used in
 Example Settings: 4096K, 8Mi, 12Mi
 Available In: Server, Tivos
 
+video_pct
+
+Recommended Setting: blank
+pyTivo Defaults to: 0.70
+Valid Entries: Any number (set this to 0 to disable this option)
+Required: No
+Skill: Advanced
+Description: This sets video_br to a percent of the source video bitrate.  pyTivo will multiply the source video bitrate by this setting, compare it to the video_br setting and use whichever is greater as the video_br.  This allows for setting higher bitrates automatically when transcoding High Definition sources.  For example, if your source file has a bitrate of 22000k and video_pct is set to 0.70, pyTivo will use 15400k for video_br instead of the default 8192k setting.  With this setting enabled, the video_br setting essentially becomes the minimum video bitrate.  This setting only applies to S3 tivos.
+Example Settings: 0.60, 0.70, 0.85, 1.0
+Available In: Server
+
 max_video_br
 
 Recommended Setting: blank

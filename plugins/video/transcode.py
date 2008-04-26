@@ -36,7 +36,7 @@ def transcode(inFile, outFile, tsn=''):
 
     settings = {}
     settings['video_codec'] = select_videocodec(tsn)
-    settings['video_br'] = select_videobr(tsn)
+    settings['video_br'] = select_videobr(inFile, tsn)
     settings['video_fps'] = select_videofps(tsn)
     settings['max_video_br'] = select_maxvideobr()
     settings['buff_size'] = select_buffsize()
@@ -110,8 +110,18 @@ def select_videocodec(tsn):
         vcodec = config.getVideoCodec(tsn)
     return '-vcodec '+vcodec
 
-def select_videobr(tsn):
-    return '-b '+config.getVideoBR(tsn)
+def select_videobr(inFile, tsn):
+    return '-b '+select_videostr(inFile, tsn)
+
+def select_videostr(inFile, tsn):
+    video_str = config.getVideoBR(tsn)
+    if config.isHDtivo(tsn):
+        type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
+        if kbps != None and config.getVideoPCT() > 0:
+            video_percent = int(kbps)*1000*config.getVideoPCT()
+            video_bitrate = max(config.strtod(video_str), video_percent)
+            video_str = str(int(min(config.strtod(config.getMaxVideoBR())*0.95, video_bitrate)))
+    return video_str
 
 def select_audiobr(tsn):
     return '-ab '+config.getAudioBR(tsn)
