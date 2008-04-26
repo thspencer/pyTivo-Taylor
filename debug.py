@@ -23,7 +23,7 @@ def debug_write(srcMod, fnAttr, data):
         fname.append('txt')
         fdebug = open(os.path.join(fpath, '.'.join(fname)), 'a')
         fdebug.write(' '.join(debug_out)+'\n')
-        print '___'+' '.join(debug_out)
+        print 'DEBUG:'+' '.join(debug_out)
         fdebug.close()
 
 def fn_attr():
