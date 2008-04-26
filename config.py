@@ -246,7 +246,7 @@ def getVideoPCT():
     try:
         return config.getfloat('Server', 'video_pct')
     except NoOptionError:
-        return 0.70
+        return 70
 
 def getBuffSize():
     try:

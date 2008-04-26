@@ -118,7 +118,7 @@ def select_videostr(inFile, tsn):
     if config.isHDtivo(tsn):
         type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
         if kbps != None and config.getVideoPCT() > 0:
-            video_percent = int(kbps)*1000*config.getVideoPCT()
+            video_percent = int(kbps)*10*config.getVideoPCT()
             video_bitrate = max(config.strtod(video_str), video_percent)
             video_str = str(int(min(config.strtod(config.getMaxVideoBR())*0.95, video_bitrate)))
     return video_str
