@@ -198,9 +198,13 @@ def select_aspect(inFile, tsn = ''):
     elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)] or dar1 == '4:3':
         debug_write(__name__, fn_attr(), ['File is within 4:3 list.'])
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or dar1 == '16:9') and aspect169:
+    elif ((rwidth, rheight) in [(5, 4), (16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or dar1 == '16:9')\
+         and (aspect169 or config.get169Letterbox(tsn)):
         debug_write(__name__, fn_attr(), ['File is within 16:9 list and 16:9 allowed.'])
-        return ['-aspect', '16:9', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
+        if config.get169Blacklist(tsn) or (aspect169 and config.get169Letterbox(tsn)): 
+            return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
+        else:
+            return ['-aspect', '16:9', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
     else:
         settings = []
         #If video is wider than 4:3 add top and bottom padding
@@ -208,8 +212,11 @@ def select_aspect(inFile, tsn = ''):
             if aspect169 and (ratio > 135): #If file would fall in 4:3 assume it is supposed to be 4:3 
                 if (ratio > 177):#too short needs padding top and bottom
                     endHeight = int(((TIVO_WIDTH*height)/width) * multiplier16by9)
-                    settings.append('-aspect')
-                    settings.append('16:9')
+                    settings.append('-aspect') 
+                    if config.get169Blacklist(tsn) or config.get169Letterbox(tsn): 
+                        settings.append('4:3') 
+                    else: 
+                        settings.append('16:9')
                     if endHeight % 2:
                         endHeight -= 1
                     if endHeight < TIVO_HEIGHT * 0.99:
@@ -232,7 +239,10 @@ def select_aspect(inFile, tsn = ''):
                 else: #too skinny needs padding on left and right.
                     endWidth = int((TIVO_HEIGHT*width)/(height*multiplier16by9))
                     settings.append('-aspect')
-                    settings.append('16:9')
+                    if config.get169Blacklist(tsn) or config.get169Letterbox(tsn): 
+                        settings.append('4:3') 
+                    else: 
+                        settings.append('16:9')
                     if endWidth % 2:
                         endWidth -= 1
                     if endWidth < (TIVO_WIDTH-10):
@@ -253,9 +263,14 @@ def select_aspect(inFile, tsn = ''):
                         settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
                     debug_write(__name__, fn_attr(), ['16:9 aspect allowed, file is narrower than 16:9 padding left and right\n', ' '.join(settings)])
             else: #this is a 4:3 file or 16:9 output not allowed
+                multiplier = multiplier4by3
                 settings.append('-aspect')
-                settings.append('4:3')
-                endHeight = int(((TIVO_WIDTH*height)/width) * multiplier4by3)
+                if ratio > 135 and config.get169Letterbox(tsn):
+                    settings.append('16:9')
+                    multiplier = multiplier16by9
+                else:
+                    settings.append('4:3')
+                endHeight = int(((TIVO_WIDTH*height)/width) * multiplier)
                 if endHeight % 2:
                     endHeight -= 1
                 if endHeight < TIVO_HEIGHT * 0.99:
@@ -357,7 +372,7 @@ def tivo_compatable(inFile, tsn = ''):
         debug_write(__name__, fn_attr(), ['FALSE,', fps, 'fps, should be 29.97.', inFile])
         return False
 
-    if not config.get169Setting(tsn):
+    if not config.get169Setting(tsn) or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
         if dar1 == None or not dar1 in ('4:3', '8:9'):
             debug_write(__name__, fn_attr(), ['FALSE, DAR', dar1, 'not supported by BLACKLIST_169 tivos.', inFile])
             return False

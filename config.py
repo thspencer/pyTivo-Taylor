@@ -2,8 +2,6 @@ import ConfigParser, os
 import re
 from ConfigParser import NoOptionError
 
-BLACKLIST_169 = ('540')
-
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
 config_file = os.path.join(p, 'pyTivo.conf')
@@ -32,6 +30,12 @@ def getBeaconAddresses():
 def getPort():
     return config.get('Server', 'Port')
 
+def get169Blacklist(tsn):  # tivo does not pad 16:9 video
+    return tsn != '' and tsn[:3] in ('540')
+
+def get169Letterbox(tsn):  # tivo pads 16:9 video for 4:3 display
+    return tsn != '' and tsn[:3] in ('649')
+
 def get169Setting(tsn):
     if not tsn:
         return True
@@ -43,7 +47,7 @@ def get169Setting(tsn):
             except ValueError:
                 pass
 
-    if tsn[:3] in BLACKLIST_169:
+    if get169Blacklist(tsn) or get169Letterbox(tsn):
         return False
 
     return True
