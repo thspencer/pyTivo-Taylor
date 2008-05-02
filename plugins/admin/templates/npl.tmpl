@@ -85,7 +85,9 @@
 				$row['Duration']
 				</td>
 				<td NOWRAP align="center">$row['CaptureDate']</td>
-				#if 'Url' in $row
+				#if 'CopyProtected' in $row and $row['CopyProtected'] == 'Yes'
+					<td>CopyProtected</td>
+				#else if 'Url' in $row
 					<td NOWRAP>
 					#if $unquote($row['Url']) in $status
 						#set $this_status = $status[$unquote($row['Url'])]
