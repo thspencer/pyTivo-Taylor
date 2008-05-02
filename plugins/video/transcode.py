@@ -198,7 +198,7 @@ def select_aspect(inFile, tsn = ''):
     elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)] or dar1 == '4:3':
         debug_write(__name__, fn_attr(), ['File is within 4:3 list.'])
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif ((rwidth, rheight) in [(5, 4), (16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or dar1 == '16:9')\
+    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or dar1 == '16:9')\
          and (aspect169 or config.get169Letterbox(tsn)):
         debug_write(__name__, fn_attr(), ['File is within 16:9 list and 16:9 allowed.'])
         if config.get169Blacklist(tsn) or (aspect169 and config.get169Letterbox(tsn)): 
