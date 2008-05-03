@@ -231,6 +231,8 @@ class Admin(Plugin):
                 entry = {}
                 entry['Title'] = item.getElementsByTagName("Title")[0].firstChild.data
                 entry['ContentType'] = item.getElementsByTagName("ContentType")[0].firstChild.data
+                if (len(item.getElementsByTagName("CopyProtected")) >= 1):
+                    entry['CopyProtected'] = item.getElementsByTagName("CopyProtected")[0].firstChild.data
                 if (len(item.getElementsByTagName("UniqueId")) >= 1):
                     entry['UniqueId'] = item.getElementsByTagName("UniqueId")[0].firstChild.data
                 if entry['ContentType'] == 'x-tivo-container/folder':

@@ -27,7 +27,9 @@
                 #end for
           </vDirector>
           <episodeNumber>$escape($video.episodeNumber)</episodeNumber>
-          <episodeTitle>$escape($video.title)</episodeTitle>
+          #if $video.episodeTitle
+          <episodeTitle>$escape($video.episodeTitle)</episodeTitle>
+          #end if
           <vExecProducer>
                 #for $element in $video.vExecProducer
                 <element>$escape($element)</element>
@@ -75,7 +77,7 @@
           #if $video.starRating
           <starRating value="$video.starRating[1]">$video.starRating[0]</starRating>
           #end if
-          <title>$escape($video.seriesTitle)</title>
+          <title>$escape($video.title)</title>
           <vWriter>
                 #for $element in $video.vWriter
                 <element>$escape($element)</element>

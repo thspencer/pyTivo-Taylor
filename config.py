@@ -1,10 +1,14 @@
-import ConfigParser, os
+import ConfigParser, os, sys
 import re
 from ConfigParser import NoOptionError
 
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
 config_file = os.path.join(p, 'pyTivo.conf')
+if not os.path.exists(config_file):
+    print 'ERROR:  pyTivo.conf does not exist.\n' + \
+          'You must create this file before running pyTivo.'
+    sys.exit(1)
 config.read(config_file)
 
 def reset():
