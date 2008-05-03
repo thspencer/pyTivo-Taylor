@@ -110,7 +110,8 @@ Available In: Server, Tivos
 
 par
 
-Default Setting: blank
+Recommended Setting: 1.0
+pyTivo Defaults To: blank
 Valid Entries: any valid par
 Required: No
 Skill: Very Advanced
@@ -122,7 +123,8 @@ Available In: Server
 
 video_fps
 
-Default Setting: 29.97 for S2 Tivo, blank for S3/HD TiVo
+Recommended Setting: blank
+pyTivo Defaults To: 29.97 for S2 Tivo, same as source for S3/HD TiVo
 Valid Entries: 29.97, 23.98, 25, 59.94
 Required: No
 Skill: Advanced
@@ -174,7 +176,7 @@ Available In: Server
 
 width
 
-Default Setting: 544
+Default Setting: 544 for S2, 1280 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to nearest acceptable TiVo dimension
 Required: No
 Skill: Moderate
@@ -184,7 +186,7 @@ Available In: Server, Tivos
 
 height
 
-Default Setting: 480
+Default Setting: 480 for S2, 720 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to nearest acceptable TiVo dimension
 Required: No
 Skill: Moderate
@@ -194,7 +196,8 @@ Available In: Server, Tivos
 
 audio_br
 
-Default Setting: 384K
+Recommended Setting: blank
+pyTivo Defaults To: same bitrate as source or 384k
 Valid Entries: Any valid Bit rate up to 448k.
 Required: No
 Skill: Advanced
@@ -204,7 +207,8 @@ Available In: Server, Tivos
 
 max_audio_br
 
-Default Setting: 448K
+Recommended Setting: blank
+pyTivo Defaults To: 448k
 Valid Entries: Any valid Bit rate.
 Required: No
 Skill: Advanced
@@ -214,7 +218,8 @@ Available In: Server, Tivos
 
 audio_fr
 
-Default Setting: 48000
+Recommended Setting: blank
+pyTivo Defaults To: same frequency as source
 Valid Entries: 44100, 48000
 Required: No
 Skill: Advanced
@@ -224,7 +229,8 @@ Available In: Server, Tivos
 
 audio_ch
 
-Default Setting: blank (same as source)
+Recommended Setting: blank
+pyTivo Defaults To: same channels as source
 Valid Entries: any number compatible with ffmpeg and the audio codec selected
 Required: No
 Skill: Advanced
@@ -234,7 +240,8 @@ Available In: Server, Tivos
 
 audio_codec
 
-Default Setting: ac3
+Recommended Setting: blank
+pyTivo Defaults To: ac3 or copy
 Valid Entries: mp2, ac3
 Required: No
 Skill: Advanced
@@ -246,7 +253,8 @@ Available In: Server, Tivos
 
 copy_ts
 
-Default Setting: True
+Recommended Setting: blank
+pyTivo Defaults To: True
 Valid Entries: blank, True, False
 Required: No
 Skill: Basic
@@ -266,7 +274,8 @@ Available In: Server, Tivos
 
 ffmpeg_tmpl
 
-Default Setting: "%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s
+Recommended Setting: blank
+pyTivo Defaults To: %(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s
 Valid Entries: A valid ffmpeg command
 Required: No
 Skill: Very Advanced
