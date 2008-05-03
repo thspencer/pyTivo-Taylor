@@ -372,7 +372,8 @@ def tivo_compatable(inFile, tsn = ''):
         debug_write(__name__, fn_attr(), ['FALSE,', fps, 'fps, should be 29.97.', inFile])
         return False
 
-    if not config.get169Setting(tsn) or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
+    if (config.get169Blacklist(tsn) and not config.get169Setting(tsn))\
+        or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
         if dar1 == None or not dar1 in ('4:3', '8:9'):
             debug_write(__name__, fn_attr(), ['FALSE, DAR', dar1, 'not supported by BLACKLIST_169 tivos.', inFile])
             return False
