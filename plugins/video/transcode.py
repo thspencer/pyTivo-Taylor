@@ -67,14 +67,14 @@ def transcode(inFile, outFile, tsn=''):
 def select_audiocodec(inFile, tsn = ''):
     # Default, compatible with all TiVo's
     codec = 'ac3'
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
+    vInfo =  video_info(inFile)
     if config.getAudioCodec(tsn) == None:
-        if acodec in ('ac3', 'liba52', 'mp2'):
-            if akbps == None:
+        if vInfo['acodec'] in ('ac3', 'liba52', 'mp2'):
+            if vInfo['akbps'] == None:
                 cmd_string = '-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy -t 00:00:01 -f vob -'
                 if video_check(inFile, cmd_string):
-                    typetest, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(videotest)
-            if not akbps == None and int(akbps) <= config.getMaxAudioBR(tsn):
+                    vInfo =  video_info(videotest)
+            if not vInfo['akbps'] == None and int(vInfo['akbps']) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
     else:
@@ -87,10 +87,10 @@ def select_audiocodec(inFile, tsn = ''):
 
 def select_audiofr(inFile, tsn):
     freq = '48000'  #default
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
-    if not afreq == None and afreq in ('44100', '48000'):
+    vInfo =  video_info(inFile)
+    if not vInfo['afreq'] == None and vInfo['afreq'] in ('44100', '48000'):
         # compatible frequency
-        freq = afreq
+        freq = vInfo['afreq']
     if config.getAudioFR(tsn) != None:
         freq = config.getAudioFR(tsn)
     return '-ar '+freq
@@ -101,9 +101,9 @@ def select_audioch(tsn):
     return ''
 
 def select_videofps(inFile, tsn):
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
+    vInfo =  video_info(inFile)
     vfps = '-r 29.97'  #default
-    if config.isHDtivo(tsn) and fps not in BAD_MPEG_FPS:
+    if config.isHDtivo(tsn) and vInfo['fps'] not in BAD_MPEG_FPS:
         vfps = ' '
     if config.getVideoFPS(tsn) != None:
         vfps = '-r '+config.getVideoFPS(tsn)
@@ -121,9 +121,9 @@ def select_videobr(inFile, tsn):
 def select_videostr(inFile, tsn):
     video_str = config.getVideoBR(tsn)
     if config.isHDtivo(tsn):
-        type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
-        if kbps != None and config.getVideoPCT() > 0:
-            video_percent = int(kbps)*10*config.getVideoPCT()
+        vInfo =  video_info(inFile)
+        if vInfo['kbps'] != None and config.getVideoPCT() > 0:
+            video_percent = int(vInfo['kbps'])*10*config.getVideoPCT()
             video_bitrate = max(config.strtod(video_str), video_percent)
             video_str = str(int(min(config.strtod(config.getMaxVideoBR())*0.95, video_bitrate)))
     return video_str
@@ -152,7 +152,7 @@ def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
     TIVO_HEIGHT = config.getTivoHeight(tsn)
 
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
+    vInfo =  video_info(inFile)
 
     logging.debug('tsn: %s' % tsn)
 
@@ -165,18 +165,18 @@ def select_aspect(inFile, tsn = ''):
     logging.debug('optres:%s' % optres)
 
     if optres:
-        optHeight = config.nearestTivoHeight(height)
-        optWidth = config.nearestTivoWidth(width)
+        optHeight = config.nearestTivoHeight(vInfo['height'])
+        optWidth = config.nearestTivoWidth(vInfo['width'])
         if optHeight < TIVO_HEIGHT:
             TIVO_HEIGHT = optHeight
         if optWidth < TIVO_WIDTH:
             TIVO_WIDTH = optWidth
 
-    d = gcd(height,width)
-    ratio = (width*100)/height
-    rheight, rwidth = height/d, width/d
+    d = gcd(vInfo['height'],vInfo['width'])
+    ratio = (width*100)/vInfo['height']
+    rheight, rwidth = vInfo['height']/d, vInfo['width']/d
 
-    logger.debug('File=%s Type=%s width=%s height=%s fps=%s millisecs=%s ratio=%s rheight=%s rwidth=%s TIVO_HEIGHT=%sTIVO_WIDTH=%s' % (inFile, type, width, height, fps, millisecs, ratio, rheight, rwidth, TIVO_HEIGHT, TIVO_WIDTH))
+    logger.debug('File=%s Type=%s width=%s height=%s fps=%s millisecs=%s ratio=%s rheight=%s rwidth=%s TIVO_HEIGHT=%sTIVO_WIDTH=%s' % (inFile, vInfo['codec'], vInfo['width'], vInfo['height'], vInfo['fps'], vInfo['millisecs'], ratio, rheight, rwidth, TIVO_HEIGHT, TIVO_WIDTH))
 
     multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH)
     multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH)
@@ -328,69 +328,70 @@ def select_aspect(inFile, tsn = ''):
 
 def tivo_compatable(inFile, tsn = ''):
     supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], [480, 480], [352, 480]]
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
+    vInfo =  video_info(inFile)
     #print type, width, height, fps, millisecs, kbps, akbps, acodec
 
     if (inFile[-5:]).lower() == '.tivo':
         logger.debug('TRUE, ends with .tivo. %s' % inFile)
         return True
 
-    if not type == 'mpeg2video':
+    if not vInfo['codec'] == 'mpeg2video':
         #print 'Not Tivo Codec'
-        logger.debug('FALSE, type %s not mpeg2video. %s' % (type, inFile))
+        logger.debug('FALSE, type %s not mpeg2video. %s' % (vInfo['codec'], inFile))
         return False
 
     if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp'):
         logger.debug('FALSE, ext %s not tivo compatible. %s' % (os.path.splitext(inFile)[-1], inFile))
         return False
 
-    if acodec == 'dca':
-        logger.debug('FALSE, acodec %s not supported. %s' % (acodec, inFile))
+    if vInfo['acodec'] == 'dca':
+        logger.debug('FALSE, acodec %s not supported. %s' % (vInfo['acodec'], inFile))
         return False
 
-    if acodec != None:
-        if not akbps or int(akbps) > config.getMaxAudioBR(tsn):
-            logger.debug('FALSE, %s kbps exceeds max audio bitrate. %s' % (akbps, inFile))
+    if vInfo['acodec'] != None:
+        if not vInfo['akbps'] or int(vInfo['akbps']) > config.getMaxAudioBR(tsn):
+            logger.debug('FALSE, %s kbps exceeds max audio bitrate. %s' % (vInfo['akbps'], inFile))
             return False
 
-    if kbps != None:
-        abit = max('0', akbps)
-        if int(kbps)-int(abit) > config.strtod(config.getMaxVideoBR())/1000:
-            logger.debug('FALSE, %s kbps exceeds max video bitrate. %s' % (kbps, inFile))
+    if vInfo['kbps'] != None:
+        abit = max('0', vInfo['akbps'])
+        if int(vInfo['kbps'])-int(abit) > config.strtod(config.getMaxVideoBR())/1000:
+            logger.debug('FALSE, %s kbps exceeds max video bitrate. %s' % (vInfo['kbps'], inFile))
             return False
     else:
-        logger.debug('FALSE, %s kbps not supported. %s' % (kbps, inFile))
+        logger.debug('FALSE, %s kbps not supported. %s' % (vInfo['kbps'], inFile))
         return False
 
     if config.isHDtivo(tsn):
-        if par2 != 1.0:
+        if vInfo['par2'] != 1.0:
             if config.getPixelAR(0):
-                if par2 != None or config.getPixelAR(1) != 1.0:
-                    logger.debug('FALSE, %s not correct PAR, %s' % (par2, inFile))
+                if vInfo['par2'] != None or config.getPixelAR(1) != 1.0:
+                    logger.debug('FALSE, %s not correct PAR, %s' % (vInfo['par2'], inFile))
                     return False
         logger.debug('TRUE, HD Tivo detected, skipping remaining tests %s' % inFile)
         return True
 
-    if not fps == '29.97':
+    if not vInfo['fps'] == '29.97':
         #print 'Not Tivo fps'
-        logger.debug('FALSE, %s fps, should be 29.97. %s' % (fps, inFile))
+        logger.debug('FALSE, %s fps, should be 29.97. %s' % (vInfo['fps'], inFile))
         return False
 
     if (config.get169Blacklist(tsn) and not config.get169Setting(tsn))\
         or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
-        if dar1 == None or not dar1 in ('4:3', '8:9'):
-            debug_write(__name__, fn_attr(), ['FALSE, DAR', dar1, 'not supported by BLACKLIST_169 tivos.', inFile])
+        if vInfo['dar1'] == None or not vInfo['dar1'] in ('4:3', '8:9'):
+            debug_write(__name__, fn_attr(), ['FALSE, DAR', vInfo['dar1'], 'not supported by BLACKLIST_169 tivos.', inFile])
             return False
 
     for mode in supportedModes:
-        if (mode[0], mode[1]) == (width, height):
-            logger.debug('TRUE, %s x %s is valid. %s' % (width, height, inFile))
+        if (mode[0], mode[1]) == (vInfo['width'], vInfo['height']):
+            logger.debug('TRUE, %s x %s is valid. %s' % (vInfo['width'], vInfo['height'], inFile))
             return True
     #print 'Not Tivo dimensions'
-    logger.debug('FALSE, %s x %s not in supported modes. %s' % (width, height, inFile))
+    logger.debug('FALSE, %s x %s not in supported modes. %s' % (vInfo['width'], vInfo['height'], inFile))
     return False
 
 def video_info(inFile):
+    vInfo = dict()
     mtime = os.stat(inFile).st_mtime
     if inFile != videotest:
         if inFile in info_cache and info_cache[inFile][0] == mtime:
@@ -398,9 +399,11 @@ def video_info(inFile):
             return info_cache[inFile][1]
 
     if (inFile[-5:]).lower() == '.tivo':
-        info_cache[inFile] = (mtime, (True, True, True, True, True, True, True, True, True, True, True, True, True))
+        vInfo['Supported'] = True
+        vInfo['millisecs'] = 0
+        info_cache[inFile] = (mtime, vInfo)
         logger.debug('VALID, ends in .tivo. %s' % inFile)
-        return True, True, True, True, True, True, True, True, True, True, True, True, True
+        return vInfo
     
     cmd = [ffmpeg_path(), '-i', inFile ]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
@@ -415,8 +418,9 @@ def video_info(inFile):
 
     if ffmpeg.poll() == None:
         kill(ffmpeg.pid)
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
-        return None, None, None, None, None, None, None, None, None, None, None, None, None
+        vInfo['Supported'] = False
+        info_cache[inFile] = (mtime, vInfo)
+        return vInfo
 
     err_tmp.seek(0) 
     output = err_tmp.read() 
@@ -426,110 +430,113 @@ def video_info(inFile):
     rezre = re.compile(r'.*Video: ([^,]+),.*')
     x = rezre.search(output)
     if x:
-        codec = x.group(1)
+        vInfo['codec'] = x.group(1)
     else:
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
+        vInfo['Supported'] = False
+        info_cache[inFile] = (mtime, vInfo)
         logging.debug('failed at video codec')
-        return None, None, None, None, None, None, None, None, None, None, None, None, None
+        return vInfo
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
     if x:
-        width = int(x.group(1))
-        height = int(x.group(2))
+        vInfo['width'] = int(x.group(1))
+        vInfo['height'] = int(x.group(2))
     else:
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
+        vInfo['Supported'] = False
+        info_cache[inFile] = (mtime, vInfo)
         logger.debug('failed at width/height')
-        return None, None, None, None, None, None, None, None, None, None, None, None, None
+        return vInfo
 
     rezre = re.compile(r'.*Video: .+, (.+) (?:fps|tb).*')
     x = rezre.search(output)
     if x:
-        fps = x.group(1)
+        vInfo['fps'] = x.group(1)
     else:
-        info_cache[inFile] = (mtime, (None, None, None, None, None, None, None, None, None, None, None, None, None))
+        vInfo['Supported'] = False
+        info_cache[inFile] = (mtime, vInfo)
         logging.debug('failed at fps')
-        return None, None, None, None, None, None, None, None, None, None, None, None, None
+        return vInfo
 
     # Allow override only if it is mpeg2 and frame rate was doubled to 59.94
-    if (not fps == '29.97') and (codec == 'mpeg2video'):
+    if (not vInfo['fps'] == '29.97') and (vInfo['codec'] == 'mpeg2video'):
         # First look for the build 7215 version
         rezre = re.compile(r'.*film source: 29.97.*')
         x = rezre.search(output.lower() )
         if x:
             logger.debug('film source: 29.97 setting fps to 29.97')
-            fps = '29.97'
+            vInfo['fps'] = '29.97'
         else:
             # for build 8047:
             rezre = re.compile(r'.*frame rate differs from container frame rate: 29.97.*')
             logger.debug('Bug in VideoReDo')
             x = rezre.search(output.lower() )
             if x:
-                fps = '29.97'
+                vInfo['fps'] = '29.97'
 
     durre = re.compile(r'.*Duration: (.{2}):(.{2}):(.{2})\.(.),')
     d = durre.search(output)
     if d:
-        millisecs = ((int(d.group(1))*3600) + (int(d.group(2))*60) + int(d.group(3)))*1000 + (int(d.group(4))*100)
+        vInfo['millisecs'] = ((int(d.group(1))*3600) + (int(d.group(2))*60) + int(d.group(3)))*1000 + (int(d.group(4))*100)
     else:
-        millisecs = 0
+        vInfo['millisecs'] = 0
 
     #get bitrate of source for tivo compatibility test.
     rezre = re.compile(r'.*bitrate: (.+) (?:kb/s).*')
     x = rezre.search(output)
     if x:
-        kbps = x.group(1)
+        vInfo['kbps'] = x.group(1)
     else:
-        kbps = None
+        vInfo['kbps'] = None
         logger.debug('failed at kbps')
 
     #get audio bitrate of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: .+, (.+) (?:kb/s).*')
     x = rezre.search(output)
     if x:
-        akbps = x.group(1)
+        vInfo['akbps'] = x.group(1)
     else:
-        akbps = None
+        vInfo['akbps'] = None
         logger.debug('failed at akbps')
 
     #get audio codec of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: ([^,]+),.*')
     x = rezre.search(output)
     if x:
-        acodec = x.group(1)
+        vInfo['acodec'] = x.group(1)
     else:
-        acodec = None
+        vInfo['acodec'] = None
         logger.debug('failed at acodec')
 
     #get audio frequency of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: .+, (.+) (?:Hz).*')
     x = rezre.search(output)
     if x:
-        afreq = x.group(1)
+        vInfo['afreq'] = x.group(1)
     else:
-        afreq = None
+        vInfo['afreq'] = None
         logger.debug('failed at afreq')
 
     #get par.
     rezre = re.compile(r'.*Video: .+PAR ([0-9]+):([0-9]+) DAR [0-9:]+.*')
     x = rezre.search(output)
     if x and x.group(1)!="0" and x.group(2)!="0":
-        par1, par2 = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
+        vInfo['par1'], vInfo['par2'] = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
     else:
-        par1, par2 = None, None
+        vInfo['par1'], vInfo['par2'] = None, None
  
     #get dar.
     rezre = re.compile(r'.*Video: .+DAR ([0-9]+):([0-9]+).*')
     x = rezre.search(output)
     if x and x.group(1)!="0" and x.group(2)!="0":
-        dar1, dar2 = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
+        vInfo['dar1'], vInfo['dar2'] = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
     else:
-        dar1, dar2 = None, None
+        vInfo['dar1'], vInfo['dar2'] = None, None
  
-    info_cache[inFile] = (mtime, (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2))
-    logger.debug('Codec=%s width=%s height=%s fps=%s millisecs=%s kbps=%s akbps=%s acodec=%s afreq=%s par=%s %s dar=%s %s' %
-        (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2))
-    return codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2
+    info_cache[inFile] = (mtime, vInfo)
+    logger.debug('Codec=%(codec)s width=%(width)s height=%(height)s fps=%(fps)s millisecs=%(millisecs)s kbps=%(kbps)s akbps=%(akbps)s acodec=%(acodec)s afreq=%(afreq)s par=%(par1)s %(par2)s dar=%(dar1)s %(dar2)s'\
+                 % vInfo)
+    return vInfo
 
 def video_check(inFile, cmd_string):
     cmd = [ffmpeg_path(), '-i', inFile] + cmd_string.split()
@@ -542,7 +549,7 @@ def video_check(inFile, cmd_string):
         return False
 
 def supported_format(inFile):
-    if video_info(inFile)[0]:
+    if video_info(inFile)['Supported']:
         return True
     else:
         logger.debug('FALSE, file not supported %s' % inFile)

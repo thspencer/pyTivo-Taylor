@@ -211,7 +211,7 @@ class Video(Plugin):
         return os.path.isdir(full_path)
 
     def __duration(self, full_path):
-        return transcode.video_info(full_path)[4]
+        return transcode.video_info(full_path)['millisecs']
 
     def __total_items(self, full_path):
         count = 0
