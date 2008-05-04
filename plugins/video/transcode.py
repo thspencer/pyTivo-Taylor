@@ -433,9 +433,7 @@ def video_info(inFile):
         vInfo['codec'] = x.group(1)
     else:
         vInfo['Supported'] = False
-        info_cache[inFile] = (mtime, vInfo)
-        logging.debug('failed at video codec')
-        return vInfo
+        logger.debug('failed at codec')
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
@@ -444,35 +442,30 @@ def video_info(inFile):
         vInfo['height'] = int(x.group(2))
     else:
         vInfo['Supported'] = False
-        info_cache[inFile] = (mtime, vInfo)
         logger.debug('failed at width/height')
-        return vInfo
 
     rezre = re.compile(r'.*Video: .+, (.+) (?:fps|tb).*')
     x = rezre.search(output)
     if x:
         vInfo['fps'] = x.group(1)
-    else:
-        vInfo['Supported'] = False
-        info_cache[inFile] = (mtime, vInfo)
-        logging.debug('failed at fps')
-        return vInfo
-
-    # Allow override only if it is mpeg2 and frame rate was doubled to 59.94
-    if (not vInfo['fps'] == '29.97') and (vInfo['codec'] == 'mpeg2video'):
-        # First look for the build 7215 version
-        rezre = re.compile(r'.*film source: 29.97.*')
-        x = rezre.search(output.lower() )
-        if x:
-            logger.debug('film source: 29.97 setting fps to 29.97')
-            vInfo['fps'] = '29.97'
-        else:
-            # for build 8047:
-            rezre = re.compile(r'.*frame rate differs from container frame rate: 29.97.*')
-            logger.debug('Bug in VideoReDo')
+        # Allow override only if it is mpeg2 and frame rate was doubled to 59.94
+        if (not vInfo['fps'] == '29.97') and (vInfo['codec'] == 'mpeg2video'):
+            # First look for the build 7215 version
+            rezre = re.compile(r'.*film source: 29.97.*')
             x = rezre.search(output.lower() )
             if x:
+                logger.debug('film source: 29.97 setting fps to 29.97')
                 vInfo['fps'] = '29.97'
+            else:
+                # for build 8047:
+                rezre = re.compile(r'.*frame rate differs from container frame rate: 29.97.*')
+                logger.debug('Bug in VideoReDo')
+                x = rezre.search(output.lower() )
+                if x:
+                    vInfo['fps'] = '29.97'
+    else:
+        vInfo['Supported'] = False
+        logger.debug('failed at fps')
 
     durre = re.compile(r'.*Duration: (.{2}):(.{2}):(.{2})\.(.),')
     d = durre.search(output)
@@ -534,8 +527,7 @@ def video_info(inFile):
         vInfo['dar1'], vInfo['dar2'] = None, None
  
     info_cache[inFile] = (mtime, vInfo)
-    logger.debug('Codec=%(codec)s width=%(width)s height=%(height)s fps=%(fps)s millisecs=%(millisecs)s kbps=%(kbps)s akbps=%(akbps)s acodec=%(acodec)s afreq=%(afreq)s par=%(par1)s %(par2)s dar=%(dar1)s %(dar2)s'\
-                 % vInfo)
+    logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
     return vInfo
 
 def video_check(inFile, cmd_string):
