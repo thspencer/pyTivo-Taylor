@@ -1,6 +1,7 @@
 import subprocess, shutil, os, re, sys, tempfile, ConfigParser, time, lrucache, math
 import config
 import logging
+from plugin import GetPlugin
 
 logger = logging.getLogger('pyTivo.video.transcode')
 
@@ -432,6 +433,7 @@ def video_info(inFile):
     if x:
         vInfo['codec'] = x.group(1)
     else:
+        vInfo['codec'] = ''
         vInfo['Supported'] = False
         logger.debug('failed at codec')
 
@@ -441,6 +443,8 @@ def video_info(inFile):
         vInfo['width'] = int(x.group(1))
         vInfo['height'] = int(x.group(2))
     else:
+        vInfo['width'] = ''
+        vInfo['height'] = ''
         vInfo['Supported'] = False
         logger.debug('failed at width/height')
 
@@ -464,6 +468,7 @@ def video_info(inFile):
                 if x:
                     vInfo['fps'] = '29.97'
     else:
+        vInfo['fps'] = ''
         vInfo['Supported'] = False
         logger.debug('failed at fps')
 
@@ -525,7 +530,15 @@ def video_info(inFile):
         vInfo['dar1'], vInfo['dar2'] = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
     else:
         vInfo['dar1'], vInfo['dar2'] = None, None
- 
+
+    videoPlugin = GetPlugin('video')
+    metadata = videoPlugin.getMetadataFromTxt(inFile)
+
+    for key in metadata:
+        if key.startswith('Override_'):
+            vInfo['Supported'] = True
+            vInfo[key.replace('Override_','')] = metadata[key]
+            
     info_cache[inFile] = (mtime, vInfo)
     logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
     return vInfo

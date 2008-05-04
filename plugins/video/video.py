@@ -249,7 +249,7 @@ class Video(Plugin):
             return int((self.__duration(full_path) / 1000) *
                        (bitrate * 1.02 / 8))
 
-    def __getMetadataFromTxt(self, full_path):
+    def getMetadataFromTxt(self, full_path):
         metadata = {}
 
         default_meta = os.path.join(os.path.split(full_path)[0], 'default.txt')
@@ -298,7 +298,7 @@ class Video(Plugin):
         metadata['seriesTitle'] = metadata['title'] # default to the filename
         metadata['originalAirDate'] = originalAirDate.isoformat()
 
-        metadata.update(self.__getMetadataFromTxt(full_path))
+        metadata.update(self.getMetadataFromTxt(full_path))
 
         return metadata
 
