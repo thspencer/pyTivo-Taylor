@@ -101,7 +101,7 @@ def select_audioch(tsn):
     return ''
 
 def select_videofps(inFile, tsn):
-    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, vpar =  video_info(inFile)
+    type, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2 =  video_info(inFile)
     vfps = '-r 29.97'  #default
     if config.isHDtivo(tsn) and fps not in BAD_MPEG_FPS:
         vfps = ' '
