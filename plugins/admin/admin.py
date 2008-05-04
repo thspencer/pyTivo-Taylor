@@ -8,7 +8,7 @@ from urllib import unquote_plus, quote, unquote
 from urlparse import urlparse
 from xml.sax.saxutils import escape
 from lrucache import LRUCache
-import debug
+import logging
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -34,7 +34,7 @@ class Admin(Plugin):
             last_page = query['last_page'][0]
         else:
             last_page = 'Admin'
-        
+
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         handler.send_response(200)
@@ -47,9 +47,8 @@ class Admin(Plugin):
                  'file and all changed should now be in effect. <br> The'+ \
                  '<a href="/TiVoConnect?Command='+ quote(last_page) +'&Container='+ quote(cname) +'"> previous</a> page will reload in 3 seconds.'
         handler.wfile.write(t)
-        debug.debug_write(__name__, debug.fn_attr(), ['The pyTivo Server has been soft reset.'])
-        debug.print_conf(__name__, debug.fn_attr())
-    
+        logging.getLogger('pyTivo.admin').info('The pyTivo Server has been soft reset.')
+
     def Admin(self, handler, query):
         #Read config file new each time in case there was any outside edits
         config = ConfigParser.ConfigParser()
@@ -62,7 +61,7 @@ class Admin(Plugin):
                     shares_data.append((section, dict(config.items(section, raw=True))))
                 elif config.get(section,'type').lower() != 'admin':
                     shares_data.append((section, dict(config.items(section, raw=True))))
-        
+
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         handler.send_response(200)
@@ -93,12 +92,12 @@ class Admin(Plugin):
                     new_value = query[key][0]
                     continue
                 if query[key][0] == " ":
-                    config.remove_option(section, option)                      
+                    config.remove_option(section, option)
                 else:
                     config.set(section, option, query[key][0])
         if not(new_setting == ' ' and new_value == ' '):
             config.set('Server', new_setting, new_value)
-           
+
         sections = query['Section_Map'][0].split(']')
         sections.pop() #last item is junk
         for section in sections:
@@ -119,7 +118,7 @@ class Admin(Plugin):
                         new_value = query[key][0]
                         continue
                     if query[key][0] == " ":
-                        config.remove_option(query[ID][0], option)                      
+                        config.remove_option(query[ID][0], option)
                     else:
                         config.set(query[ID][0], option, query[key][0])
             if not(new_setting == ' ' and new_value == ' '):
@@ -142,7 +141,7 @@ class Admin(Plugin):
                  'However you will need to do a <b>Soft Reset</b> before these changes will take effect.'+\
                  '<br> The <a href="/TiVoConnect?Command=Admin&Container='+ quote(cname) +'"> Admin</a> page will reload in 10 seconds.'
         handler.wfile.write(t)
-        
+
     def NPL(self, handler, query):
         shows_per_page = 50 #Change this to alter the number of shows returned per page
         subcname = query['Container'][0]
@@ -197,7 +196,7 @@ class Admin(Plugin):
                                  '<br>This most likely caused by an incorrect Media Access Key.  Please return to the ToGo page and double check your Media Access Key.' +\
                                  '<br> The <a href="/TiVoConnect?Command=NPL&Container='+ quote(cname) + '"> ToGo</a> page will reload in 20 seconds.'
                         handler.wfile.write(t)
-                        return 
+                        return
                     tivo_cache[theurl]['thepage'] = handle.read()
                     tivo_cache[theurl]['thepage_time'] = time.time()
             else: #not in cache
@@ -258,7 +257,7 @@ class Admin(Plugin):
                                         + str((int(entry['Duration'])%(60*60*1000))/(60*1000)).zfill(2) + ':' \
                                         + str((int(entry['Duration'])/1000)%60).zfill(2)
                     entry['CaptureDate'] = time.strftime("%b %d, %Y", time.localtime(int(entry['CaptureDate'], 16)))
-                            
+
                 data.append(entry)
         else:
             data = []
@@ -271,6 +270,7 @@ class Admin(Plugin):
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html; charset=UTF-8')
         handler.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'npl.tmpl'))
         t.quote = quote
@@ -289,8 +289,7 @@ class Admin(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
-        o = ''.join([i for i in unicode(t) if i not in (u'\u200b')])
-        handler.wfile.write(o.encode('latin-1'))
+        handler.wfile.write(unicode(t).encode('utf-8'))
 
     def get_tivo_file(self, url, mak, tivoIP, outfile):
         #global status
@@ -361,7 +360,7 @@ class Admin(Plugin):
             status[theurl] = {'running':True, 'error':'', 'rate':'', 'finished':False}
 
             thread.start_new_thread(Admin.get_tivo_file, (self, theurl, password, tivoIP, outfile))
-            
+
             handler.send_response(200)
             handler.end_headers()
             t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
@@ -385,9 +384,9 @@ class Admin(Plugin):
     def ToGoStop(self, handler, query):
         parse_url = urlparse(str(query['Url'][0]))
         theurl = 'http://' + parse_url[1].split(':')[0] + parse_url[2] + "?" + parse_url[4]
-        
+
         status[theurl]['running'] = False
-        
+
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         tivoIP = query['TiVo'][0]
@@ -408,7 +407,7 @@ class Admin(Plugin):
         if 'tivo_mak' in query:
             config.set(query['Container'][0], 'tivo_mak', query['tivo_mak'][0])
         if 'togo_path' in query:
-            config.set(query['Container'][0], 'togo_path', query['togo_path'][0])                 
+            config.set(query['Container'][0], 'togo_path', query['togo_path'][0])
         f = open(config_file_path, "w")
         config.write(f)
         f.close()

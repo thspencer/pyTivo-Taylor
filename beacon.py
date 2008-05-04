@@ -11,7 +11,7 @@ class Beacon:
     def add_service(self, service):
         self.services.append(service)
         self.send_beacon()
-        
+
     def format_services(self):
         return ';'.join(self.services)
 

@@ -1,8 +1,29 @@
 #!/usr/bin/env python
 
+import logging
+import logging.config
+import os
+import ConfigParser
 import beacon, httpserver, os, sys
 import config
 from plugin import GetPlugin
+
+def init_logging():
+    config.config_files
+    p = os.path.dirname(__file__)
+
+    if config.config.has_section('loggers') and\
+      config.config.has_section('handlers') and\
+      config.config.has_section('formatters'):
+
+        logging.config.fileConfig(config.config_files)
+
+    elif config.getDebug(0):
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
+init_logging()
 
 port = config.getPort()
 
@@ -36,7 +57,8 @@ b.start()
 if 'listen' in config.getBeaconAddresses():
     b.listen()
 
-print 'pyTivo is ready.'
+logging.getLogger('pyTivo').info('pyTivo is ready.')
+
 try:
     httpd.serve_forever()
 except KeyboardInterrupt:

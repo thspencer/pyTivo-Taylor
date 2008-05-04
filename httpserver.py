@@ -6,7 +6,7 @@ from Cheetah.Template import Template
 from plugin import GetPlugin
 import config
 from xml.sax.saxutils import escape
-from debug import debug_write, fn_attr
+import logging
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -45,7 +45,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         tsn = self.headers.getheader('TiVo_TCD_ID', self.headers.getheader('tsn', ''))
         ip = self.address_string()
         self.tivos[tsn] = ip
-               
+
         basepath = unquote_plus(self.path).split('/')[1]
 
         ## Get File
@@ -72,11 +72,11 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if command == "QueryContainer" and \
                (not query.has_key('Container') or query['Container'][0] == '/'):
                 self.root_container()
-                return 
+                return
 
             if query.has_key('Container'):
                 # Dispatch to the container plugin
-                basepath = query['Container'][0].split('/')[0]
+                basepath = unquote(query['Container'][0].split('/')[0])
                 for name, container in self.server.containers.items():
                     if basepath == name:
                         plugin = GetPlugin(container['type'])
@@ -87,7 +87,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         else:
                             break
 
-        # If we made it here it means we couldn't match the request to 
+        # If we made it here it means we couldn't match the request to
         # anything.
         self.unsupported(query)
 
@@ -129,21 +129,26 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             t.admin = '<br><b>No Admin plugin installed in pyTivo.conf</b><br> If you wish to use'\
                       + ' the admin plugin add the following lines to pyTivo.conf<br><br>'\
                       + '[Admin]<br>type=admin'
-        
+
+        t.shares = 'Video shares:<br/>'
+        for section, settings in config.getShares():
+            if settings.get('type') == 'video':
+                t.shares += '<a href="TiVoConnect?Command=QueryContainer&Container=' + section\
+                    + '">' +  section + '</a><br/>'
+
         self.wfile.write(t)
         self.end_headers()
 
     def unsupported(self, query):
         if hack83 and 'Command' in query and 'Filter' in query:
-            debug_write(__name__, fn_attr(), ['Unsupported request,',
-                         'checking to see if it is video.'])
+            logger = logging.getLogger('pyTivo.hack83')
+
+            logger.debug('Unsupported request checking to see if it is video.')
             command = query['Command'][0]
             plugin = GetPlugin('video')
             if ''.join(query['Filter']).find('video') >= 0 and \
                hasattr(plugin, command):
-                debug_write(__name__, fn_attr(), ['Unsupported request,',
-                             'yup it is video',
-                             'send to video plugin for it to sort out.'])
+                logger.debug('Unsupported request yup it is video send to video plugin for it to sort out.')
                 method = getattr(plugin, command)
                 method(self, query)
                 return

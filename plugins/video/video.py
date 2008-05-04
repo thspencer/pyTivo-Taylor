@@ -8,7 +8,8 @@ from UserDict import DictMixin
 from datetime import datetime, timedelta
 import config
 import time
-from debug import debug_write, fn_attr
+import mind
+import logging
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -21,7 +22,7 @@ except:
     extensions = None
 
 if config.getHack83():
-    debug_write(__name__, fn_attr(), ['Hack83 is enabled.'])
+    logging.getLogger('pyTivo.hack83').info('Hack83 is enabled.')
 
 class Video(Plugin):
 
@@ -44,8 +45,9 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def hack(self, handler, query, subcname):
-        debug_write(__name__, fn_attr(), ['new request ------------------------'])
-        debug_write(__name__, fn_attr(), ['TiVo request is: \n', query])
+        logger = logging.getLogger('pyTivo.hack83')
+        logger.debug('new request ------------------------')
+        logger.debug('TiVo request is: \n%s' % query)
         queryAnchor = ''
         rightAnchor = ''
         leftAnchor = ''
@@ -53,8 +55,7 @@ class Video(Plugin):
 
         # not a tivo
         if not tsn:
-            debug_write(__name__, fn_attr(), ['this was not a TiVo request.',
-                         'Using default tsn.'])
+            logger.debug('this was not a TiVo request. Using default tsn.')
             tsn = '123456789'
 
         # this breaks up the anchor item request into seperate parts
@@ -67,14 +68,13 @@ class Video(Plugin):
                 # This is a file
                 queryAnchor = queryAnchor.split('/', 1)[-1]
             leftAnchor, rightAnchor = queryAnchor.rsplit('/', 1)
-            debug_write(__name__, fn_attr(), ['queryAnchor: ', queryAnchor,
-                         ' leftAnchor: ', leftAnchor,
-                         ' rightAnchor: ', rightAnchor])
+            logger.debug('queryAnchor:%s \n leftAnchor:%s\n rightAnchor: %s' %
+                            (queryAnchor, leftAnchor, rightAnchor))
         try:
             path, state = self.request_history[tsn]
         except KeyError:
             # Never seen this tsn, starting new history
-            debug_write(__name__, fn_attr(), ['New TSN.'])
+            logger.debug('New TSN.')
             path = []
             state = {}
             self.request_history[tsn] = (path, state)
@@ -82,7 +82,7 @@ class Video(Plugin):
             state['page'] = ''
             state['time'] = int(time.time()) + 1000
 
-        debug_write(__name__, fn_attr(), ['our saved request is: \n', state['query']])
+        logger.debug('our saved request is: \n%s' % state['query'])
 
         current_folder = subcname.split('/')[-1]
 
@@ -91,19 +91,17 @@ class Video(Plugin):
 
         # 1. at the root - This request is always accurate
         if len(subcname.split('/')) == 1:
-            debug_write(__name__, fn_attr(), ['we are at the root.',
-                         'Saving query, Clearing state[page].'])
+            logger.debug('we are at the root. Saving query, Clearing state[page].')
             path[:] = [current_folder]
             state['query'] = query
             state['page'] = ''
             return query, path
 
         # 2. entering a new folder
-        # If there is no AnchorItem in the request then we must be 
+        # If there is no AnchorItem in the request then we must be
         # entering a new folder.
         if 'AnchorItem' not in query:
-            debug_write(__name__, fn_attr(), ['we are entering a new folder.',
-                         'Saving query, setting time, setting state[page].'])
+            logger.debug('we are entering a new folder. Saving query, setting time, setting state[page].')
             path[:] = subcname.split('/')
             state['query'] = query
             state['time'] = int(time.time())
@@ -118,63 +116,59 @@ class Video(Plugin):
         # 3. Request a page after pyTivo sent a 302 code
         # we know this is the proper page
         if ''.join(query['AnchorItem']) == 'Hack8.3':
-            debug_write(__name__, fn_attr(), ['requested page from 302 code.',
-                         'Returning saved query.'])
+            logger.debug('requested page from 302 code. Returning saved query.')
             return state['query'], path
 
         # 4. this is a request for a file
         if 'ItemCount' in query and int(''.join(query['ItemCount'])) == 1:
-            debug_write(__name__, fn_attr(), ['requested a file'])
+            logger.debug('requested a file')
             # Everything in this request is right except the container
             query['Container'] = ['/'.join(path)]
             state['page'] = ''
             return query, path
 
-        # All remaining requests could be a second erroneous request for 
-        # each of the following we will pause to see if a correct 
+        # All remaining requests could be a second erroneous request for
+        # each of the following we will pause to see if a correct
         # request is coming right behind it.
 
-        # Sleep just in case the erroneous request came first this 
+        # Sleep just in case the erroneous request came first this
         # allows a proper request to be processed first
-        debug_write(__name__, fn_attr(), ['maybe erroneous request, sleeping.'])
+        logger.debug('maybe erroneous request, sleeping.')
         time.sleep(.25)
 
         # 5. scrolling in a folder
-        # This could be a request to exit a folder or scroll up or down 
+        # This could be a request to exit a folder or scroll up or down
         # within the folder
         # First we have to figure out if we are scrolling
         if 'AnchorOffset' in query:
-            debug_write(__name__, fn_attr(), ['Anchor offset was in query.',
-                         'leftAnchor needs to match ', '/'.join(path)])
+            logger.debug('Anchor offset was in query. leftAnchor needs to match %s' % '/'.join(path))
             if leftAnchor == str('/'.join(path)):
-                debug_write(__name__, fn_attr(), ['leftAnchor matched.'])
+                logger.debug('leftAnchor matched.')
                 query['Container'] = ['/'.join(path)]
-                files, total, start = self.get_files(handler, query, 
+                files, total, start = self.get_files(handler, query,
                                                      self.video_file_filter)
-                debug_write(__name__, fn_attr(), ['saved page is= ', state['page'],
-                             ' top returned file is= ', files[0]])
+                logger.debug('saved page is=%s top returned file is= %s' % (state['page'], files[0]))
                 # If the first file returned equals the top of the page
                 # then we haven't scrolled pages
                 if files[0] != str(state['page']):
-                    debug_write(__name__, fn_attr(), ['this is scrolling within a folder.'])
+                    logger.debug('this is scrolling within a folder.')
                     state['page'] = files[0]
-                    return query, path               
+                    return query, path
 
-        # The only remaining options are exiting a folder or this is a 
+        # The only remaining options are exiting a folder or this is a
         # erroneous second request.
 
         # 6. this an extraneous request
-        # this came within a second of a valid request; just use that 
+        # this came within a second of a valid request; just use that
         # request.
         if (int(time.time()) - state['time']) <= 1:
-            debug_write(__name__, fn_attr(), ['erroneous request, send a 302 error'])
+            logger.debug('erroneous request, send a 302 error')
             return None, path
 
         # 7. this is a request to exit a folder
         # this request came by itself; it must be to exit a folder
         else:
-            debug_write(__name__, fn_attr(), ['over 1 second,',
-                         'must be request to exit folder'])
+            logger.debug('over 1 second must be request to exit folder')
             path.pop()
             state['query'] = {'Command': query['Command'],
                               'SortOrder': query['SortOrder'],
@@ -190,8 +184,7 @@ class Video(Plugin):
             return None, path
 
         # just in case we missed something.
-        debug_write(__name__, fn_attr(), ['ERROR, should not have made it here. ',
-                     'Trying to recover.'])
+        logger.debug('ERROR, should not have made it here Trying to recover.')
         return state['query'], path
 
     def send_file(self, handler, container, name):
@@ -293,7 +286,7 @@ class Video(Plugin):
 
         return metadata
 
-    def __metadata_basic(self, full_path):
+    def metadata_basic(self, full_path):
         metadata = {}
 
         base_path, title = os.path.split(full_path)
@@ -309,7 +302,7 @@ class Video(Plugin):
 
         return metadata
 
-    def __metadata_full(self, full_path, tsn=''):
+    def metadata_full(self, full_path, tsn=''):
         metadata = {}
 
         now = datetime.utcnow()
@@ -340,16 +333,15 @@ class Video(Plugin):
         # If you are running 8.3 software you want to enable hack83
         # in the config file
         if config.getHack83():
-            print '=' * 73
+            logger = logging.getLogger('pyTivo.hack83')
+            logger.debug('=' * 73)
             query, hackPath = self.hack(handler, query, subcname)
             hackPath = '/'.join(hackPath)
-            print 'Tivo said:', subcname, '|| Hack said:', hackPath
-            debug_write(__name__, fn_attr(), ['Tivo said: ', subcname, ' || Hack said: ',
-                         hackPath])
+            logger.debug('Tivo said: %s || Hack said: %s' % (subcname, hackPath))
             subcname = hackPath
 
             if not query:
-                debug_write(__name__, fn_attr(), ['sending 302 redirect page'])
+                logger.debug('sending 302 redirect page')
                 handler.send_response(302)
                 handler.send_header('Location ', 'http://' +
                                     handler.headers.getheader('host') +
@@ -396,10 +388,10 @@ class Video(Plugin):
                 if precache or len(files) == 1 or file in transcode.info_cache:
                     video['valid'] = transcode.supported_format(file)
                     if video['valid']:
-                        video.update(self.__metadata_full(file, tsn))
+                        video.update(self.metadata_full(file, tsn))
                 else:
                     video['valid'] = True
-                    video.update(self.__metadata_basic(file))
+                    video.update(self.metadata_basic(file))
 
             videos.append(video)
 
@@ -415,10 +407,11 @@ class Video(Plugin):
         t.escape = escape
         t.crc = zlib.crc32
         t.guid = config.getGUID()
+        t.tivos = handler.tivos
         handler.wfile.write(t)
 
     def TVBusQuery(self, handler, query):
-        tsn = handler.headers.getheader('tsn', '')       
+        tsn = handler.headers.getheader('tsn', '')
         file = query['File'][0]
         path = self.get_local_path(handler, query)
         file_path = path + file
@@ -426,7 +419,7 @@ class Video(Plugin):
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
         if file_info['valid']:
-            file_info.update(self.__metadata_full(file_path, tsn))
+            file_info.update(self.metadata_full(file_path, tsn))
 
         handler.send_response(200)
         handler.end_headers()
@@ -434,6 +427,56 @@ class Video(Plugin):
         t.video = file_info
         t.escape = escape
         handler.wfile.write(t)
+
+    def XSL(self, handler, query):
+        file = open(os.path.join(SCRIPTDIR, 'templates', 'container.xsl'))
+        handler.send_response(200)
+        handler.end_headers()
+        handler.wfile.write(file.read())
+
+
+    def Push(self, handler, query):
+        file = unquote(query['File'][0])
+        tsn = query['tsn'][0]
+        path = self.get_local_path(handler, query)
+        file_path = path + file
+
+        file_info = VideoDetails()
+        file_info['valid'] = transcode.supported_format(file_path)
+        if file_info['valid']:
+            file_info.update(self.metadata_full(file_path, tsn))
+
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('tivo.com',123))
+        ip = s.getsockname()[0]
+        container = quote(query['Container'][0].split('/')[0])
+        port = config.getPort()
+
+        url = 'http://%s:%s/%s%s' % (ip, port, container, quote(file))
+
+        try:
+            m = mind.getMind()
+            m.pushVideo(
+                tsn = tsn,
+                url = url,
+                description = file_info['description'],
+                duration = file_info['duration'] / 1000,
+                size = file_info['size'],
+                title = file_info['title'],
+                subtitle = file_info['name'])
+        except Exception, e:
+            import traceback
+            handler.send_response(500)
+            handler.end_headers()
+            handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
+            raise
+
+        referer = handler.headers.getheader('Referer')
+        handler.send_response(302)
+        handler.send_header('Location', referer)
+        handler.end_headers()
+
 
 class VideoDetails(DictMixin):
 

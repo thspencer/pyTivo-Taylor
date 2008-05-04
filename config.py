@@ -1,28 +1,46 @@
 import ConfigParser, os, sys
 import re
+import random
+import string
 from ConfigParser import NoOptionError
+
+BLACKLIST_169 = ('540', '649')
+guid = ''.join([random.choice(string.letters) for i in range(10)])
 
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
-config_file = os.path.join(p, 'pyTivo.conf')
-if not os.path.exists(config_file):
+
+config_files = [
+    '/etc/pyTivo.conf',
+    os.path.join(p, 'pyTivo.conf'),
+]
+config_exists = False
+for config_file in config_files:
+    if  os.path.exists(config_file):
+        config_exists = True
+if not config_exists:
     print 'ERROR:  pyTivo.conf does not exist.\n' + \
           'You must create this file before running pyTivo.'
     sys.exit(1)
-config.read(config_file)
+config.read(config_files)
 
 def reset():
     global config
     del config
     config = ConfigParser.ConfigParser()
-    config.read(config_file)
+    config.read(config_files)
 
 def getGUID():
     if config.has_option('Server', 'GUID'):
-        guid = config.get('Server', 'GUID')
+        return config.get('Server', 'GUID')
     else:
-        guid = '123456'
-    return guid
+        return guid
+
+def getTivoUsername():
+    return config.get('Server', 'tivo_username')
+
+def getTivoPassword():
+    return config.get('Server', 'tivo_password')
 
 def getBeaconAddresses():
     if config.has_option('Server', 'beacon'):
@@ -58,8 +76,15 @@ def get169Setting(tsn):
 
 def getShares(tsn=''):
     shares = [(section, dict(config.items(section)))
-              for section in config.sections()
-              if not(section.startswith('_tivo_') or section == 'Server')]
+                for section in config.sections()
+                if not (
+                    section.startswith('_tivo_')
+                    or section in ('Server', 'loggers', 'handlers', 'formatters')
+                    or section.startswith('logger_')
+                    or section.startswith('handler_')
+                    or section.startswith('formatter_')
+                )
+    ]
 
     if config.has_section('_tivo_' + tsn):
         if config.has_option('_tivo_' + tsn, 'shares'):
@@ -331,7 +356,7 @@ def getVideoFPS(tsn = None):
         return config.get('Server', 'video_fps')
     except NoOptionError:
         return None
-    
+
 def getVideoCodec(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
