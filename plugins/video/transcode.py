@@ -527,7 +527,6 @@ def video_info(inFile):
         dar1, dar2 = None, None
  
     info_cache[inFile] = (mtime, (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2))
-    debug_write(__name__, fn_attr(), ['Codec=', codec, ' width=', width, ' height=', height, ' fps=', fps, ' millisecs=', millisecs, ' kbps=', kbps, ' akbps=', akbps, ' acodec=', acodec, ' afreq=', afreq, ' par=', par1, par2, ' dar=', dar1, dar2])
     logger.debug('Codec=%s width=%s height=%s fps=%s millisecs=%s kbps=%s akbps=%s acodec=%s afreq=%s par=%s %s dar=%s %s' %
         (codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2))
     return codec, width, height, fps, millisecs, kbps, akbps, acodec, afreq, par1, par2, dar1, dar2
