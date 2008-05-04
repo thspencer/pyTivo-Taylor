@@ -133,7 +133,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.shares = 'Video shares:<br/>'
         for section, settings in config.getShares():
             if settings.get('type') == 'video':
-                t.shares += '<a href="TiVoConnect?Command=QueryContainer&Container=' + section\
+                t.shares += '<a href="TiVoConnect?Command=QueryContainer&Container=' + quote(section)\
                     + '">' +  section + '</a><br/>'
 
         self.wfile.write(t)
