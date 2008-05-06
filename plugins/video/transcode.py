@@ -399,8 +399,9 @@ def video_info(inFile):
             logging.debug('CACHE HIT! %s' % inFile)
             return info_cache[inFile][1]
 
+    vInfo['Supported'] = True
+
     if (inFile[-5:]).lower() == '.tivo':
-        vInfo['Supported'] = True
         vInfo['millisecs'] = 0
         info_cache[inFile] = (mtime, vInfo)
         logger.debug('VALID, ends in .tivo. %s' % inFile)
