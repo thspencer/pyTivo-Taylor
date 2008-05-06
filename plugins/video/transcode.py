@@ -174,7 +174,7 @@ def select_aspect(inFile, tsn = ''):
             TIVO_WIDTH = optWidth
 
     d = gcd(vInfo['height'],vInfo['width'])
-    ratio = (width*100)/vInfo['height']
+    ratio = (vInfo['width']*100)/vInfo['height']
     rheight, rwidth = vInfo['height']/d, vInfo['width']/d
 
     logger.debug('File=%s Type=%s width=%s height=%s fps=%s millisecs=%s ratio=%s rheight=%s rwidth=%s TIVO_HEIGHT=%sTIVO_WIDTH=%s' % (inFile, vInfo['codec'], vInfo['width'], vInfo['height'], vInfo['fps'], vInfo['millisecs'], ratio, rheight, rwidth, TIVO_HEIGHT, TIVO_WIDTH))
@@ -184,27 +184,27 @@ def select_aspect(inFile, tsn = ''):
 
     if config.isHDtivo(tsn) and not optres:
         if config.getPixelAR(0):
-            if par2 == None:
+            if vInfo['par2'] == None:
                 npar = config.getPixelAR(1)
             else:
-                npar = par2
+                npar = vInfo['par2']
             # adjust for pixel aspect ratio, if set, because TiVo expects square pixels
             if npar<1.0:
-                return ['-s', str(width) + 'x' + str(int(math.ceil(height/npar)))]
+                return ['-s', str(vInfo['width']) + 'x' + str(int(math.ceil(vInfo['height']/npar)))]
             elif npar>1.0:
                 # FFMPEG expects width to be a multiple of two
-                return ['-s', str(int(math.ceil(width*npar/2.0)*2)) + 'x' + str(height)]
-        if height <= TIVO_HEIGHT:
+                return ['-s', str(int(math.ceil(vInfo['width']*npar/2.0)*2)) + 'x' + str(vInfo['height'])]
+        if vInfo['height'] <= TIVO_HEIGHT:
             # pass all resolutions to S3, except heights greater than conf height
             return []
         # else, resize video.
     if (rwidth, rheight) in [(1, 1)] and par1 == '8:9':
         logger.debug('File + PAR is within 4:3.')
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)] or dar1 == '4:3':
+    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)] or vInfo['dar1'] == '4:3':
         logger.debug('File is within 4:3 list.')
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or dar1 == '16:9')\
+    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or vInfo['dar1'] == '16:9')\
          and (aspect169 or config.get169Letterbox(tsn)):
         logger.debug('File is within 16:9 list and 16:9 allowed.')
         if config.get169Blacklist(tsn) or (aspect169 and config.get169Letterbox(tsn)): 
@@ -217,7 +217,7 @@ def select_aspect(inFile, tsn = ''):
         if (ratio > 133): #Might be 16:9 file, or just need padding on top and bottom
             if aspect169 and (ratio > 135): #If file would fall in 4:3 assume it is supposed to be 4:3
                 if (ratio > 177):#too short needs padding top and bottom
-                    endHeight = int(((TIVO_WIDTH*height)/width) * multiplier16by9)
+                    endHeight = int(((TIVO_WIDTH*vInfo['height'])/vInfo['width']) * multiplier16by9)
                     settings.append('-aspect') 
                     if config.get169Blacklist(tsn) or config.get169Letterbox(tsn): 
                         settings.append('4:3') 
@@ -243,7 +243,7 @@ def select_aspect(inFile, tsn = ''):
                         settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
                     logger.debug('16:9 aspect allowed, file is wider than 16:9 padding top and bottom\n%s' % ' '.join(settings))
                 else: #too skinny needs padding on left and right.
-                    endWidth = int((TIVO_HEIGHT*width)/(height*multiplier16by9))
+                    endWidth = int((TIVO_HEIGHT*vInfo['width'])/(vInfo['height']*multiplier16by9))
                     settings.append('-aspect')
                     if config.get169Blacklist(tsn) or config.get169Letterbox(tsn): 
                         settings.append('4:3') 
@@ -276,7 +276,7 @@ def select_aspect(inFile, tsn = ''):
                     multiplier = multiplier16by9
                 else:
                     settings.append('4:3')
-                endHeight = int(((TIVO_WIDTH*height)/width) * multiplier)
+                endHeight = int(((TIVO_WIDTH*vInfo['height'])/vInfo['width']) * multiplier)
                 if endHeight % 2:
                     endHeight -= 1
                 if endHeight < TIVO_HEIGHT * 0.99:
@@ -301,7 +301,7 @@ def select_aspect(inFile, tsn = ''):
         #If video is taller than 4:3 add left and right padding, this is rare. All of these files will always be sent in
         #an aspect ratio of 4:3 since they are so narrow.
         else:
-            endWidth = int((TIVO_HEIGHT*width)/(height*multiplier4by3))
+            endWidth = int((TIVO_HEIGHT*vInfo['width'])/(vInfo['height']*multiplier4by3))
             settings.append('-aspect')
             settings.append('4:3')
             if endWidth % 2:
