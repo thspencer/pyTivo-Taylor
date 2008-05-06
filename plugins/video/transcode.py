@@ -473,7 +473,7 @@ def video_info(inFile):
         vInfo['Supported'] = False
         logger.debug('failed at fps')
 
-    durre = re.compile(r'.*Duration: (.{2}):(.{2}):(.{2})\.(.),')
+    durre = re.compile(r'.*Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+),')
     d = durre.search(output)
     if d:
         vInfo['millisecs'] = ((int(d.group(1))*3600) + (int(d.group(2))*60) + int(d.group(3)))*1000 + (int(d.group(4))*100)
