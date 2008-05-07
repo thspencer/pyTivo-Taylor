@@ -69,6 +69,7 @@ def select_audiocodec(inFile, tsn = ''):
     # Default, compatible with all TiVo's
     codec = 'ac3'
     vInfo =  video_info(inFile)
+    codectype = vInfo['codec']
     if config.getAudioCodec(tsn) == None:
         if vInfo['acodec'] in ('ac3', 'liba52', 'mp2'):
             if vInfo['akbps'] == None:
@@ -82,7 +83,7 @@ def select_audiocodec(inFile, tsn = ''):
         codec = config.getAudioCodec(tsn)
     copyts = ' -copyts'
     if (codec == 'copy' and config.getCopyTS(tsn).lower() == 'none' \
-        and type == 'mpeg2video') or config.getCopyTS(tsn).lower() == 'false':
+        and codectype == 'mpeg2video') or config.getCopyTS(tsn).lower() == 'false':
         copyts = ''
     return '-acodec '+codec+copyts
 
@@ -177,7 +178,7 @@ def select_aspect(inFile, tsn = ''):
     ratio = (vInfo['width']*100)/vInfo['height']
     rheight, rwidth = vInfo['height']/d, vInfo['width']/d
 
-    logger.debug('File=%s Type=%s width=%s height=%s fps=%s millisecs=%s ratio=%s rheight=%s rwidth=%s TIVO_HEIGHT=%sTIVO_WIDTH=%s' % (inFile, vInfo['codec'], vInfo['width'], vInfo['height'], vInfo['fps'], vInfo['millisecs'], ratio, rheight, rwidth, TIVO_HEIGHT, TIVO_WIDTH))
+    logger.debug('File=%s codec=%s width=%s height=%s fps=%s millisecs=%s ratio=%s rheight=%s rwidth=%s TIVO_HEIGHT=%sTIVO_WIDTH=%s' % (inFile, vInfo['codec'], vInfo['width'], vInfo['height'], vInfo['fps'], vInfo['millisecs'], ratio, rheight, rwidth, TIVO_HEIGHT, TIVO_WIDTH))
 
     multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH)
     multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH)
@@ -330,7 +331,6 @@ def select_aspect(inFile, tsn = ''):
 def tivo_compatable(inFile, tsn = ''):
     supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], [480, 480], [352, 480]]
     vInfo =  video_info(inFile)
-    #print type, width, height, fps, millisecs, kbps, akbps, acodec
 
     if (inFile[-5:]).lower() == '.tivo':
         logger.debug('TRUE, ends with .tivo. %s' % inFile)
@@ -338,7 +338,7 @@ def tivo_compatable(inFile, tsn = ''):
 
     if not vInfo['codec'] == 'mpeg2video':
         #print 'Not Tivo Codec'
-        logger.debug('FALSE, type %s not mpeg2video. %s' % (vInfo['codec'], inFile))
+        logger.debug('FALSE, codec %s not mpeg2video. %s' % (vInfo['codec'], inFile))
         return False
 
     if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp'):
