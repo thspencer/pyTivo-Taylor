@@ -235,7 +235,7 @@ class Video(Plugin):
     def __est_size(self, full_path, tsn = ''):
         # Size is estimated by taking audio and video bit rate adding 2%
 
-        if transcode.tivo_compatable(full_path, tsn):
+        if transcode.tivo_compatable(full_path, tsn)[0]:
             # Is TiVo-compatible mpeg2
             return int(os.stat(full_path).st_size)
         else:
@@ -315,6 +315,16 @@ class Video(Plugin):
         metadata['stopTime'] = (now + duration_delta).isoformat()
         metadata['size'] = self.__est_size(full_path, tsn)
         metadata['duration'] = duration
+        vInfo = transcode.video_info(full_path)
+        transcode_options = {}
+        if not transcode.tivo_compatable(full_path, tsn)[0]:
+            transcode_options = transcode.transcode(True, full_path, '', tsn)
+        metadata['vHost'] = [str(transcode.tivo_compatable(full_path, tsn)[1])]+\
+                            ['SOURCE INFO: ']+["%s=%s" % (k, v) for k, v in sorted(transcode.video_info(full_path).items(), reverse=True)]+\
+                            ['TRANSCODE OPTIONS: ']+["%s" % (v) for k, v in transcode_options.items()]+\
+                            ['SOURCE FILE: ']+[str(os.path.split(full_path)[1])]
+
+
         metadata.update(self.metadata_basic(full_path))
 
         min = duration_delta.seconds / 60
