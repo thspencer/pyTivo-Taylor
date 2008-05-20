@@ -349,7 +349,7 @@ def tivo_compatable(inFile, tsn = ''):
             message = False, 'TRANSCODE=YES, vCodec %s not compatible.' % vInfo['vCodec']
             break
 
-        if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp', 'dvr-ms'):
+        if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp', '.dvr-ms'):
             message = False, 'TRANSCODE=YES, ext %s not compatible.' % os.path.splitext(inFile)[-1]
             break
 
