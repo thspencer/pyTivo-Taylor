@@ -338,77 +338,70 @@ def tivo_compatable(inFile, tsn = ''):
     supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], [480, 480], [352, 480]]
     vInfo =  video_info(inFile)
 
-    if (inFile[-5:]).lower() == '.tivo':
-        message = 'TRANSCODE=NO, ends with .tivo.'
-        logger.debug('%s, %s' % (message, inFile))
-        return True, message
+    while True:
 
-    if not vInfo['vCodec'] == 'mpeg2video':
-        #print 'Not Tivo Codec'
-        message = 'TRANSCODE=YES, vCodec %s not compatible.' % vInfo['vCodec']
-        logger.debug('%s, %s' % (message, inFile))
-        return False, message
+        if (inFile[-5:]).lower() == '.tivo':
+            message = True, 'TRANSCODE=NO, ends with .tivo.'
+            break
 
-    if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp'):
-        message = 'TRANSCODE=YES, ext %s not compatible.' % os.path.splitext(inFile)[-1]
-        logger.debug('%s, %s' % (message, inFile))
-        return False, message
+        if not vInfo['vCodec'] == 'mpeg2video':
+            #print 'Not Tivo Codec'
+            message = False, 'TRANSCODE=YES, vCodec %s not compatible.' % vInfo['vCodec']
+            break
 
-    if vInfo['aCodec'] == 'dca':
-        message = 'TRANSCODE=YES, aCodec %s not compatible.' % vInfo['aCodec']
-        logger.debug('%s, %s' % (message, inFile))
-        return False, message
+        if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp'):
+            message = False, 'TRANSCODE=YES, ext %s not compatible.' % os.path.splitext(inFile)[-1]
+            break
 
-    if vInfo['aCodec'] != None:
-        if not vInfo['aKbps'] or int(vInfo['aKbps']) > config.getMaxAudioBR(tsn):
-            message = 'TRANSCODE=YES, %s kbps exceeds max audio bitrate.' % vInfo['aKbps']
-            logger.debug('%s, %s' % (message, inFile))
-            return False, message
+        if vInfo['aCodec'] == 'dca':
+            message = False, 'TRANSCODE=YES, aCodec %s not compatible.' % vInfo['aCodec']
+            break
 
-    if vInfo['kbps'] != None:
-        abit = max('0', vInfo['aKbps'])
-        if int(vInfo['kbps'])-int(abit) > config.strtod(config.getMaxVideoBR())/1000:
-            message = 'TRANSCODE=YES, %s kbps exceeds max video bitrate.' % vInfo['kbps']
-            logger.debug('%s, %s' % (message, inFile))
-            return False, message
-    else:
-        message = 'TRANSCODE=YES, %s kbps not supported.' % vInfo['kbps']
-        logger.debug('%s, %s' % (message, inFile))
-        return False, message
+        if vInfo['aCodec'] != None:
+            if not vInfo['aKbps'] or int(vInfo['aKbps']) > config.getMaxAudioBR(tsn):
+                message = False, 'TRANSCODE=YES, %s kbps exceeds max audio bitrate.' % vInfo['aKbps']
+                break
 
-    if config.isHDtivo(tsn):
-        if vInfo['par2'] != 1.0:
-            if config.getPixelAR(0):
-                if vInfo['par2'] != None or config.getPixelAR(1) != 1.0:
-                    message = 'TRANSCODE=YES, %s not correct PAR.' % vInfo['par2']
-                    logger.debug('%s, %s' % (message, inFile))
-                    return False, message
-        message = 'TRANSCODE=NO, HD Tivo detected, skipping remaining tests.'
-        logger.debug('%s, %s' % (message, inFile))
-        return True, message
+        if vInfo['kbps'] != None:
+            abit = max('0', vInfo['aKbps'])
+            if int(vInfo['kbps'])-int(abit) > config.strtod(config.getMaxVideoBR())/1000:
+                message = False, 'TRANSCODE=YES, %s kbps exceeds max video bitrate.' % vInfo['kbps']
+                break
+        else:
+            message = False, 'TRANSCODE=YES, %s kbps not supported.' % vInfo['kbps']
+            break
+        
+        if config.isHDtivo(tsn):
+            if vInfo['par2'] != 1.0:
+                if config.getPixelAR(0):
+                    if vInfo['par2'] != None or config.getPixelAR(1) != 1.0:
+                        message = False, 'TRANSCODE=YES, %s not correct PAR.' % vInfo['par2']
+                        break
+            message = True, 'TRANSCODE=NO, HD Tivo detected, skipping remaining tests.'
+            break
+        
+        if not vInfo['vFps'] == '29.97':
+            #print 'Not Tivo fps'
+            message = False, 'TRANSCODE=YES, %s vFps, should be 29.97.' % vInfo['vFps']
+            break
+        
+        if (config.get169Blacklist(tsn) and not config.get169Setting(tsn))\
+            or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
+            if vInfo['dar1'] == None or not vInfo['dar1'] in ('4:3', '8:9'):
+                message = False, 'TRANSCODE=YES, DAR %s not supported by BLACKLIST_169 tivos.' % vInfo['dar1']
+                break
 
-    if not vInfo['vFps'] == '29.97':
-        #print 'Not Tivo fps'
-        message = 'TRANSCODE=YES, %s vFps, should be 29.97.' % vInfo['vFps']
-        logger.debug('%s, %s' % (message, inFile))
-        return False, message
+        for mode in supportedModes:
+            if (mode[0], mode[1]) == (vInfo['vWidth'], vInfo['vHeight']):
+                message = True, 'TRANSCODE=NO, %s x %s is valid.' % (vInfo['vWidth'], vInfo['vHeight'])
+                break
+            #print 'Not Tivo dimensions'
+            message = False, 'TRANSCODE=YES, %s x %s not in supported modes.' % (vInfo['vWidth'], vInfo['vHeight'])
+        break
 
-    if (config.get169Blacklist(tsn) and not config.get169Setting(tsn))\
-        or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
-        if vInfo['dar1'] == None or not vInfo['dar1'] in ('4:3', '8:9'):
-            message = 'TRANSCODE=YES, DAR %s not supported by BLACKLIST_169 tivos.' % vInfo['dar1']
-            logger.debug('%s, %s' % (message, inFile))
-            return False, message
-
-    for mode in supportedModes:
-        if (mode[0], mode[1]) == (vInfo['vWidth'], vInfo['vHeight']):
-            message = 'TRANSCODE=NO, %s x %s is valid.' % (vInfo['vWidth'], vInfo['vHeight'])
-            logger.debug('%s, %s' % (message, inFile))
-            return True, message
-    #print 'Not Tivo dimensions'
-    message = 'TRANSCODE=YES, %s x %s not in supported modes.' % (vInfo['vWidth'], vInfo['vHeight'])
     logger.debug('%s, %s' % (message, inFile))
-    return False, message
+    return message
+
 
 def video_info(inFile):
     vInfo = dict()
