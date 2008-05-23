@@ -323,7 +323,10 @@ class Video(Plugin):
                             ['SOURCE INFO: ']+["%s=%s" % (k, v) for k, v in sorted(transcode.video_info(full_path).items(), reverse=True)]+\
                             ['TRANSCODE OPTIONS: ']+["%s" % (v) for k, v in transcode_options.items()]+\
                             ['SOURCE FILE: ']+[str(os.path.split(full_path)[1])]
-
+        if not (full_path[-5:]).lower() == '.tivo' and \
+           (int(vInfo['vHeight']) >= 720 and config.getTivoHeight >= 720) or \
+           (int(vInfo['vWidth']) >= 1280 and config.getTivoWidth >= 1280):
+            metadata['showingBits'] = '4096'
 
         metadata.update(self.metadata_basic(full_path))
 
