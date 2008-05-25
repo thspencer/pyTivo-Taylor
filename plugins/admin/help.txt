@@ -258,7 +258,7 @@ pyTivo Defaults To: blank
 Valid Entries: any language tag or audio stream number reported by ffmpeg
 Required: No
 Skill: Basic
-Description: Sets the preferred language track used by pyTivo.  ffmpeg/pytivo defaults to the first audio stream.  Specifying this parameter, tells pyTivo to use the first audio stream that matches this entry if more than one audio stream exists.  If your video source does not have language tags, you may specify the audio stream number reported by ffmpeg (ie. 0.1, 0.2 ect.). Stream references like 0x80, 0x81, etc. may also be specified.<br><br>+\
+Description: Sets the preferred language track used by pyTivo.  ffmpeg/pytivo defaults to the first audio stream.  Specifying this parameter, tells pyTivo to use the first audio stream that matches this entry if more than one audio stream exists.  If your video source does not have language tags, you may specify the audio stream number reported by ffmpeg (ie. 0.1, 0.2 ect.). Stream references like 0x80, 0x81, etc. may also be specified.  pyTivo will transcode the file if necessary to obtain the preferred language track.<br><br>+\
 Example Settings: eng, ger, spa, en, ge, 0.0, 0.1, 0.2, 0x80, 0x81 etc...
 Available In: Server, Tivos
 
