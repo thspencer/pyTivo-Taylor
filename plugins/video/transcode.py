@@ -50,6 +50,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     settings['audio_fr'] = select_audiofr(inFile, tsn)
     settings['audio_ch'] = select_audioch(tsn)
     settings['audio_codec'] = select_audiocodec(isQuery, inFile, tsn)
+    settings['audio_lang'] = select_audiolang(inFile, tsn)
     settings['ffmpeg_pram'] = select_ffmpegprams(tsn)
     settings['format'] = select_format(tsn)
 
@@ -77,7 +78,8 @@ def select_audiocodec(isQuery, inFile, tsn = ''):
         if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
             if vInfo['aKbps'] == None:
                 if not isQuery:
-                    cmd_string = '-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy -t 00:00:01 -f vob -'
+                    cmd_string = '-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy '+\
+                                 select_audiolang(inFile, tsn)+' -t 00:00:01 -f vob -'
                     if video_check(inFile, cmd_string):
                         vInfo =  video_info(videotest)
                 else:
@@ -106,6 +108,18 @@ def select_audiofr(inFile, tsn):
 def select_audioch(tsn):
     if config.getAudioCH(tsn) != None:
         return '-ac '+config.getAudioCH(tsn)
+    return ''
+
+def select_audiolang(inFile, tsn):
+    vInfo =  video_info(inFile)
+    if config.getAudioLang(tsn) != None and vInfo['mapVid'] != None:
+        stream, l = vInfo['mapAud'][0]
+        for s, l in vInfo['mapAud']:
+            if config.getAudioLang(tsn) in s+l:
+                stream = s
+                break
+        if not stream == '':        
+            return '-map '+vInfo['mapVid']+' -map '+stream
     return ''
 
 def select_videofps(inFile, tsn):
@@ -370,7 +384,12 @@ def tivo_compatable(inFile, tsn = ''):
         else:
             message = False, 'TRANSCODE=YES, %s kbps not supported.' % vInfo['kbps']
             break
-        
+
+        stream, l = vInfo['mapAud'][0]
+        if stream != select_audiolang(inFile, tsn)[-3:]:
+            message = False, 'TRANSCODE=YES, %s preferred audio track exists.' % config.getAudioLang(tsn)
+            break
+
         if config.isHDtivo(tsn):
             if vInfo['par2'] != 1.0:
                 if config.getPixelAR(0):
@@ -544,6 +563,29 @@ def video_info(inFile):
     else:
         vInfo['dar1'], vInfo['dar2'] = None, None
 
+    #get Video Stream mapping.
+    rezre = re.compile(r'([0-9]+\.[0-9]+).*: Video:.*')
+    x = rezre.search(output)
+    if x:
+        vInfo['mapVid'] = x.group(1)
+    else:
+        vInfo['mapVid'] = None
+        logger.debug('failed at mapVid')
+
+
+    #get Audio Stream mapping.
+    rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:.*')
+    x = rezre.search(output)
+    amap = []
+    if x:
+        for x in rezre.finditer(output):
+            amap.append(x.groups())
+    else:
+        amap.append(('', ''))
+        logger.debug('failed at mapAud')
+    vInfo['mapAud'] = amap
+
+
     videoPlugin = GetPlugin('video')
     metadata = videoPlugin.getMetadataFromTxt(inFile)
 
@@ -551,7 +593,7 @@ def video_info(inFile):
         if key.startswith('Override_'):
             vInfo['Supported'] = True
             vInfo[key.replace('Override_','')] = metadata[key]
-            
+
     info_cache[inFile] = (mtime, vInfo)
     logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
     return vInfo

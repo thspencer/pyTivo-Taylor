@@ -169,7 +169,8 @@ def getFFmpegTemplate(tsn):
     except NoOptionError: #default
         return '%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s \
                 %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s \
-                %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s'
+                %(audio_fr)s %(audio_ch)s %(audio_codec)s %(audio_lang)s \
+                %(ffmpeg_pram)s %(format)s'
 
 def getFFmpegPrams(tsn):
     if tsn and config.has_section('_tivo_' + tsn):
@@ -329,6 +330,17 @@ def getAudioFR(tsn = None):
             pass
     try:
         return config.get('Server', 'audio_fr')
+    except NoOptionError:
+        return None
+
+def getAudioLang(tsn = None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        try:
+            return config.get('_tivo_' + tsn, 'audio_lang')
+        except NoOptionError:
+            pass
+    try:
+        return config.get('Server', 'audio_lang')
     except NoOptionError:
         return None
 
