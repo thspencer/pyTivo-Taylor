@@ -593,6 +593,8 @@ def video_info(inFile):
         if key.startswith('Override_'):
             vInfo['Supported'] = True
             vInfo[key.replace('Override_','')] = metadata[key]
+            if type(vInfo['mapAud']) != list:
+                vInfo[key.replace('Override_','')] = [config.str2tuple(metadata[key])]
 
     info_cache[inFile] = (mtime, vInfo)
     logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
