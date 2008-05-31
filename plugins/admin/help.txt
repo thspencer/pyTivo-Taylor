@@ -260,6 +260,9 @@ Valid Entries: any language tag or audio stream number reported by ffmpeg
 Required: No
 Skill: Basic
 Description: Sets the preferred language track used by pyTivo.  ffmpeg/pytivo defaults to the first audio stream.  Specifying this parameter, tells pyTivo to use the first audio stream that matches this entry if more than one audio stream exists.  If your video source does not have language tags, you may specify the audio stream number reported by ffmpeg (ie. 0.1, 0.2 ect.). Stream references like 0x80, 0x81, etc. may also be specified.  pyTivo will transcode the file if necessary to obtain the preferred language track.<br><br>+\
+You can also assign new language tags to your files by adding Override lines to your metadata txt files.  This will enable pytivo to detect your audio language setting in files that do not contain language tags.  The syntax is<br>+\
+Override_mapAudio 0.1 colon eng (replace the word colon with a colon)<br>+\
+Where 0.1 is the audio stream number reported by ffmpeg and eng is the new audio tag to assign to that stream.  Add a separate Override line for each audio stream that you want to replace with a new tag.<br><br>+\
 Example Settings: eng, ger, spa, en, ge, 0.0, 0.1, 0.2, 0x80, 0x81 etc...
 Available In: Server, Tivos
 
