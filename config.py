@@ -259,11 +259,11 @@ def getAudioBR(tsn = None):
 def getVideoBR(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
-            return config.get('_tivo_' + tsn, 'video_br')
+            return str(int(strtod(config.get('_tivo_' + tsn, 'video_br'))/1000)) + 'k'
         except NoOptionError:
             pass
     try:
-        return config.get('Server', 'video_br')
+        return str(int(strtod(config.get('Server', 'video_br'))/1000)) + 'k'
     except NoOptionError: #defaults for S3/S2 TiVo
         if isHDtivo(tsn):
             return '8192k'
@@ -284,7 +284,7 @@ def getVideoPCT():
 
 def getBuffSize():
     try:
-        return str(int(strtod(config.get('Server', 'bufsize'))))
+        return str(int(strtod(config.get('Server', 'bufsize'))/1000)) + 'k'
     except NoOptionError: #default 1024k
         return '1024k'
 

@@ -244,7 +244,7 @@ class Video(Plugin):
                 audioBPS = config.getMaxAudioBR(tsn)*1000
             else:
                 audioBPS = config.strtod(config.getAudioBR(tsn))
-            videoBPS = config.strtod(transcode.select_videostr(full_path, tsn)) 
+            videoBPS = transcode.select_videostr(full_path, tsn)
             bitrate =  audioBPS + videoBPS
             return int((self.__duration(full_path) / 1000) *
                        (bitrate * 1.02 / 8))

@@ -142,7 +142,7 @@ def select_videocodec(tsn):
     return '-vcodec '+codec
 
 def select_videobr(inFile, tsn):
-    return '-b '+select_videostr(inFile, tsn)
+    return '-b '+str(select_videostr(inFile, tsn)/1000)+'k'
 
 def select_videostr(inFile, tsn):
     video_str = config.strtod(config.getVideoBR(tsn))
@@ -151,7 +151,7 @@ def select_videostr(inFile, tsn):
         if vInfo['kbps'] != None and config.getVideoPCT() > 0:
             video_percent = int(vInfo['kbps'])*10*config.getVideoPCT()
             video_str = max(video_str, video_percent)
-    video_str = str(int(min(config.strtod(config.getMaxVideoBR())*0.95, video_str)))
+    video_str = int(min(config.strtod(config.getMaxVideoBR())*0.95, video_str))
     return video_str
 
 def select_audiobr(tsn):
