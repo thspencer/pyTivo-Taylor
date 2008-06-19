@@ -391,6 +391,8 @@ class Music(Plugin):
             path = unicode(path, 'utf-8')
             try:
                 for f in os.listdir(path):
+                    if f.startswith('.'):
+                        continue
                     f = os.path.join(path, f)
                     isdir = os.path.isdir(f)
                     f = f.encode('utf-8')
