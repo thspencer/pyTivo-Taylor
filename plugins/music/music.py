@@ -121,7 +121,7 @@ class Music(Plugin):
         if needs_transcode:
             if mswindows:
                 fname = fname.encode('iso8859-1')
-            cmd = [ffmpeg_path(), '-i', fname, '-acodec', 'libmp3lame', '-ab', 
+            cmd = [ffmpeg_path(), '-i', fname, '-ab', 
                    '320k', '-ar', '44100', '-f', 'mp3', '-']
             if seek:
                 cmd[-1:] = ['-ss', '%.3f' % (seek / 1000.0), '-']
