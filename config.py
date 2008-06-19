@@ -1,4 +1,4 @@
-import ConfigParser, os
+import ConfigParser, os, sys
 import re
 import random
 import string
@@ -9,17 +9,26 @@ guid = ''.join([random.choice(string.letters) for i in range(10)])
 
 config = ConfigParser.ConfigParser()
 p = os.path.dirname(__file__)
+
 config_files = [
     '/etc/pyTivo.conf',
     os.path.join(p, 'pyTivo.conf'),
 ]
+config_exists = False
+for config_file in config_files:
+    if  os.path.exists(config_file):
+        config_exists = True
+if not config_exists:
+    print 'ERROR:  pyTivo.conf does not exist.\n' + \
+          'You must create this file before running pyTivo.'
+    sys.exit(1)
 config.read(config_files)
 
 def reset():
     global config
     del config
     config = ConfigParser.ConfigParser()
-    config.read(config_file)
+    config.read(config_files)
 
 def getGUID():
     if config.has_option('Server', 'GUID'):
@@ -43,6 +52,12 @@ def getBeaconAddresses():
 def getPort():
     return config.get('Server', 'Port')
 
+def get169Blacklist(tsn):  # tivo does not pad 16:9 video
+    return tsn != '' and tsn[:3] in ('540')
+
+def get169Letterbox(tsn):  # tivo pads 16:9 video for 4:3 display
+    return tsn != '' and tsn[:3] in ('649')
+
 def get169Setting(tsn):
     if not tsn:
         return True
@@ -54,7 +69,7 @@ def get169Setting(tsn):
             except ValueError:
                 pass
 
-    if tsn[:3] in BLACKLIST_169:
+    if get169Blacklist(tsn) or get169Letterbox(tsn):
         return False
 
     return True
@@ -90,7 +105,7 @@ def getShares(tsn=''):
         try:
             for item in os.listdir(base_path):
                 item_path = os.path.join(base_path, item)
-                if not os.path.isdir(item_path):
+                if not os.path.isdir(item_path) or item.startswith('.'):
                     continue
 
                 new_name = name + '/' + item
@@ -154,7 +169,8 @@ def getFFmpegTemplate(tsn):
     except NoOptionError: #default
         return '%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s \
                 %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s \
-                %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s'
+                %(audio_fr)s %(audio_ch)s %(audio_codec)s %(audio_lang)s \
+                %(ffmpeg_pram)s %(format)s'
 
 def getFFmpegPrams(tsn):
     if tsn and config.has_section('_tivo_' + tsn):
@@ -243,11 +259,11 @@ def getAudioBR(tsn = None):
 def getVideoBR(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
-            return config.get('_tivo_' + tsn, 'video_br')
+            return str(int(strtod(config.get('_tivo_' + tsn, 'video_br'))/1000)) + 'k'
         except NoOptionError:
             pass
     try:
-        return config.get('Server', 'video_br')
+        return str(int(strtod(config.get('Server', 'video_br'))/1000)) + 'k'
     except NoOptionError: #defaults for S3/S2 TiVo
         if isHDtivo(tsn):
             return '8192k'
@@ -257,12 +273,18 @@ def getVideoBR(tsn = None):
 def getMaxVideoBR():
     try:
         return str(int(strtod(config.get('Server', 'max_video_br'))/1000)) + 'k'
-    except NoOptionError: #default to 17Mi
-        return '17408k'
+    except NoOptionError: #default to 30000k
+        return '30000k'
+
+def getVideoPCT():
+    try:
+        return config.getfloat('Server', 'video_pct')
+    except NoOptionError:
+        return 70
 
 def getBuffSize():
     try:
-        return str(int(strtod(config.get('Server', 'bufsize'))))
+        return str(int(strtod(config.get('Server', 'bufsize'))/1000)) + 'k'
     except NoOptionError: #default 1024k
         return '1024k'
 
@@ -310,6 +332,31 @@ def getAudioFR(tsn = None):
         return config.get('Server', 'audio_fr')
     except NoOptionError:
         return None
+
+def getAudioLang(tsn = None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        try:
+            return config.get('_tivo_' + tsn, 'audio_lang')
+        except NoOptionError:
+            pass
+    try:
+        return config.get('Server', 'audio_lang')
+    except NoOptionError:
+        return None
+
+def getCopyTS(tsn = None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        if config.has_option('_tivo_' + tsn, 'copy_ts'):
+            try:
+                return config.get('_tivo_' + tsn, 'copy_ts')
+            except NoOptionError, ValueError:
+                pass
+    if config.has_option('Server', 'copy_ts'):
+        try:
+            return config.get('Server', 'copy_ts')
+        except NoOptionError, ValueError:
+            pass
+    return 'none'
 
 def getVideoFPS(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):

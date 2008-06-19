@@ -175,6 +175,12 @@ class Video(Plugin):
                               'ItemCount': query['ItemCount'],
                               'Filter': query['Filter'],
                               'Container': ['/'.join(path)]}
+            files, total, start = self.get_files(handler, state['query'],
+                                                 self.video_file_filter)
+            if files:
+                state['page'] = files[0]
+            else:
+                state['page'] = ''
             return None, path
 
         # just in case we missed something.
@@ -205,7 +211,7 @@ class Video(Plugin):
         return os.path.isdir(full_path)
 
     def __duration(self, full_path):
-        return transcode.video_info(full_path)[4]
+        return transcode.video_info(full_path)['millisecs']
 
     def __total_items(self, full_path):
         count = 0
@@ -229,7 +235,7 @@ class Video(Plugin):
     def __est_size(self, full_path, tsn = ''):
         # Size is estimated by taking audio and video bit rate adding 2%
 
-        if transcode.tivo_compatable(full_path, tsn):
+        if transcode.tivo_compatable(full_path, tsn)[0]:
             # Is TiVo-compatible mpeg2
             return int(os.stat(full_path).st_size)
         else:
@@ -238,12 +244,12 @@ class Video(Plugin):
                 audioBPS = config.getMaxAudioBR(tsn)*1000
             else:
                 audioBPS = config.strtod(config.getAudioBR(tsn))
-            videoBPS = config.strtod(config.getVideoBR(tsn))
+            videoBPS = transcode.select_videostr(full_path, tsn)
             bitrate =  audioBPS + videoBPS
             return int((self.__duration(full_path) / 1000) *
                        (bitrate * 1.02 / 8))
 
-    def __getMetadataFromTxt(self, full_path):
+    def getMetadataFromTxt(self, full_path):
         metadata = {}
 
         default_meta = os.path.join(os.path.split(full_path)[0], 'default.txt')
@@ -284,19 +290,20 @@ class Video(Plugin):
         metadata = {}
 
         base_path, title = os.path.split(full_path)
-        originalAirDate = datetime.fromtimestamp(os.stat(full_path).st_ctime)
+        ctime = os.stat(full_path).st_ctime
+        if (ctime < 0): ctime = 0
+        originalAirDate = datetime.fromtimestamp(ctime)
 
         metadata['title'] = '.'.join(title.split('.')[:-1])
         metadata['seriesTitle'] = metadata['title'] # default to the filename
         metadata['originalAirDate'] = originalAirDate.isoformat()
 
-        metadata.update(self.__getMetadataFromTxt(full_path))
+        metadata.update(self.getMetadataFromTxt(full_path))
 
         return metadata
 
     def metadata_full(self, full_path, tsn=''):
         metadata = {}
-        metadata.update(self.metadata_basic(full_path))
 
         now = datetime.utcnow()
 
@@ -308,6 +315,20 @@ class Video(Plugin):
         metadata['stopTime'] = (now + duration_delta).isoformat()
         metadata['size'] = self.__est_size(full_path, tsn)
         metadata['duration'] = duration
+        vInfo = transcode.video_info(full_path)
+        transcode_options = {}
+        if not transcode.tivo_compatable(full_path, tsn)[0]:
+            transcode_options = transcode.transcode(True, full_path, '', tsn)
+        metadata['vHost'] = [str(transcode.tivo_compatable(full_path, tsn)[1])]+\
+                            ['SOURCE INFO: ']+["%s=%s" % (k, v) for k, v in sorted(transcode.video_info(full_path).items(), reverse=True)]+\
+                            ['TRANSCODE OPTIONS: ']+["%s" % (v) for k, v in transcode_options.items()]+\
+                            ['SOURCE FILE: ']+[str(os.path.split(full_path)[1])]
+        if not (full_path[-5:]).lower() == '.tivo':
+            if (int(vInfo['vHeight']) >= 720 and config.getTivoHeight >= 720) or \
+               (int(vInfo['vWidth']) >= 1280 and config.getTivoWidth >= 1280):
+                metadata['showingBits'] = '4096'
+
+        metadata.update(self.metadata_basic(full_path))
 
         min = duration_delta.seconds / 60
         sec = duration_delta.seconds % 60
@@ -338,7 +359,7 @@ class Video(Plugin):
                 handler.send_header('Location ', 'http://' +
                                     handler.headers.getheader('host') +
                                     '/TiVoConnect?Command=QueryContainer&' +
-                                    'AnchorItem=Hack8.3&Container=' + hackPath)
+                                    'AnchorItem=Hack8.3&Container=' + quote(hackPath))
                 handler.end_headers()
                 return
 
@@ -361,12 +382,16 @@ class Video(Plugin):
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
         for file in files:
-            mtime = datetime.fromtimestamp(os.stat(file).st_mtime)
+            mtime = os.stat(file).st_mtime
+            if (mtime < 0): mtime = 0
+            mtime = datetime.fromtimestamp(mtime)
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
             video['name'] = os.path.split(file)[1]
             video['path'] = file
             video['part_path'] = file.replace(local_base_path, '', 1)
+            if not video['part_path'].startswith(os.path.sep):
+                video['part_path'] = os.path.sep + video['part_path']
             video['title'] = os.path.split(file)[1]
             video['is_dir'] = self.__isdir(file)
             if video['is_dir']:

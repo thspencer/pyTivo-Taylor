@@ -42,10 +42,10 @@ class Admin(Plugin):
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
         t.container = cname
         t.time = '3'
-        t.url = '/TiVoConnect?Command='+ last_page +'&Container=' + cname
+        t.url = '/TiVoConnect?Command='+ last_page +'&Container=' + quote(cname)
         t.text = '<h3>The pyTivo Server has been soft reset.</h3>  <br>pyTivo has reloaded the pyTivo.conf'+\
                  'file and all changed should now be in effect. <br> The'+ \
-                 '<a href="/TiVoConnect?Command='+ last_page +'&Container='+ cname +'"> previous</a> page will reload in 3 seconds.'
+                 '<a href="/TiVoConnect?Command='+ quote(last_page) +'&Container='+ quote(cname) +'"> previous</a> page will reload in 3 seconds.'
         handler.wfile.write(t)
         logging.getLogger('pyTivo.admin').info('The pyTivo Server has been soft reset.')
 
@@ -68,6 +68,7 @@ class Admin(Plugin):
         handler.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'settings.tmpl'))
         t.container = cname
+        t.quote = quote
         t.server_data = dict(config.items('Server', raw=True))
         t.server_known = buildhelp.getknown('server')
         t.shares_data = shares_data
@@ -135,10 +136,10 @@ class Admin(Plugin):
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
         t.container = cname
         t.time = '10'
-        t.url = '/TiVoConnect?Command=Admin&Container=' + cname
+        t.url = '/TiVoConnect?Command=Admin&Container=' + quote(cname)
         t.text = '<h3>Your Settings have been saved.</h3>  <br>You settings have been saved to the pyTivo.conf file.'+\
                  'However you will need to do a <b>Soft Reset</b> before these changes will take effect.'+\
-                 '<br> The <a href="/TiVoConnect?Command=Admin&Container='+ cname +'"> Admin</a> page will reload in 10 seconds.'
+                 '<br> The <a href="/TiVoConnect?Command=Admin&Container='+ quote(cname) +'"> Admin</a> page will reload in 10 seconds.'
         handler.wfile.write(t)
 
     def NPL(self, handler, query):
@@ -190,10 +191,10 @@ class Admin(Plugin):
                         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
                         t.container = cname
                         t.time = '20'
-                        t.url = '/TiVoConnect?Command=NPL&Container=' + cname
+                        t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
                         t.text = '<h3>Unable to Connect to TiVo.</h3>  <br>pyTivo was unable to connect to the TiVo at ' + tivoIP +\
                                  '<br>This most likely caused by an incorrect Media Access Key.  Please return to the ToGo page and double check your Media Access Key.' +\
-                                 '<br> The <a href="/TiVoConnect?Command=NPL&Container='+ cname + '"> ToGo</a> page will reload in 20 seconds.'
+                                 '<br> The <a href="/TiVoConnect?Command=NPL&Container='+ quote(cname) + '"> ToGo</a> page will reload in 20 seconds.'
                         handler.wfile.write(t)
                         return
                     tivo_cache[theurl]['thepage'] = handle.read()
@@ -207,10 +208,10 @@ class Admin(Plugin):
                     t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
                     t.container = cname
                     t.time = '20'
-                    t.url = '/TiVoConnect?Command=NPL&Container=' + cname
+                    t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
                     t.text = '<h3>Unable to Connect to TiVo.</h3>  <br>pyTivo was unable to connect to the TiVo at ' + tivoIP +\
                              '<br>This most likely caused by an incorrect Media Access Key.  Please return to the ToGo page and double check your Media Access Key.' +\
-                             '<br> The <a href="/TiVoConnect?Command=NPL&Container='+ cname + '"> ToGo</a> page will reload in 20 seconds.'
+                             '<br> The <a href="/TiVoConnect?Command=NPL&Container='+ quote(cname) + '"> ToGo</a> page will reload in 20 seconds.'
                     handler.wfile.write(t)
                     return
                 tivo_cache[theurl] = {}
@@ -229,6 +230,8 @@ class Admin(Plugin):
                 entry = {}
                 entry['Title'] = item.getElementsByTagName("Title")[0].firstChild.data
                 entry['ContentType'] = item.getElementsByTagName("ContentType")[0].firstChild.data
+                if (len(item.getElementsByTagName("CopyProtected")) >= 1):
+                    entry['CopyProtected'] = item.getElementsByTagName("CopyProtected")[0].firstChild.data
                 if (len(item.getElementsByTagName("UniqueId")) >= 1):
                     entry['UniqueId'] = item.getElementsByTagName("UniqueId")[0].firstChild.data
                 if entry['ContentType'] == 'x-tivo-container/folder':
@@ -270,6 +273,7 @@ class Admin(Plugin):
         handler.send_header('Content-Type', 'text/html; charset=UTF-8')
         handler.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'npl.tmpl'))
+        t.quote = quote
         t.folder = folder
         t.status = status
         t.tivo_mak = tivo_mak
@@ -285,7 +289,6 @@ class Admin(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
-        t.redirect = quote(unquote_plus(handler.path).split('/')[1])
         handler.wfile.write(unicode(t).encode('utf-8'))
 
     def get_tivo_file(self, url, mak, tivoIP, outfile):
@@ -335,6 +338,7 @@ class Admin(Plugin):
     def ToGo(self, handler, query):
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
+        tivoIP = query['TiVo'][0]
         for name, data in config.getShares():
             if cname == name:
                 if 'tivo_mak' in data:
@@ -349,7 +353,6 @@ class Admin(Plugin):
             parse_url = urlparse(str(query['Url'][0]))
             theurl = 'http://' + parse_url[1].split(':')[0] + parse_url[2] + "?" + parse_url[4]
             password = tivo_mak #TiVo MAK
-            tivoIP = query['TiVo'][0]
             name = unquote(parse_url[2])[10:300].split('.')
             name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
             outfile = os.path.join(togo_path, "".join(name))
@@ -361,21 +364,21 @@ class Admin(Plugin):
             handler.send_response(200)
             handler.end_headers()
             t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
-            t.container = cname
+            command = query['Redirect'][0]
             t.time = '3'
-            t.url = '/'+ query['Redirect'][0]
+            t.url = '/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP
             t.text = '<h3>Transfer Initiated.</h3>  <br>You selected transfer has been initiated.'+\
-                     '<br> The <a href="/'+ query['Redirect'][0] +'"> ToGo</a> page will reload in 3 seconds.'
+                     '<br> The <a href="/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP +'"> ToGo</a> page will reload in 3 seconds.'
             handler.wfile.write(t)
         else:
             handler.send_response(200)
             handler.end_headers()
             t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
-            t.container = cname
+            command = query['Redirect'][0]
             t.time = '10'
-            t.url = '/'+ query['Redirect'][0]
+            t.url = '/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP
             t.text = '<h3>Missing Data.</h3>  <br>You must set both "tivo_mak" and "togo_path" before using this function.'+\
-                     '<br> The <a href="/'+ query['Redirect'][0] +'"> ToGo</a> page will reload in 10 seconds.'
+                     '<br> The <a href="/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP +'"> ToGo</a> page will reload in 10 seconds.'
             handler.wfile.write(t)
 
     def ToGoStop(self, handler, query):
@@ -386,14 +389,15 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
+        tivoIP = query['TiVo'][0]
+        command = query['Redirect'][0]
         handler.send_response(200)
         handler.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
-        t.container = cname
         t.time = '3'
-        t.url = '/'+ query['Redirect'][0]
+        t.url = '/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP
         t.text = '<h3>Transfer Stopped.</h3>  <br>Your transfer has been stopped.'+\
-                 '<br> The <a href="/'+ query['Redirect'][0] +'"> ToGo</a> page will reload in 3 seconds.'
+                 '<br> The <a href="/TiVoConnect?Command='+ command +'&Container='+ quote(cname) +'&TiVo=' + tivoIP +'"> ToGo</a> page will reload in 3 seconds.'
         handler.wfile.write(t)
 
 
@@ -415,8 +419,8 @@ class Admin(Plugin):
         t = Template(file=os.path.join(SCRIPTDIR,'templates', 'redirect.tmpl'))
         t.container = cname
         t.time = '2'
-        t.url = '/TiVoConnect?last_page=NPL&Command=Reset&Container=' + cname
+        t.url = '/TiVoConnect?last_page=NPL&Command=Reset&Container=' + quote(cname)
         t.text = '<h3>Your Settings have been saved.</h3>  <br>You settings have been saved to the pyTivo.conf file.'+\
                  'pyTivo will now do a <b>Soft Reset</b> to allow these changes to take effect.'+\
-                 '<br> The <a href="/TiVoConnect?last_page=NPL&Command=Reset&Container='+ cname +'"> Reset</a> will occur in 2 seconds.'
+                 '<br> The <a href="/TiVoConnect?last_page=NPL&Command=Reset&Container='+ quote(cname) +'"> Reset</a> will occur in 2 seconds.'
         handler.wfile.write(t)

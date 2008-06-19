@@ -110,7 +110,8 @@ Available In: Server, Tivos
 
 par
 
-Default Setting: blank
+Recommended Setting: 1.0
+pyTivo Defaults To: blank
 Valid Entries: any valid par
 Required: No
 Skill: Very Advanced
@@ -122,7 +123,8 @@ Available In: Server
 
 video_fps
 
-Default Setting: 29.97 for S2 Tivo, blank for S3/HD TiVo
+Recommended Setting: blank
+pyTivo Defaults To: 29.97 for S2 Tivo, same as source for S3/HD TiVo
 Valid Entries: 29.97, 23.98, 25, 59.94
 Required: No
 Skill: Advanced
@@ -136,33 +138,46 @@ Default Setting: 4096K for SD TiVo's, 8192K for HD TiVo's
 Valid Entries: Any valid Bit rate. 1024K = 1Mi
 Required: No
 Skill: Advanced
-Description: This allows you to choose the default server video bit rate used in transcoding. FFmpeg does not strictly follow this bit rate, there is a certain level of tolerance that is allowed. Also a low quality file will always have a low bit rate. The default is likely fine for most users. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.
-Example Settings: 4096K, 8Mi, 12Mi
+Description: This allows you to choose the default server video bit rate used in transcoding. FFmpeg does not strictly follow this bit rate, there is a certain level of tolerance that is allowed. Also a low quality file will always have a low bit rate. The default is likely fine for most users. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.  See the bufsize setting if you increase this setting to 12Mi or above for transcoding to 1080 resolutions.
+Example Settings: 4096K, 8Mi, 12Mi, 16Mi
 Available In: Server, Tivos
+
+video_pct
+
+Recommended Setting: blank
+pyTivo Defaults to: 70 (percent of source bitrate)
+Valid Entries: Any number (set this to 0 to disable this option)
+Required: No
+Skill: Advanced
+Description: This sets video_br to a percent of the source video bitrate.  pyTivo will multiply the source video bitrate by this percentage setting, compare it to the video_br setting and use whichever is greater as the video_br.  This allows for setting higher bitrates automatically when transcoding High Definition sources.  For example, if your source file has a bitrate of 22000k and video_pct is set to 70, pyTivo will use 15400k for video_br instead of the default 8192k setting.  With this setting enabled, the video_br setting essentially becomes the minimum video bitrate.  This setting only applies to S3 tivos.
+Example Settings: 60, 70, 85, 100
+Available In: Server
 
 max_video_br
 
-Default Setting: 17408k
+Recommended Setting: blank
+pyTivo Defaults to: 30000k
 Valid Entries: Any valid Bit rate. 1024K = 1Mi
 Required: No
 Skill: Advanced
-Description: This allows you to choose the maximum bit rate and is more strict than the video_br setting above. However setting this can cause buffer overflows and can cause issues with ffmpeg. In addition to setting the ffmpeg maxrate option, this setting is used to determine if the video bitrate of the source video file is too high for the TiVo. Otherwise compatible mpeg's with a video bitrate above this setting will be transcoded rather than sent to the TiVo untouched. Raising this setting much higher than the default will likly result in pixelation during playback. Recommended only for skilled users. Note: there is a report that ffmpeg throws an error with 17Mi but accepts 17408K just fine.
-Example Settings: 17408k
+Description: This allows you to choose the maximum bit rate and is more strict than the video_br setting above. However setting this can cause buffer overflows and can cause issues with ffmpeg. In addition to setting the ffmpeg maxrate option, this setting is used to determine if the video bitrate of the source video file is too high for the TiVo. mpeg's with a video bitrate above this setting will be transcoded rather than sent to the TiVo untouched.  Lower this setting below the bitrate of your source file if you wish to force high bitrate sources to be transcoded.  Recommended only for skilled users. Note: there is a report that ffmpeg throws an error with 17Mi but accepts 17408K just fine.
+Example Settings: 17408k, 30000k
 Available In: Server
 
 bufsize
 
-Default Setting: 1024k
+Recommended Setting: 4096k
+pyTivo Defaults To: 1024k
 Valid Entries: Any valid byte size
 Required: No
 Skill: Very Advanced
-Description: Allows you to set the buffer size used by ffmpeg. I don't know much about this setting, but from what I can tell it is rather touchy and should only be edited by advanced users.
-Example Settings: 1024k
+Description: Allows you to set the buffer size used by ffmpeg. Increasing this setting will allow higher bitrates during transcoding (see video_br setting), especially when transcoding to HD resolutions.  But it may result in pixelation or audio sync issues with some sources.  1024k is fine for the resolutions used by S2 tivos.  But you will probably want to increase this setting to 2048k or 4096k if you have an HD tivo.
+Example Settings: 1024k, 2048k, 4096k
 Available In: Server
 
 width
 
-Default Setting: 544
+Default Setting: 544 for S2, 1280 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to nearest acceptable TiVo dimension
 Required: No
 Skill: Moderate
@@ -172,7 +187,7 @@ Available In: Server, Tivos
 
 height
 
-Default Setting: 480
+Default Setting: 480 for S2, 720 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to nearest acceptable TiVo dimension
 Required: No
 Skill: Moderate
@@ -182,7 +197,8 @@ Available In: Server, Tivos
 
 audio_br
 
-Default Setting: 384K
+Recommended Setting: blank
+pyTivo Defaults To: same bitrate as source or 384k
 Valid Entries: Any valid Bit rate up to 448k.
 Required: No
 Skill: Advanced
@@ -192,7 +208,8 @@ Available In: Server, Tivos
 
 max_audio_br
 
-Default Setting: 448K
+Recommended Setting: blank
+pyTivo Defaults To: 448k
 Valid Entries: Any valid Bit rate.
 Required: No
 Skill: Advanced
@@ -202,7 +219,8 @@ Available In: Server, Tivos
 
 audio_fr
 
-Default Setting: 48000
+Recommended Setting: blank
+pyTivo Defaults To: same frequency as source
 Valid Entries: 44100, 48000
 Required: No
 Skill: Advanced
@@ -212,7 +230,8 @@ Available In: Server, Tivos
 
 audio_ch
 
-Default Setting: blank (same as source)
+Recommended Setting: blank
+pyTivo Defaults To: same channels as source
 Valid Entries: any number compatible with ffmpeg and the audio codec selected
 Required: No
 Skill: Advanced
@@ -222,7 +241,8 @@ Available In: Server, Tivos
 
 audio_codec
 
-Default Setting: ac3
+Recommended Setting: blank
+pyTivo Defaults To: ac3 or copy
 Valid Entries: mp2, ac3
 Required: No
 Skill: Advanced
@@ -230,6 +250,32 @@ Description: Sets the audio codec used by ffmpeg during transcoding. pyTivo defa
 Allowing pyTivo to select '-acodec copy' whenever possible will generally produce the best results. This is meant to eliminate garbled audio during transcoding when the source contains audio glitches that cause ffmpeg to lose synchronization. This will also prevent the center audio channel from being moved to the right front speaker by ffmpeg when transferring mkv's and xvid's with audio bitrate of 448k or less.<br><br>+\
 You may want to change this setting to mp2 if you only have an S2, or have specified a per tivo section for an S2, and do not wish to retain 5.1 audio for possible transfer to an S3 Tivo or back to the PC should the need arise. This will slightly reduce the amount of disk space used and allow for more recordings on an S2 Tivo. In this case, you will want to specify audio_codec=mp2, audio_ch=2, and audio_br=192k. These are the settings normally used by the S2 for recordings.
 Example Settings: mp2, ac3
+Available In: Server, Tivos
+
+audio_lang
+
+Recommended Setting: eng
+pyTivo Defaults To: blank
+Valid Entries: any language tag or audio stream number reported by ffmpeg
+Required: No
+Skill: Basic
+Description: Sets the preferred language track used by pyTivo.  ffmpeg/pytivo defaults to the first audio stream.  Specifying this parameter, tells pyTivo to use the first audio stream that matches this entry if more than one audio stream exists.  If your video source does not have language tags, you may specify the audio stream number reported by ffmpeg (ie. 0.1, 0.2 ect.). Stream references like 0x80, 0x81, etc. may also be specified.  pyTivo will transcode the file if necessary to obtain the preferred language track.<br><br>+\
+You can also assign new language tags to your files by adding Override lines to your metadata txt files.  This will enable pytivo to detect your audio language setting in files that do not contain language tags.  The syntax is<br>+\
+Override_mapAudio 0.1 colon eng (replace the word colon with a colon)<br>+\
+Where 0.1 is the audio stream number reported by ffmpeg and eng is the new audio tag to assign to that stream.  Add a separate Override line for each audio stream that you want to replace with a new tag.<br><br>+\
+Example Settings: eng, ger, spa, en, ge, 0.0, 0.1, 0.2, 0x80, 0x81 etc...
+Available In: Server, Tivos
+
+
+copy_ts
+
+Recommended Setting: blank
+pyTivo Defaults To: True
+Valid Entries: blank, True, False
+Required: No
+Skill: Basic
+Description: Adds the copy timestamps setting (-copyts) to the ffmpeg command.  This setting helps correct audio synchronization problems that commonly occur during transcoding.  You can leave this field blank unless you wish to disable it. pyTivo defaults to True except when pyTivo uses acodec copy, in which case copyts is not needed, and a conflict could also occur if the source file has really corrupt sections.<br><br>+\
+Example Settings: blank, True, False
 Available In: Server, Tivos
 
 ffmpeg_pram
@@ -244,7 +290,8 @@ Available In: Server, Tivos
 
 ffmpeg_tmpl
 
-Default Setting: "%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(fmpeg_pram)s %(format)s
+Recommended Setting: blank
+pyTivo Defaults To: %(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(audio_lang)s %(ffmpeg_pram)s %(format)s
 Valid Entries: A valid ffmpeg command
 Required: No
 Skill: Very Advanced
