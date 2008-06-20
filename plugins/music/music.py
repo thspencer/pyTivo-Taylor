@@ -430,7 +430,7 @@ class Music(Plugin):
 
         filelist = []
         if recurse and path in self.recurse_cache:
-            if self.dir_cache.mtime(path) + 3600 >= time.time():
+            if self.recurse_cache.mtime(path) + 3600 >= time.time():
                 filelist = self.recurse_cache[path]
         elif not recurse and path in self.dir_cache:
             if self.dir_cache.mtime(path) >= os.stat(path)[8]:
