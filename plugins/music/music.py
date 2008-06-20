@@ -426,7 +426,7 @@ class Music(Plugin):
 
         file_type = query.get('Filter', [''])[0]
 
-        recurse = query.get('Recurse',['No'])[0] == 'Yes'
+        recurse = query.get('Recurse', ['No'])[0] == 'Yes'
 
         filelist = []
         if recurse and path in self.recurse_cache:
@@ -499,8 +499,31 @@ class Music(Plugin):
         except:
             list_name = self.get_local_path(handler, query)
 
-        recurse = query.get('Recurse',['No'])[0] == 'Yes'
+        recurse = query.get('Recurse', ['No'])[0] == 'Yes'
         playlist = self.parse_playlist(list_name, recurse)
+
+        # Shuffle?
+        if 'Random' in query.get('SortOrder', ['Normal'])[0]:
+            seed = query.get('RandomSeed', [''])[0]
+            start = query.get('RandomStart', [''])[0]
+
+            self.random_lock.acquire()
+            if seed:
+                random.seed(seed)
+            random.shuffle(playlist)
+            self.random_lock.release()
+            if start:
+                local_base_path = self.get_local_base_path(handler, query)
+                start = unquote(start)
+                start = start.replace(os.path.sep + cname,
+                                      local_base_path, 1)
+                filenames = [x.name for x in playlist]
+                try:
+                    index = filenames.index(start)
+                    i = playlist.pop(index)
+                    playlist.insert(0, i)
+                except ValueError:
+                    print 'Start not found:', start
 
         # Trim the list
         return self.item_count(handler, query, cname, playlist)
