@@ -34,8 +34,12 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         for section, settings in config.getShares():
             self.add_container(section, settings)
 
+    def set_beacon(self, beacon):
+        self.beacon = beacon
+
 class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    tivos ={}
+    tivos = {}
+    tivo_names = {}
 
     def address_string(self):
         host, port = self.client_address[:2]
@@ -45,6 +49,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         tsn = self.headers.getheader('TiVo_TCD_ID', self.headers.getheader('tsn', ''))
         ip = self.address_string()
         self.tivos[tsn] = ip
+
+        if not tsn in self.tivo_names:
+            self.tivo_names[tsn] = self.server.beacon.get_name(ip)
 
         basepath = unquote_plus(self.path).split('/')[1]
 

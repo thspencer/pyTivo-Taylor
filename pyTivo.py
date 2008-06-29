@@ -60,6 +60,7 @@ if 'listen' in config.getBeaconAddresses():
 logging.getLogger('pyTivo').info('pyTivo is ready.')
 
 try:
+    httpd.set_beacon(b)
     httpd.serve_forever()
 except KeyboardInterrupt:
     b.stop()

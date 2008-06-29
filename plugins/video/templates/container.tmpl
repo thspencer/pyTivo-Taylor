@@ -2,9 +2,9 @@
 <?xml-stylesheet type="text/xsl" href="/TiVoConnect?Command=XSL&amp;Container=$quote($name)"?>
 <TiVoContainer>
     <Tivos>
-        #for $tivo in $tivos
+        #for $tivo in $tivo_names
             #if $tivo
-                <Tivo>$tivo</Tivo>
+                <Tivo>$tivo_names[$tivo]</Tivo>
             #end if
         #end for
     </Tivos>

@@ -1,3 +1,5 @@
+import re
+import struct
 from socket import *
 from threading import Timer
 import config
@@ -50,12 +52,10 @@ class Beacon:
         self.timer.cancel()
 
     def listen(self):
-        """For the direct-connect, TCP-style beacon"""
+        """ For the direct-connect, TCP-style beacon """
         import thread
 
         def server():
-            import struct
-
             TCPSock = socket(AF_INET, SOCK_STREAM)
             TCPSock.bind(('', 2190))
             TCPSock.listen(5)
@@ -68,8 +68,6 @@ class Beacon:
                 client_length = struct.unpack('!I', client.recv(4))[0]
                 client_message = client.recv(client_length)
 
-                print client_length
-
                 # Send ours
                 message = self.format_beacon('connected')
                 client.send(struct.pack('!I', len(message)))
@@ -77,6 +75,29 @@ class Beacon:
                 client.close()
 
         thread.start_new_thread(server, ())
+
+    def get_name(self, address):
+        """ Exchange beacons, and extract the machine name. """
+        our_beacon = self.format_beacon('connected')
+        machine_name = re.compile('machine=(.*)\n').search
+
+        try:
+            tsock = socket()
+            tsock.connect((address, 2190))
+
+            tsock.send(struct.pack('!I', len(our_beacon)))
+            tsock.send(our_beacon)
+
+            length = struct.unpack('!I', tsock.recv(4))[0]
+            tivo_beacon = tsock.recv(length)
+
+            tsock.close()
+
+            name = machine_name(tivo_beacon).groups()[0]
+        except:
+            name = address
+
+        return name
 
 if __name__ == '__main__':
     b = Beacon()

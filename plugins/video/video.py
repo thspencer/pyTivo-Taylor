@@ -421,6 +421,7 @@ class Video(Plugin):
         t.crc = zlib.crc32
         t.guid = config.getGUID()
         t.tivos = handler.tivos
+        t.tivo_names = handler.tivo_names
         handler.wfile.write(t)
 
     def TVBusQuery(self, handler, query):
@@ -450,7 +451,13 @@ class Video(Plugin):
 
     def Push(self, handler, query):
         file = unquote(query['File'][0])
+
         tsn = query['tsn'][0]
+        for key in handler.tivo_names:
+            if handler.tivo_names[key] == tsn:
+                tsn = key
+                break
+
         path = self.get_local_path(handler, query)
         file_path = path + file
 
