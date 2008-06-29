@@ -17,7 +17,7 @@ class Beacon:
     def format_services(self):
         return ';'.join(self.services)
 
-    def format_beacon(self, conntype):
+    def format_beacon(self, conntype, services=True):
         beacon = []
 
         guid = config.getGUID()
@@ -29,7 +29,10 @@ class Beacon:
 
         beacon.append('machine=%s' % gethostname())
         beacon.append('platform=pc')
-        beacon.append('services=' + self.format_services())
+        if services:
+            beacon.append('services=' + self.format_services())
+        else:
+            beacon.append('services=TiVoMediaServer:0/http')
 
         return '\n'.join(beacon)
 
@@ -78,7 +81,7 @@ class Beacon:
 
     def get_name(self, address):
         """ Exchange beacons, and extract the machine name. """
-        our_beacon = self.format_beacon('connected')
+        our_beacon = self.format_beacon('connected', False)
         machine_name = re.compile('machine=(.*)\n').search
 
         try:
