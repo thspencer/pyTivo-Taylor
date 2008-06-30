@@ -17,7 +17,7 @@
       <select name="TiVo">
 	  #for $tsn in $tivos
 	  	  #if $tsn != ''
-	         <option value="$tivos[$tsn]">$tsn</option>
+	         <option value="$tivos[$tsn]">$tivo_names[$tsn]</option>
 	      #end if
 	  #end for
       </select>

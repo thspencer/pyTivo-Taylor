@@ -279,6 +279,7 @@ class Admin(Plugin):
         t.tivo_mak = tivo_mak
         t.togo_path = togo_path
         t.tivos = handler.tivos
+        t.tivo_names = handler.tivo_names
         t.tivoIP = tivoIP
         t.container = cname
         t.data = data
