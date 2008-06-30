@@ -13,9 +13,9 @@
                             <xsl:choose>
                                 <xsl:when test="Details/ContentType = 'x-container/folder'">
                                     <tr bgcolor="#bbbbbb">
-                                        <td><xsl:value-of select="Details/Title"/></td>
-                                        <td><a><xsl:attribute name="href"><xsl:value-of select="Links/Content/Url"/></xsl:attribute>Open Folder</a></td>
-                                    </tr>   
+                                        <td><a><xsl:attribute name="href"><xsl:value-of select="Links/Content/Url"/></xsl:attribute><xsl:value-of select="Details/Title"/></a></td>
+                                        <td></td>
+                                    </tr>
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <tr>
