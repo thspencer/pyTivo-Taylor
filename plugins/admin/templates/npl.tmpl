@@ -6,7 +6,17 @@
 </head>
 <body style="background-color: rgb(250, 250, 250);">
 
+#if $tivoIP != ''
+    #set $tname = $tivoIP
+    #for $tsn in $tivos
+        #if $tivoIP == $tivos[$tsn]
+            #set $tname = $tivo_names[$tsn]
+        #end if
+    #end for
+<p align="center"><font size="6">pyTivo - ToGo - $tname</font></p>
+#else
 <p align="center"><font size="6">pyTivo - ToGo</font></p>
+#end if
 <table style="border: 1px solid rgb(220, 220, 220);background-color: rgb(255, 255, 255);text-align: left; margin-left: auto; margin-right: auto;" border="0" cellpadding="0" cellspacing="4">
   <tbody>
     <tr>
