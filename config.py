@@ -298,49 +298,28 @@ def getMaxAudioBR(tsn = None):
     except NoOptionError: 
         return int(448) #default to 448
 
-def getAudioCodec(tsn = None):
+def get_tsn(name, tsn=None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
-            return config.get('_tivo_' + tsn, 'audio_codec')
+            return config.get('_tivo_' + tsn, name)
         except NoOptionError:
             pass
     try:
-        return config.get('Server', 'audio_codec')
+        return config.get('Server', name)
     except NoOptionError:
         return None
 
-def getAudioCH(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, 'audio_ch')
-        except NoOptionError:
-            pass
-    try:
-        return config.get('Server', 'audio_ch')
-    except NoOptionError:
-        return None
+def getAudioCodec(tsn=None):
+    return get_tsn('audio_codec', tsn)
 
-def getAudioFR(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, 'audio_fr')
-        except NoOptionError:
-            pass
-    try:
-        return config.get('Server', 'audio_fr')
-    except NoOptionError:
-        return None
+def getAudioCH(tsn=None):
+    return get_tsn('audio_ch', tsn)
 
-def getAudioLang(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, 'audio_lang')
-        except NoOptionError:
-            pass
-    try:
-        return config.get('Server', 'audio_lang')
-    except NoOptionError:
-        return None
+def getAudioFR(tsn=None):
+    return get_tsn('audio_fr', tsn)
+
+def getAudioLang(tsn=None):
+    return get_tsn('audio_lang', tsn)
 
 def getCopyTS(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
@@ -356,38 +335,14 @@ def getCopyTS(tsn = None):
             pass
     return 'none'
 
-def getVideoFPS(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, 'video_fps')
-        except NoOptionError:
-            pass
-    try:
-        return config.get('Server', 'video_fps')
-    except NoOptionError:
-        return None
+def getVideoFPS(tsn=None):
+    return get_tsn('video_fps', tsn)
 
-def getVideoCodec(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, 'video_codec')
-        except NoOptionError:
-            pass
-    try:
-        return config.get('Server', 'video_codec')
-    except NoOptionError:
-        return None
+def getVideoCodec(tsn=None):
+    return get_tsn('video_codec', tsn)
 
 def getFormat(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, 'force_format')
-        except NoOptionError:
-            pass
-    try:
-        return config.get('Server', 'force_format')
-    except NoOptionError:
-        return None
+    return get_tsn('force_format', tsn)
 
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216
