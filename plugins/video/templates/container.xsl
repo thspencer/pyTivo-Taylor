@@ -14,7 +14,7 @@
                                 <xsl:when test="Details/ContentType = 'x-container/folder'">
                                     <tr bgcolor="#bbbbbb">
                                         <td><a><xsl:attribute name="href"><xsl:value-of select="Links/Content/Url"/></xsl:attribute><xsl:value-of select="Details/Title"/></a></td>
-                                        <td><xsl:value-of select="Details/TotalItems"/></td>
+                                        <td><xsl:value-of select="Details/TotalItems"/> Items</td>
                                     </tr>
                                 </xsl:when>
                                 <xsl:otherwise>
