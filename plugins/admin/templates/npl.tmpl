@@ -10,7 +10,7 @@
 <table style="border: 1px solid rgb(220, 220, 220);background-color: rgb(255, 255, 255);text-align: left; margin-left: auto; margin-right: auto;" border="0" cellpadding="0" cellspacing="4">
   <tbody>
     <tr>
-      <td style="height: 48px; width: 483px;">
+      <td>
       <form method="get" action="/TiVoConnect">
       <input type="hidden" name="Command" value="NPL">
       <input type="hidden" name="Container" value="$(container)">
@@ -27,7 +27,7 @@
     </tr>
     <tr>
       <td>
-      <div style="visibility: visible; width: 920px; overflow: scroll; height: 410px; position: relative;">
+      <div>
       #if $tivoIP != ''
           <!-- If TiVoIP is present then we should display a NPL -->
 		  #if $ItemStart > 0
