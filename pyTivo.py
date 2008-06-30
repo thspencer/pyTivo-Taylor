@@ -18,7 +18,7 @@ def init_logging():
 
         logging.config.fileConfig(config.config_files)
 
-    elif config.getDebug(0):
+    elif config.getDebug():
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)

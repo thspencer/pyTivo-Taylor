@@ -118,13 +118,11 @@ def getShares(tsn=''):
 
     return shares
 
-def getDebug(ref):
-    if config.has_option('Server', 'debug'):
-        try:
-            return str2tuple(config.get('Server', 'debug')+',,')[ref]
-        except NoOptionError:
-            pass
-    return str2tuple('False,,')[ref]
+def getDebug():
+    try:
+        return config.getboolean('Server', 'debug')
+    except NoOptionError, ValueError:
+        return False
 
 def getHack83():
     try:
@@ -390,11 +388,6 @@ def getFormat(tsn = None):
         return config.get('Server', 'force_format')
     except NoOptionError:
         return None
-
-def str2tuple(s):
-    items = s.split(',')
-    L = [x.strip() for x in items]
-    return tuple(L)
 
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216
