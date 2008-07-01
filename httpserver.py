@@ -46,12 +46,14 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return host
 
     def do_GET(self):
-        tsn = self.headers.getheader('TiVo_TCD_ID', self.headers.getheader('tsn', ''))
-        ip = self.address_string()
-        self.tivos[tsn] = ip
+        tsn = self.headers.getheader('TiVo_TCD_ID',
+                                     self.headers.getheader('tsn', ''))
+        if tsn:
+            ip = self.address_string()
+            self.tivos[tsn] = ip
 
-        if not tsn in self.tivo_names:
-            self.tivo_names[tsn] = self.server.beacon.get_name(ip)
+            if not tsn in self.tivo_names:
+                self.tivo_names[tsn] = self.server.beacon.get_name(ip)
 
         basepath = unquote_plus(self.path).split('/')[1]
 
