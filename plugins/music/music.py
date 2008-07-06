@@ -143,31 +143,20 @@ class Music(Plugin):
     def QueryContainer(self, handler, query):
 
         def AudioFileFilter(f, filter_type=None):
+            ext = os.path.splitext(f)[1].lower()
 
-            if filter_type:
-                filter_start = filter_type.split('/')[0]
+            if ext in ('.mp3', '.mp2') or ext in TRANSCODE:
+                return self.AUDIO
             else:
-                filter_start = filter_type
+                file_type = False
 
-            if os.path.isdir(f):
-                ftype = self.DIRECTORY
+                if not filter_type or filter_type.split('/')[0] != self.AUDIO:
+                    if ext in PLAYLISTS:
+                        file_type = self.PLAYLIST
+                    elif os.path.isdir(f):
+                        file_type = self.DIRECTORY
 
-            elif eyeD3.isMp3File(f):
-                ftype = self.AUDIO
-            elif os.path.splitext(f)[1].lower() in PLAYLISTS:
-                ftype = self.PLAYLIST
-            elif os.path.splitext(f)[1].lower() in TRANSCODE:
-                ftype = self.AUDIO
-            else:
-                ftype = False
-
-            if filter_start == self.AUDIO:
-                if ftype == self.AUDIO:
-                    return ftype
-                else:
-                    return False
-            else: 
-                return ftype
+                return file_type
 
         def media_data(f):
             if f.name in self.media_data_cache:
