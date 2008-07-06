@@ -66,10 +66,7 @@ class EncodeUnicode(Filter):
     def filter(self, val, **kw):
         """Encode Unicode strings, by default in UTF-8"""
 
-        if kw.has_key('encoding'):
-            encoding = kw['encoding']
-        else:
-            encoding='utf8'
+        encoding = kw.get('encoding', 'utf8')
                             
         if type(val) == type(u''):
             filtered = val.encode(encoding)
@@ -98,10 +95,8 @@ class Music(Plugin):
             path = handler.path
         else:
             opts = cgi.parse_qs(query)
-            if 'Seek' in opts:
-                seek = int(opts['Seek'][0])
-            if 'Duration' in opts:
-                duration = int(opts['Duration'][0])
+            seek = int(opts.get('Seek', [0])[0])
+            duration = int(opts.get('Duration', [0])[0])
 
         fname = os.path.join(os.path.normpath(container['path']),
                              unquote(path)[len(name) + 2:])
