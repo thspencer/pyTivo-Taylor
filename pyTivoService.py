@@ -35,6 +35,10 @@ class PyTivoService(win32serviceutil.ServiceFramework):
         b = beacon.Beacon()
         b.add_service('TiVoMediaServer:' + str(port) + '/http')
         b.start()
+        if 'listen' in config.getBeaconAddresses():
+            b.listen()
+
+        httpd.set_beacon(b)
         
         while 1:
             sys.stdout.flush()
