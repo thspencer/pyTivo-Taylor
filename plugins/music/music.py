@@ -101,7 +101,7 @@ class Music(Plugin):
             if 'Seek' in opts:
                 seek = int(opts['Seek'][0])
             if 'Duration' in opts:
-                seek = int(opts['Duration'][0])
+                duration = int(opts['Duration'][0])
 
         fname = os.path.join(os.path.normpath(container['path']),
                              unquote(path)[len(name) + 2:])
