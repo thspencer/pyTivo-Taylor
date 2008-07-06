@@ -57,10 +57,7 @@ class EncodeUnicode(Filter):
     def filter(self, val, **kw):
         """Encode Unicode strings, by default in UTF-8"""
 
-        if kw.has_key('encoding'):
-            encoding = kw['encoding']
-        else:
-            encoding='utf8'
+        encoding = kw.get('encoding', 'utf8')
                             
         if type(val) == type(u''):
             filtered = val.encode(encoding)
