@@ -15,6 +15,14 @@ SCRIPTDIR = os.path.dirname(__file__)
 
 CLASS_NAME = 'Video'
 
+# Preload the templates
+tcname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
+ttname = os.path.join(SCRIPTDIR, 'templates', 'TvBus.tmpl')
+txname = os.path.join(SCRIPTDIR, 'templates', 'container.xsl')
+CONTAINER_TEMPLATE = file(tcname, 'rb').read()
+TVBUS_TEMPLATE = file(ttname, 'rb').read()
+XSL_TEMPLATE = file(txname, 'rb').read()
+
 extfile = os.path.join(SCRIPTDIR, 'video.ext')
 try:
     extensions = file(extfile).read().split()
@@ -410,7 +418,7 @@ class Video(Plugin):
 
         handler.send_response(200)
         handler.end_headers()
-        t = Template(file=os.path.join(SCRIPTDIR,'templates', 'container.tmpl'))
+        t = Template(CONTAINER_TEMPLATE)
         t.container = cname
         t.name = subcname
         t.total = total
@@ -437,17 +445,15 @@ class Video(Plugin):
 
         handler.send_response(200)
         handler.end_headers()
-        t = Template(file=os.path.join(SCRIPTDIR,'templates', 'TvBus.tmpl'))
+        t = Template(TVBUS_TEMPLATE)
         t.video = file_info
         t.escape = escape
         handler.wfile.write(t)
 
     def XSL(self, handler, query):
-        file = open(os.path.join(SCRIPTDIR, 'templates', 'container.xsl'))
         handler.send_response(200)
         handler.end_headers()
-        handler.wfile.write(file.read())
-
+        handler.wfile.write(XSL_TEMPLATE)
 
     def Push(self, handler, query):
         file = unquote(query['File'][0])
