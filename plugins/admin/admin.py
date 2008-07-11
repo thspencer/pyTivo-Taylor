@@ -173,11 +173,9 @@ class Admin(Plugin):
                 AnchorOffset += str(query['AnchorOffset'][0])
                 theurl += '&AnchorOffset=' + AnchorOffset
 
-            password = tivo_mak #TiVo MAK
-
             r=urllib2.Request(theurl)
             auth_handler = urllib2.HTTPDigestAuthHandler()
-            auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', password)
+            auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', tivo_mak)
             opener = urllib2.build_opener(auth_handler)
             urllib2.install_opener(opener)
 
@@ -353,14 +351,13 @@ class Admin(Plugin):
         if tivo_mak != "" and togo_path != "":
             parse_url = urlparse(str(query['Url'][0]))
             theurl = 'http://' + parse_url[1].split(':')[0] + parse_url[2] + "?" + parse_url[4]
-            password = tivo_mak #TiVo MAK
             name = unquote(parse_url[2])[10:300].split('.')
             name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
             outfile = os.path.join(togo_path, "".join(name))
 
             status[theurl] = {'running':True, 'error':'', 'rate':'', 'finished':False}
 
-            thread.start_new_thread(Admin.get_tivo_file, (self, theurl, password, tivoIP, outfile))
+            thread.start_new_thread(Admin.get_tivo_file, (self, theurl, tivo_mak, tivoIP, outfile))
 
             handler.send_response(200)
             handler.end_headers()
