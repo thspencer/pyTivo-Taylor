@@ -224,17 +224,17 @@ class Video(Plugin):
     def __total_items(self, full_path):
         count = 0
         try:
-            for file in os.listdir(full_path):
-                if file.startswith('.'):
+            for f in os.listdir(full_path):
+                if f.startswith('.'):
                     continue
-                file = os.path.join(full_path, file)
-                if os.path.isdir(file):
+                f = os.path.join(full_path, f)
+                if os.path.isdir(f):
                     count += 1
                 elif extensions:
-                    if os.path.splitext(file)[1].lower() in extensions:
+                    if os.path.splitext(f)[1].lower() in extensions:
                         count += 1
-                elif file in transcode.info_cache:
-                    if transcode.supported_format(file):
+                elif f in transcode.info_cache:
+                    if transcode.supported_format(f):
                         count += 1
         except:
             pass
@@ -270,11 +270,11 @@ class Video(Plugin):
 
         return metadata
 
-    def __getMetadataFromFile(self, file):
+    def __getMetadataFromFile(self, f):
         metadata = {}
 
-        if os.path.exists(file):
-            for line in open(file):
+        if os.path.exists(f):
+            for line in open(f):
                 if line.strip().startswith('#'):
                     continue
                 if not ':' in line:
@@ -389,30 +389,30 @@ class Video(Plugin):
 
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
-        for file in files:
-            mtime = os.stat(file).st_mtime
+        for f in files:
+            mtime = os.stat(f).st_mtime
             if (mtime < 0): mtime = 0
             mtime = datetime.fromtimestamp(mtime)
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
-            video['name'] = os.path.split(file)[1]
-            video['path'] = file
-            video['part_path'] = file.replace(local_base_path, '', 1)
+            video['name'] = os.path.split(f)[1]
+            video['path'] = f
+            video['part_path'] = f.replace(local_base_path, '', 1)
             if not video['part_path'].startswith(os.path.sep):
                 video['part_path'] = os.path.sep + video['part_path']
-            video['title'] = os.path.split(file)[1]
-            video['is_dir'] = self.__isdir(file)
+            video['title'] = os.path.split(f)[1]
+            video['is_dir'] = self.__isdir(f)
             if video['is_dir']:
                 video['small_path'] = subcname + '/' + video['name']
-                video['total_items'] = self.__total_items(file)
+                video['total_items'] = self.__total_items(f)
             else:
-                if precache or len(files) == 1 or file in transcode.info_cache:
-                    video['valid'] = transcode.supported_format(file)
+                if precache or len(files) == 1 or f in transcode.info_cache:
+                    video['valid'] = transcode.supported_format(f)
                     if video['valid']:
-                        video.update(self.metadata_full(file, tsn))
+                        video.update(self.metadata_full(f, tsn))
                 else:
                     video['valid'] = True
-                    video.update(self.metadata_basic(file))
+                    video.update(self.metadata_basic(f))
 
             videos.append(video)
 
@@ -434,9 +434,9 @@ class Video(Plugin):
 
     def TVBusQuery(self, handler, query):
         tsn = handler.headers.getheader('tsn', '')
-        file = query['File'][0]
+        f = query['File'][0]
         path = self.get_local_path(handler, query)
-        file_path = path + file
+        file_path = path + f
 
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
@@ -456,7 +456,7 @@ class Video(Plugin):
         handler.wfile.write(XSL_TEMPLATE)
 
     def Push(self, handler, query):
-        file = unquote(query['File'][0])
+        f = unquote(query['File'][0])
 
         tsn = query['tsn'][0]
         for key in handler.tivo_names:
@@ -465,7 +465,7 @@ class Video(Plugin):
                 break
 
         path = self.get_local_path(handler, query)
-        file_path = path + file
+        file_path = path + f
 
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
@@ -479,7 +479,7 @@ class Video(Plugin):
         container = quote(query['Container'][0].split('/')[0])
         port = config.getPort()
 
-        url = 'http://%s:%s/%s%s' % (ip, port, container, quote(file))
+        url = 'http://%s:%s/%s%s' % (ip, port, container, quote(f))
 
         try:
             m = mind.getMind()
