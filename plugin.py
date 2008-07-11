@@ -135,15 +135,15 @@ class Plugin(object):
         def build_recursive_list(path, recurse=True):
             files = []
             try:
-                for file in os.listdir(path):
-                    if file.startswith('.'):
+                for f in os.listdir(path):
+                    if f.startswith('.'):
                         continue
-                    file = os.path.join(path, file)
-                    if recurse and os.path.isdir(file):
-                        files.extend(build_recursive_list(file))
+                    f = os.path.join(path, f)
+                    if recurse and os.path.isdir(f):
+                        files.extend(build_recursive_list(f))
                     else:
-                       if not filterFunction or filterFunction(file, file_type):
-                           files.append(file)
+                       if not filterFunction or filterFunction(f, file_type):
+                           files.append(f)
             except:
                 pass
             return files
