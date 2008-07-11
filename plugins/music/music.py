@@ -36,8 +36,8 @@ durre = re.compile(r'.*Duration: (.{2}):(.{2}):(.{2})\.(.),').search
 # Preload the templates
 tfname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
 tpname = os.path.join(SCRIPTDIR, 'templates', 'm3u.tmpl')
-folder_template = file(tfname, 'rb').read()
-playlist_template = file(tpname, 'rb').read()
+FOLDER_TEMPLATE = file(tfname, 'rb').read()
+PLAYLIST_TEMPLATE = file(tpname, 'rb').read()
 
 # XXX BIG HACK
 # subprocess is broken for me on windows so super hack
@@ -245,10 +245,10 @@ class Music(Plugin):
             return
 
         if os.path.splitext(subcname)[1].lower() in PLAYLISTS:
-            t = Template(playlist_template, filter=EncodeUnicode)
+            t = Template(PLAYLIST_TEMPLATE, filter=EncodeUnicode)
             t.files, t.total, t.start = self.get_playlist(handler, query)
         else:
-            t = Template(folder_template, filter=EncodeUnicode)
+            t = Template(FOLDER_TEMPLATE, filter=EncodeUnicode)
             t.files, t.total, t.start = self.get_files(handler, query,
                                                        AudioFileFilter)
         t.files = map(media_data, t.files)

@@ -51,7 +51,7 @@ exif_orient_m = \
 
 # Preload the template
 tname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
-photo_template = file(tname, 'rb').read()
+PHOTO_TEMPLATE = file(tname, 'rb').read()
 
 class EncodeUnicode(Filter):
     def filter(self, val, **kw):
@@ -284,7 +284,7 @@ class Photo(Plugin):
             self.media_data_cache[f.name] = item
             return item
 
-        t = Template(photo_template, filter=EncodeUnicode)
+        t = Template(PHOTO_TEMPLATE, filter=EncodeUnicode)
         t.name = subcname
         t.container = cname
         t.files, t.total, t.start = self.get_files(handler, query,
