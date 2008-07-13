@@ -65,6 +65,9 @@ REDIRECT_TEMPLATE = file(trname, 'rb').read()
 SETTINGS_TEMPLATE = file(tsname, 'rb').read()
 NPL_TEMPLATE = file(tnname, 'rb').read()
 
+# Something to strip
+TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
+
 p = os.path.dirname(__file__)
 p = p.split(os.path.sep)
 p.pop()
@@ -310,6 +313,9 @@ class Admin(Plugin):
 
                     entry['CaptureDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(entry['CaptureDate'], 16)))
+
+                    desc = entry['Description']
+                    entry['Description'] = desc.replace(TRIBUNE_CR, '')
 
                 data.append(entry)
         else:
