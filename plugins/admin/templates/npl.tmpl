@@ -87,7 +87,11 @@
 					<td width=4></td>
 				#end if
 				<td width=*>
+                                        #if $row['EpisodeTitle']
 					<b>$row['Title']: $row['EpisodeTitle']</b><br>
+                                        #else
+					<b>$row['Title']</b><br>
+                                        #end if
 					<small>$row['Description']  
 					$row['SourceChannel'] $row['SourceStation']</small>
 				</td>
