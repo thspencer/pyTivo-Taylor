@@ -4,7 +4,7 @@ import random
 import string
 from ConfigParser import NoOptionError
 
-BLACKLIST_169 = ('540', '649')
+BLACKLIST_169 = ('130', '540', '649')
 guid = ''.join([random.choice(string.letters) for i in range(10)])
 
 config = ConfigParser.ConfigParser()
@@ -53,7 +53,7 @@ def getPort():
     return config.get('Server', 'Port')
 
 def get169Blacklist(tsn):  # tivo does not pad 16:9 video
-    return tsn != '' and tsn[:3] in ('540')
+    return tsn != '' and tsn[:3] in ('130', '540')
 
 def get169Letterbox(tsn):  # tivo pads 16:9 video for 4:3 display
     return tsn != '' and tsn[:3] in ('649')
