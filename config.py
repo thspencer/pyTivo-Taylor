@@ -4,7 +4,6 @@ import random
 import string
 from ConfigParser import NoOptionError
 
-BLACKLIST_169 = ('130', '540', '649')
 guid = ''.join([random.choice(string.letters) for i in range(10)])
 
 config = ConfigParser.ConfigParser()
