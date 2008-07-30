@@ -341,7 +341,7 @@ def getVideoCodec(tsn=None):
     return get_tsn('video_codec', tsn)
 
 def getFormat(tsn = None):
-    return get_tsn('force_format', tsn)
+    return get_tsn('format', tsn)
 
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216
