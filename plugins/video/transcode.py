@@ -603,6 +603,8 @@ def video_info(inFile):
                     newaudiomap = (stream, metadata[key])
                     audiomap.update([newaudiomap])
                     vInfo['mapAudio'] = sorted(audiomap.items(), key=lambda (k,v): (k,v))
+            elif key.startswith('Override_millisecs'):
+                vInfo[key.replace('Override_','')] = int(metadata[key])
             else:
                 vInfo[key.replace('Override_','')] = metadata[key]
 
