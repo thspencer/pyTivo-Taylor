@@ -126,7 +126,7 @@ def getDebug():
 def getHack83():
     try:
         return config.getboolean('Server', 'hack83')
-    except NoOptionError:
+    except NoOptionError, ValueError:
         return False
 
 def getOptres(tsn = None):
