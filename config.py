@@ -125,11 +125,7 @@ def getDebug():
 
 def getHack83():
     try:
-        debug = config.get('Server', 'hack83')
-        if debug.lower() == 'true':
-            return True
-        else:
-            return False
+        return config.getboolean('Server', 'hack83')
     except NoOptionError:
         return False
 
