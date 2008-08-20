@@ -234,29 +234,35 @@ def getTivoWidth(tsn):
         else:
             return 544
 
+def _trunc64(i):
+    return max(int(strtod(i)) / 64000, 1) * 64
+
 def getAudioBR(tsn = None):
     #convert to non-zero multiple of 64 to ensure ffmpeg compatibility
     #compare audio_br to max_audio_br and return lowest
     if tsn and config.has_section('_tivo_' + tsn):
         try:
-            audiobr = int(max(int(strtod(config.get('_tivo_' + tsn, 'audio_br'))/1000), 64)/64)*64
+            audiobr = _trunc64(config.get('_tivo_' + tsn, 'audio_br'))
             return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
         except NoOptionError:
             pass
     try:
-        audiobr = int(max(int(strtod(config.get('Server', 'audio_br'))/1000), 64)/64)*64
+        audiobr = _trunc64(config.get('Server', 'audio_br'))
         return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
     except NoOptionError:
         return str(min(384, getMaxAudioBR(tsn))) + 'k'
 
+def _k(i):
+    return str(int(strtod(i)) / 1000) + 'k'
+
 def getVideoBR(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
-            return str(int(strtod(config.get('_tivo_' + tsn, 'video_br'))/1000)) + 'k'
+            return _k(config.get('_tivo_' + tsn, 'video_br'))
         except NoOptionError:
             pass
     try:
-        return str(int(strtod(config.get('Server', 'video_br'))/1000)) + 'k'
+        return _k(config.get('Server', 'video_br'))
     except NoOptionError: #defaults for S3/S2 TiVo
         if isHDtivo(tsn):
             return '8192k'
@@ -265,7 +271,7 @@ def getVideoBR(tsn = None):
 
 def getMaxVideoBR():
     try:
-        return str(int(strtod(config.get('Server', 'max_video_br'))/1000)) + 'k'
+        return _k(config.get('Server', 'max_video_br'))
     except NoOptionError: #default to 30000k
         return '30000k'
 
@@ -277,7 +283,7 @@ def getVideoPCT():
 
 def getBuffSize():
     try:
-        return str(int(strtod(config.get('Server', 'bufsize'))/1000)) + 'k'
+        return _k(config.get('Server', 'bufsize'))
     except NoOptionError: #default 1024k
         return '1024k'
 
@@ -285,12 +291,12 @@ def getMaxAudioBR(tsn = None):
     #convert to non-zero multiple of 64 for ffmpeg compatibility
     if tsn and config.has_section('_tivo_' + tsn):
         try:
-            return int(int(strtod(config.get('_tivo_' + tsn, 'max_audio_br'))/1000)/64)*64
+            return _trunc64(config.get('_tivo_' + tsn, 'max_audio_br'))
         except NoOptionError:
             pass
     try:
-        return int(int(strtod(config.get('Server', 'max_audio_br'))/1000)/64)*64
-    except NoOptionError: 
+        return _trunc64(config.get('Server', 'max_audio_br'))
+    except NoOptionError:
         return int(448) #default to 448
 
 def get_tsn(name, tsn=None):
