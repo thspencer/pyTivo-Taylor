@@ -177,7 +177,7 @@ def getFFmpegPrams(tsn):
         return None
 
 def isHDtivo(tsn):  # tsn's of High Definition Tivo's
-    return tsn != '' and tsn[:3] in ['648', '652']
+    return tsn != '' and tsn[:3] in ['648', '652', '658']
 
 def getValidWidths():
     return [1920, 1440, 1280, 720, 704, 544, 480, 352]
