@@ -510,8 +510,12 @@ def video_info(inFile):
 
     durre = re.compile(r'.*Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+),')
     d = durre.search(output)
+
     if d:
-        vInfo['millisecs'] = ((int(d.group(1))*3600) + (int(d.group(2))*60) + int(d.group(3)))*1000 + (int(d.group(4))*100)
+        vInfo['millisecs'] = ((int(d.group(1)) * 3600 +
+                               int(d.group(2)) * 60 +
+                               int(d.group(3))) * 1000 +
+                              int(d.group(4)) * (10 ** (3 - len(d.group(4)))))
     else:
         vInfo['millisecs'] = 0
 

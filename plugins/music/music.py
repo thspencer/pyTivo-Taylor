@@ -203,10 +203,11 @@ class Music(Plugin):
                     output = ffmpeg.stderr.read()
                     d = durre(output)
                     if d:
-                        millisecs = (int(d.group(1)) * 3600 + \
-                                     int(d.group(2)) * 60 + \
-                                     int(d.group(3))) * 1000 + \
-                                     int(d.group(4)) * 100
+                        millisecs = ((int(d.group(1)) * 3600 +
+                                      int(d.group(2)) * 60 +
+                                      int(d.group(3))) * 1000 +
+                                     int(d.group(4)) *
+                                     (10 ** (3 - len(d.group(4)))))
                     else:
                         millisecs = 0
                     item['Duration'] = millisecs
