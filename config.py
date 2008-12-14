@@ -281,10 +281,21 @@ def getVideoPCT():
     except NoOptionError:
         return 70
 
-def getBuffSize():
-    try:
-        return _k(config.get('Server', 'bufsize'))
-    except NoOptionError: #default 1024k
+def getBuffSize(tsn = None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        if config.has_option('_tivo_' + tsn, 'bufsize'):
+            try:
+                return _k(config.get('_tivo_' + tsn, 'bufsize'))
+            except NoOptionError:
+                pass
+    if config.has_option('Server', 'bufsize'):
+        try:
+            return _k(config.get('Server', 'bufsize'))
+        except NoOptionError:
+            pass
+    if isHDtivo(tsn):
+        return '4096k'
+    else:
         return '1024k'
 
 def getMaxAudioBR(tsn = None):

@@ -138,7 +138,7 @@ Default Setting: 4096K for SD TiVo's, 8192K for HD TiVo's
 Valid Entries: Any valid Bit rate. 1024K = 1Mi
 Required: No
 Skill: Advanced
-Description: This allows you to choose the default server video bit rate used in transcoding. FFmpeg does not strictly follow this bit rate, there is a certain level of tolerance that is allowed. Also a low quality file will always have a low bit rate. The default is likely fine for most users. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.  See the bufsize setting if you increase this setting to 12Mi or above for transcoding to 1080 resolutions.
+Description: This allows you to choose the default server video bit rate used in transcoding. FFmpeg does not strictly follow this bit rate, there is a certain level of tolerance that is allowed. Also a low quality file will always have a low bit rate. The default is likely fine for most users. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.
 Example Settings: 4096K, 8Mi, 12Mi, 16Mi
 Available In: Server, Tivos
 
@@ -166,14 +166,14 @@ Available In: Server
 
 bufsize
 
-Recommended Setting: 4096k
-pyTivo Defaults To: 1024k
+Recommended Setting: blank
+pyTivo Defaults To: 1024k for S2, 4096k for S3
 Valid Entries: Any valid byte size
 Required: No
 Skill: Very Advanced
-Description: Allows you to set the buffer size used by ffmpeg. Increasing this setting will allow higher bitrates during transcoding (see video_br setting), especially when transcoding to HD resolutions.  But it may result in pixelation or audio sync issues with some sources.  1024k is fine for the resolutions used by S2 tivos.  But you will probably want to increase this setting to 2048k or 4096k if you have an HD tivo.
+Description: Allows you to set the buffer size used by ffmpeg. Increasing this setting will allow higher bitrates during transcoding (see video_br setting), especially when transcoding to HD resolutions.  But it may result in pixelation or audio sync issues with some sources.  1024k is fine for the resolutions used by S2 tivos.  But 2048k or 4096k is preferred for HD tivos.  Leave this setting blank unless you are experiencing audio/video sync issues and wish to test a different value.
 Example Settings: 1024k, 2048k, 4096k
-Available In: Server
+Available In: Server, Tivos
 
 width
 

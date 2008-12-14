@@ -44,7 +44,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     settings['video_br'] = select_videobr(inFile, tsn)
     settings['video_fps'] = select_videofps(inFile, tsn)
     settings['max_video_br'] = select_maxvideobr()
-    settings['buff_size'] = select_buffsize()
+    settings['buff_size'] = select_buffsize(tsn)
     settings['aspect_ratio'] = ' '.join(select_aspect(inFile, tsn))
     settings['audio_br'] = select_audiobr(tsn)
     settings['audio_fr'] = select_audiofr(inFile, tsn)
@@ -160,8 +160,8 @@ def select_audiobr(tsn):
 def select_maxvideobr():
     return '-maxrate '+config.getMaxVideoBR()
 
-def select_buffsize():
-    return '-bufsize '+config.getBuffSize()
+def select_buffsize(tsn):
+    return '-bufsize '+config.getBuffSize(tsn)
 
 def select_ffmpegprams(tsn):
     if config.getFFmpegPrams(tsn) != None:
