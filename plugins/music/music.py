@@ -31,7 +31,7 @@ plstitle = re.compile('[Tt]itle(\d+)=(.+)').match
 plslength = re.compile('[Ll]ength(\d+)=(\d+)').match
 
 # Duration -- parse from ffmpeg output
-durre = re.compile(r'.*Duration: (.{2}):(.{2}):(.{2})\.(.),').search
+durre = re.compile(r'.*Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+),').search
 
 # Preload the templates
 tfname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
