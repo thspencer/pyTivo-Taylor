@@ -65,16 +65,6 @@ Description: The subnet which the beacon should broadcast on. Most people can le
 Example Settings: 255.255.255.255
 Available In: Server
 
-hack83
-
-Default Setting: False
-Valid Entries: True/False
-Required: No
-Skill: Moderate
-Description: Available in the SubFoldersBranch. Allows TiVos with software 8.3 and above to display subfolders as users are accustomed too prior to the 8.3Software glitch. If you use this then you don't need to use auto_subshares. Warning: navigating folders too fast with this setting enabled may cause TiVo to reboot.
-Example Settings: True/False
-Available In: Server
-
 debug
 
 Default Setting: False
@@ -325,7 +315,7 @@ Default Setting: false
 Valid Entries: True/False
 Required: No
 Skill: Moderate
-Description: Subfolders of the share paths you define will be seen by pyTivo and displayed as subfolders in the Now Playing List. This is an alternative to the hack83 setting which enables the SubFoldersBranch
+Description: Subfolders of the share paths you define will be seen by pyTivo and displayed as subfolders in the Now Playing List.
 Example Settings: True/False
 Available In: Shares
 

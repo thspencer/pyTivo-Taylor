@@ -123,12 +123,6 @@ def getDebug():
     except NoOptionError, ValueError:
         return False
 
-def getHack83():
-    try:
-        return config.getboolean('Server', 'hack83')
-    except NoOptionError, ValueError:
-        return False
-
 def getOptres(tsn = None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:

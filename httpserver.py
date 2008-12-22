@@ -10,8 +10,6 @@ import logging
 
 SCRIPTDIR = os.path.dirname(__file__)
 
-hack83 = config.getHack83()
-
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
 
@@ -149,19 +147,6 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
 
     def unsupported(self, query):
-        if hack83 and 'Command' in query and 'Filter' in query:
-            logger = logging.getLogger('pyTivo.hack83')
-
-            logger.debug('Unsupported request checking to see if it is video.')
-            command = query['Command'][0]
-            plugin = GetPlugin('video')
-            if ''.join(query['Filter']).find('video') >= 0 and \
-               hasattr(plugin, command):
-                logger.debug('Unsupported request yup it is video send to video plugin for it to sort out.')
-                method = getattr(plugin, command)
-                method(self, query)
-                return
-
         self.send_response(404)
         self.send_header('Content-type', 'text/html')
         self.end_headers()

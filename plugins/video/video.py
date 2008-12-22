@@ -29,16 +29,9 @@ try:
 except:
     extensions = None
 
-if config.getHack83():
-    logging.getLogger('pyTivo.hack83').info('Hack83 is enabled.')
-
 class Video(Plugin):
 
     CONTENT_TYPE = 'x-container/tivo-videos'
-
-    # Used for 8.3's broken requests
-    count = 0
-    request_history = {}
 
     def pre_cache(self, full_path):
         if Video.video_file_filter(self, full_path):
@@ -51,149 +44,6 @@ class Video(Plugin):
             return os.path.splitext(full_path)[1].lower() in extensions
         else:
             return transcode.supported_format(full_path)
-
-    def hack(self, handler, query, subcname):
-        logger = logging.getLogger('pyTivo.hack83')
-        logger.debug('new request ------------------------')
-        logger.debug('TiVo request is: \n%s' % query)
-        queryAnchor = ''
-        rightAnchor = ''
-        leftAnchor = ''
-        tsn = handler.headers.getheader('tsn', '')
-
-        # not a tivo
-        if not tsn:
-            logger.debug('this was not a TiVo request. Using default tsn.')
-            tsn = '123456789'
-
-        # this breaks up the anchor item request into seperate parts
-        if 'AnchorItem' in query and query['AnchorItem'] != ['Hack8.3']:
-            queryAnchor = urllib.unquote_plus(''.join(query['AnchorItem']))
-            if queryAnchor.find('Container=') >= 0:
-                # This is a folder
-                queryAnchor = queryAnchor.split('Container=')[-1]
-            else:
-                # This is a file
-                queryAnchor = queryAnchor.split('/', 1)[-1]
-            leftAnchor, rightAnchor = queryAnchor.rsplit('/', 1)
-            logger.debug('queryAnchor:%s \n leftAnchor:%s\n rightAnchor: %s' %
-                            (queryAnchor, leftAnchor, rightAnchor))
-        try:
-            path, state = self.request_history[tsn]
-        except KeyError:
-            # Never seen this tsn, starting new history
-            logger.debug('New TSN.')
-            path = []
-            state = {}
-            self.request_history[tsn] = (path, state)
-            state['query'] = query
-            state['page'] = ''
-            state['time'] = int(time.time()) + 1000
-
-        logger.debug('our saved request is: \n%s' % state['query'])
-
-        current_folder = subcname.split('/')[-1]
-
-        # Begin figuring out what the request TiVo sent us means
-        # There are 7 options that can occur
-
-        # 1. at the root - This request is always accurate
-        if len(subcname.split('/')) == 1:
-            logger.debug('we are at the root. Saving query, Clearing state[page].')
-            path[:] = [current_folder]
-            state['query'] = query
-            state['page'] = ''
-            return query, path
-
-        # 2. entering a new folder
-        # If there is no AnchorItem in the request then we must be
-        # entering a new folder.
-        if 'AnchorItem' not in query:
-            logger.debug('we are entering a new folder. Saving query, setting time, setting state[page].')
-            path[:] = subcname.split('/')
-            state['query'] = query
-            state['time'] = int(time.time())
-            files, total, start = self.get_files(handler, query,
-                                                 self.video_file_filter)
-            if files:
-                state['page'] = files[0]
-            else:
-                state['page'] = ''
-            return query, path
-
-        # 3. Request a page after pyTivo sent a 302 code
-        # we know this is the proper page
-        if ''.join(query['AnchorItem']) == 'Hack8.3':
-            logger.debug('requested page from 302 code. Returning saved query.')
-            return state['query'], path
-
-        # 4. this is a request for a file
-        if 'ItemCount' in query and int(''.join(query['ItemCount'])) == 1:
-            logger.debug('requested a file')
-            # Everything in this request is right except the container
-            query['Container'] = ['/'.join(path)]
-            state['page'] = ''
-            return query, path
-
-        # All remaining requests could be a second erroneous request for
-        # each of the following we will pause to see if a correct
-        # request is coming right behind it.
-
-        # Sleep just in case the erroneous request came first this
-        # allows a proper request to be processed first
-        logger.debug('maybe erroneous request, sleeping.')
-        time.sleep(.25)
-
-        # 5. scrolling in a folder
-        # This could be a request to exit a folder or scroll up or down
-        # within the folder
-        # First we have to figure out if we are scrolling
-        if 'AnchorOffset' in query:
-            logger.debug('Anchor offset was in query. leftAnchor needs to match %s' % '/'.join(path))
-            if leftAnchor == str('/'.join(path)):
-                logger.debug('leftAnchor matched.')
-                query['Container'] = ['/'.join(path)]
-                files, total, start = self.get_files(handler, query,
-                                                     self.video_file_filter)
-                logger.debug('saved page is=%s top returned file is= %s' % (state['page'], files[0]))
-                # If the first file returned equals the top of the page
-                # then we haven't scrolled pages
-                if files[0] != str(state['page']):
-                    logger.debug('this is scrolling within a folder.')
-                    state['page'] = files[0]
-                    return query, path
-
-        # The only remaining options are exiting a folder or this is a
-        # erroneous second request.
-
-        # 6. this an extraneous request
-        # this came within a second of a valid request; just use that
-        # request.
-        if (int(time.time()) - state['time']) <= 1:
-            logger.debug('erroneous request, send a 302 error')
-            return None, path
-
-        # 7. this is a request to exit a folder
-        # this request came by itself; it must be to exit a folder
-        else:
-            logger.debug('over 1 second must be request to exit folder')
-            path.pop()
-            state['query'] = {'Command': query['Command'],
-                              'SortOrder': query['SortOrder'],
-                              'ItemCount': query['ItemCount'],
-                              'Filter': query['Filter'],
-                              'Container': ['/'.join(path)]}
-            files, total, start = self.get_files(handler, state['query'],
-                                                 self.video_file_filter)
-            if files:
-                state['page'] = files[0]
-            else:
-                state['page'] = ''
-            return None, path
-
-        # just in case we missed something.
-        logger.debug('ERROR, should not have made it here Trying to recover.')
-        return state['query'], path
 
     def send_file(self, handler, container, name):
         if handler.headers.getheader('Range') and \
@@ -350,29 +200,6 @@ class Video(Plugin):
     def QueryContainer(self, handler, query):
         tsn = handler.headers.getheader('tsn', '')
         subcname = query['Container'][0]
-
-        # If you are running 8.3 software you want to enable hack83
-        # in the config file
-        if config.getHack83():
-            logger = logging.getLogger('pyTivo.hack83')
-            logger.debug('=' * 73)
-            query, hackPath = self.hack(handler, query, subcname)
-            hackPath = '/'.join(hackPath)
-            logger.debug('Tivo said: %s || Hack said: %s' % (subcname, hackPath))
-            subcname = hackPath
-
-            if not query:
-                logger.debug('sending 302 redirect page')
-                handler.send_response(302)
-                handler.send_header('Location ', 'http://' +
-                                    handler.headers.getheader('host') +
-                                    '/TiVoConnect?Command=QueryContainer&' +
-                                    'AnchorItem=Hack8.3&Container=' + quote(hackPath))
-                handler.end_headers()
-                return
-
-        # End hack mess
-
         cname = subcname.split('/')[0]
 
         if not handler.server.containers.has_key(cname) or \
