@@ -12,13 +12,15 @@ except ImportError:
     try:
         import elementtree.ElementTree as ElementTree
     except ImportError:
-        warnings.warn('Python 2.5 or higher or elementtree is needed to use the TivoPush')
+        warnings.warn('Python 2.5 or higher or elementtree is ' +
+                      'needed to use the TivoPush')
 
 if 'ElementTree' not in locals():
 
     class Mind:
         def __init__(self, *arg, **karg):
-            raise Exception('Python 2.5 or higher or elementtree is needed to use the TivoPush')
+            raise Exception('Python 2.5 or higher or elementtree is ' +
+                            'needed to use the TivoPush')
 
 else:
 
@@ -28,15 +30,17 @@ else:
             self.__username = username
             self.__password = password
 
-            self.__cj = cookielib.CookieJar()
-            self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cj))
+            cj = cookielib.CookieJar()
+            cp = urllib2.HTTPCookieProcessor(cj)
+            self.__opener = urllib2.build_opener(cp)
 
             self.__login()
 
             if not self.__pcBodySearch():
                 self.__pcBodyStore('pyTivo', True)
 
-        def pushVideo(self, tsn, url, description, duration, size, title, subtitle):
+        def pushVideo(self, tsn, url, description, duration, size,
+                      title, subtitle):
             # It looks like tivo only supports one pc per house
             pc_body_id = self.__pcBodySearch()[0]
 
@@ -49,7 +53,8 @@ else:
                 'pcBodyId': pc_body_id,
                 'publishDate': time.strftime('%Y-%m-%d %H:%M%S', time.gmtime()),
                 'size': size,
-                'source': 'file:/C%3A%2FDocuments%20and%20Settings%2FStephanie%2FDesktop%2FVideo',
+                'source': 'file:/C%3A%2FDocuments%20and%20Settings%2F' +
+                          'Stephanie%2FDesktop%2FVideo',
                 'state': 'complete',
                 'subtitle': subtitle,
                 'title': title,
@@ -96,7 +101,8 @@ else:
             request['encodingType'] = 'mpeg2ProgramStream'
             request['state'] = 'complete'
             request['type'] = 'bodyOfferModify'
-            request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S', time.gmtime())
+            request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S',
+                                                  time.gmtime())
 
             offer_id, content_id = self.__bodyOfferModify(request)
             self.__subscribe(offer_id, content_id, request['bodyId'][4:])
@@ -114,7 +120,7 @@ else:
             results['username'] = xml.findtext('xmppId')
 
             for sendPresence in xml.findall('sendPresence'):
-                results.setdefault('presence_list', []).append(sendPresence.text)
+                results.setdefault('presence_list',[]).append(sendPresence.text)
 
             return results
 

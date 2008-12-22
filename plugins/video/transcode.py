@@ -78,22 +78,26 @@ def select_audiocodec(isQuery, inFile, tsn = ''):
         if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
             if vInfo['aKbps'] == None:
                 if not isQuery:
-                    cmd_string = '-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy '+\
-                                 select_audiolang(inFile, tsn)+' -t 00:00:01 -f vob -'
+                    cmd_string = '-y -vcodec mpeg2video -r 29.97 ' + \
+                                 '-b 1000k -acodec copy ' + \
+                                 select_audiolang(inFile, tsn) + \
+                                 ' -t 00:00:01 -f vob -'
                     if video_check(inFile, cmd_string):
                         vInfo =  video_info(videotest)
                 else:
                     codec = 'TBD'
-            if not vInfo['aKbps'] == None and int(vInfo['aKbps']) <= config.getMaxAudioBR(tsn):
+            if (not vInfo['aKbps'] == None and
+                int(vInfo['aKbps']) <= config.getMaxAudioBR(tsn)):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
     else:
         codec = config.getAudioCodec(tsn)
     copyts = ' -copyts'
-    if (codec == 'copy' and config.getCopyTS(tsn).lower() == 'none' \
-        and codectype == 'mpeg2video') or config.getCopyTS(tsn).lower() == 'false':
+    if ((codec == 'copy' and config.getCopyTS(tsn).lower() == 'none'
+         and codectype == 'mpeg2video') or
+        config.getCopyTS(tsn).lower() == 'false'):
         copyts = ''
-    return '-acodec '+codec+copyts
+    return '-acodec ' + codec + copyts
 
 def select_audiofr(inFile, tsn):
     freq = '48000'  #default
@@ -142,16 +146,17 @@ def select_videocodec(tsn):
     return '-vcodec '+codec
 
 def select_videobr(inFile, tsn):
-    return '-b '+str(select_videostr(inFile, tsn)/1000)+'k'
+    return '-b ' + str(select_videostr(inFile, tsn) / 1000) + 'k'
 
 def select_videostr(inFile, tsn):
     video_str = config.strtod(config.getVideoBR(tsn))
     if config.isHDtivo(tsn):
         vInfo =  video_info(inFile)
         if vInfo['kbps'] != None and config.getVideoPCT() > 0:
-            video_percent = int(vInfo['kbps'])*10*config.getVideoPCT()
+            video_percent = int(vInfo['kbps']) * 10 * config.getVideoPCT()
             video_str = max(video_str, video_percent)
-    video_str = int(min(config.strtod(config.getMaxVideoBR())*0.95, video_str))
+    video_str = int(min(config.strtod(config.getMaxVideoBR()) * 0.95,
+                        video_str))
     return video_str
 
 def select_audiobr(tsn):
@@ -198,11 +203,16 @@ def select_aspect(inFile, tsn = ''):
         if optWidth < TIVO_WIDTH:
             TIVO_WIDTH = optWidth
 
-    d = gcd(vInfo['vHeight'],vInfo['vWidth'])
-    ratio = (vInfo['vWidth']*100)/vInfo['vHeight']
-    rheight, rwidth = vInfo['vHeight']/d, vInfo['vWidth']/d
+    d = gcd(vInfo['vHeight'], vInfo['vWidth'])
+    ratio = (vInfo['vWidth'] * 100) / vInfo['vHeight']
+    rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
 
-    logger.debug('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s millisecs=%s ratio=%s rheight=%s rwidth=%s TIVO_HEIGHT=%sTIVO_WIDTH=%s' % (inFile, vInfo['vCodec'], vInfo['vWidth'], vInfo['vHeight'], vInfo['vFps'], vInfo['millisecs'], ratio, rheight, rwidth, TIVO_HEIGHT, TIVO_WIDTH))
+    logger.debug('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
+                 'millisecs=%s ratio=%s rheight=%s rwidth=%s ' +
+                 'TIVO_HEIGHT=%s TIVO_WIDTH=%s' % (inFile,
+                 vInfo['vCodec'], vInfo['vWidth'], vInfo['vHeight'],
+                 vInfo['vFps'], vInfo['millisecs'], ratio, rheight,
+                 rwidth, TIVO_HEIGHT, TIVO_WIDTH))
 
     multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH)
     multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH)
@@ -213,40 +223,68 @@ def select_aspect(inFile, tsn = ''):
                 npar = config.getPixelAR(1)
             else:
                 npar = vInfo['par2']
-            # adjust for pixel aspect ratio, if set, because TiVo expects square pixels
-            if npar<1.0:
-                return ['-s', str(vInfo['vWidth']) + 'x' + str(int(math.ceil(vInfo['vHeight']/npar)))]
-            elif npar>1.0:
+
+            # adjust for pixel aspect ratio, if set, because TiVo 
+            # expects square pixels
+
+            if npar < 1.0:
+                return ['-s', str(vInfo['vWidth']) + 'x' + 
+                        str(int(math.ceil(vInfo['vHeight'] / npar)))]
+            elif npar > 1.0:
                 # FFMPEG expects width to be a multiple of two
-                return ['-s', str(int(math.ceil(vInfo['vWidth']*npar/2.0)*2)) + 'x' + str(vInfo['vHeight'])]
+
+                return ['-s', str(int(math.ceil(vInfo['vWidth'] * npar / 
+                        2.0) * 2)) + 'x' + str(vInfo['vHeight'])]
+
         if vInfo['vHeight'] <= TIVO_HEIGHT:
-            # pass all resolutions to S3, except heights greater than conf height
+            # pass all resolutions to S3, except heights greater than 
+            # conf height
             return []
         # else, resize video.
+
     if (rwidth, rheight) in [(1, 1)] and vInfo['par1'] == '8:9':
         logger.debug('File + PAR is within 4:3.')
-        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), (59, 72), (59, 36), (59, 54)] or vInfo['dar1'] == '4:3':
+        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' +
+                str(TIVO_HEIGHT)]
+
+    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), 
+                               (59, 72), (59, 36), (59, 54)] or
+          vInfo['dar1'] == '4:3':
         logger.debug('File is within 4:3 list.')
-        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
-    elif ((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), (59, 27)] or vInfo['dar1'] == '16:9')\
-         and (aspect169 or config.get169Letterbox(tsn)):
+        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + 
+                str(TIVO_HEIGHT)]
+
+    elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), 
+                                (59, 27)] or vInfo['dar1'] == '16:9')
+          and (aspect169 or config.get169Letterbox(tsn))):
         logger.debug('File is within 16:9 list and 16:9 allowed.')
-        if config.get169Blacklist(tsn) or (aspect169 and config.get169Letterbox(tsn)): 
-            return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
+
+        if config.get169Blacklist(tsn) or (aspect169 and 
+                                           config.get169Letterbox(tsn)):
+            return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + 
+                    str(TIVO_HEIGHT)]
         else:
-            return ['-aspect', '16:9', '-s', str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT)]
+            return ['-aspect', '16:9', '-s', str(TIVO_WIDTH) + 'x' + 
+                    str(TIVO_HEIGHT)]
     else:
         settings = []
-        #If video is wider than 4:3 add top and bottom padding
-        if (ratio > 133): #Might be 16:9 file, or just need padding on top and bottom
-            if aspect169 and (ratio > 135): #If file would fall in 4:3 assume it is supposed to be 4:3
-                if (ratio > 177):#too short needs padding top and bottom
-                    endHeight = int(((TIVO_WIDTH*vInfo['vHeight'])/vInfo['vWidth']) * multiplier16by9)
+
+        # If video is wider than 4:3 add top and bottom padding
+
+        if (ratio > 133): # Might be 16:9 file, or just need padding on 
+                          # top and bottom
+
+            if aspect169 and (ratio > 135): # If file would fall in 4:3 
+                                            # assume it is supposed to be 4:3
+
+                if (ratio > 177): # too short needs padding top and bottom
+                    endHeight = int(((TIVO_WIDTH * vInfo['vHeight']) /
+                                    vInfo['vWidth']) * multiplier16by9)
                     settings.append('-aspect') 
-                    if config.get169Blacklist(tsn) or config.get169Letterbox(tsn): 
-                        settings.append('4:3') 
-                    else: 
+                    if (config.get169Blacklist(tsn) or
+                        config.get169Letterbox(tsn)):
+                        settings.append('4:3')
+                    else:
                         settings.append('16:9')
                     if endHeight % 2:
                         endHeight -= 1
@@ -254,7 +292,7 @@ def select_aspect(inFile, tsn = ''):
                         settings.append('-s')
                         settings.append(str(TIVO_WIDTH) + 'x' + str(endHeight))
 
-                        topPadding = ((TIVO_HEIGHT - endHeight)/2)
+                        topPadding = ((TIVO_HEIGHT - endHeight) / 2)
                         if topPadding % 2:
                             topPadding -= 1
 
@@ -263,24 +301,32 @@ def select_aspect(inFile, tsn = ''):
                         bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
                         settings.append('-padbottom')
                         settings.append(str(bottomPadding))
-                    else:   #if only very small amount of padding needed, then just stretch it
+                    else:   # if only very small amount of padding 
+                            # needed, then just stretch it
                         settings.append('-s')
-                        settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
-                    logger.debug('16:9 aspect allowed, file is wider than 16:9 padding top and bottom\n%s' % ' '.join(settings))
-                else: #too skinny needs padding on left and right.
-                    endWidth = int((TIVO_HEIGHT*vInfo['vWidth'])/(vInfo['vHeight']*multiplier16by9))
+                        settings.append(str(TIVO_WIDTH) + 'x' +
+                                        str(TIVO_HEIGHT))
+
+                    logger.debug('16:9 aspect allowed, file is wider ' +
+                                 'than 16:9 padding top and bottom\n%s' %
+                                 ' '.join(settings))
+
+                else: # too skinny needs padding on left and right.
+                    endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) / 
+                                   (vInfo['vHeight'] * multiplier16by9))
                     settings.append('-aspect')
-                    if config.get169Blacklist(tsn) or config.get169Letterbox(tsn): 
-                        settings.append('4:3') 
-                    else: 
+                    if (config.get169Blacklist(tsn) or
+                        config.get169Letterbox(tsn)):
+                        settings.append('4:3')
+                    else:
                         settings.append('16:9')
                     if endWidth % 2:
                         endWidth -= 1
-                    if endWidth < (TIVO_WIDTH-10):
+                    if endWidth < (TIVO_WIDTH - 10):
                         settings.append('-s')
                         settings.append(str(endWidth) + 'x' + str(TIVO_HEIGHT))
 
-                        leftPadding = ((TIVO_WIDTH - endWidth)/2)
+                        leftPadding = ((TIVO_WIDTH - endWidth) / 2)
                         if leftPadding % 2:
                             leftPadding -= 1
 
@@ -289,11 +335,15 @@ def select_aspect(inFile, tsn = ''):
                         rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
                         settings.append('-padright')
                         settings.append(str(rightPadding))
-                    else: #if only very small amount of padding needed, then just stretch it
+                    else: # if only very small amount of padding needed, 
+                          # then just stretch it
                         settings.append('-s')
-                        settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
-                    logger.debug('16:9 aspect allowed, file is narrower than 16:9 padding left and right\n%s' % ' '.join(settings))
-            else: #this is a 4:3 file or 16:9 output not allowed
+                        settings.append(str(TIVO_WIDTH) + 'x' +
+                                        str(TIVO_HEIGHT))
+                    logger.debug('16:9 aspect allowed, file is narrower ' +
+                                 'than 16:9 padding left and right\n%s' %
+                                 ' '.join(settings))
+            else: # this is a 4:3 file or 16:9 output not allowed
                 multiplier = multiplier4by3
                 settings.append('-aspect')
                 if ratio > 135 and config.get169Letterbox(tsn):
@@ -301,7 +351,8 @@ def select_aspect(inFile, tsn = ''):
                     multiplier = multiplier16by9
                 else:
                     settings.append('4:3')
-                endHeight = int(((TIVO_WIDTH*vInfo['vHeight'])/vInfo['vWidth']) * multiplier)
+                endHeight = int(((TIVO_WIDTH * vInfo['vHeight']) / 
+                                 vInfo['vWidth']) * multiplier)
                 if endHeight % 2:
                     endHeight -= 1
                 if endHeight < TIVO_HEIGHT * 0.99:
@@ -317,16 +368,22 @@ def select_aspect(inFile, tsn = ''):
                     bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
                     settings.append('-padbottom')
                     settings.append(str(bottomPadding))
-                else:   #if only very small amount of padding needed, then just stretch it
+                else:   # if only very small amount of padding needed, 
+                        # then just stretch it
                     settings.append('-s')
                     settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
-                logging.debug('File is wider than 4:3 padding top and bottom\n%s' %  ' '.join(settings))
+                logging.debug('File is wider than 4:3 padding ' +
+                              'top and bottom\n%s' % ' '.join(settings))
 
             return settings
-        #If video is taller than 4:3 add left and right padding, this is rare. All of these files will always be sent in
-        #an aspect ratio of 4:3 since they are so narrow.
+
+        # If video is taller than 4:3 add left and right padding, this 
+        # is rare. All of these files will always be sent in an aspect 
+        # ratio of 4:3 since they are so narrow.
+
         else:
-            endWidth = int((TIVO_HEIGHT*vInfo['vWidth'])/(vInfo['vHeight']*multiplier4by3))
+            endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) / 
+                           (vInfo['vHeight'] * multiplier4by3))
             settings.append('-aspect')
             settings.append('4:3')
             if endWidth % 2:
@@ -335,7 +392,7 @@ def select_aspect(inFile, tsn = ''):
                 settings.append('-s')
                 settings.append(str(endWidth) + 'x' + str(TIVO_HEIGHT))
 
-                leftPadding = ((TIVO_WIDTH - endWidth)/2)
+                leftPadding = ((TIVO_WIDTH - endWidth) / 2)
                 if leftPadding % 2:
                     leftPadding -= 1
 
@@ -344,82 +401,100 @@ def select_aspect(inFile, tsn = ''):
                 rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
                 settings.append('-padright')
                 settings.append(str(rightPadding))
-            else: #if only very small amount of padding needed, then just stretch it
+            else: # if only very small amount of padding needed, then 
+                  # just stretch it
                 settings.append('-s')
                 settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
 
-            logger.debug('File is taller than 4:3 padding left and right\n%s' % ' '.join(settings))
+            logger.debug('File is taller than 4:3 padding left and right\n%s'
+                         % ' '.join(settings))
 
             return settings
 
 def tivo_compatable(inFile, tsn = ''):
-    supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], [480, 480], [352, 480]]
+    supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], 
+                      [480, 480], [352, 480]]
     vInfo =  video_info(inFile)
 
     while True:
-
         if (inFile[-5:]).lower() == '.tivo':
-            message = True, 'TRANSCODE=NO, ends with .tivo.'
+            message = (True, 'TRANSCODE=NO, ends with .tivo.')
             break
 
         if not vInfo['vCodec'] == 'mpeg2video':
             #print 'Not Tivo Codec'
-            message = False, 'TRANSCODE=YES, vCodec %s not compatible.' % vInfo['vCodec']
+            message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
+                              vInfo['vCodec'])
             break
 
-        if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv', '.tp', '.dvr-ms'):
-            message = False, 'TRANSCODE=YES, ext %s not compatible.' % os.path.splitext(inFile)[-1]
+        if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv',
+                                                    '.tp', '.dvr-ms'):
+            message = (False, 'TRANSCODE=YES, ext %s not compatible.' % 
+                              os.path.splitext(inFile)[-1])
             break
 
         if vInfo['aCodec'] == 'dca':
-            message = False, 'TRANSCODE=YES, aCodec %s not compatible.' % vInfo['aCodec']
+            message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
+                              vInfo['aCodec'])
             break
 
         if vInfo['aCodec'] != None:
-            if not vInfo['aKbps'] or int(vInfo['aKbps']) > config.getMaxAudioBR(tsn):
-                message = False, 'TRANSCODE=YES, %s kbps exceeds max audio bitrate.' % vInfo['aKbps']
+            if (not vInfo['aKbps'] or
+                int(vInfo['aKbps']) > config.getMaxAudioBR(tsn)):
+                message = (False, 'TRANSCODE=YES, %s kbps exceeds max ' +
+                                  'audio bitrate.' % vInfo['aKbps'])
                 break
 
         if vInfo['kbps'] != None:
             abit = max('0', vInfo['aKbps'])
-            if int(vInfo['kbps'])-int(abit) > config.strtod(config.getMaxVideoBR())/1000:
-                message = False, 'TRANSCODE=YES, %s kbps exceeds max video bitrate.' % vInfo['kbps']
+            if (int(vInfo['kbps']) - int(abit) > 
+                config.strtod(config.getMaxVideoBR()) / 1000):
+                message = (False, 'TRANSCODE=YES, %s kbps exceeds max ' +
+                                  'video bitrate.' % vInfo['kbps']
                 break
         else:
-            message = False, 'TRANSCODE=YES, %s kbps not supported.' % vInfo['kbps']
+            message = (False, 'TRANSCODE=YES, %s kbps not supported.' %
+                              vInfo['kbps'])
             break
 
         if config.getAudioLang(tsn) is not None:
             if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
-                message = False, 'TRANSCODE=YES, %s preferred audio track exists.' % config.getAudioLang(tsn)
+                message = (False, 'TRANSCODE=YES, %s preferred audio ' +
+                                  'track exists.' % config.getAudioLang(tsn))
                 break
 
         if config.isHDtivo(tsn):
             if vInfo['par2'] != 1.0:
                 if config.getPixelAR(0):
                     if vInfo['par2'] != None or config.getPixelAR(1) != 1.0:
-                        message = False, 'TRANSCODE=YES, %s not correct PAR.' % vInfo['par2']
+                        message = (False, 'TRANSCODE=YES, %s not correct PAR.'
+                                          % vInfo['par2'])
                         break
-            message = True, 'TRANSCODE=NO, HD Tivo detected, skipping remaining tests.'
+            message = (True, 'TRANSCODE=NO, HD Tivo detected, skipping ' +
+                             'remaining tests.')
             break
         
         if not vInfo['vFps'] == '29.97':
             #print 'Not Tivo fps'
-            message = False, 'TRANSCODE=YES, %s vFps, should be 29.97.' % vInfo['vFps']
+            message = (False, 'TRANSCODE=YES, %s vFps, should be 29.97.' %
+                              vInfo['vFps'])
             break
-        
-        if (config.get169Blacklist(tsn) and not config.get169Setting(tsn))\
-            or (config.get169Letterbox(tsn) and config.get169Setting(tsn)):
+
+        if ((config.get169Blacklist(tsn) and not config.get169Setting(tsn))
+            or (config.get169Letterbox(tsn) and config.get169Setting(tsn))):
             if vInfo['dar1'] == None or not vInfo['dar1'] in ('4:3', '8:9'):
-                message = False, 'TRANSCODE=YES, DAR %s not supported by BLACKLIST_169 tivos.' % vInfo['dar1']
+                message = (False, 'TRANSCODE=YES, DAR %s not supported ' +
+                                  'by BLACKLIST_169 tivos.' % vInfo['dar1'])
                 break
 
         for mode in supportedModes:
             if (mode[0], mode[1]) == (vInfo['vWidth'], vInfo['vHeight']):
-                message = True, 'TRANSCODE=NO, %s x %s is valid.' % (vInfo['vWidth'], vInfo['vHeight'])
+                message = (True, 'TRANSCODE=NO, %s x %s is valid.' %
+                                 (vInfo['vWidth'], vInfo['vHeight']))
                 break
             #print 'Not Tivo dimensions'
-            message = False, 'TRANSCODE=YES, %s x %s not in supported modes.' % (vInfo['vWidth'], vInfo['vHeight'])
+            message = (False, 'TRANSCODE=YES, %s x %s not in supported modes.'
+                       % (vInfo['vWidth'], vInfo['vHeight']))
         break
 
     logger.debug('%s, %s' % (message, inFile))
@@ -445,7 +520,8 @@ def video_info(inFile):
     cmd = [ffmpeg_path(), '-i', inFile ]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
     err_tmp = tempfile.TemporaryFile()
-    ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
+                              stdin=subprocess.PIPE)
 
     # wait 10 sec if ffmpeg is not back give up
     for i in xrange(200):
@@ -488,7 +564,10 @@ def video_info(inFile):
     x = rezre.search(output)
     if x:
         vInfo['vFps'] = x.group(1)
-        # Allow override only if it is mpeg2 and frame rate was doubled to 59.94
+
+        # Allow override only if it is mpeg2 and frame rate was doubled 
+        # to 59.94
+
         if (not vInfo['vFps'] == '29.97') and (vInfo['vCodec'] == 'mpeg2video'):
             # First look for the build 7215 version
             rezre = re.compile(r'.*film source: 29.97.*')
@@ -498,7 +577,8 @@ def video_info(inFile):
                 vInfo['vFps'] = '29.97'
             else:
                 # for build 8047:
-                rezre = re.compile(r'.*frame rate differs from container frame rate: 29.97.*')
+                rezre = re.compile(r'.*frame rate differs from container ' +
+                                   r'frame rate: 29.97.*')
                 logger.debug('Bug in VideoReDo')
                 x = rezre.search(output.lower() )
                 if x:
@@ -558,16 +638,18 @@ def video_info(inFile):
     #get par.
     rezre = re.compile(r'.*Video: .+PAR ([0-9]+):([0-9]+) DAR [0-9:]+.*')
     x = rezre.search(output)
-    if x and x.group(1)!="0" and x.group(2)!="0":
-        vInfo['par1'], vInfo['par2'] = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
+    if x and x.group(1) != "0" and x.group(2) != "0":
+        vInfo['par1'] = x.group(1) + ':' + x.group(2)
+        vInfo['par2'] = float(x.group(1)) / float(x.group(2))
     else:
         vInfo['par1'], vInfo['par2'] = None, None
  
     #get dar.
     rezre = re.compile(r'.*Video: .+DAR ([0-9]+):([0-9]+).*')
     x = rezre.search(output)
-    if x and x.group(1)!="0" and x.group(2)!="0":
-        vInfo['dar1'], vInfo['dar2'] = x.group(1)+':'+x.group(2), float(x.group(1))/float(x.group(2))
+    if x and x.group(1) != "0" and x.group(2) != "0":
+        vInfo['dar1'] = x.group(1) + ':' + x.group(2)
+        vInfo['dar2'] = float(x.group(1)) / float(x.group(2))
     else:
         vInfo['dar1'], vInfo['dar2'] = None, None
 
@@ -606,7 +688,8 @@ def video_info(inFile):
                 if audiomap.has_key(stream):
                     newaudiomap = (stream, metadata[key])
                     audiomap.update([newaudiomap])
-                    vInfo['mapAudio'] = sorted(audiomap.items(), key=lambda (k,v): (k,v))
+                    vInfo['mapAudio'] = sorted(audiomap.items(),
+                                               key=lambda (k,v): (k,v))
             elif key.startswith('Override_millisecs'):
                 vInfo[key.replace('Override_','')] = int(metadata[key])
             else:
@@ -642,13 +725,12 @@ def kill(pid):
         os.kill(pid, signal.SIGTERM)
 
 def win32kill(pid):
-        import ctypes
-        handle = ctypes.windll.kernel32.OpenProcess(1, False, pid)
-        ctypes.windll.kernel32.TerminateProcess(handle, -1)
-        ctypes.windll.kernel32.CloseHandle(handle)
+    import ctypes
+    handle = ctypes.windll.kernel32.OpenProcess(1, False, pid)
+    ctypes.windll.kernel32.TerminateProcess(handle, -1)
+    ctypes.windll.kernel32.CloseHandle(handle)
 
 def gcd(a,b):
     while b:
         a, b = b, a % b
     return a
-

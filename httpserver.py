@@ -128,23 +128,25 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.admin = ''
         for section, settings in config.getShares():
             if 'type' in settings and settings['type'] == 'admin':
-                t.admin += '<a href="/TiVoConnect?Command=Admin&Container=' + quote(section)\
-                           + '">pyTivo Web Configuration</a><br>'\
-                           + '<a href="/TiVoConnect?Command=NPL&Container=' + quote(section)\
-                           + '">pyTivo ToGo</a><br>'
+                t.admin += '<a href="/TiVoConnect?Command=Admin&Container=' + \
+                           quote(section) + \
+                           '">pyTivo Web Configuration</a><br>' + \
+                           '<a href="/TiVoConnect?Command=NPL&Container=' + \
+                           quote(section) + '">pyTivo ToGo</a><br>'
         if t.admin == '':
-            t.admin = '<br><b>No Admin plugin installed in pyTivo.conf</b><br> If you wish to use'\
-                      + ' the admin plugin add the following lines to pyTivo.conf<br><br>'\
-                      + '[Admin]<br>type=admin'
+            t.admin = '<br><b>No Admin plugin installed in pyTivo.conf</b>' + \
+                      '<br> If you wish to use the admin plugin add the ' + \
+                      'following lines to pyTivo.conf<br><br>' + \
+                      '[Admin]<br>type=admin'
 
         t.shares = 'Video shares:<br/>'
         for section, settings in config.getShares():
             if settings.get('type') == 'video':
-                t.shares += '<a href="TiVoConnect?Command=QueryContainer&Container=' + quote(section)\
-                    + '">' +  section + '</a><br/>'
+                t.shares += '<a href="TiVoConnect?Command=QueryContainer&' + \
+                            'Container=' + quote(section) + '">' + section + \
+                            '</a><br/>'
 
         self.wfile.write(t)
-        self.end_headers()
 
     def unsupported(self, query):
         self.send_response(404)
@@ -159,7 +161,8 @@ if __name__ == '__main__':
     def start_server():
         httpd = TivoHTTPServer(('', 9032), TivoHTTPHandler)
         httpd.add_container('test', 'x-container/tivo-videos',
-                            r'C:\Documents and Settings\Armooo\Desktop\pyTivo\test')
+                            r'C:\Documents and Settings\Armooo' +
+                            r'\Desktop\pyTivo\test')
         httpd.serve_forever()
 
     start_server()

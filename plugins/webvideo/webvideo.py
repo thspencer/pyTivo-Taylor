@@ -44,11 +44,13 @@ class WebVideo(Video):
             port=xmpp_info['port'],
             debug=[],
         )
-        self.__logger.debug('Connecting to %s:%s' % (xmpp_info['server'], xmpp_info['port']))
+        self.__logger.debug('Connecting to %s:%s' % (xmpp_info['server'],
+                                                     xmpp_info['port']))
         cl.connect()
         cl.RegisterHandler('message', self.processMessage)
         self.__logger.debug('Loging in as %s/pyTivo' % xmpp_info['username'])
-        cl.auth(user=jid.getNode(), password=config.getTivoPassword(), resource='pyTivo')
+        cl.auth(user=jid.getNode(), password=config.getTivoPassword(),
+                resource='pyTivo')
 
         cl.sendInitPresence(requestRoster=0)
 
@@ -63,11 +65,13 @@ class WebVideo(Video):
 
     def startWorkerThreads(self):
         for i in range(self.download_thread_num):
-            t = threading.Thread(target=self.processDlRequest, name='webvideo downloader')
+            t = threading.Thread(target=self.processDlRequest,
+                                 name='webvideo downloader')
             t.setDaemon(True)
             t.start()
 
-        t = threading.Thread(target=self.watchQueue, name='webvideo queue watcher')
+        t = threading.Thread(target=self.watchQueue,
+                             name='webvideo queue watcher')
         t.setDaemon(True)
         t.start()
 
@@ -115,7 +119,10 @@ class WebVideo(Video):
             self.__logger.debug('Processing request: %s' % data)
 
             path = settings['path']
-            file_name = os.path.join(path, '%s-%s' % (data['bodyOfferId'].replace(':', '-'),data['url'].split('/')[-1]))
+
+            file_name = os.path.join(path, '%s-%s' % 
+                                     (data['bodyOfferId'].replace(':', '-'),
+                                      data['url'].split('/')[-1]))
 
             self.downloadFile(data['url'], file_name)
 
@@ -129,7 +136,9 @@ class WebVideo(Video):
             ip = s.getsockname()[0]
             port = config.getPort()
 
-            data['url'] = 'http://%s:%s' % (ip, port) + urllib.quote('/%s/%s' % (share_name, os.path.split(file_name)[-1]))
+            data['url'] = 'http://%s:%s' % (ip, port) + \
+                          urllib.quote('/%s/%s' % (share_name, 
+                                       os.path.split(file_name)[-1]))
             data['duration'] = file_info['duration'] / 1000
             data['size'] = file_info['size']
 
@@ -163,7 +172,8 @@ class WebVideo(Video):
                 self.__logger.debug('File was alraedy done. %s' % url)
                 return
             else:
-                self.__logger.debug('File was not done but could not resume. %s' % url)
+                self.__logger.debug('File was not done but could not resume. %s'
+                                    % url)
                 outfile.close()
                 outfile = open(file_path, 'wb')
 
@@ -180,4 +190,3 @@ class WebVideo(Video):
         if os.path.exists(file_path):
             self.__logger.info('Deleting file %s' % file_path)
             os.unlink(file_path)
-

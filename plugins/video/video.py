@@ -46,8 +46,8 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def send_file(self, handler, container, name):
-        if handler.headers.getheader('Range') and \
-           handler.headers.getheader('Range') != 'bytes=0-':
+        if (handler.headers.getheader('Range') and
+            handler.headers.getheader('Range') != 'bytes=0-'):
             handler.send_response(206)
             handler.send_header('Connection', 'close')
             handler.send_header('Content-Type', 'video/x-tivo-mpeg')
@@ -182,8 +182,10 @@ class Video(Plugin):
                             ['TRANSCODE OPTIONS: ']+["%s" % (v) for k, v in transcode_options.items()]+\
                             ['SOURCE FILE: ']+[str(os.path.split(full_path)[1])]
         if not (full_path[-5:]).lower() == '.tivo':
-            if (int(vInfo['vHeight']) >= 720 and config.getTivoHeight >= 720) or \
-               (int(vInfo['vWidth']) >= 1280 and config.getTivoWidth >= 1280):
+            if ((int(vInfo['vHeight']) >= 720 and
+                 config.getTivoHeight >= 720) or
+                (int(vInfo['vWidth']) >= 1280 and
+                 config.getTivoWidth >= 1280)):
                 metadata['showingBits'] = '4096'
 
         metadata.update(self.metadata_basic(full_path))
