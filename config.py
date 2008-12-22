@@ -1,4 +1,5 @@
 import ConfigParser, os, sys
+import logging
 import re
 import random
 import string
@@ -355,3 +356,15 @@ def strtod(value):
     if byte == 'B': # B == Byte, b == bit
         value *= 8;
     return value
+
+def init_logging():
+    if (config.has_section('loggers') and
+        config.has_section('handlers') and
+        config.has_section('formatters')):
+
+        logging.config.fileConfig(config_files)
+
+    elif getDebug():
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
