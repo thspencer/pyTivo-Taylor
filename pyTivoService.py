@@ -17,6 +17,8 @@ class PyTivoService(win32serviceutil.ServiceFramework):
        
         import sys, os
 
+        config.init_logging()
+
         p = os.path.dirname(__file__)
     
         f = open(os.path.join(p, 'log.txt'), 'w')
