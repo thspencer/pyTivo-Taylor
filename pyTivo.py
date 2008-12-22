@@ -9,12 +9,9 @@ import config
 from plugin import GetPlugin
 
 def init_logging():
-    config.config_files
-    p = os.path.dirname(__file__)
-
-    if config.config.has_section('loggers') and\
-      config.config.has_section('handlers') and\
-      config.config.has_section('formatters'):
+    if (config.config.has_section('loggers') and
+        config.config.has_section('handlers') and
+        config.config.has_section('formatters')):
 
         logging.config.fileConfig(config.config_files)
 

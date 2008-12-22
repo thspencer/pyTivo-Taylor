@@ -18,17 +18,13 @@ class Beacon:
         return ';'.join(self.services)
 
     def format_beacon(self, conntype, services=True):
-        beacon = []
+        beacon = ['tivoconnect=1',
+                  'swversion=1',
+                  'method=%s' % conntype,
+                  'identity=%s' % config.getGUID(),
+                  'machine=%s' % gethostname(),
+                  'platform=pc']
 
-        guid = config.getGUID()
-
-        beacon.append('tivoconnect=1')
-        beacon.append('swversion=1')
-        beacon.append('method=%s' % conntype)
-        beacon.append('identity=%s' % guid)
-
-        beacon.append('machine=%s' % gethostname())
-        beacon.append('platform=pc')
         if services:
             beacon.append('services=' + self.format_services())
         else:

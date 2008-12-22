@@ -15,7 +15,7 @@ config_files = [
 ]
 config_exists = False
 for config_file in config_files:
-    if  os.path.exists(config_file):
+    if os.path.exists(config_file):
         config_exists = True
 if not config_exists:
     print 'ERROR:  pyTivo.conf does not exist.\n' + \
@@ -52,10 +52,10 @@ def getPort():
     return config.get('Server', 'Port')
 
 def get169Blacklist(tsn):  # tivo does not pad 16:9 video
-    return tsn != '' and not isHDtivo(tsn) and not get169Letterbox(tsn)
+    return tsn and not isHDtivo(tsn) and not get169Letterbox(tsn)
 
 def get169Letterbox(tsn):  # tivo pads 16:9 video for 4:3 display
-    return tsn != '' and tsn[:3] in ('649')
+    return tsn and tsn[:3] in ('649')
 
 def get169Setting(tsn):
     if not tsn:
@@ -150,7 +150,7 @@ def getFFmpegPrams(tsn):
         return None
 
 def isHDtivo(tsn):  # tsn's of High Definition Tivo's
-    return tsn != '' and tsn[:3] in ['648', '652', '658']
+    return tsn and tsn[:3] in ['648', '652', '658']
 
 def getValidWidths():
     return [1920, 1440, 1280, 720, 704, 544, 480, 352]
