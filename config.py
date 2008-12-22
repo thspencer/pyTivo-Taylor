@@ -75,26 +75,24 @@ def get169Setting(tsn):
 
 def getShares(tsn=''):
     shares = [(section, dict(config.items(section)))
-                for section in config.sections()
-                if not (
-                    section.startswith('_tivo_')
-                    or section in ('Server', 'loggers', 'handlers', 'formatters')
-                    or section.startswith('logger_')
-                    or section.startswith('handler_')
-                    or section.startswith('formatter_')
-                )
+              for section in config.sections()
+              if not (section.startswith(('_tivo_', 'logger_', 'handler_',
+                                          'formatter_'))
+                      or section in ('Server', 'loggers', 'handlers',
+                                     'formatters')
+              )
     ]
 
-    if config.has_section('_tivo_' + tsn):
-        if config.has_option('_tivo_' + tsn, 'shares'):
-            # clean up leading and trailing spaces & make sure ref is valid
-            tsnshares = []
-            for x in config.get('_tivo_' + tsn, 'shares').split(','):
-                y = x.lstrip().rstrip()
-                if config.has_section(y):
-                    tsnshares += [(y, dict(config.items(y)))]
-            if tsnshares:
-                shares = tsnshares
+    tsnsect = '_tivo_' + tsn
+    if config.has_section(tsnsect) and config.has_option(tsnsect, 'shares'):
+        # clean up leading and trailing spaces & make sure ref is valid
+        tsnshares = []
+        for x in config.get(tsnsect, 'shares').split(','):
+            y = x.strip()
+            if config.has_section(y):
+                tsnshares.append((y, dict(config.items(y))))
+        if tsnshares:
+            shares = tsnshares
 
     return shares
 
