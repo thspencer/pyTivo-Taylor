@@ -96,25 +96,6 @@ def getShares(tsn=''):
             if tsnshares:
                 shares = tsnshares
 
-    for name, data in shares:
-        if not data.get('auto_subshares', 'False').lower() == 'true':
-            continue
-
-        base_path = data['path']
-        try:
-            for item in os.listdir(base_path):
-                item_path = os.path.join(base_path, item)
-                if not os.path.isdir(item_path) or item.startswith('.'):
-                    continue
-
-                new_name = name + '/' + item
-                new_data = dict(data)
-                new_data['path'] = item_path
-
-                shares.append((new_name, new_data))
-        except:
-            pass
-
     return shares
 
 def getDebug():

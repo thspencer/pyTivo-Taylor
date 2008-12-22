@@ -4,25 +4,16 @@ import os, sys, ConfigParser
 
 class EditShare(tkSimpleDialog.Dialog):
 
-    def __init__(self, parent, title=None, name='', path='', plugin='',
-                 subshares=0):
+    def __init__(self, parent, title=None, name='', path='', plugin=''):
         self.name = name
         self.path = path
         self.plugin = StringVar()
         self.plugin.set(plugin)
-        self.subshares = IntVar()
-        self.subshares.set(subshares)
         tkSimpleDialog.Dialog.__init__(self, parent, title)
 
     def get_dir(self):
         self.e2.delete(0, END)
         self.e2.insert(0, os.path.normpath(tkFileDialog.askdirectory()))
-
-    def sub_show(self):
-        if self.plugin.get() == 'video':
-            self.subbutt.grid(row=2, column=1)
-        else:
-            self.subbutt.grid_forget()
 
     def body(self, master):
         Label(master, text="Name:").grid(row=0)
@@ -42,24 +33,19 @@ class EditShare(tkSimpleDialog.Dialog):
         self.e2.grid(row=1, column=1, sticky=W+E)
         browse.grid(row=1, column=2)
 
-        self.subbutt = Checkbutton(master, text='Auto subshares', 
-                                   variable=self.subshares)
-
         if not self.plugin.get():
             self.plugin.set('video')
 
-        self.sub_show()
-
         for i, name in zip(xrange(3), ('video', 'music', 'photo')):
             b = Radiobutton(master, text=name, variable=self.plugin, 
-                value=name, command=self.sub_show).grid(row=i, column=3)
+                value=name).grid(row=i, column=3)
 
         return self.e1 # initial focus
 
     def apply(self):
         name = self.e1.get()
         path = self.e2.get()
-        self.result = name, path, self.plugin.get(), self.subshares.get()
+        self.result = name, path, self.plugin.get()
 
 class pyTivoConfigurator(Frame):
 
@@ -107,13 +93,10 @@ class pyTivoConfigurator(Frame):
     def add(self):
         share = EditShare(self, title='New Share')
         if share.result:
-            sharename, path, plugin, subshares = share.result
+            sharename, path, plugin = share.result
             self.config.add_section(sharename)
             self.config.set(sharename, 'type', plugin)
             self.config.set(sharename, 'path', path)
-            if subshares and plugin == 'video':
-                self.config.set(name, 'auto_subshares', 'True')
-
             self.updateContainerList()
 
     def delete(self):
@@ -137,27 +120,16 @@ class pyTivoConfigurator(Frame):
         path = self.config.get(name, 'path')
         plugin = self.config.get(name, 'type')
 
-        if self.config.has_option(name, 'auto_subshares') and \
-           self.config.getboolean(name, 'auto_subshares'):
-            subshares = 1
-        else:
-            subshares = 0
-
         share = EditShare(self, title='Edit Share', name=name, path=path,
-                          plugin=plugin, subshares=subshares)
+                          plugin=plugin)
         if share.result:
-            name, path, plugin, subshares = share.result
+            name, path, plugin = share.result
             if name != self.section:
                 self.config.remove_section(self.section)
                 self.config.add_section(name)
                 self.section = name
             self.config.set(name, 'type', plugin)
             self.config.set(name, 'path', path)
-            if subshares and plugin == 'video':
-                self.config.set(name, 'auto_subshares', 'True')
-            else:
-                self.config.remove_option(name, 'auto_subshares')
-
             self.updateContainerList()
 
     def updateContainerList(self):
