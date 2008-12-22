@@ -28,7 +28,7 @@ if mswindows:
     patchSubprocess()
 
 def output_video(inFile, outFile, tsn=''):
-    if tivo_compatable(inFile, tsn)[0]:
+    if tivo_compatible(inFile, tsn)[0]:
         logger.debug('%s is tivo compatible' % inFile)
         f = file(inFile, 'rb')
         shutil.copyfileobj(f, outFile)
@@ -411,7 +411,7 @@ def select_aspect(inFile, tsn = ''):
 
             return settings
 
-def tivo_compatable(inFile, tsn = ''):
+def tivo_compatible(inFile, tsn = ''):
     supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], 
                       [480, 480], [352, 480]]
     vInfo =  video_info(inFile)
