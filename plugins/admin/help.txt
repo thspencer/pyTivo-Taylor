@@ -309,16 +309,6 @@ Description: Sets the base path to your media content. While pyTivo will start w
 Example Settings: Windows = C:\videos | Linux = /home/user/media
 Available In: Shares
 
-auto_subshares
-
-Default Setting: false
-Valid Entries: True/False
-Required: No
-Skill: Moderate
-Description: Subfolders of the share paths you define will be seen by pyTivo and displayed as subfolders in the Now Playing List.
-Example Settings: True/False
-Available In: Shares
-
 aspect169
 
 Default Setting: True
