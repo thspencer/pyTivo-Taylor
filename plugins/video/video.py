@@ -251,8 +251,6 @@ class Video(Plugin):
 
             videos.append(video)
 
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(CONTAINER_TEMPLATE)
         t.container = cname
         t.name = subcname
@@ -265,6 +263,8 @@ class Video(Plugin):
         t.guid = config.getGUID()
         t.tivos = handler.tivos
         t.tivo_names = handler.tivo_names
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)
 
     def TVBusQuery(self, handler, query):
@@ -278,11 +278,11 @@ class Video(Plugin):
         if file_info['valid']:
             file_info.update(self.metadata_full(file_path, tsn))
 
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(TVBUS_TEMPLATE)
         t.video = file_info
         t.escape = escape
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)
 
     def XSL(self, handler, query):

@@ -78,10 +78,10 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     except:
         kill(ffmpeg.pid)
 
-def select_audiocodec(isQuery, inFile, tsn = ''):
+def select_audiocodec(isQuery, inFile, tsn=''):
     # Default, compatible with all TiVo's
     codec = 'ac3'
-    vInfo =  video_info(inFile)
+    vInfo = video_info(inFile)
     codectype = vInfo['vCodec']
     if config.getAudioCodec(tsn) == None:
         if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
@@ -110,17 +110,18 @@ def select_audiocodec(isQuery, inFile, tsn = ''):
 
 def select_audiofr(inFile, tsn):
     freq = '48000'  #default
-    vInfo =  video_info(inFile)
+    vInfo = video_info(inFile)
     if not vInfo['aFreq'] == None and vInfo['aFreq'] in ('44100', '48000'):
         # compatible frequency
         freq = vInfo['aFreq']
     if config.getAudioFR(tsn) != None:
         freq = config.getAudioFR(tsn)
-    return '-ar '+freq
+    return '-ar ' + freq
 
 def select_audioch(tsn):
-    if config.getAudioCH(tsn) != None:
-        return '-ac '+config.getAudioCH(tsn)
+    ch = config.getAudioCH(tsn)
+    if ch:
+        return '-ac ' + ch
     return ''
 
 def select_audiolang(inFile, tsn):
@@ -141,18 +142,18 @@ def select_audiolang(inFile, tsn):
 
 def select_videofps(inFile, tsn):
     vInfo =  video_info(inFile)
-    fps = '-r 29.97'  #default
+    fps = '-r 29.97'  # default
     if config.isHDtivo(tsn) and vInfo['vFps'] not in BAD_MPEG_FPS:
         fps = ' '
     if config.getVideoFPS(tsn) != None:
-        fps = '-r '+config.getVideoFPS(tsn)
+        fps = '-r ' + config.getVideoFPS(tsn)
     return fps
 
 def select_videocodec(tsn):
-    codec = 'mpeg2video'  #default
-    if config.getVideoCodec(tsn) != None:
-        codec = config.getVideoCodec(tsn)
-    return '-vcodec '+codec
+    codec = config.getVideoCodec(tsn)
+    if not codec:
+        codec = 'mpeg2video'  # default
+    return '-vcodec ' + codec
 
 def select_videobr(inFile, tsn):
     return '-b ' + str(select_videostr(inFile, tsn) / 1000) + 'k'
@@ -178,15 +179,16 @@ def select_buffsize(tsn):
     return '-bufsize ' + config.getBuffSize(tsn)
 
 def select_ffmpegprams(tsn):
-    if config.getFFmpegPrams(tsn) != None:
-        return config.getFFmpegPrams(tsn)
-    return ''
+    params = config.getFFmpegPrams(tsn)
+    if not params:
+        params = ''
+    return params
 
 def select_format(tsn):
-    fmt = 'vob'
-    if config.getFormat(tsn) != None:
-        fmt = config.getFormat(tsn)
-    return '-f ' + fmt + ' -'
+    fmt = config.getFormat(tsn)
+    if not fmt:
+        fmt = 'vob'
+    return '-f %s -' % fmt
 
 def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
@@ -198,11 +200,11 @@ def select_aspect(inFile, tsn = ''):
 
     aspect169 = config.get169Setting(tsn)
 
-    logging.debug('aspect169:%s' % aspect169)
+    logging.debug('aspect169: %s' % aspect169)
 
     optres = config.getOptres(tsn)
 
-    logging.debug('optres:%s' % optres)
+    logging.debug('optres: %s' % optres)
 
     if optres:
         optHeight = config.nearestTivoHeight(vInfo['vHeight'])
@@ -213,7 +215,7 @@ def select_aspect(inFile, tsn = ''):
             TIVO_WIDTH = optWidth
 
     d = gcd(vInfo['vHeight'], vInfo['vWidth'])
-    ratio = (vInfo['vWidth'] * 100) / vInfo['vHeight']
+    ratio = vInfo['vWidth'] * 100 / vInfo['vHeight']
     rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
 
     logger.debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
@@ -278,13 +280,13 @@ def select_aspect(inFile, tsn = ''):
 
         # If video is wider than 4:3 add top and bottom padding
 
-        if (ratio > 133): # Might be 16:9 file, or just need padding on 
-                          # top and bottom
+        if ratio > 133: # Might be 16:9 file, or just need padding on 
+                        # top and bottom
 
-            if aspect169 and (ratio > 135): # If file would fall in 4:3 
-                                            # assume it is supposed to be 4:3
+            if aspect169 and ratio > 135: # If file would fall in 4:3 
+                                          # assume it is supposed to be 4:3
 
-                if (ratio > 177): # too short needs padding top and bottom
+                if ratio > 177: # too short needs padding top and bottom
                     endHeight = int(((TIVO_WIDTH * vInfo['vHeight']) /
                                     vInfo['vWidth']) * multiplier16by9)
                     settings.append('-aspect') 
@@ -416,10 +418,10 @@ def select_aspect(inFile, tsn = ''):
 
             return settings
 
-def tivo_compatible(inFile, tsn = ''):
-    supportedModes = [[720, 480], [704, 480], [544, 480], [528, 480], 
-                      [480, 480], [352, 480]]
-    vInfo =  video_info(inFile)
+def tivo_compatible(inFile, tsn=''):
+    supportedModes = [(720, 480), (704, 480), (544, 480),
+                      (528, 480), (480, 480), (352, 480)]
+    vInfo = video_info(inFile)
 
     while True:
         if (inFile[-5:]).lower() == '.tivo':
@@ -462,7 +464,7 @@ def tivo_compatible(inFile, tsn = ''):
                               vInfo['kbps'])
             break
 
-        if config.getAudioLang(tsn) is not None:
+        if config.getAudioLang(tsn):
             if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
                 message = (False, ('TRANSCODE=YES, %s preferred audio ' +
                                    'track exists.') % config.getAudioLang(tsn))
@@ -493,7 +495,7 @@ def tivo_compatible(inFile, tsn = ''):
                 break
 
         for mode in supportedModes:
-            if (mode[0], mode[1]) == (vInfo['vWidth'], vInfo['vHeight']):
+            if mode == (vInfo['vWidth'], vInfo['vHeight']):
                 message = (True, 'TRANSCODE=NO, %s x %s is valid.' %
                                  (vInfo['vWidth'], vInfo['vHeight']))
                 break
@@ -521,8 +523,8 @@ def video_info(inFile):
         info_cache[inFile] = (mtime, vInfo)
         logger.debug('VALID, ends in .tivo. %s' % inFile)
         return vInfo
-    
-    cmd = [ffmpeg_path(), '-i', inFile ]
+
+    cmd = [ffmpeg_path(), '-i', inFile]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
     err_tmp = tempfile.TemporaryFile()
     ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
@@ -573,10 +575,10 @@ def video_info(inFile):
         # Allow override only if it is mpeg2 and frame rate was doubled 
         # to 59.94
 
-        if (not vInfo['vFps'] == '29.97') and (vInfo['vCodec'] == 'mpeg2video'):
+        if vInfo['vCodec'] == 'mpeg2video' and vInfo['vFps'] != '29.97':
             # First look for the build 7215 version
             rezre = re.compile(r'.*film source: 29.97.*')
-            x = rezre.search(output.lower() )
+            x = rezre.search(output.lower())
             if x:
                 logger.debug('film source: 29.97 setting vFps to 29.97')
                 vInfo['vFps'] = '29.97'
@@ -585,7 +587,7 @@ def video_info(inFile):
                 rezre = re.compile(r'.*frame rate differs from container ' +
                                    r'frame rate: 29.97.*')
                 logger.debug('Bug in VideoReDo')
-                x = rezre.search(output.lower() )
+                x = rezre.search(output.lower())
                 if x:
                     vInfo['vFps'] = '29.97'
     else:
@@ -604,7 +606,7 @@ def video_info(inFile):
     else:
         vInfo['millisecs'] = 0
 
-    #get bitrate of source for tivo compatibility test.
+    # get bitrate of source for tivo compatibility test.
     rezre = re.compile(r'.*bitrate: (.+) (?:kb/s).*')
     x = rezre.search(output)
     if x:
@@ -613,7 +615,7 @@ def video_info(inFile):
         vInfo['kbps'] = None
         logger.debug('failed at kbps')
 
-    #get audio bitrate of source for tivo compatibility test.
+    # get audio bitrate of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: .+, (.+) (?:kb/s).*')
     x = rezre.search(output)
     if x:
@@ -622,7 +624,7 @@ def video_info(inFile):
         vInfo['aKbps'] = None
         logger.debug('failed at aKbps')
 
-    #get audio codec of source for tivo compatibility test.
+    # get audio codec of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: ([^,]+),.*')
     x = rezre.search(output)
     if x:
@@ -631,7 +633,7 @@ def video_info(inFile):
         vInfo['aCodec'] = None
         logger.debug('failed at aCodec')
 
-    #get audio frequency of source for tivo compatibility test.
+    # get audio frequency of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: .+, (.+) (?:Hz).*')
     x = rezre.search(output)
     if x:
@@ -640,7 +642,7 @@ def video_info(inFile):
         vInfo['aFreq'] = None
         logger.debug('failed at aFreq')
 
-    #get par.
+    # get par.
     rezre = re.compile(r'.*Video: .+PAR ([0-9]+):([0-9]+) DAR [0-9:]+.*')
     x = rezre.search(output)
     if x and x.group(1) != "0" and x.group(2) != "0":
@@ -649,7 +651,7 @@ def video_info(inFile):
     else:
         vInfo['par1'], vInfo['par2'] = None, None
  
-    #get dar.
+    # get dar.
     rezre = re.compile(r'.*Video: .+DAR ([0-9]+):([0-9]+).*')
     x = rezre.search(output)
     if x and x.group(1) != "0" and x.group(2) != "0":
@@ -658,7 +660,7 @@ def video_info(inFile):
     else:
         vInfo['dar1'], vInfo['dar2'] = None, None
 
-    #get Video Stream mapping.
+    # get Video Stream mapping.
     rezre = re.compile(r'([0-9]+\.[0-9]+).*: Video:.*')
     x = rezre.search(output)
     if x:
@@ -667,8 +669,7 @@ def video_info(inFile):
         vInfo['mapVideo'] = None
         logger.debug('failed at mapVideo')
 
-
-    #get Audio Stream mapping.
+    # get Audio Stream mapping.
     rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:.*')
     x = rezre.search(output)
     amap = []
@@ -679,7 +680,6 @@ def video_info(inFile):
         amap.append(('', ''))
         logger.debug('failed at mapAudio')
     vInfo['mapAudio'] = amap
-
 
     videoPlugin = GetPlugin('video')
     metadata = videoPlugin.getMetadataFromTxt(inFile)
@@ -735,7 +735,7 @@ def win32kill(pid):
     ctypes.windll.kernel32.TerminateProcess(handle, -1)
     ctypes.windll.kernel32.CloseHandle(handle)
 
-def gcd(a,b):
+def gcd(a, b):
     while b:
         a, b = b, a % b
     return a

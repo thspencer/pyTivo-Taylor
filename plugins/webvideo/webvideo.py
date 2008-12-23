@@ -61,7 +61,7 @@ class WebVideo(Video):
 
         for user_name in xmpp_info['presence_list']:
             self.__logger.debug('Sending presence to %s' % user_name)
-            jid=xmpp.protocol.JID(user_name)
+            jid = xmpp.protocol.JID(user_name)
             cl.sendPresence(jid)
 
         t = threading.Thread(target=self.processXMPP, args=(cl,))

@@ -21,8 +21,8 @@ for config_file in config_files:
     if os.path.exists(config_file):
         config_exists = True
 if not config_exists:
-    print 'ERROR:  pyTivo.conf does not exist.\n' + \
-          'You must create this file before running pyTivo.'
+    print ('ERROR: pyTivo.conf does not exist.\n' +
+           'You must create this file before running pyTivo.')
     sys.exit(1)
 config.read(config_files)
 
@@ -58,16 +58,17 @@ def get169Blacklist(tsn):  # tivo does not pad 16:9 video
     return tsn and not isHDtivo(tsn) and not get169Letterbox(tsn)
 
 def get169Letterbox(tsn):  # tivo pads 16:9 video for 4:3 display
-    return tsn and tsn[:3] in ('649')
+    return tsn and tsn[:3] in ['649']
 
 def get169Setting(tsn):
     if not tsn:
         return True
 
-    if config.has_section('_tivo_' + tsn):
-        if config.has_option('_tivo_' + tsn, 'aspect169'):
+    tsnsect = '_tivo_' + tsn
+    if config.has_section(tsnsect):
+        if config.has_option(tsnsect, 'aspect169'):
             try:
-                return config.getboolean('_tivo_' + tsn, 'aspect169')
+                return config.getboolean(tsnsect, 'aspect169')
             except ValueError:
                 pass
 
@@ -105,7 +106,7 @@ def getDebug():
     except NoOptionError, ValueError:
         return False
 
-def getOptres(tsn = None):
+def getOptres(tsn=None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
             return config.getboolean('_tivo_' + tsn, 'optres')
@@ -213,9 +214,9 @@ def getTivoWidth(tsn):
 def _trunc64(i):
     return max(int(strtod(i)) / 64000, 1) * 64
 
-def getAudioBR(tsn = None):
-    #convert to non-zero multiple of 64 to ensure ffmpeg compatibility
-    #compare audio_br to max_audio_br and return lowest
+def getAudioBR(tsn=None):
+    # convert to non-zero multiple of 64 to ensure ffmpeg compatibility
+    # compare audio_br to max_audio_br and return lowest
     if tsn and config.has_section('_tivo_' + tsn):
         try:
             audiobr = _trunc64(config.get('_tivo_' + tsn, 'audio_br'))
@@ -231,7 +232,7 @@ def getAudioBR(tsn = None):
 def _k(i):
     return str(int(strtod(i)) / 1000) + 'k'
 
-def getVideoBR(tsn = None):
+def getVideoBR(tsn=None):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
             return _k(config.get('_tivo_' + tsn, 'video_br'))
@@ -257,11 +258,12 @@ def getVideoPCT():
     except NoOptionError:
         return 70
 
-def getBuffSize(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        if config.has_option('_tivo_' + tsn, 'bufsize'):
+def getBuffSize(tsn=None):
+    tsnsect = '_tivo_' + tsn
+    if tsn and config.has_section(tsnsect):
+        if config.has_option(tsnsect, 'bufsize'):
             try:
-                return _k(config.get('_tivo_' + tsn, 'bufsize'))
+                return _k(config.get(tsnsect, 'bufsize'))
             except NoOptionError:
                 pass
     if config.has_option('Server', 'bufsize'):
@@ -274,8 +276,8 @@ def getBuffSize(tsn = None):
     else:
         return '1024k'
 
-def getMaxAudioBR(tsn = None):
-    #convert to non-zero multiple of 64 for ffmpeg compatibility
+def getMaxAudioBR(tsn=None):
+    # convert to non-zero multiple of 64 for ffmpeg compatibility
     if tsn and config.has_section('_tivo_' + tsn):
         try:
             return _trunc64(config.get('_tivo_' + tsn, 'max_audio_br'))
@@ -309,11 +311,12 @@ def getAudioFR(tsn=None):
 def getAudioLang(tsn=None):
     return get_tsn('audio_lang', tsn)
 
-def getCopyTS(tsn = None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        if config.has_option('_tivo_' + tsn, 'copy_ts'):
+def getCopyTS(tsn=None):
+    tsnsect = '_tivo_' + tsn
+    if tsn and config.has_section(tsnsect):
+        if config.has_option(tsnsect, 'copy_ts'):
             try:
-                return config.get('_tivo_' + tsn, 'copy_ts')
+                return config.get(tsnsect, 'copy_ts')
             except NoOptionError, ValueError:
                 pass
     if config.has_option('Server', 'copy_ts'):
@@ -329,7 +332,7 @@ def getVideoFPS(tsn=None):
 def getVideoCodec(tsn=None):
     return get_tsn('video_codec', tsn)
 
-def getFormat(tsn = None):
+def getFormat(tsn=None):
     return get_tsn('format', tsn)
 
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
@@ -342,7 +345,7 @@ def strtod(value):
                 'T': 12,  'P': 15,  'E': 18,  'Z': 21,  'Y': 24}
     p = re.compile(r'^(\d+)(?:([yzafpnumcdhkKMGTPEZY])(i)?)?([Bb])?$')
     m = p.match(value)
-    if m is None:
+    if not m:
         raise SyntaxError('Invalid bit value syntax')
     (coef, prefix, power, byte) = m.groups()
     if prefix is None:

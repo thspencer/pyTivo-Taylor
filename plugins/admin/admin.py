@@ -85,8 +85,8 @@ p.pop()
 p = os.path.sep.join(p)
 config_file_path = os.path.join(p, 'pyTivo.conf')
 
-status = {} #Global variable to control download threads
-tivo_cache = {} #Cache of TiVo NPL
+status = {} # Global variable to control download threads
+tivo_cache = {} # Cache of TiVo NPL
 
 def tag_data(element, tag):
     for name in tag.split('/'):
@@ -109,18 +109,18 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(REDIRECT_TEMPLATE)
         t.container = cname
         t.time = '3'
         t.url = '/TiVoConnect?Command='+ last_page +'&Container=' + quote(cname)
         t.text = RESET_MSG % (quote(last_page), quote(cname))
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)
         logging.getLogger('pyTivo.admin').info('pyTivo has been soft reset.')
 
     def Admin(self, handler, query):
-        #Read config file new each time in case there was any outside edits
+        # Read config file new each time in case there was any outside edits
         config = ConfigParser.ConfigParser()
         config.read(config_file_path)
 
@@ -134,8 +134,6 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(SETTINGS_TEMPLATE)
         t.container = cname
         t.quote = quote
@@ -148,6 +146,8 @@ class Admin(Plugin):
                         if section.startswith('_tivo_')]
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)
 
     def UpdateSettings(self, handler, query):
@@ -168,7 +168,7 @@ class Admin(Plugin):
             config.set('Server', new_setting, new_value)
 
         sections = query['Section_Map'][0].split(']')
-        sections.pop() #last item is junk
+        sections.pop() # last item is junk
         for section in sections:
             ID, name = section.split('|')
             if query[ID][0] == "Delete_Me":
@@ -198,22 +198,22 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(REDIRECT_TEMPLATE)
         t.container = cname
         t.time = '10'
         t.url = '/TiVoConnect?Command=Admin&Container=' + quote(cname)
         t.text = SETTINGS1 % quote(cname)
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)
 
     def NPL(self, handler, query):
-        shows_per_page = 50 #Change this to alter the number of shows returned
+        shows_per_page = 50 # Change this to alter the number of shows returned
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         folder = ''
         AnchorItem = ''
-        AnchorOffset= ''
+        AnchorOffset = ''
         for name, data in config.getShares():
             if cname == name:
                 tivo_mak = data.get('tivo_mak', '')
@@ -243,33 +243,33 @@ class Admin(Plugin):
             if theurl in tivo_cache: #check if we've accessed this page before
                 if (tivo_cache[theurl]['thepage'] == '' or
                    (time.time() - tivo_cache[theurl]['thepage_time']) >= 60):
-                    #if page is empty or old then retreive it
+                    # if page is empty or old then retreive it
                     try:
                         handle = urllib2.urlopen(r)
                     except IOError, e:
-                        handler.send_response(200)
-                        handler.end_headers()
                         t = Template(REDIRECT_TEMPLATE)
                         t.container = cname
                         t.time = '20'
                         t.url = ('/TiVoConnect?Command=NPL&Container=' +
                                  quote(cname))
                         t.text = UNABLE % (tivoIP, quote(cname))
+                        handler.send_response(200)
+                        handler.end_headers()
                         handler.wfile.write(t)
                         return
                     tivo_cache[theurl]['thepage'] = handle.read()
                     tivo_cache[theurl]['thepage_time'] = time.time()
-            else: #not in cache
+            else: # not in cache
                 try:
                     handle = urllib2.urlopen(r)
                 except IOError, e:
-                    handler.send_response(200)
-                    handler.end_headers()
                     t = Template(REDIRECT_TEMPLATE)
                     t.container = cname
                     t.time = '20'
                     t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
                     t.text = UNABLE % (tivoIP, quote(cname))
+                    handler.send_response(200)
+                    handler.end_headers()
                     handler.wfile.write(t)
                     return
                 tivo_cache[theurl] = {}
@@ -337,9 +337,6 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html; charset=UTF-8')
-        handler.end_headers()
         t = Template(NPL_TEMPLATE)
         t.quote = quote
         t.folder = folder
@@ -358,13 +355,16 @@ class Admin(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
+        handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html; charset=UTF-8')
+        handler.end_headers()
         handler.wfile.write(unicode(t).encode('utf-8'))
 
     def get_tivo_file(self, url, mak, tivoIP, outfile):
-        #global status
+        # global status
         cj = cookielib.LWPCookieJar()
 
-        r=urllib2.Request(url)
+        r = urllib2.Request(url)
         auth_handler = urllib2.HTTPDigestAuthHandler()
         auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', mak)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
@@ -374,9 +374,9 @@ class Admin(Plugin):
         try:
             handle = urllib2.urlopen(r)
         except IOError, e:
-            #If we get "Too many transfers error" try a second time.  
-            #For some reason urllib2 does not properly close connections 
-            #when a transfer is canceled.
+            # If we get "Too many transfers error" try a second time.  
+            # For some reason urllib2 does not properly close 
+            # connections when a transfer is canceled.
             if e.code == 503:
                 try:
                     handle = urllib2.urlopen(r)
@@ -393,18 +393,19 @@ class Admin(Plugin):
         kilobytes = 0
         start_time = time.time()
         output = handle.read(1024)
-        while status[url]['running'] and output != '':
+        while status[url]['running'] and output:
             kilobytes += 1
             f.write(output)
-            if ((time.time() - start_time) >= 5):
-                status[url]['rate'] = int(kilobytes/(time.time() - start_time))
+            now = time.time()
+            elapsed = now - start_time
+            if elapsed >= 5:
+                status[url]['rate'] = int(kilobytes / elapsed)
                 kilobytes = 0
-                start_time = time.time()
+                start_time = now
             output = handle.read(1024)
         status[url]['running'] = False
         handle.close()
         f.close()
-        return
 
     def ToGo(self, handler, query):
         subcname = query['Container'][0]
@@ -414,6 +415,9 @@ class Admin(Plugin):
             if cname == name:
                 tivo_mak = data.get('tivo_mak', '')
                 togo_path = data.get('togo_path', '')
+        t = Template(REDIRECT_TEMPLATE)
+        command = query['Redirect'][0]
+        params = (command, quote(cname), tivoIP)
         if tivo_mak and togo_path:
             parse_url = urlparse(str(query['Url'][0]))
             theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
@@ -428,25 +432,16 @@ class Admin(Plugin):
             thread.start_new_thread(Admin.get_tivo_file,
                                     (self, theurl, tivo_mak, tivoIP, outfile))
 
-            handler.send_response(200)
-            handler.end_headers()
-            t = Template(REDIRECT_TEMPLATE)
-            command = query['Redirect'][0]
             t.time = '3'
-            t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
-                     quote(cname) + '&TiVo=' + tivoIP)
-            t.text = TRANS_INIT % (command, quote(cname), tivoIP)
-            handler.wfile.write(t)
+            t.text = TRANS_INIT % params
         else:
-            handler.send_response(200)
-            handler.end_headers()
-            t = Template(REDIRECT_TEMPLATE)
-            command = query['Redirect'][0]
             t.time = '10'
-            t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
-                     quote(cname) + '&TiVo=' + tivoIP)
-            t.text = MISSING % (command, quote(cname), tivoIP)
-            handler.wfile.write(t)
+            t.text = MISSING % params
+        t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
+                 quote(cname) + '&TiVo=' + tivoIP)
+        handler.send_response(200)
+        handler.end_headers()
+        handler.wfile.write(t)
 
     def ToGoStop(self, handler, query):
         parse_url = urlparse(str(query['Url'][0]))
@@ -459,15 +454,14 @@ class Admin(Plugin):
         cname = subcname.split('/')[0]
         tivoIP = query['TiVo'][0]
         command = query['Redirect'][0]
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(REDIRECT_TEMPLATE)
         t.time = '3'
         t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
                  quote(cname) + '&TiVo=' + tivoIP)
         t.text = TRANS_STOP % (command, quote(cname), tivoIP)
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)
-
 
     def SaveNPL(self, handler, query):
         config = ConfigParser.ConfigParser()
@@ -484,12 +478,12 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        handler.send_response(200)
-        handler.end_headers()
         t = Template(REDIRECT_TEMPLATE)
         t.container = cname
         t.time = '2'
         t.url = ('/TiVoConnect?last_page=NPL&Command=Reset&Container=' +
                  quote(cname))
         t.text = SETTINGS2 % quote(cname)
+        handler.send_response(200)
+        handler.end_headers()
         handler.wfile.write(t)

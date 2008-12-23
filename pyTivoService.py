@@ -27,7 +27,6 @@ class PyTivoService(win32serviceutil.ServiceFramework):
         f = open(os.path.join(p, 'log.txt'), 'w')
         sys.stdout = f
         sys.stderr = f
-    
 
         port = config.getPort()
 
