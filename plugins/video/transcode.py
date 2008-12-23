@@ -48,7 +48,6 @@ def output_video(inFile, outFile, tsn=''):
         transcode(False, inFile, outFile, tsn)
 
 def transcode(isQuery, inFile, outFile, tsn=''):
-
     settings = {'video_codec': select_videocodec(tsn),
                 'video_br': select_videobr(inFile, tsn),
                 'video_fps': select_videofps(inFile, tsn),
