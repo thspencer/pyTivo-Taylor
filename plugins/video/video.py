@@ -200,9 +200,9 @@ class Video(Plugin):
         sec = duration_delta.seconds % 60
         hours = min / 60
         min = min % 60
-        metadata['iso_duration'] = ('P' + str(duration_delta.days) +
-                                    'DT' + str(hours) + 'H' + str(min) +
-                                    'M' + str(sec) + 'S')
+        metadata['iso_duration'] = ('P%sDT%sH%sM%sS' % 
+                                    (duration_delta.days, hours, min, sec))
+
         return metadata
 
     def QueryContainer(self, handler, query):

@@ -37,7 +37,7 @@ for section, settings in config.getShares():
             build_recursive_list(settings.get('path'))
 
 b = beacon.Beacon()
-b.add_service('TiVoMediaServer:' + str(port) + '/http')
+b.add_service('TiVoMediaServer:%s/http' % port)
 b.start()
 if 'listen' in config.getBeaconAddresses():
     b.listen()

@@ -253,15 +253,13 @@ def select_aspect(inFile, tsn = ''):
 
     if (rwidth, rheight) in [(1, 1)] and vInfo['par1'] == '8:9':
         logger.debug('File + PAR is within 4:3.')
-        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' +
-                str(TIVO_HEIGHT)]
+        return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
     elif ((rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), 
                                 (59, 72), (59, 36), (59, 54)] or
           vInfo['dar1'] == '4:3'):
         logger.debug('File is within 4:3 list.')
-        return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + 
-                str(TIVO_HEIGHT)]
+        return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
     elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), 
                                 (59, 27)] or vInfo['dar1'] == '16:9')
@@ -270,11 +268,11 @@ def select_aspect(inFile, tsn = ''):
 
         if config.get169Blacklist(tsn) or (aspect169 and 
                                            config.get169Letterbox(tsn)):
-            return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + 
-                    str(TIVO_HEIGHT)]
+            return ['-aspect', '4:3', '-s', '%sx%s' %
+                    (TIVO_WIDTH, TIVO_HEIGHT)]
         else:
-            return ['-aspect', '16:9', '-s', str(TIVO_WIDTH) + 'x' + 
-                    str(TIVO_HEIGHT)]
+            return ['-aspect', '16:9', '-s', '%sx%s' %
+                    (TIVO_WIDTH, TIVO_HEIGHT)]
     else:
         settings = []
 
@@ -299,7 +297,7 @@ def select_aspect(inFile, tsn = ''):
                         endHeight -= 1
                     if endHeight < TIVO_HEIGHT * 0.99:
                         settings.append('-s')
-                        settings.append(str(TIVO_WIDTH) + 'x' + str(endHeight))
+                        settings.append('%sx%s' % (TIVO_WIDTH, endHeight))
 
                         topPadding = ((TIVO_HEIGHT - endHeight) / 2)
                         if topPadding % 2:
@@ -313,8 +311,7 @@ def select_aspect(inFile, tsn = ''):
                     else:   # if only very small amount of padding 
                             # needed, then just stretch it
                         settings.append('-s')
-                        settings.append(str(TIVO_WIDTH) + 'x' +
-                                        str(TIVO_HEIGHT))
+                        settings.append('%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT))
 
                     logger.debug(('16:9 aspect allowed, file is wider ' +
                                   'than 16:9 padding top and bottom\n%s') %
@@ -333,7 +330,7 @@ def select_aspect(inFile, tsn = ''):
                         endWidth -= 1
                     if endWidth < (TIVO_WIDTH - 10):
                         settings.append('-s')
-                        settings.append(str(endWidth) + 'x' + str(TIVO_HEIGHT))
+                        settings.append('%sx%s' % (endWidth, TIVO_HEIGHT))
 
                         leftPadding = ((TIVO_WIDTH - endWidth) / 2)
                         if leftPadding % 2:
@@ -347,8 +344,7 @@ def select_aspect(inFile, tsn = ''):
                     else: # if only very small amount of padding needed, 
                           # then just stretch it
                         settings.append('-s')
-                        settings.append(str(TIVO_WIDTH) + 'x' +
-                                        str(TIVO_HEIGHT))
+                        settings.append('%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT))
                     logger.debug(('16:9 aspect allowed, file is narrower ' +
                                   'than 16:9 padding left and right\n%s') %
                                  ' '.join(settings))
@@ -366,7 +362,7 @@ def select_aspect(inFile, tsn = ''):
                     endHeight -= 1
                 if endHeight < TIVO_HEIGHT * 0.99:
                     settings.append('-s')
-                    settings.append(str(TIVO_WIDTH) + 'x' + str(endHeight))
+                    settings.append('%sx%s' % (TIVO_WIDTH, endHeight))
 
                     topPadding = ((TIVO_HEIGHT - endHeight)/2)
                     if topPadding % 2:
@@ -380,7 +376,7 @@ def select_aspect(inFile, tsn = ''):
                 else:   # if only very small amount of padding needed, 
                         # then just stretch it
                     settings.append('-s')
-                    settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
+                    settings.append('%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT))
                 logging.debug(('File is wider than 4:3 padding ' +
                                'top and bottom\n%s') % ' '.join(settings))
 
@@ -399,7 +395,7 @@ def select_aspect(inFile, tsn = ''):
                 endWidth -= 1
             if endWidth < (TIVO_WIDTH * 0.99):
                 settings.append('-s')
-                settings.append(str(endWidth) + 'x' + str(TIVO_HEIGHT))
+                settings.append('%sx%s' % (endWidth, TIVO_HEIGHT))
 
                 leftPadding = ((TIVO_WIDTH - endWidth) / 2)
                 if leftPadding % 2:
@@ -413,7 +409,7 @@ def select_aspect(inFile, tsn = ''):
             else: # if only very small amount of padding needed, then 
                   # just stretch it
                 settings.append('-s')
-                settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
+                settings.append('%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT))
 
             logger.debug('File is taller than 4:3 padding left and right\n%s'
                          % ' '.join(settings))
