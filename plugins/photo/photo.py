@@ -167,8 +167,8 @@ class Photo(Plugin):
             if attrs and not 'odate' in attrs:
                 date = exif_date(exif)
                 if date:
-                    year, month, day, hour, minute, second = \
-                        (int(x) for x in date.groups())
+                    year, month, day, hour, minute, second = (int(x)
+                        for x in date.groups())
                     if year:
                         odate = time.mktime((year, month, day, hour,
                                              minute, second, -1, -1, -1))
@@ -265,8 +265,8 @@ class Photo(Plugin):
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         local_base_path = self.get_local_base_path(handler, query)
-        if not handler.server.containers.has_key(cname) or \
-           not self.get_local_path(handler, query):
+        if (not handler.server.containers.has_key(cname) or
+            not self.get_local_path(handler, query)):
             handler.send_error(404)
             return
 

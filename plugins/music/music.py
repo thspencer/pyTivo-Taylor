@@ -112,8 +112,8 @@ class Music(Plugin):
                              unquote(path)[len(name) + 2:])
         fname = unicode(fname, 'utf-8')
 
-        needs_transcode = os.path.splitext(fname)[1].lower() in TRANSCODE \
-                          or seek or duration
+        needs_transcode = (os.path.splitext(fname)[1].lower() in TRANSCODE
+                           or seek or duration)
 
         handler.send_response(200)
         handler.send_header('Content-Type', 'audio/mpeg')
@@ -249,8 +249,8 @@ class Music(Plugin):
         cname = subcname.split('/')[0]
         local_base_path = self.get_local_base_path(handler, query)
 
-        if not handler.server.containers.has_key(cname) or \
-           not self.get_local_path(handler, query):
+        if (not handler.server.containers.has_key(cname) or
+            not self.get_local_path(handler, query)):
             handler.send_response(404)
             handler.end_headers()
             return

@@ -221,9 +221,9 @@ class Admin(Plugin):
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
-            theurl = 'https://' + tivoIP + \
-                     '/TiVoConnect?Command=QueryContainer&ItemCount=' + \
-                     str(shows_per_page) + '&Container=/NowPlaying'
+            theurl = ('https://' + tivoIP +
+                      '/TiVoConnect?Command=QueryContainer&ItemCount=' +
+                      str(shows_per_page) + '&Container=/NowPlaying')
             if 'Folder' in query:
                 folder += str(query['Folder'][0])
                 theurl += '/' + folder
@@ -252,8 +252,8 @@ class Admin(Plugin):
                         t = Template(REDIRECT_TEMPLATE)
                         t.container = cname
                         t.time = '20'
-                        t.url = '/TiVoConnect?Command=NPL&Container=' + \
-                                quote(cname)
+                        t.url = ('/TiVoConnect?Command=NPL&Container=' +
+                                 quote(cname))
                         t.text = UNABLE % (tivoIP, quote(cname))
                         handler.wfile.write(t)
                         return
@@ -433,8 +433,8 @@ class Admin(Plugin):
             t = Template(REDIRECT_TEMPLATE)
             command = query['Redirect'][0]
             t.time = '3'
-            t.url = '/TiVoConnect?Command=' + command + '&Container=' + \
-                    quote(cname) + '&TiVo=' + tivoIP
+            t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
+                     quote(cname) + '&TiVo=' + tivoIP)
             t.text = TRANS_INIT % (command, quote(cname), tivoIP)
             handler.wfile.write(t)
         else:
@@ -443,8 +443,8 @@ class Admin(Plugin):
             t = Template(REDIRECT_TEMPLATE)
             command = query['Redirect'][0]
             t.time = '10'
-            t.url = '/TiVoConnect?Command=' + command + '&Container=' + \
-                    quote(cname) + '&TiVo=' + tivoIP
+            t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
+                     quote(cname) + '&TiVo=' + tivoIP)
             t.text = MISSING % (command, quote(cname), tivoIP)
             handler.wfile.write(t)
 
@@ -463,8 +463,8 @@ class Admin(Plugin):
         handler.end_headers()
         t = Template(REDIRECT_TEMPLATE)
         t.time = '3'
-        t.url = '/TiVoConnect?Command=' + command + '&Container=' + \
-                quote(cname) + '&TiVo=' + tivoIP
+        t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
+                 quote(cname) + '&TiVo=' + tivoIP)
         t.text = TRANS_STOP % (command, quote(cname), tivoIP)
         handler.wfile.write(t)
 
@@ -489,7 +489,7 @@ class Admin(Plugin):
         t = Template(REDIRECT_TEMPLATE)
         t.container = cname
         t.time = '2'
-        t.url = '/TiVoConnect?last_page=NPL&Command=Reset&Container=' + \
-                quote(cname)
+        t.url = ('/TiVoConnect?last_page=NPL&Command=Reset&Container=' +
+                 quote(cname))
         t.text = SETTINGS2 % quote(cname)
         handler.wfile.write(t)

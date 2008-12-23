@@ -141,9 +141,9 @@ class WebVideo(Video):
             ip = s.getsockname()[0]
             port = config.getPort()
 
-            data['url'] = 'http://%s:%s' % (ip, port) + \
-                          urllib.quote('/%s/%s' % (share_name, 
-                                       os.path.split(file_name)[-1]))
+            data['url'] = ('http://%s:%s' % (ip, port) +
+                           urllib.quote('/%s/%s' % (share_name,
+                                        os.path.split(file_name)[-1])))
             data['duration'] = file_info['duration'] / 1000
             data['size'] = file_info['size']
 
