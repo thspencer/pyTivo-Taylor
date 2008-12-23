@@ -54,8 +54,8 @@ else:
                 'pcBodyId': pc_body_id,
                 'publishDate': time.strftime('%Y-%m-%d %H:%M%S', time.gmtime()),
                 'size': size,
-                'source': 'file:/C%3A%2FDocuments%20and%20Settings%2F' +
-                          'Stephanie%2FDesktop%2FVideo',
+                'source': ('file:/C%3A%2FDocuments%20and%20Settings%2F' +
+                           'Stephanie%2FDesktop%2FVideo'),
                 'state': 'complete',
                 'subtitle': subtitle,
                 'title': title,

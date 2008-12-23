@@ -131,13 +131,13 @@ def select_audiolang(inFile, tsn):
         langmatch = []
         for lang in config.getAudioLang(tsn).replace(' ','').lower().split(','):
             for s, l in vInfo['mapAudio']:
-                if lang in s+l.replace(' ','').lower():
+                if lang in s + l.replace(' ','').lower():
                     langmatch.append(s)
                     stream = s
                     break
             if langmatch: break
         if stream is not '':
-            return '-map '+vInfo['mapVideo']+' -map '+stream
+            return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
     return ''
 
 def select_videofps(inFile, tsn):
@@ -170,13 +170,13 @@ def select_videostr(inFile, tsn):
     return video_str
 
 def select_audiobr(tsn):
-    return '-ab '+config.getAudioBR(tsn)
+    return '-ab ' + config.getAudioBR(tsn)
 
 def select_maxvideobr():
-    return '-maxrate '+config.getMaxVideoBR()
+    return '-maxrate ' + config.getMaxVideoBR()
 
 def select_buffsize(tsn):
-    return '-bufsize '+config.getBuffSize(tsn)
+    return '-bufsize ' + config.getBuffSize(tsn)
 
 def select_ffmpegprams(tsn):
     if config.getFFmpegPrams(tsn) != None:
@@ -187,7 +187,7 @@ def select_format(tsn):
     fmt = 'vob'
     if config.getFormat(tsn) != None:
         fmt = config.getFormat(tsn)
-    return '-f '+fmt+' -'
+    return '-f ' + fmt + ' -'
 
 def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
@@ -217,12 +217,12 @@ def select_aspect(inFile, tsn = ''):
     ratio = (vInfo['vWidth'] * 100) / vInfo['vHeight']
     rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
 
-    logger.debug('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
-                 'millisecs=%s ratio=%s rheight=%s rwidth=%s ' +
-                 'TIVO_HEIGHT=%s TIVO_WIDTH=%s' % (inFile,
-                 vInfo['vCodec'], vInfo['vWidth'], vInfo['vHeight'],
-                 vInfo['vFps'], vInfo['millisecs'], ratio, rheight,
-                 rwidth, TIVO_HEIGHT, TIVO_WIDTH))
+    logger.debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
+                  'millisecs=%s ratio=%s rheight=%s rwidth=%s ' +
+                  'TIVO_HEIGHT=%s TIVO_WIDTH=%s') % (inFile,
+                  vInfo['vCodec'], vInfo['vWidth'], vInfo['vHeight'],
+                  vInfo['vFps'], vInfo['millisecs'], ratio, rheight,
+                  rwidth, TIVO_HEIGHT, TIVO_WIDTH))
 
     multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH)
     multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH)
@@ -257,9 +257,9 @@ def select_aspect(inFile, tsn = ''):
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' +
                 str(TIVO_HEIGHT)]
 
-    elif (rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), 
-                               (59, 72), (59, 36), (59, 54)] or
-          vInfo['dar1'] == '4:3':
+    elif ((rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), 
+                                (59, 72), (59, 36), (59, 54)] or
+          vInfo['dar1'] == '4:3'):
         logger.debug('File is within 4:3 list.')
         return ['-aspect', '4:3', '-s', str(TIVO_WIDTH) + 'x' + 
                 str(TIVO_HEIGHT)]
@@ -317,8 +317,8 @@ def select_aspect(inFile, tsn = ''):
                         settings.append(str(TIVO_WIDTH) + 'x' +
                                         str(TIVO_HEIGHT))
 
-                    logger.debug('16:9 aspect allowed, file is wider ' +
-                                 'than 16:9 padding top and bottom\n%s' %
+                    logger.debug(('16:9 aspect allowed, file is wider ' +
+                                  'than 16:9 padding top and bottom\n%s') %
                                  ' '.join(settings))
 
                 else: # too skinny needs padding on left and right.
@@ -350,8 +350,8 @@ def select_aspect(inFile, tsn = ''):
                         settings.append('-s')
                         settings.append(str(TIVO_WIDTH) + 'x' +
                                         str(TIVO_HEIGHT))
-                    logger.debug('16:9 aspect allowed, file is narrower ' +
-                                 'than 16:9 padding left and right\n%s' %
+                    logger.debug(('16:9 aspect allowed, file is narrower ' +
+                                  'than 16:9 padding left and right\n%s') %
                                  ' '.join(settings))
             else: # this is a 4:3 file or 16:9 output not allowed
                 multiplier = multiplier4by3
@@ -382,8 +382,8 @@ def select_aspect(inFile, tsn = ''):
                         # then just stretch it
                     settings.append('-s')
                     settings.append(str(TIVO_WIDTH) + 'x' + str(TIVO_HEIGHT))
-                logging.debug('File is wider than 4:3 padding ' +
-                              'top and bottom\n%s' % ' '.join(settings))
+                logging.debug(('File is wider than 4:3 padding ' +
+                               'top and bottom\n%s') % ' '.join(settings))
 
             return settings
 
@@ -451,16 +451,16 @@ def tivo_compatible(inFile, tsn = ''):
         if vInfo['aCodec'] != None:
             if (not vInfo['aKbps'] or
                 int(vInfo['aKbps']) > config.getMaxAudioBR(tsn)):
-                message = (False, 'TRANSCODE=YES, %s kbps exceeds max ' +
-                                  'audio bitrate.' % vInfo['aKbps'])
+                message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
+                                   'audio bitrate.') % vInfo['aKbps'])
                 break
 
         if vInfo['kbps'] != None:
             abit = max('0', vInfo['aKbps'])
             if (int(vInfo['kbps']) - int(abit) > 
                 config.strtod(config.getMaxVideoBR()) / 1000):
-                message = (False, 'TRANSCODE=YES, %s kbps exceeds max ' +
-                                  'video bitrate.' % vInfo['kbps']
+                message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
+                                   'video bitrate.') % vInfo['kbps'])
                 break
         else:
             message = (False, 'TRANSCODE=YES, %s kbps not supported.' %
@@ -469,8 +469,8 @@ def tivo_compatible(inFile, tsn = ''):
 
         if config.getAudioLang(tsn) is not None:
             if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
-                message = (False, 'TRANSCODE=YES, %s preferred audio ' +
-                                  'track exists.' % config.getAudioLang(tsn))
+                message = (False, ('TRANSCODE=YES, %s preferred audio ' +
+                                   'track exists.') % config.getAudioLang(tsn))
                 break
 
         if config.isHDtivo(tsn):
@@ -493,8 +493,8 @@ def tivo_compatible(inFile, tsn = ''):
         if ((config.get169Blacklist(tsn) and not config.get169Setting(tsn))
             or (config.get169Letterbox(tsn) and config.get169Setting(tsn))):
             if vInfo['dar1'] == None or not vInfo['dar1'] in ('4:3', '8:9'):
-                message = (False, 'TRANSCODE=YES, DAR %s not supported ' +
-                                  'by BLACKLIST_169 tivos.' % vInfo['dar1'])
+                message = (False, ('TRANSCODE=YES, DAR %s not supported ' +
+                                   'by BLACKLIST_169 tivos.') % vInfo['dar1'])
                 break
 
         for mode in supportedModes:
@@ -694,16 +694,16 @@ def video_info(inFile):
             vInfo['Supported'] = True
             if key.startswith('Override_mapAudio'):
                 audiomap = dict(vInfo['mapAudio'])
-                stream = key.replace('Override_mapAudio','').strip()
+                stream = key.replace('Override_mapAudio', '').strip()
                 if audiomap.has_key(stream):
                     newaudiomap = (stream, metadata[key])
                     audiomap.update([newaudiomap])
                     vInfo['mapAudio'] = sorted(audiomap.items(),
                                                key=lambda (k,v): (k,v))
             elif key.startswith('Override_millisecs'):
-                vInfo[key.replace('Override_','')] = int(metadata[key])
+                vInfo[key.replace('Override_', '')] = int(metadata[key])
             else:
-                vInfo[key.replace('Override_','')] = metadata[key]
+                vInfo[key.replace('Override_', '')] = metadata[key]
 
     info_cache[inFile] = (mtime, vInfo)
     logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
