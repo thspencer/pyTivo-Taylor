@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import beacon
-import httpserver
 import os
 
+import beacon
+import httpserver
 import config
 from plugin import GetPlugin
 

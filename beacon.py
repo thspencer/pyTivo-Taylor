@@ -2,6 +2,7 @@ import re
 import struct
 from socket import *
 from threading import Timer
+
 import config
 
 class Beacon:

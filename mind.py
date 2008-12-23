@@ -1,10 +1,11 @@
 import cookielib
+import logging
+import time
 import urllib2
 import urllib
-import time
 import warnings
+
 import config
-import logging
 
 try:
     import xml.etree.ElementTree as ElementTree

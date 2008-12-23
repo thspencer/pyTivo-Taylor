@@ -1,8 +1,10 @@
-import ConfigParser, os, sys
+import ConfigParser
 import logging
+import os
 import re
 import random
 import string
+import sys
 from ConfigParser import NoOptionError
 
 guid = ''.join([random.choice(string.letters) for i in range(10)])

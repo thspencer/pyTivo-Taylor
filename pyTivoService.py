@@ -1,9 +1,12 @@
-import beacon, httpserver
-import win32serviceutil 
-import win32service 
+import select
+import sys
 import win32event
-import select, sys
+import win32service 
+import win32serviceutil 
+
+import beacon
 import config
+import httpserver
 
 class PyTivoService(win32serviceutil.ServiceFramework):
     _svc_name_ = 'pyTivo'

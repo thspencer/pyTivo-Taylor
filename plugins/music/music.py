@@ -1,13 +1,23 @@
-import subprocess, os, random, re, shutil, socket, sys, urllib, time, cgi
-import config
-from plugins.video.transcode import kill
+import cgi
+import os
+import random
+import re
+import shutil
+import socket
+import subprocess
+import sys
+import time
+import urllib
+from urlparse import urlparse
+from xml.sax.saxutils import escape
+
+import eyeD3
 from Cheetah.Template import Template
 from Cheetah.Filters import Filter
-from plugin import Plugin, quote, unquote
-from xml.sax.saxutils import escape
 from lrucache import LRUCache
-from urlparse import urlparse
-import eyeD3
+import config
+from plugin import Plugin, quote, unquote
+from plugins.video.transcode import kill
 
 SCRIPTDIR = os.path.dirname(__file__)
 

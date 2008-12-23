@@ -1,24 +1,29 @@
-from plugins.video.video import Video, VideoDetails
-import mind
-import config
-
-import xmpp
-
-import threading
-import urllib2
-import os.path
-import shutil
-import os.path
-import time
-import os
-import urlparse
-import urllib
-import xml.etree.ElementTree as ElementTree
 import Queue
 import logging
+import os
+import shutil
+import threading
+import time
+import urllib
+import urllib2
+import urlparse
+import warnings
+
+try:
+    import xml.etree.ElementTree as ElementTree
+except ImportError:
+    try:
+        import elementtree.ElementTree as ElementTree
+    except ImportError:
+        warnings.warn('Python 2.5 or higher or elementtree is ' +
+                      'needed to use the TivoPush')
+
+import xmpp
+import mind
+import config
+from plugins.video.video import Video, VideoDetails
 
 CLASS_NAME = 'WebVideo'
-
 
 class WebVideo(Video):
 

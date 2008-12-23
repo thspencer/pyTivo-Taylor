@@ -1,12 +1,18 @@
-import time, os, BaseHTTPServer, SocketServer, socket, re
+import BaseHTTPServer
+import SocketServer
+import logging
+import os
+import re
+import socket
+import time
+from cgi import parse_qs
 from urllib import unquote_plus, quote, unquote
 from urlparse import urlparse
-from cgi import parse_qs
-from Cheetah.Template import Template
-from plugin import GetPlugin
-import config
 from xml.sax.saxutils import escape
-import logging
+
+from Cheetah.Template import Template
+import config
+from plugin import GetPlugin
 
 SCRIPTDIR = os.path.dirname(__file__)
 

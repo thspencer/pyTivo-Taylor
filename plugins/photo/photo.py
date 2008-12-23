@@ -24,17 +24,25 @@
 # Version 0.2,  Dec. 8  -- thumbnail caching, faster thumbnails
 # Version 0.1,  Dec. 7, 2007
 
-import os, re, random, urllib, threading, time, cgi
+import cgi
+import os
+import re
+import random
+import threading
+import time
+import urllib
+from cStringIO import StringIO
+from xml.sax.saxutils import escape
+
 try:
     import Image
 except ImportError:
     print 'Photo Plugin Error: The Python Imaging Library is not installed'
-from cStringIO import StringIO
+
 from Cheetah.Template import Template
 from Cheetah.Filters import Filter
-from plugin import Plugin, quote, unquote
-from xml.sax.saxutils import escape
 from lrucache import LRUCache
+from plugin import Plugin, quote, unquote
 
 SCRIPTDIR = os.path.dirname(__file__)
 

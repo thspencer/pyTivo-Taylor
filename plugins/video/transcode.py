@@ -1,6 +1,16 @@
-import subprocess, shutil, os, re, sys, tempfile, ConfigParser, time, lrucache, math
-import config
+import ConfigParser
 import logging
+import math
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+import lrucache
+import config
 from plugin import GetPlugin
 
 logger = logging.getLogger('pyTivo.video.transcode')

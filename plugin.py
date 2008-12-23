@@ -1,4 +1,8 @@
-import os, shutil, random, threading, urllib
+import os
+import shutil
+import random
+import threading
+import urllib
 from urlparse import urlparse
 
 if os.path.sep == '/':
