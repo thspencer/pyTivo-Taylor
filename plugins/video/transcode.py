@@ -49,20 +49,19 @@ def output_video(inFile, outFile, tsn=''):
 
 def transcode(isQuery, inFile, outFile, tsn=''):
 
-    settings = {}
-    settings['video_codec'] = select_videocodec(tsn)
-    settings['video_br'] = select_videobr(inFile, tsn)
-    settings['video_fps'] = select_videofps(inFile, tsn)
-    settings['max_video_br'] = select_maxvideobr()
-    settings['buff_size'] = select_buffsize(tsn)
-    settings['aspect_ratio'] = ' '.join(select_aspect(inFile, tsn))
-    settings['audio_br'] = select_audiobr(tsn)
-    settings['audio_fr'] = select_audiofr(inFile, tsn)
-    settings['audio_ch'] = select_audioch(tsn)
-    settings['audio_codec'] = select_audiocodec(isQuery, inFile, tsn)
-    settings['audio_lang'] = select_audiolang(inFile, tsn)
-    settings['ffmpeg_pram'] = select_ffmpegprams(tsn)
-    settings['format'] = select_format(tsn)
+    settings = {'video_codec': select_videocodec(tsn),
+                'video_br': select_videobr(inFile, tsn),
+                'video_fps': select_videofps(inFile, tsn),
+                'max_video_br': select_maxvideobr(),
+                'buff_size': select_buffsize(tsn),
+                'aspect_ratio': ' '.join(select_aspect(inFile, tsn)),
+                'audio_br': select_audiobr(tsn),
+                'audio_fr': select_audiofr(inFile, tsn),
+                'audio_ch': select_audioch(tsn),
+                'audio_codec': select_audiocodec(isQuery, inFile, tsn),
+                'audio_lang': select_audiolang(inFile, tsn),
+                'ffmpeg_pram': select_ffmpegprams(tsn),
+                'format': select_format(tsn)}
 
     if isQuery:
         return settings
@@ -70,10 +69,11 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
     cmd = [ffmpeg_path(), '-i', inFile] + cmd_string.split()
-    logging.debug('transcoding to tivo model '+tsn[:3]+' using ffmpeg command:')
+    logging.debug('transcoding to tivo model ' + tsn[:3] +
+                  ' using ffmpeg command:')
     logging.debug(' '.join(cmd))
-    ffmpeg = subprocess.Popen(cmd, bufsize=512*1024, stdout=subprocess.PIPE)
-
+    ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
+                              stdout=subprocess.PIPE)
     try:
         shutil.copyfileobj(ffmpeg.stdout, outFile)
     except:
@@ -88,10 +88,10 @@ def select_audiocodec(isQuery, inFile, tsn = ''):
         if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
             if vInfo['aKbps'] == None:
                 if not isQuery:
-                    cmd_string = '-y -vcodec mpeg2video -r 29.97 ' + \
-                                 '-b 1000k -acodec copy ' + \
-                                 select_audiolang(inFile, tsn) + \
-                                 ' -t 00:00:01 -f vob -'
+                    cmd_string = ('-y -vcodec mpeg2video -r 29.97 ' +
+                                  '-b 1000k -acodec copy ' +
+                                  select_audiolang(inFile, tsn) +
+                                  ' -t 00:00:01 -f vob -')
                     if video_check(inFile, cmd_string):
                         vInfo =  video_info(videotest)
                 else:
