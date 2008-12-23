@@ -690,7 +690,7 @@ def video_info(inFile):
             if key.startswith('Override_mapAudio'):
                 audiomap = dict(vInfo['mapAudio'])
                 stream = key.replace('Override_mapAudio', '').strip()
-                if audiomap.has_key(stream):
+                if stream in audiomap:
                     newaudiomap = (stream, metadata[key])
                     audiomap.update([newaudiomap])
                     vInfo['mapAudio'] = sorted(audiomap.items(),

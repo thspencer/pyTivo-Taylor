@@ -78,10 +78,10 @@ class Plugin(object):
         totalFiles = len(files)
         index = 0
 
-        if totalFiles and query.has_key('ItemCount'):
+        if totalFiles and 'ItemCount' in query:
             count = int(query['ItemCount'][0])
 
-            if query.has_key('AnchorItem'):
+            if 'AnchorItem' in query:
                 bs = '/TiVoConnect?Command=QueryContainer&Container='
                 local_base_path = self.get_local_base_path(handler, query)
 
@@ -111,7 +111,7 @@ class Plugin(object):
                 if count > 0:
                     index += 1
 
-                if query.has_key('AnchorOffset'):
+                if 'AnchorOffset' in query:
                     index += int(query['AnchorOffset'][0])
 
                 #foward count

@@ -25,7 +25,7 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         self.daemon_threads = True
 
     def add_container(self, name, settings):
-        if self.containers.has_key(name) or name == 'TiVoConnect':
+        if name in self.containers or name == 'TiVoConnect':
             raise "Container Name in use"
         try:
             settings['content_type'] = GetPlugin(settings['type']).CONTENT_TYPE
@@ -77,18 +77,17 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         query = parse_qs(o[4])
 
         mname = False
-        if query.has_key('Command') and len(query['Command']) >= 1:
+        if 'Command' in query and len(query['Command']) >= 1:
 
             command = query['Command'][0]
 
             # If we are looking at the root container
             if (command == "QueryContainer" and
-                (not query.has_key('Container') or
-                 query['Container'][0] == '/')):
+                (not 'Container' in query or query['Container'][0] == '/')):
                 self.root_container()
                 return
 
-            if query.has_key('Container'):
+            if 'Container' in query:
                 # Dispatch to the container plugin
                 basepath = unquote(query['Container'][0].split('/')[0])
                 for name, container in self.server.containers.items():

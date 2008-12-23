@@ -249,7 +249,7 @@ class Music(Plugin):
         cname = subcname.split('/')[0]
         local_base_path = self.get_local_base_path(handler, query)
 
-        if (not handler.server.containers.has_key(cname) or
+        if (not cname in handler.server.containers or
             not self.get_local_path(handler, query)):
             handler.send_response(404)
             handler.end_headers()
