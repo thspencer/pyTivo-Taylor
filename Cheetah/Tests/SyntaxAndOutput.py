@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# $Id: SyntaxAndOutput.py,v 1.105 2006/06/21 23:48:19 tavis_rudd Exp $
+# -*- coding: latin-1 -*-
+# $Id: SyntaxAndOutput.py,v 1.109 2007/04/04 00:28:21 tavis_rudd Exp $
 """Syntax and Output tests.
 
 TODO
@@ -12,12 +13,12 @@ TODO
 Meta-Data
 ================================================================================
 Author: Tavis Rudd <tavis@damnsimple.com>
-Version: $Revision: 1.105 $
+Version: $Revision: 1.109 $
 Start Date: 2001/03/30
-Last Revision Date: $Date: 2006/06/21 23:48:19 $
+Last Revision Date: $Date: 2007/04/04 00:28:21 $
 """
 __author__ = "Tavis Rudd <tavis@damnsimple.com>"
-__revision__ = "$Revision: 1.105 $"[11:-2]
+__revision__ = "$Revision: 1.109 $"[11:-2]
 
 
 ##################################################
@@ -764,6 +765,31 @@ class EncodingDirective(OutputTest):
         self.verify("#encoding latin-1\nAndr\202",
                     u'Andr\202', outputEncoding='latin-1')
 
+class UnicodeDirective(OutputTest):
+    def test1(self):
+        """basic #unicode """
+        self.verify("#unicode utf-8\n1234",
+                    u"1234")
+        
+        self.verify("#unicode ascii\n1234",
+                    u"1234")
+
+        self.verify("#unicode latin-1\n1234",
+                    u"1234")
+
+        self.verify("#unicode latin-1\n1234ü",
+                    u"1234ü")
+        self.verify("#unicode: latin-1\n1234ü",
+                    u"1234ü")
+        self.verify("#  unicode  : latin-1\n1234ü",
+                    u"1234ü")
+
+        self.verify(u"#unicode latin-1\n1234ü",
+                    u"1234ü")
+
+        self.verify("#encoding latin-1\n1234ü",
+                    "1234ü")
+
 class Placeholders_Esc(OutputTest):
     convertEOLs = False
     def test1(self):
@@ -1097,6 +1123,12 @@ $aStr#slurp
 $foo$foo$foo$foo$foo""",
                     "1\n012346blarg"*5)
         
+    def test6(self):
+        r"""Make sure that partial directives don't match"""
+        self.verify("#cache_foo",
+                    "#cache_foo")
+        self.verify("#cached",
+                    "#cached")
 
 class CallDirective(OutputTest):
     
@@ -1769,6 +1801,11 @@ class DefDirective(OutputTest):
 class DecoratorDirective(OutputTest):
     def test1(self):
         """single line #def with decorator"""
+
+        self.verify("#@ blah", "#@ blah")
+        self.verify("#@23 blah", "#@23 blah")
+        self.verify("#@@TR: comment", "#@@TR: comment")
+
         self.verify("#from Cheetah.Tests.SyntaxAndOutput import testdecorator\n"
                     +"#@testdecorator"
                     +"\n#def $testMeth():1234\n$testMeth",
@@ -2701,6 +2738,29 @@ $g $numOne
 """,
                     'Hello 1\n')
 
+
+class SuperDirective(OutputTest):
+    def test1(self):
+        tmpl1 = Template.compile('''$foo $bar(99)
+        #def foo: this is base foo
+        #def bar(arg): super-$arg''')
+
+        tmpl2 = tmpl1.subclass('''
+        #implements dummy
+        #def foo
+          #super
+          This is child foo
+          #super(trans=trans)
+          $bar(1234)
+        #end def
+        #def bar(arg): #super($arg)
+        ''')
+        expected = ('this is base foo          '
+                    'This is child foo\nthis is base foo          '
+                    'super-1234\n super-99')
+        assert str(tmpl2()).strip()==expected
+
+
 class ImportantExampleCases(OutputTest):
     def test1(self):
         """how to make a comma-delimited list"""
@@ -2719,18 +2779,18 @@ class FilterDirective(OutputTest):
         return {'useFilterArgsInPlaceholders':True}
     
     def test1(self):
-        """#filter ReplaceNone
+        """#filter Filter
         """
-        self.verify("#filter ReplaceNone\n$none#end filter",
+        self.verify("#filter Filter\n$none#end filter",
                     "")
 
-        self.verify("#filter ReplaceNone: $none",
+        self.verify("#filter Filter: $none",
                     "")
 
     def test2(self):
         """#filter ReplaceNone with WS
         """
-        self.verify("#filter ReplaceNone  \n$none#end filter",
+        self.verify("#filter Filter  \n$none#end filter",
                     "")
 
     def test3(self):

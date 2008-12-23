@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: Parser.py,v 1.130 2006/06/21 23:49:14 tavis_rudd Exp $
+# $Id: Parser.py,v 1.135 2007/11/16 18:26:01 tavis_rudd Exp $
 """Parser classes for Cheetah's Compiler
 
 Classes:
@@ -11,12 +11,12 @@ Classes:
 Meta-Data
 ================================================================================
 Author: Tavis Rudd <tavis@damnsimple.com>
-Version: $Revision: 1.130 $
+Version: $Revision: 1.135 $
 Start Date: 2001/08/01
-Last Revision Date: $Date: 2006/06/21 23:49:14 $
+Last Revision Date: $Date: 2007/11/16 18:26:01 $
 """
 __author__ = "Tavis Rudd <tavis@damnsimple.com>"
-__revision__ = "$Revision: 1.130 $"[11:-2]
+__revision__ = "$Revision: 1.135 $"[11:-2]
 
 import os
 import sys
@@ -33,8 +33,15 @@ from Cheetah.SourceReader import SourceReader
 from Cheetah import Filters
 from Cheetah import ErrorCatchers
 from Cheetah.Unspecified import Unspecified
+from Cheetah.Macros.I18n import I18n
 
 # re tools
+_regexCache = {}
+def cachedRegex(pattern):
+    if pattern not in _regexCache:
+        _regexCache[pattern] = re.compile(pattern)
+    return _regexCache[pattern]
+
 def escapeRegexChars(txt,
                      escapeRE=re.compile(r'([\$\^\*\+\.\?\{\}\[\]\(\)\|\\])')):
     
@@ -142,12 +149,20 @@ EOLre=re.compile(r'(?:\r\n|\r|\n)')
 specialVarRE=re.compile(r'([a-zA-z_]+)@') # for matching specialVar comments
 # e.g. ##author@ Tavis Rudd
 
+unicodeDirectiveRE = re.compile(
+    r'(?:^|\r\n|\r|\n)\s*#\s{0,5}unicode[:\s]*([-\w.]*)\s*(?:\r\n|\r|\n)', re.MULTILINE)
+encodingDirectiveRE = re.compile(
+    r'(?:^|\r\n|\r|\n)\s*#\s{0,5}encoding[:\s]*([-\w.]*)\s*(?:\r\n|\r|\n)', re.MULTILINE)
+
+escapedNewlineRE = re.compile(r'(?<!\\)\\n')
+
 directiveNamesAndParsers = {
     # importing and inheritance
     'import':None,
     'from':None,
     'extends': 'eatExtends',
     'implements': 'eatImplements',
+    'super': 'eatSuper',
 
     # output, filtering, and caching
     'slurp': 'eatSlurp',
@@ -418,16 +433,16 @@ class _LowLevelParser(SourceReader):
                       '|' +                      
                       r'(?P<NO_CACHE>)' +
                       ')')
-        self.cacheTokenRE = re.compile(cacheToken)
+        self.cacheTokenRE = cachedRegex(cacheToken)
 
         silentPlaceholderToken = (r'(?:' +
                                   r'(?P<SILENT>' +escapeRegexChars('!')+')'+
                                   '|' +
                                   r'(?P<NOT_SILENT>)' +
                                   ')')
-        self.silentPlaceholderTokenRE = re.compile(silentPlaceholderToken)
+        self.silentPlaceholderTokenRE = cachedRegex(silentPlaceholderToken)
         
-        self.cheetahVarStartRE = re.compile(
+        self.cheetahVarStartRE = cachedRegex(
             escCharLookBehind +
             r'(?P<startToken>'+escapeRegexChars(self.setting('cheetahVarStartToken'))+')'+
             r'(?P<silenceToken>'+silentPlaceholderToken+')'+
@@ -436,18 +451,18 @@ class _LowLevelParser(SourceReader):
             r'(?=[A-Za-z_])')
         validCharsLookAhead = r'(?=[A-Za-z_\*!\{\(\[])'
         self.cheetahVarStartToken = self.setting('cheetahVarStartToken')
-        self.cheetahVarStartTokenRE = re.compile(
+        self.cheetahVarStartTokenRE = cachedRegex(
             escCharLookBehind +
             escapeRegexChars(self.setting('cheetahVarStartToken'))
             +validCharsLookAhead
             )
 
-        self.cheetahVarInExpressionStartTokenRE = re.compile(
+        self.cheetahVarInExpressionStartTokenRE = cachedRegex(
             escapeRegexChars(self.setting('cheetahVarStartToken'))
             +r'(?=[A-Za-z_])'
             )
 
-        self.expressionPlaceholderStartRE = re.compile(
+        self.expressionPlaceholderStartRE = cachedRegex(
             escCharLookBehind +
             r'(?P<startToken>' + escapeRegexChars(self.setting('cheetahVarStartToken')) + ')' +
             r'(?P<cacheToken>' + cacheToken + ')' +
@@ -457,7 +472,7 @@ class _LowLevelParser(SourceReader):
             )
 
         if self.setting('EOLSlurpToken'):
-            self.EOLSlurpRE = re.compile(
+            self.EOLSlurpRE = cachedRegex(
                 escapeRegexChars(self.setting('EOLSlurpToken'))
                 + r'[ \t\f]*'
                 + r'(?:'+EOL+')'
@@ -469,16 +484,16 @@ class _LowLevelParser(SourceReader):
     def _makeCommentREs(self):
         """Construct the regex bits that are used in comment parsing."""
         startTokenEsc = escapeRegexChars(self.setting('commentStartToken'))
-        self.commentStartTokenRE = re.compile(escCharLookBehind + startTokenEsc)
+        self.commentStartTokenRE = cachedRegex(escCharLookBehind + startTokenEsc)
         del startTokenEsc
         
         startTokenEsc = escapeRegexChars(
             self.setting('multiLineCommentStartToken'))
         endTokenEsc = escapeRegexChars(
             self.setting('multiLineCommentEndToken'))
-        self.multiLineCommentTokenStartRE = re.compile(escCharLookBehind +
+        self.multiLineCommentTokenStartRE = cachedRegex(escCharLookBehind +
                                                        startTokenEsc)
-        self.multiLineCommentEndTokenRE = re.compile(escCharLookBehind +
+        self.multiLineCommentEndTokenRE = cachedRegex(escCharLookBehind +
                                                      endTokenEsc)
         
     def _makeDirectiveREs(self):
@@ -492,17 +507,17 @@ class _LowLevelParser(SourceReader):
         if self.setting('allowWhitespaceAfterDirectiveStartToken'):
             reParts.append('[ \t]*')
         reParts.append(validSecondCharsLookAhead)
-        self.directiveStartTokenRE = re.compile(''.join(reParts))
-        self.directiveEndTokenRE = re.compile(escCharLookBehind + endTokenEsc)
+        self.directiveStartTokenRE = cachedRegex(''.join(reParts))
+        self.directiveEndTokenRE = cachedRegex(escCharLookBehind + endTokenEsc)
 
     def _makePspREs(self):
         """Setup the regexs for PSP parsing."""
         startToken = self.setting('PSPStartToken')
         startTokenEsc = escapeRegexChars(startToken)
-        self.PSPStartTokenRE = re.compile(escCharLookBehind + startTokenEsc)
+        self.PSPStartTokenRE = cachedRegex(escCharLookBehind + startTokenEsc)
         endToken = self.setting('PSPEndToken')
         endTokenEsc = escapeRegexChars(endToken)
-        self.PSPEndTokenRE = re.compile(escCharLookBehind + endTokenEsc)
+        self.PSPEndTokenRE = cachedRegex(escCharLookBehind + endTokenEsc)
 
 
     def isLineClearToStartToken(self, pos=None):
@@ -650,26 +665,28 @@ class _LowLevelParser(SourceReader):
 
     def matchDirectiveName(self, directiveNameChars=identchars+'0123456789-@'):
         startPos = self.pos()
-        directives = self._directiveNamesAndParsers.keys()
-        possibleMatches = [] 
+        possibleMatches = self._directiveNamesAndParsers.keys()
         name = ''
+        match = None
+
         while not self.atEnd():
             c = self.getc()
             if not c in directiveNameChars:
                 break
             name += c
-            if name in directives:
-                possibleMatches.append(name)
+            if name == '@':
+                if not self.atEnd() and self.peek() in identchars:
+                    match = '@'
+                break
+            possibleMatches = [dn for dn in possibleMatches if dn.startswith(name)]
+            if not possibleMatches:
+                break
+            elif (name in possibleMatches and (self.atEnd() or self.peek() not in directiveNameChars)):
+                match = name
+                break
 
-        possibleMatches.sort()
-        possibleMatches.reverse() # longest match first
-        
-        directiveName = False
-        if possibleMatches:
-            directiveName = possibleMatches[0]
-            
         self.setPos(startPos)
-        return directiveName
+        return match
         
     def matchDirectiveStartToken(self):
         return self.directiveStartTokenRE.match(self.src(), self.pos())
@@ -976,7 +993,6 @@ class _LowLevelParser(SourceReader):
 
         while 1:
             if self.atEnd():
-                self.setPos(enclosures[-1][1])
                 raise ParseError(
                     self, msg="EOF was reached before a matching ')'"+
                     " was found for the '('")
@@ -1359,7 +1375,6 @@ class _HighLevelParser(_LowLevelParser):
 
 
         macroDirectives = self.setting('macroDirectives',{})
-        from Cheetah.Macros.I18n import I18n
         macroDirectives['i18n'] = I18n
 
 
@@ -1789,7 +1804,7 @@ class _HighLevelParser(_LowLevelParser):
         if self.peek() == '=':
             self.advance()
         else:
-            raise ParserError(self)
+            raise ParseError(self)
         valueExpr = self.getExpression()
         endPos = self.pos()
 
@@ -2052,6 +2067,32 @@ class _HighLevelParser(_LowLevelParser):
             
         self.getExpression()  # throw away and unwanted crap that got added in
         self._eatRestOfDirectiveTag(isLineClearToStartToken, endOfFirstLine)
+
+    def eatSuper(self):
+        # filtered
+        isLineClearToStartToken = self.isLineClearToStartToken()
+        endOfFirstLine = self.findEOL()
+        self.getDirectiveStartToken()
+        self.advance(len('super'))
+        self.getWhiteSpace()
+        startPos = self.pos()
+        if not self.atEnd() and self.peek() == '(':
+            argsList = self.getDefArgList()
+            self.advance()              # past the closing ')'
+            if argsList and argsList[0][0] == 'self':
+                del argsList[0]
+        else:
+            argsList=[]
+
+        self._applyExpressionFilters(self[startPos:self.pos()], 'super', startPos=startPos)
+
+        #parserComment = ('## CHEETAH: generated from ' + signature + 
+        #                 ' at line %s, col %s' % self.getRowCol(startPos)
+        #                 + '.')
+
+        self.getExpression()  # throw away and unwanted crap that got added in
+        self._eatRestOfDirectiveTag(isLineClearToStartToken, endOfFirstLine)
+        self._compiler.addSuper(argsList)
 
     def eatSet(self):
         # filtered

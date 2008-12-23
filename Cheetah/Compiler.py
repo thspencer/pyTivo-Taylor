@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# $Id: Compiler.py,v 1.148 2006/06/22 00:18:22 tavis_rudd Exp $
+# $Id: Compiler.py,v 1.156 2007/10/30 20:17:09 tavis_rudd Exp $
 """Compiler classes for Cheetah:
 ModuleCompiler aka 'Compiler'
 ClassCompiler
@@ -11,12 +11,12 @@ ModuleCompiler.compile, and ModuleCompiler.__getattr__.
 Meta-Data
 ================================================================================
 Author: Tavis Rudd <tavis@damnsimple.com>
-Version: $Revision: 1.148 $
+Version: $Revision: 1.156 $
 Start Date: 2001/09/19
-Last Revision Date: $Date: 2006/06/22 00:18:22 $
+Last Revision Date: $Date: 2007/10/30 20:17:09 $
 """
 __author__ = "Tavis Rudd <tavis@damnsimple.com>"
-__revision__ = "$Revision: 1.148 $"[11:-2]
+__revision__ = "$Revision: 1.156 $"[11:-2]
 
 import sys
 import os
@@ -32,11 +32,12 @@ import copy
 
 from Cheetah.Version import Version, VersionTuple
 from Cheetah.SettingsManager import SettingsManager
-from Cheetah.Parser import Parser, ParseError, specialVarRE, \
-     STATIC_CACHE, REFRESH_CACHE, SET_LOCAL, SET_GLOBAL,SET_MODULE
 from Cheetah.Utils.Indenter import indentize # an undocumented preprocessor
 from Cheetah import ErrorCatchers
 from Cheetah import NameMapper
+from Cheetah.Parser import Parser, ParseError, specialVarRE, \
+     STATIC_CACHE, REFRESH_CACHE, SET_LOCAL, SET_GLOBAL,SET_MODULE, \
+     unicodeDirectiveRE, encodingDirectiveRE,escapedNewlineRE
 
 from Cheetah.NameMapper import NotFound, valueForName, valueFromSearchList, valueFromFrameOrSearchList
 VFFSL=valueFromFrameOrSearchList
@@ -62,17 +63,13 @@ DEFAULT_COMPILER_SETTINGS = {
     'alwaysFilterNone':True, # filter out None, before the filter is called
     'useFilters':True, # use str instead if =False
     'includeRawExprInFilterArgs':True,
-
     
     #'lookForTransactionAttr':False,
     'autoAssignDummyTransactionToSelf':False,
     'useKWsDictArgForPassingTrans':True,
     
-    ## controlling the aesthetic appearance / behaviour of generated code
+    ## controlling the aesthetic appearance / behaviour of generated code    
     'commentOffset': 1,
-    # should shorter str constant chunks be printed using repr rather than ''' quotes
-    'reprShortStrConstants': True, 
-    'reprNewlineThreshold':3,
     'outputRowColComments':True,
     # should #block's be wrapped in a comment in the template's output
     'includeBlockMarkers': False,   
@@ -86,7 +83,7 @@ DEFAULT_COMPILER_SETTINGS = {
     'initialMethIndentLevel': 2,
     'monitorSrcFile':False,
     'outputMethodsBeforeAttributes': True,
-
+    'addTimestampsToCompilerOutput': True,
 
     ## customizing the #extends directive
     'autoImportForExtendsDirective':True,
@@ -292,7 +289,7 @@ class GenUtils:
 
         nameChunks.reverse()
         name, useAC, remainder = nameChunks.pop()
-
+        
         if not useSearchList:
             firstDotIdx = name.find('.')
             if firstDotIdx != -1 and firstDotIdx < len(name):
@@ -394,6 +391,7 @@ class MethodCompiler(GenUtils):
             return self.wrapCode()
 
     __str__ = methodDef
+    __unicode__ = methodDef
     
     def wrapCode(self):
         self.commitStrConst()
@@ -494,17 +492,24 @@ class MethodCompiler(GenUtils):
             self._pendingStrConstChunks = []
             if not strConst:
                 return
-            if self.setting('reprShortStrConstants') and \
-               strConst.count('\n') < self.setting('reprNewlineThreshold'):
-                self.addWriteChunk( repr(strConst).replace('\\012','\\n'))
             else:
-                strConst = strConst.replace('\\','\\\\').replace("'''","'\'\'\'")
-                if strConst[0] == "'":
-                    strConst = '\\' + strConst
-                if strConst[-1] == "'":
-                    strConst = strConst[:-1] + '\\' + strConst[-1]
-                    
-                self.addWriteChunk("'''" + strConst + "'''" )
+                reprstr = repr(strConst).replace('\\012','\n')
+                i = 0
+                out = []
+                if reprstr.startswith('u'):
+                    i = 1
+                    out = ['u']
+                body = escapedNewlineRE.sub('\n', reprstr[i+1:-1])
+                
+                if reprstr[i]=="'":
+                    out.append("'''")
+                    out.append(body)
+                    out.append("'''")
+                else:
+                    out.append('"""')
+                    out.append(body)
+                    out.append('"""')
+                self.addWriteChunk(''.join(out))
 
     def handleWSBeforeDirective(self):
         """Truncate the pending strCont to the beginning of the current line.
@@ -1001,8 +1006,9 @@ class MethodCompiler(GenUtils):
     def closeFilterBlock(self):
         ID, filterDetails = self._filterRegionsStack.pop()
         #self.addChunk('_filter = self._CHEETAH__initialFilter')
-        self.addChunk('_filter = _orig_filter%(ID)s'%locals())
-        
+        #self.addChunk('_filter = _orig_filter%(ID)s'%locals())
+        self.addChunk('_filter = self._CHEETAH__currentFilter = _orig_filter%(ID)s'%locals())
+
 class AutoMethodCompiler(MethodCompiler):
 
     def _setupState(self):
@@ -1197,8 +1203,11 @@ class ClassCompiler(GenUtils):
         self._generatedAttribs.append('_CHEETAH_version = __CHEETAH_version__')
         self._generatedAttribs.append(
             '_CHEETAH_versionTuple = __CHEETAH_versionTuple__')
-        self._generatedAttribs.append('_CHEETAH_genTime = __CHEETAH_genTime__')
-        self._generatedAttribs.append('_CHEETAH_genTimestamp = __CHEETAH_genTimestamp__')
+
+        if self.setting('addTimestampsToCompilerOutput'):
+            self._generatedAttribs.append('_CHEETAH_genTime = __CHEETAH_genTime__')
+            self._generatedAttribs.append('_CHEETAH_genTimestamp = __CHEETAH_genTimestamp__')
+
         self._generatedAttribs.append('_CHEETAH_src = __CHEETAH_src__')
         self._generatedAttribs.append(
             '_CHEETAH_srcLastModified = __CHEETAH_srcLastModified__')
@@ -1242,7 +1251,7 @@ class ClassCompiler(GenUtils):
         self.addChunk('if exists(self._filePath) and ' +
                       'getmtime(self._filePath) > self._fileMtime:')
         self.indent()
-        self.addChunk('self._compile(file=self._filePath, moduleName='+className + ')')
+        self.addChunk('self._compile(file=self._filePath, moduleName='+self._className + ')')
         self.addChunk(
             'write(getattr(self, self._mainCheetahMethod_for_' + self._className +
             ')(trans=trans))')            
@@ -1349,6 +1358,20 @@ class ClassCompiler(GenUtils):
         ## now add the attribute
         self._generatedAttribs.append(attribExpr)
 
+    def addSuper(self, argsList, parserComment=None):        
+        className = self._className #self._baseClass
+        methodName = self._getActiveMethodCompiler().methodName()
+
+        argStringChunks = []
+        for arg in argsList:
+            chunk = arg[0]
+            if not arg[1] == None:
+                chunk += '=' + arg[1]
+            argStringChunks.append(chunk)
+        argString = ','.join(argStringChunks)
+
+        self.addFilteredChunk(
+            'super(%(className)s, self).%(methodName)s(%(argString)s)'%locals())
 
     def addErrorCatcherCall(self, codeChunk, rawCode='', lineCol=''):
         if self._placeholderToErrorCatcherMap.has_key(rawCode):
@@ -1423,6 +1446,7 @@ class ClassCompiler(GenUtils):
             return self.wrapClassDef()
 
     __str__ = classDef
+    __unicode__ = classDef
     
     def wrapClassDef(self):
         ind = self.setting('indentationStep')
@@ -1469,7 +1493,7 @@ class ClassCompiler(GenUtils):
         return  docStr
 
     def methodDefs(self):
-        methodDefs = [str(methGen) for methGen in self._finishedMethods() ]
+        methodDefs = [methGen.methodDef() for methGen in self._finishedMethods()]
         return '\n\n'.join(methodDefs)
 
     def attributes(self):
@@ -1528,8 +1552,7 @@ class ModuleCompiler(SettingsManager, GenUtils):
         
         if source and file:
             raise TypeError("Cannot compile from a source string AND file.")
-        elif isinstance(file, types.StringType) or isinstance(file, types.UnicodeType): # it's a filename.
-
+        elif isinstance(file, (str, unicode)): # it's a filename.
             f = open(file) # Raises IOError.
             source = f.read()
             f.close()
@@ -1539,23 +1562,35 @@ class ModuleCompiler(SettingsManager, GenUtils):
             source = file.read()  # Can't set filename or mtime--they're not accessible.
         elif file:
             raise TypeError("'file' argument must be a filename string or file-like object")
-
-
+                
         if self._filePath:
             self._fileDirName, self._fileBaseName = os.path.split(self._filePath)
-            self._fileBaseNameRoot, self._fileBaseNameExt = \
-                                    os.path.splitext(self._fileBaseName)
+            self._fileBaseNameRoot, self._fileBaseNameExt = os.path.splitext(self._fileBaseName)
 
-        if not (isinstance(source, str) or isinstance(source, unicode)):
-            source = str( source )
-        # by converting to string here we allow objects such as other Templates
-        # to be passed in
+        if not isinstance(source, (str,unicode)):
+            source = str(source)
+            # by converting to string here we allow objects such as other Templates
+            # to be passed in
 
         # Handle the #indent directive by converting it to other directives.
         # (Over the long term we'll make it a real directive.)
         if source == "":
             warnings.warn("You supplied an empty string for the source!", )
         
+        else:
+            unicodeMatch = unicodeDirectiveRE.search(source)
+            if unicodeMatch:
+                if encodingDirectiveRE.match(source):
+                    raise ParseError(
+                        self, "#encoding and #unicode are mutually exclusive! "
+                        "Use one or the other.")
+                source = unicodeDirectiveRE.sub('', source)
+                if isinstance(source, str):
+                    encoding = unicodeMatch.group(1) or 'ascii'
+                    source = unicode(source, encoding)
+                
+                #print encoding
+
         if source.find('#indent') != -1: #@@TR: undocumented hack
             source = indentize(source)
 
@@ -1855,8 +1890,9 @@ class ModuleCompiler(SettingsManager, GenUtils):
         self.addSpecialVar('CHEETAH_docstring', self.setting('defDocStrMsg'))
         self.addModuleGlobal('__CHEETAH_version__ = %r'%Version)
         self.addModuleGlobal('__CHEETAH_versionTuple__ = %r'%(VersionTuple,))        
-        self.addModuleGlobal('__CHEETAH_genTime__ = %r'%time.time())
-        self.addModuleGlobal('__CHEETAH_genTimestamp__ = %r'%self.timestamp())
+        if self.setting('addTimestampsToCompilerOutput'):
+            self.addModuleGlobal('__CHEETAH_genTime__ = %r'%time.time())
+            self.addModuleGlobal('__CHEETAH_genTimestamp__ = %r'%self.timestamp())
         if self._filePath:
             timestamp = self.timestamp(self._fileMtime)
             self.addModuleGlobal('__CHEETAH_src__ = %r'%self._filePath)
@@ -1949,7 +1985,7 @@ if not hasattr(%(mainClassName)s, '_initCheetahAttributes'):
         return '\n'.join(self._moduleConstants)
 
     def classDefs(self):
-        classDefs = [str(klass) for klass in self._finishedClasses() ]
+        classDefs = [klass.classDef() for klass in self._finishedClasses()]
         return '\n\n'.join(classDefs)
 
     def moduleFooter(self):
