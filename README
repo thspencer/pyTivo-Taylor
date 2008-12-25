@@ -67,4 +67,5 @@ select "Recently Deleted" or your pyTivo server that is listed and then
 hit the left arrow.  Your NPL will be back to normal.
 
 ---Notes
-Most of the work has been done by armooo.  With minor updates by KRKeegan.
+pyTivo was created by Jason Michalski ("armooo"). Contributors include 
+Kevin R. Keegan, William McBrine, and "wgw".
