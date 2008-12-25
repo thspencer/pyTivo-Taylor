@@ -10,27 +10,26 @@ from ConfigParser import NoOptionError
 guid = ''.join([random.choice(string.letters) for i in range(10)])
 
 config = ConfigParser.ConfigParser()
-p = os.path.dirname(__file__)
 
-config_files = [
-    '/etc/pyTivo.conf',
-    os.path.join(p, 'pyTivo.conf'),
-]
-config_exists = False
-for config_file in config_files:
-    if os.path.exists(config_file):
-        config_exists = True
-if not config_exists:
+p = os.path.dirname(__file__)
+config_files = ['/etc/pyTivo.conf', os.path.join(p, 'pyTivo.conf')]
+
+configs_found = config.read(config_files)
+if not configs_found:
     print ('ERROR: pyTivo.conf does not exist.\n' +
            'You must create this file before running pyTivo.')
     sys.exit(1)
-config.read(config_files)
 
 def reset():
     global config
     del config
     config = ConfigParser.ConfigParser()
     config.read(config_files)
+
+def write():
+    f = open(configs_found[-1], 'wt')
+    config.write(f)
+    f.close()
 
 def getGUID():
     if config.has_option('Server', 'GUID'):

@@ -1,4 +1,3 @@
-import ConfigParser
 import logging
 import math
 import os

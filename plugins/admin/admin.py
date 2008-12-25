@@ -1,4 +1,3 @@
-import ConfigParser
 import cookielib
 import os
 import socket
@@ -7,11 +6,9 @@ import sys
 import thread
 import time
 import urllib2
-from ConfigParser import NoOptionError
 from urllib import unquote_plus, quote, unquote
 from urlparse import urlparse
 from xml.dom import minidom
-from xml.sax.saxutils import escape
 
 from lrucache import LRUCache
 from Cheetah.Template import Template
@@ -78,13 +75,6 @@ NPL_TEMPLATE = file(tnname, 'rb').read()
 # Something to strip
 TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
 
-p = os.path.dirname(__file__)
-p = p.split(os.path.sep)
-p.pop()
-p.pop()
-p = os.path.sep.join(p)
-config_file_path = os.path.join(p, 'pyTivo.conf')
-
 status = {} # Global variable to control download threads
 tivo_cache = {} # Cache of TiVo NPL
 
@@ -121,28 +111,28 @@ class Admin(Plugin):
 
     def Admin(self, handler, query):
         # Read config file new each time in case there was any outside edits
-        config = ConfigParser.ConfigParser()
-        config.read(config_file_path)
+        config.reset()
 
         shares_data = []
-        for section in config.sections():
+        for section in config.config.sections():
             if not section.startswith(('_tivo_', 'Server')):
-                if (not(config.has_option(section,'type')) or
-                        config.get(section, 'type').lower() != 'admin'):
+                if (not(config.config.has_option(section, 'type')) or
+                        config.config.get(section, 'type').lower() != 'admin'):
                     shares_data.append((section,
-                                        dict(config.items(section, raw=True))))
+                                        dict(config.config.items(section,
+                                                                 raw=True))))
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         t = Template(SETTINGS_TEMPLATE)
         t.container = cname
         t.quote = quote
-        t.server_data = dict(config.items('Server', raw=True))
+        t.server_data = dict(config.config.items('Server', raw=True))
         t.server_known = buildhelp.getknown('server')
         t.shares_data = shares_data
         t.shares_known = buildhelp.getknown('shares')
-        t.tivos_data = [(section, dict(config.items(section, raw=True)))
-                        for section in config.sections()
+        t.tivos_data = [(section, dict(config.config.items(section, raw=True)))
+                        for section in config.config.sections()
                         if section.startswith('_tivo_')]
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
@@ -151,8 +141,7 @@ class Admin(Plugin):
         handler.wfile.write(t)
 
     def UpdateSettings(self, handler, query):
-        config = ConfigParser.ConfigParser()
-        config.read(config_file_path)
+        config.reset()
         for key in query:
             if key.startswith('Server.'):
                 section, option = key.split('.')
@@ -161,22 +150,22 @@ class Admin(Plugin):
                 elif option == "new__value":
                     new_value = query[key][0]
                 elif query[key][0] == " ":
-                    config.remove_option(section, option)
+                    config.config.remove_option(section, option)
                 else:
-                    config.set(section, option, query[key][0])
+                    config.config.set(section, option, query[key][0])
         if not(new_setting == ' ' and new_value == ' '):
-            config.set('Server', new_setting, new_value)
+            config.config.set('Server', new_setting, new_value)
 
         sections = query['Section_Map'][0].split(']')
         sections.pop() # last item is junk
         for section in sections:
             ID, name = section.split('|')
             if query[ID][0] == "Delete_Me":
-                config.remove_section(name)
+                config.config.remove_section(name)
                 continue
             if query[ID][0] != name:
-                config.remove_section(name)
-                config.add_section(query[ID][0])
+                config.config.remove_section(name)
+                config.config.add_section(query[ID][0])
             for key in query:
                 if key.startswith(ID + '.'):
                     junk, option = key.split('.')
@@ -185,16 +174,14 @@ class Admin(Plugin):
                     elif option == "new__value":
                         new_value = query[key][0]
                     elif query[key][0] == " ":
-                        config.remove_option(query[ID][0], option)
+                        config.config.remove_option(query[ID][0], option)
                     else:
-                        config.set(query[ID][0], option, query[key][0])
+                        config.config.set(query[ID][0], option, query[key][0])
             if not(new_setting == ' ' and new_value == ' '):
-                config.set(query[ID][0], new_setting, new_value)
+                config.config.set(query[ID][0], new_setting, new_value)
         if query['new_Section'][0] != " ":
-            config.add_section(query['new_Section'][0])
-        f = open(config_file_path, "w")
-        config.write(f)
-        f.close()
+            config.config.add_section(query['new_Section'][0])
+        config.write()
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
@@ -464,17 +451,14 @@ class Admin(Plugin):
         handler.wfile.write(t)
 
     def SaveNPL(self, handler, query):
-        config = ConfigParser.ConfigParser()
-        config.read(config_file_path)
+        config.reset()
         if 'tivo_mak' in query:
-            config.set(query['Container'][0], 'tivo_mak',
-                       query['tivo_mak'][0])
+            config.config.set(query['Container'][0], 'tivo_mak',
+                              query['tivo_mak'][0])
         if 'togo_path' in query:
-            config.set(query['Container'][0], 'togo_path',
-                       query['togo_path'][0])
-        f = open(config_file_path, "w")
-        config.write(f)
-        f.close()
+            config.config.set(query['Container'][0], 'togo_path',
+                              query['togo_path'][0])
+        config.write()
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
