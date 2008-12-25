@@ -285,7 +285,7 @@ def getMaxAudioBR(tsn=None):
     try:
         return _trunc64(config.get('Server', 'max_audio_br'))
     except NoOptionError:
-        return int(448) #default to 448
+        return int(448) # default to 448
 
 def get_tsn(name, tsn=None):
     if tsn and config.has_section('_tivo_' + tsn):
@@ -311,19 +311,7 @@ def getAudioLang(tsn=None):
     return get_tsn('audio_lang', tsn)
 
 def getCopyTS(tsn=None):
-    tsnsect = '_tivo_' + tsn
-    if tsn and config.has_section(tsnsect):
-        if config.has_option(tsnsect, 'copy_ts'):
-            try:
-                return config.get(tsnsect, 'copy_ts')
-            except NoOptionError, ValueError:
-                pass
-    if config.has_option('Server', 'copy_ts'):
-        try:
-            return config.get('Server', 'copy_ts')
-        except NoOptionError, ValueError:
-            pass
-    return 'none'
+    return get_tsn('copy_ts', tsn)
 
 def getVideoFPS(tsn=None):
     return get_tsn('video_fps', tsn)
