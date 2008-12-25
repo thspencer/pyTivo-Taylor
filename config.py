@@ -27,7 +27,7 @@ def reset():
     config.read(config_files)
 
 def write():
-    f = open(configs_found[-1], 'wt')
+    f = open(configs_found[-1], 'w')
     config.write(f)
     f.close()
 

@@ -221,7 +221,7 @@ class Admin(Plugin):
                 AnchorOffset += str(query['AnchorOffset'][0])
                 theurl += '&AnchorOffset=' + AnchorOffset
 
-            r=urllib2.Request(theurl)
+            r = urllib2.Request(theurl)
             auth_handler = urllib2.HTTPDigestAuthHandler()
             auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', tivo_mak)
             opener = urllib2.build_opener(auth_handler)
