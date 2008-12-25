@@ -78,12 +78,12 @@ def transcode(isQuery, inFile, outFile, tsn=''):
         kill(ffmpeg.pid)
 
 def select_audiocodec(isQuery, inFile, tsn=''):
-    # Default, compatible with all TiVo's
-    codec = 'ac3'
     vInfo = video_info(inFile)
     codectype = vInfo['vCodec']
     codec = config.getAudioCodec(tsn)
     if not codec:
+        # Default, compatible with all TiVo's
+        codec = 'ac3'
         if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
             if vInfo['aKbps'] == None:
                 if not isQuery:
@@ -101,8 +101,8 @@ def select_audiocodec(isQuery, inFile, tsn=''):
                 codec = 'copy'
     copy_flag = config.getCopyTS(tsn)
     copyts = ' -copyts'
-    if (codec == 'copy' and codectype == 'mpeg2video' and not copy_flag) or
-       (copy_flag and copy_flag.lower() == 'false'):
+    if ((codec == 'copy' and codectype == 'mpeg2video' and not copy_flag) or
+        (copy_flag and copy_flag.lower() == 'false')):
         copyts = ''
     return '-acodec ' + codec + copyts
 
