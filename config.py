@@ -22,9 +22,9 @@ if not configs_found:
 
 def reset():
     global config
-    del config
-    config = ConfigParser.ConfigParser()
-    config.read(config_files)
+    newconfig = ConfigParser.ConfigParser()
+    newconfig.read(config_files)
+    config = newconfig
 
 def write():
     f = open(configs_found[-1], 'w')
