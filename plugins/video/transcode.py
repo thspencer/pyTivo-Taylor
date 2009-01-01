@@ -227,9 +227,12 @@ def select_aspect(inFile, tsn = ''):
     multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH)
 
     if config.isHDtivo(tsn) and not optres:
-        if config.getPixelAR(0):
+        if config.getPixelAR(0) or vInfo['par']:
             if vInfo['par2'] == None:
-                npar = config.getPixelAR(1)
+                if vInfo['par']:
+                    npar = float(vInfo['par'])
+                else:
+                    npar = config.getPixelAR(1)
             else:
                 npar = vInfo['par2']
 
@@ -654,6 +657,7 @@ def video_info(inFile):
         logger.debug('failed at mapAudio')
     vInfo['mapAudio'] = amap
 
+    vInfo['par'] = None
     videoPlugin = GetPlugin('video')
     metadata = videoPlugin.getMetadataFromTxt(inFile)
 
