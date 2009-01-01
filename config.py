@@ -129,6 +129,12 @@ def getPixelAR(ref):
 def get(section, key):
     return config.get(section, key)
 
+def getFFmpegWait(): 
+    if config.has_option('Server', 'ffmpeg_wait'): 
+        return max(int(float(config.get('Server', 'ffmpeg_wait'))), 1)
+    else: 
+        return 10 
+
 def getFFmpegTemplate(tsn):
     if tsn and config.has_section('_tivo_' + tsn):
         try:

@@ -506,11 +506,14 @@ def video_info(inFile):
     ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
                               stdin=subprocess.PIPE)
 
-    # wait 10 sec if ffmpeg is not back give up
-    for i in xrange(200):
-        time.sleep(.05)
+    # wait configured # of seconds: if ffmpeg is not back give up 
+    wait = config.getFFmpegWait()
+    logging.debug( 
+     'starting ffmpeg, will wait %s seconds for it to complete' % wait) 
+    for i in xrange(wait*20): 
+        time.sleep(.05) 
         if not ffmpeg.poll() == None:
-            break
+            break 
 
     if ffmpeg.poll() == None:
         kill(ffmpeg.pid)

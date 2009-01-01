@@ -109,7 +109,7 @@ Description: Set pixel aspect ratio. Applies to S3 Tivos only. OPTRES must be fa
 par=1.18518519 (32:27, usually the correct setting for wide-screen anamorphically encoded DVD content)<br><br>+\
 par=0.88888889 (8:9, usually the correct setting for anamorphically encoded DVDs from TV shows)
 Example Settings: 1.0, 1.18518519, 0.88888889<br><br>+\
-Alternate option: Specify par in metadata txt files by adding "Override_par : x.xxxx" to a metadata file associated with the video file.  If all files in the folder have the same par, add the option to a file called default.txt instead of creating individual metadata files. 
+Alternative option: Specify par in metadat txt files by adding "Override_par : x.xxxx" to a metadata file associated with the video file.  If all files in the folder have the same par, add the option to a file called default.txt instead of creating individual metadata files. 
 Available In: Server
 
 video_fps
@@ -330,5 +330,13 @@ Description: Only the shares listed in this setting will be visible on this TiVo
 Example Settings: Movies, Kids Stuff
 Available In: Tivos
 
+ffmpeg_wait
 
-
+Recommended Setting: blank
+pyTivo Defaults To: 10 (seconds)
+Valid Entries: any integer
+Required: No
+Skill: Advanced
+Description: Slow computers or NAS servers may result in pytivo reporting supported videos  as not supported (copy protected).  Increasing this setting will give ffmpeg more time to scan the file.
+Example Settings: 10, 15, 20.
+Available In: Server
