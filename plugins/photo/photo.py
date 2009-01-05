@@ -90,8 +90,19 @@ class Photo(Plugin):
 
         def __setitem__(self, key, obj):
             self.acquire()
-            LRUCache.__setitem__(self, key, obj)
-            self.release()
+            try:
+                LRUCache.__setitem__(self, key, obj)
+            finally:
+                self.release()
+
+        def __getitem__(self, key):
+            item = None
+            self.acquire()
+            try:
+                item = LRUCache.__getitem__(self, key)
+            finally:
+                self.release()
+            return item
 
     media_data_cache = LockedLRUCache(300)  # info and thumbnails
     recurse_cache = LockedLRUCache(5)       # recursive directory lists
