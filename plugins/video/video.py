@@ -159,7 +159,6 @@ class Video(Plugin):
         originalAirDate = datetime.fromtimestamp(ctime)
 
         metadata['title'] = '.'.join(title.split('.')[:-1])
-        metadata['seriesTitle'] = metadata['title'] # default to the filename
         metadata['originalAirDate'] = originalAirDate.isoformat()
 
         metadata.update(self.getMetadataFromTxt(full_path))
