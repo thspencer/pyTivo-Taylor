@@ -510,7 +510,7 @@ def video_info(inFile):
     wait = config.getFFmpegWait()
     logging.debug(
      'starting ffmpeg, will wait %s seconds for it to complete' % wait)
-    for i in xrange(wait*20):
+    for i in xrange(wait * 20):
         time.sleep(.05)
         if not ffmpeg.poll() == None:
             break
