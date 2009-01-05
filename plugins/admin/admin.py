@@ -115,7 +115,8 @@ class Admin(Plugin):
 
         shares_data = []
         for section in config.config.sections():
-            if not section.startswith(('_tivo_', 'Server')):
+            if not (section.startswith('_tivo_')
+                    or section.startswith('Server')):
                 if (not(config.config.has_option(section, 'type')) or
                         config.config.get(section, 'type').lower() != 'admin'):
                     shares_data.append((section,

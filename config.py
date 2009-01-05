@@ -81,8 +81,10 @@ def get169Setting(tsn):
 def getShares(tsn=''):
     shares = [(section, dict(config.items(section)))
               for section in config.sections()
-              if not (section.startswith(('_tivo_', 'logger_', 'handler_',
-                                          'formatter_'))
+              if not (section.startswith('_tivo_')
+                      or section.startswith('logger_')
+                      or section.startswith('handler_')
+                      or section.startswith('formatter_')
                       or section in ('Server', 'loggers', 'handlers',
                                      'formatters')
               )
