@@ -506,14 +506,14 @@ def video_info(inFile):
     ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
                               stdin=subprocess.PIPE)
 
-    # wait configured # of seconds: if ffmpeg is not back give up 
+    # wait configured # of seconds: if ffmpeg is not back give up
     wait = config.getFFmpegWait()
-    logging.debug( 
-     'starting ffmpeg, will wait %s seconds for it to complete' % wait) 
-    for i in xrange(wait*20): 
-        time.sleep(.05) 
+    logging.debug(
+     'starting ffmpeg, will wait %s seconds for it to complete' % wait)
+    for i in xrange(wait*20):
+        time.sleep(.05)
         if not ffmpeg.poll() == None:
-            break 
+            break
 
     if ffmpeg.poll() == None:
         kill(ffmpeg.pid)
@@ -521,9 +521,9 @@ def video_info(inFile):
         info_cache[inFile] = (mtime, vInfo)
         return vInfo
 
-    err_tmp.seek(0) 
-    output = err_tmp.read() 
-    err_tmp.close() 
+    err_tmp.seek(0)
+    output = err_tmp.read()
+    err_tmp.close()
     logging.debug('ffmpeg output=%s' % output)
 
     rezre = re.compile(r'.*Video: ([^,]+),.*')
