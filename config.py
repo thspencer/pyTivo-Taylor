@@ -55,6 +55,8 @@ def getPort():
 
 def get169Blacklist(tsn):  # tivo does not pad 16:9 video
     return tsn and not isHDtivo(tsn) and not get169Letterbox(tsn)
+    # verified Blacklist Tivo's are ('130', '240', '540')
+    # It is assumed all remaining non-HD and non-Letterbox tivos are Blacklist
 
 def get169Letterbox(tsn):  # tivo pads 16:9 video for 4:3 display
     return tsn and tsn[:3] in ['649']
