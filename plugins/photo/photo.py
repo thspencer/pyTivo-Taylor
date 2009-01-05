@@ -195,7 +195,16 @@ class Photo(Plugin):
                     orient = exif_orient_m(exif)
 
                 if orient:
-                    exifrot = ((ord(orient.group(1)) - 1) * -90) % 360
+                    exifrot = {
+                        1:   0, 
+                        2:   0,
+                        3: 180,
+                        4: 180,
+                        5:  90,
+                        6: -90,
+                        7: -90,
+                        8:  90}.get(ord(orient.group(1)), 0)
+
                     rot = (rot + exifrot) % 360
                     if attrs:
                         attrs['exifrot'] = exifrot
