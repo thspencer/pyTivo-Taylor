@@ -158,7 +158,7 @@ class Plugin(object):
 
         file_type = query.get('Filter', [''])[0]
 
-        recurse = query.get('Recurse',['No'])[0] == 'Yes'
+        recurse = query.get('Recurse', ['No'])[0] == 'Yes'
         files = build_recursive_list(path, recurse)
 
         totalFiles = len(files)
@@ -175,12 +175,17 @@ class Plugin(object):
         def name_sort(x, y):
             return cmp(x, y)
 
-        if query.get('SortOrder',['Normal'])[0] == 'Random':
+        def date_sort(x, y):
+            return cmp(os.stat(y).st_ctime, os.stat(x).st_ctime)
+
+        if query.get('SortOrder', ['Normal'])[0] == 'Random':
             seed = query.get('RandomSeed', ['1'])[0]
             self.random_lock.acquire()
             random.seed(seed)
             random.shuffle(files)
             self.random_lock.release()
+        elif query.get('SortOrder', ['Normal'])[0] == '!CaptureDate':
+            files.sort(date_sort)
         else:
             files.sort(dir_sort)
 
