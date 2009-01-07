@@ -6,6 +6,10 @@
         <showingBits value="$video.showingBits"/>
         <time>$video.time</time>
         <duration>$video.iso_duration</duration>
+		#if $video.partCount and $video.partIndex
+		<partCount>$video.partCount</partCount>
+		<partIndex>$video.partIndex</partIndex>
+        #end if
         <program>
           <vActor>
                 #for $element in $video.vActor
@@ -102,6 +106,10 @@
     <showingBits value="$video.showingBits"/>
     <time>$video.time</time>
     <duration>$video.iso_duration</duration>
+	#if $video.partCount and $video.partIndex
+	<partCount>$video.partCount</partCount>
+	<partIndex>$video.partIndex</partIndex>
+    #end if
     <program>
       <vActor>
             #for $element in $video.vActor
