@@ -137,7 +137,7 @@ class Music(Plugin):
             try:
                 shutil.copyfileobj(ffmpeg.stdout, handler.wfile)
             except:
-                kill(ffmpeg.pid)
+                kill(ffmpeg)
         else:
             f = file(fname, 'rb')
             try:

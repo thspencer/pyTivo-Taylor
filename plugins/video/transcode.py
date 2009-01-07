@@ -75,7 +75,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     try:
         shutil.copyfileobj(ffmpeg.stdout, outFile)
     except:
-        kill(ffmpeg.pid)
+        kill(ffmpeg)
 
 def select_audiocodec(isQuery, inFile, tsn=''):
     vInfo = video_info(inFile)
@@ -516,7 +516,7 @@ def video_info(inFile):
             break
 
     if ffmpeg.poll() == None:
-        kill(ffmpeg.pid)
+        kill(ffmpeg)
         vInfo['Supported'] = False
         info_cache[inFile] = (mtime, vInfo)
         return vInfo
@@ -691,7 +691,7 @@ def video_check(inFile, cmd_string):
         shutil.copyfileobj(ffmpeg.stdout, open(videotest, 'wb'))
         return True
     except:
-        kill(ffmpeg.pid)
+        kill(ffmpeg)
         return False
 
 def supported_format(inFile):
@@ -701,13 +701,24 @@ def supported_format(inFile):
         logger.debug('FALSE, file not supported %s' % inFile)
         return False
 
-def kill(pid):
-    logger.debug('killing pid=%s' % str(pid))
+def kill(popen):
+    logger.debug('killing pid=%s' % str(popen.pid))
     if mswindows:
-        win32kill(pid)
+        win32kill(popen.pid)
     else:
         import os, signal
-        os.kill(pid, signal.SIGTERM)
+        for i in xrange(3):
+            logger.debug('sending SIGTERM to pid: %s' % popen.pid)
+            os.kill(popen.pid, signal.SIGTERM)
+            time.sleep(.5)
+            if popen.poll() is not None:
+                logger.debug('process %s has exited' % popen.pid)
+                break
+        else:
+            while popen.poll() is None:
+                logger.debug('sending SIGKILL to pid: %s' % popen.pid)
+                os.kill(popen.pid, signal.SIGKILL)
+                time.sleep(.5)
 
 def win32kill(pid):
     import ctypes
