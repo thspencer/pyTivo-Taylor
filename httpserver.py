@@ -129,6 +129,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # anything.
         self.unsupported(query)
 
+    def log_message(self, format, *args):
+        logging.getLogger("pyTivo").info(format, *args)
+
     def root_container(self):
         tsn = self.headers.getheader('TiVo_TCD_ID', '')
         tsnshares = config.getShares(tsn)
