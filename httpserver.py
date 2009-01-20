@@ -43,6 +43,9 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         for section, settings in config.getShares():
             self.add_container(section, settings)
 
+    def handle_error(self, request, client_address):
+        logging.getLogger("pyTivo").exception("Exception during request from %s" % (client_address,))
+
     def set_beacon(self, beacon):
         self.beacon = beacon
 

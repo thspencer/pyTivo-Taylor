@@ -8,7 +8,12 @@ import httpserver
 import config
 from plugin import GetPlugin
 
+def exceptionLogger(type, value, tb):
+    sys.excepthook = sys.__excepthook__
+    logging.getLogger("pyTivo").exception("Exception in pyTivo")
+
 config.init_logging()
+sys.excepthook = exceptionLogger
 
 port = config.getPort()
 
