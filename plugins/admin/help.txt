@@ -245,7 +245,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 audio_lang
 
-Recommended Setting: eng
+Recommended Setting: 5.1, DTS, en  (entire string including commas)
 pyTivo Defaults To: blank
 Valid Entries: any language tag or audio stream number reported by ffmpeg
 Required: No
