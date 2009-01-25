@@ -352,7 +352,7 @@ def getVideoPCT(tsn=None):
             return config.getfloat('_tivo_SD', 'video_pct')
         except NoOptionError:
             pass
-    return 70
+    return 85
 
 def getBuffSize(tsn=None):
     tsnsect = '_tivo_' + tsn

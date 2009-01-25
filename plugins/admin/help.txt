@@ -136,7 +136,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 video_pct
 
 Recommended Setting: blank
-pyTivo Defaults to: 70 (percent of source bitrate)
+pyTivo Defaults to: 85 (percent of source bitrate)
 Valid Entries: Any number (set this to 0 to disable this option)
 Required: No
 Skill: Advanced
