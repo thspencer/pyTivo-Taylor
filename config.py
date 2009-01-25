@@ -296,7 +296,7 @@ def getAudioBR(tsn=None):
             return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
         except NoOptionError:
             pass
-    return str(min(384, getMaxAudioBR(tsn))) + 'k'
+    return str(min(448, getMaxAudioBR(tsn))) + 'k'
 
 def _k(i):
     return str(int(strtod(i)) / 1000) + 'k'

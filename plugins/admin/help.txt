@@ -189,7 +189,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 audio_br
 
 Recommended Setting: blank
-pyTivo Defaults To: same bitrate as source or 384k
+pyTivo Defaults To: same bitrate as source or 448k
 Valid Entries: Any valid Bit rate up to 448k.
 Required: No
 Skill: Advanced
