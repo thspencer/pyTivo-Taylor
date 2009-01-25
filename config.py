@@ -311,7 +311,7 @@ def getVideoBR(tsn=None):
         try:
             return _k(config.get('_tivo_HD', 'video_br'))
         except NoOptionError:
-            return '8192k'
+            return '16384k'
     else:
         try:
             return _k(config.get('_tivo_SD', 'video_br'))
