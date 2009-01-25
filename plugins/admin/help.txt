@@ -21,7 +21,7 @@
 # This entry should be a comma seperated list of the sections which 
 # this setting should be shown in. For example:
 #
-# Available In: Server, TiVos, Shares
+# Available In: Server, Tivos, HD_tivos, SD_tivos, Shares
 #
 ######################################################################
 
@@ -96,7 +96,7 @@ Required: No
 Skill: Moderate
 Description: Allows for the use of the Optimal Resolution in transcoding. By setting optes = true pyTivo will treat the height and width settings in the conf file as a maximum. If the video to be transcoded has smaller dimensions that are closer to other acceptable TiVo dimensions then pyTivo will use these dimensions. This allows for faster transcoding and small files when the initial video is a lower quality. pyTivo uses the same resolution as the source file on HD Tivos for optimal transcoding efficiency. It is not necessay to to set this option with HD TiVos unles you wish to force pyTivo to change the resolution to an "S2 compatible" resolution.
 Example Settings: True/False
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 par
 
@@ -121,7 +121,7 @@ Required: No
 Skill: Advanced
 Description: Sets the frame rate used by ffmpeg. pyTivo uses 29.97 for S2's, and uses the same frame rate as the source on HD TiVos. The default setting should work fine for most transfers.
 Example Settings: 29.97, 23.98, 25, 59.94
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 video_br
 
@@ -131,7 +131,7 @@ Required: No
 Skill: Advanced
 Description: This allows you to choose the default server video bit rate used in transcoding. FFmpeg does not strictly follow this bit rate, there is a certain level of tolerance that is allowed. Also a low quality file will always have a low bit rate. The default is likely fine for most users. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.
 Example Settings: 4096K, 8Mi, 12Mi, 16Mi
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 video_pct
 
@@ -141,8 +141,8 @@ Valid Entries: Any number (set this to 0 to disable this option)
 Required: No
 Skill: Advanced
 Description: This sets video_br to a percent of the source video bitrate.  pyTivo will multiply the source video bitrate by this percentage setting, compare it to the video_br setting and use whichever is greater as the video_br.  This allows for setting higher bitrates automatically when transcoding High Definition sources.  For example, if your source file has a bitrate of 22000k and video_pct is set to 70, pyTivo will use 15400k for video_br instead of the default 8192k setting.  With this setting enabled, the video_br setting essentially becomes the minimum video bitrate.  This setting only applies to S3 tivos.
-Example Settings: 60, 70, 85, 100
-Available In: Server
+Example Settings: 60, 70, 85, 100, 125
+Available In: Tivos, HD_tivos, SD_tivos
 
 max_video_br
 
@@ -153,7 +153,7 @@ Required: No
 Skill: Advanced
 Description: This allows you to choose the maximum bit rate and is more strict than the video_br setting above. However setting this can cause buffer overflows and can cause issues with ffmpeg. In addition to setting the ffmpeg maxrate option, this setting is used to determine if the video bitrate of the source video file is too high for the TiVo. mpeg's with a video bitrate above this setting will be transcoded rather than sent to the TiVo untouched.  Lower this setting below the bitrate of your source file if you wish to force high bitrate sources to be transcoded.  Recommended only for skilled users. Note: there is a report that ffmpeg throws an error with 17Mi but accepts 17408K just fine.
 Example Settings: 17408k, 30000k
-Available In: Server
+Available In: Tivos, HD_tivos, SD_tivos
 
 bufsize
 
@@ -164,7 +164,7 @@ Required: No
 Skill: Very Advanced
 Description: Allows you to set the buffer size used by ffmpeg. Increasing this setting will allow higher bitrates during transcoding (see video_br setting), especially when transcoding to HD resolutions.  But it may result in pixelation or audio sync issues with some sources.  1024k is fine for the resolutions used by S2 tivos.  But 2048k or 4096k is preferred for HD tivos.  Leave this setting blank unless you are experiencing audio/video sync issues and wish to test a different value.
 Example Settings: 1024k, 2048k, 4096k
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 width
 
@@ -174,7 +174,7 @@ Required: No
 Skill: Moderate
 Description: Allows you to choose the output dimension of the transcoded videos. SD units are limited to 544 and below. Likely HD users will want to choose a higher value. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.
 Example Settings: 1920, 1440, 1280, 720, 704, 544, 480, 352.
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 height
 
@@ -184,7 +184,7 @@ Required: No
 Skill: Moderate
 Description: Allows you to choose the output dimension of the transcoded videos. SD units are limited to 480 and below. Likely HD users will want to choose a higher value. Higher values may slow down transcoding and will increase the file size. Increased file sizes take up more room on the TiVo and take longer to transfer over the network.
 Example Settings: 1080, 720, 480
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 audio_br
 
@@ -195,7 +195,7 @@ Required: No
 Skill: Advanced
 Description: This allows you to choose the default audio bit rate used for transcoding. The default is likely fine for most users. 384k is the minimum recommended for ac3 audio. For S2 Tivos, you may want to lower this setting to 192k and set audio_ch=2 to slightly reduce the file size. See audio_codec for more info.
 Example Settings: 192K, 384K, 448K.
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 max_audio_br
 
@@ -206,7 +206,7 @@ Required: No
 Skill: Advanced
 Description: This sets the maximum audio bit rate that can be sent to the TiVo. Files having a higher bit rate will be transcoded to ensure TiVo compatibilty.
 Example Settings: 384K, 448K.
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 audio_fr
 
@@ -217,7 +217,7 @@ Required: No
 Skill: Advanced
 Description: Sets the audio sampling frequency. Defaults to frequency of the source file for better audio sync if it is 44100 or 48000. Otherwise 48000 is used.
 Example Settings: 44100, 48000
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 audio_ch
 
@@ -228,7 +228,7 @@ Required: No
 Skill: Advanced
 Description: Sets the number of audio channels used by ffmpeg. ffmpeg will retain the same number of channels as the source file by default. The default setting should work fine for most transfers unless the default audio_codec is changed. Change this setting to 2 if you do not want to retain 5.1 audio. A bug in ffmpeg will sometimes move the center audio channel to the left or right speaker. Setting this option to 2, on an as needed basis, or permanently, will correct this at the loss of 5.1 audio. But this should only be necessary on rare occasions where the source file is an mkv or xvid with ac3 5.1 audio bitrate above 448k.
 Example Settings: 2, 6
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 audio_codec
 
@@ -241,7 +241,7 @@ Description: Sets the audio codec used by ffmpeg during transcoding. pyTivo defa
 Allowing pyTivo to select '-acodec copy' whenever possible will generally produce the best results. This is meant to eliminate garbled audio during transcoding when the source contains audio glitches that cause ffmpeg to lose synchronization. This will also prevent the center audio channel from being moved to the right front speaker by ffmpeg when transferring mkv's and xvid's with audio bitrate of 448k or less.<br><br>+\
 You may want to change this setting to mp2 if you only have an S2, or have specified a per tivo section for an S2, and do not wish to retain 5.1 audio for possible transfer to an S3 Tivo or back to the PC should the need arise. This will slightly reduce the amount of disk space used and allow for more recordings on an S2 Tivo. In this case, you will want to specify audio_codec=mp2, audio_ch=2, and audio_br=192k. These are the settings normally used by the S2 for recordings.
 Example Settings: mp2, ac3
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 audio_lang
 
@@ -255,7 +255,7 @@ You can also assign new language tags to your files by adding Override lines to 
 Override_mapAudio 0.1 colon eng (replace the word colon with a colon)<br>+\
 Where 0.1 is the audio stream number reported by ffmpeg and eng is the new audio tag to assign to that stream.  Add a separate Override line for each audio stream that you want to replace with a new tag.<br><br>+\
 Example Settings: eng, ger, spa, en, ge, 0.0, 0.1, 0.2, 0x80, 0x81 etc...
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 
 copy_ts
@@ -267,7 +267,7 @@ Required: No
 Skill: Basic
 Description: Adds the copy timestamps setting (-copyts) to the ffmpeg command.  This setting helps correct audio synchronization problems that commonly occur during transcoding.  You can leave this field blank unless you wish to disable it. pyTivo defaults to True except when pyTivo uses acodec copy, in which case copyts is not needed, and a conflict could also occur if the source file has really corrupt sections.<br><br>+\
 Example Settings: blank, True, False
-Available In: Server, Tivos
+Available In: Tivos, HD_tivos, SD_tivos
 
 ffmpeg_pram
 
@@ -277,7 +277,7 @@ Required: No
 Skill: Very Advanced
 Description: This allows you to append additional raw ffmpeg commands to the ffmpeg template. For example, you would enter '-threads 2' here if you have multiple processors and want ffmpeg to use both processors to speed up transcoding.
 Example Settings: -threads 2
-Available In: Server, Tivos
+Available In: Server, Tivos, HD_tivos, SD_tivos
 
 ffmpeg_tmpl
 
@@ -288,7 +288,7 @@ Required: No
 Skill: Very Advanced
 Description: This is a template used by pyTivo to control the parameters passed to ffmpeg. It should not be necessary to modify this template unless there is a particular parameter you do not wish ffmpeg to use and it cannot be overridden by specifying that parameter in the pyTivo.conf file.
 Example Settings: See Above and the forum.
-Available In: Server, Tivos
+Available In: Server, Tivos, HD_tivos, SD_tivos
 
 type
 

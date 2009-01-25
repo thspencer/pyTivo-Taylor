@@ -50,7 +50,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     settings = {'video_codec': select_videocodec(tsn),
                 'video_br': select_videobr(inFile, tsn),
                 'video_fps': select_videofps(inFile, tsn),
-                'max_video_br': select_maxvideobr(),
+                'max_video_br': select_maxvideobr(tsn),
                 'buff_size': select_buffsize(tsn),
                 'aspect_ratio': ' '.join(select_aspect(inFile, tsn)),
                 'audio_br': select_audiobr(tsn),
@@ -160,18 +160,18 @@ def select_videostr(inFile, tsn):
     video_str = config.strtod(config.getVideoBR(tsn))
     if config.isHDtivo(tsn):
         vInfo =  video_info(inFile)
-        if vInfo['kbps'] != None and config.getVideoPCT() > 0:
-            video_percent = int(vInfo['kbps']) * 10 * config.getVideoPCT()
+        if vInfo['kbps'] != None and config.getVideoPCT(tsn) > 0:
+            video_percent = int(vInfo['kbps']) * 10 * config.getVideoPCT(tsn)
             video_str = max(video_str, video_percent)
-    video_str = int(min(config.strtod(config.getMaxVideoBR()) * 0.95,
+    video_str = int(min(config.strtod(config.getMaxVideoBR(tsn)) * 0.95,
                         video_str))
     return video_str
 
 def select_audiobr(tsn):
     return '-ab ' + config.getAudioBR(tsn)
 
-def select_maxvideobr():
-    return '-maxrate ' + config.getMaxVideoBR()
+def select_maxvideobr(tsn):
+    return '-maxrate ' + config.getMaxVideoBR(tsn)
 
 def select_buffsize(tsn):
     return '-bufsize ' + config.getBuffSize(tsn)
@@ -431,7 +431,7 @@ def tivo_compatible(inFile, tsn=''):
         if vInfo['kbps'] != None:
             abit = max('0', vInfo['aKbps'])
             if (int(vInfo['kbps']) - int(abit) > 
-                config.strtod(config.getMaxVideoBR()) / 1000):
+                config.strtod(config.getMaxVideoBR(tsn)) / 1000):
                 message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
                                    'video bitrate.') % vInfo['kbps'])
                 break

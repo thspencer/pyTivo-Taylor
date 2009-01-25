@@ -32,6 +32,23 @@ def write():
     config.write(f)
     f.close()
 
+if not config.has_section('_tivo_HD'):
+    f = open(configs_found[-1], 'a')
+    f.write('\n\n[_tivo_HD]'\
+                     '\n# section for default video options applicable to all HD TiVos'\
+                     '\n# see pyTivo Web Configuration for all available settings')
+    f.close()
+    reset()
+
+if not config.has_section('_tivo_SD'):
+    f = open(configs_found[-1], 'a')
+    f.write('\n\n[_tivo_SD]'\
+                     '\n# section for default video options applicable to all SD TiVos'\
+                     '\n# see pyTivo Web Configuration for all available settings')
+    f.close()
+    reset()
+
+
 def getGUID():
     if config.has_option('Server', 'GUID'):
         return config.get('Server', 'GUID')
@@ -116,10 +133,16 @@ def getOptres(tsn=None):
             return config.getboolean('_tivo_' + tsn, 'optres')
         except NoOptionError, ValueError:
             pass
-    try:
-        return config.getboolean('Server', 'optres')
-    except NoOptionError, ValueError:
-        return False
+    if isHDtivo(tsn):
+        try:
+            return config.getboolean('_tivo_HD', 'optres')
+        except NoOptionError, ValueError:
+            return False
+    else:
+        try:
+            return config.getboolean('_tivo_SD', 'optres')
+        except NoOptionError, ValueError:
+            return False
 
 def getPixelAR(ref):
     if config.has_option('Server', 'par'):
@@ -144,6 +167,16 @@ def getFFmpegTemplate(tsn):
             return config.get('_tivo_' + tsn, 'ffmpeg_tmpl', raw=True)
         except NoOptionError:
             pass
+    if isHDtivo(tsn):
+        try:
+            return config.get('_tivo_HD', 'ffmpeg_tmpl', raw=True)
+        except NoOptionError:
+            pass
+    else:
+        try:
+            return config.get('_tivo_SD', 'ffmpeg_tmpl', raw=True)
+        except NoOptionError:
+            pass
     try:
         return config.get('Server', 'ffmpeg_tmpl', raw=True)
     except NoOptionError: #default
@@ -156,6 +189,16 @@ def getFFmpegPrams(tsn):
     if tsn and config.has_section('_tivo_' + tsn):
         try:
             return config.get('_tivo_' + tsn, 'ffmpeg_pram', raw=True)
+        except NoOptionError:
+            pass
+    if isHDtivo(tsn):
+        try:
+            return config.get('_tivo_HD', 'ffmpeg_pram', raw=True)
+        except NoOptionError:
+            pass
+    else:
+        try:
+            return config.get('_tivo_SD', 'ffmpeg_pram', raw=True)
         except NoOptionError:
             pass
     try:
@@ -196,13 +239,17 @@ def getTivoHeight(tsn):
             return nearestTivoHeight(height)
         except NoOptionError:
             pass
-    try:
-        height = config.getint('Server', 'height')
-        return nearestTivoHeight(height)
-    except NoOptionError: #defaults for S3/S2 TiVo
-        if isHDtivo(tsn):
+    if isHDtivo(tsn):
+        try:
+            height = config.getint('_tivo_HD', 'height')
+            return nearestTivoHeight(height)
+        except NoOptionError:
             return 720
-        else:
+    else:
+        try:
+            height = config.getint('_tivo_SD', 'height')
+            return nearestTivoHeight(height)
+        except NoOptionError:
             return 480
 
 def getTivoWidth(tsn):
@@ -212,13 +259,17 @@ def getTivoWidth(tsn):
             return nearestTivoWidth(width)
         except NoOptionError:
             pass
-    try:
-        width = config.getint('Server', 'width')
-        return nearestTivoWidth(width)
-    except NoOptionError: #defaults for S3/S2 TiVo
-        if isHDtivo(tsn):
+    if isHDtivo(tsn):
+        try:
+            width = config.getint('_tivo_HD', 'width')
+            return nearestTivoWidth(width)
+        except NoOptionError:
             return 1280
-        else:
+    else:
+        try:
+            width = config.getint('_tivo_SD', 'width')
+            return nearestTivoWidth(width)
+        except NoOptionError:
             return 544
 
 def _trunc64(i):
@@ -233,11 +284,19 @@ def getAudioBR(tsn=None):
             return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
         except NoOptionError:
             pass
-    try:
-        audiobr = _trunc64(config.get('Server', 'audio_br'))
-        return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
-    except NoOptionError:
-        return str(min(384, getMaxAudioBR(tsn))) + 'k'
+    if isHDtivo(tsn):
+        try:
+            audiobr = _trunc64(config.get('_tivo_HD', 'audio_br'))
+            return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
+        except NoOptionError:
+            pass
+    else:
+        try:
+            audiobr = _trunc64(config.get('_tivo_SD', 'audio_br'))
+            return str(min(audiobr, getMaxAudioBR(tsn))) + 'k'
+        except NoOptionError:
+            pass
+    return str(min(384, getMaxAudioBR(tsn))) + 'k'
 
 def _k(i):
     return str(int(strtod(i)) / 1000) + 'k'
@@ -248,25 +307,52 @@ def getVideoBR(tsn=None):
             return _k(config.get('_tivo_' + tsn, 'video_br'))
         except NoOptionError:
             pass
-    try:
-        return _k(config.get('Server', 'video_br'))
-    except NoOptionError: #defaults for S3/S2 TiVo
-        if isHDtivo(tsn):
+    if isHDtivo(tsn):
+        try:
+            return _k(config.get('_tivo_HD', 'video_br'))
+        except NoOptionError:
             return '8192k'
-        else:
+    else:
+        try:
+            return _k(config.get('_tivo_SD', 'video_br'))
+        except NoOptionError:
             return '4096K'
 
-def getMaxVideoBR():
-    try:
-        return _k(config.get('Server', 'max_video_br'))
-    except NoOptionError: #default to 30000k
-        return '30000k'
+def getMaxVideoBR(tsn=None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        try:
+            return _k(config.get('_tivo_' + tsn, 'max_video_br'))
+        except NoOptionError:
+            pass
+    if isHDtivo(tsn):
+        try:
+            return _k(config.get('_tivo_HD', 'max_video_br'))
+        except NoOptionError:
+            pass
+    else:
+        try:
+            return _k(config.get('_tivo_SD', 'max_video_br'))
+        except NoOptionError:
+            pass 
+    return '30000k'
 
-def getVideoPCT():
-    try:
-        return config.getfloat('Server', 'video_pct')
-    except NoOptionError:
-        return 70
+def getVideoPCT(tsn=None):
+    if tsn and config.has_section('_tivo_' + tsn):
+        try:
+            return config.getfloat('_tivo_' + tsn, 'video_pct')
+        except NoOptionError:
+            pass
+    if isHDtivo(tsn):
+        try:
+            return config.getfloat('_tivo_HD', 'video_pct')
+        except NoOptionError:
+            pass
+    else:
+        try:
+            return config.getfloat('_tivo_SD', 'video_pct')
+        except NoOptionError:
+            pass
+    return 70
 
 def getBuffSize(tsn=None):
     tsnsect = '_tivo_' + tsn
@@ -276,14 +362,19 @@ def getBuffSize(tsn=None):
                 return _k(config.get(tsnsect, 'bufsize'))
             except NoOptionError:
                 pass
-    if config.has_option('Server', 'bufsize'):
-        try:
-            return _k(config.get('Server', 'bufsize'))
-        except NoOptionError:
-            pass
     if isHDtivo(tsn):
+        if config.has_option('_tivo_HD', 'bufsize'):
+            try:
+                return _k(config.get('_tivo_HD', 'bufsize'))
+            except NoOptionError:
+                pass
         return '4096k'
     else:
+        if config.has_option('_tivo_SD', 'bufsize'):
+            try:
+                return _k(config.get('_tivo_SD', 'bufsize'))
+            except NoOptionError:
+                pass
         return '1024k'
 
 def getMaxAudioBR(tsn=None):
@@ -293,10 +384,17 @@ def getMaxAudioBR(tsn=None):
             return _trunc64(config.get('_tivo_' + tsn, 'max_audio_br'))
         except NoOptionError:
             pass
-    try:
-        return _trunc64(config.get('Server', 'max_audio_br'))
-    except NoOptionError:
-        return int(448) # default to 448
+    if isHDtivo(tsn):
+        try:
+            return _trunc64(config.get('_tivo_HD', 'max_audio_br'))
+        except NoOptionError:
+            pass
+    else:
+        try:
+            return _trunc64(config.get('_tivo_SD', 'max_audio_br'))
+        except NoOptionError:
+            pass
+    return int(448)
 
 def get_tsn(name, tsn=None):
     if tsn and config.has_section('_tivo_' + tsn):
@@ -304,10 +402,17 @@ def get_tsn(name, tsn=None):
             return config.get('_tivo_' + tsn, name)
         except NoOptionError:
             pass
-    try:
-        return config.get('Server', name)
-    except NoOptionError:
-        return None
+    if isHDtivo(tsn):
+        try:
+            return config.get('_tivo_HD', name)
+        except NoOptionError:
+            pass
+    else:
+        try:
+            return config.get('_tivo_SD', name)
+        except NoOptionError:
+            pass
+    return None
 
 def getAudioCodec(tsn=None):
     return get_tsn('audio_codec', tsn)
