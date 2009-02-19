@@ -130,9 +130,15 @@ class Admin(Plugin):
         t.quote = quote
         t.server_data = dict(config.config.items('Server', raw=True))
         t.server_known = buildhelp.getknown('server')
-        t.hd_tivos_data = dict(config.config.items('_tivo_HD', raw=True))
+        if config.config.has_section('_tivo_HD'):
+            t.hd_tivos_data = dict(config.config.items('_tivo_HD', raw=True))
+        else:
+            t.hd_tivos_data = {}
         t.hd_tivos_known = buildhelp.getknown('hd_tivos')
-        t.sd_tivos_data = dict(config.config.items('_tivo_SD', raw=True))
+        if config.config.has_section('_tivo_SD'):
+            t.sd_tivos_data = dict(config.config.items('_tivo_SD', raw=True))
+        else:
+            t.sd_tivos_data = {}
         t.sd_tivos_known = buildhelp.getknown('sd_tivos')
         t.shares_data = shares_data
         t.shares_known = buildhelp.getknown('shares')
@@ -154,6 +160,8 @@ class Admin(Plugin):
                 or key.startswith('_tivo_SD.') \
                 or key.startswith('_tivo_HD.'):
                 section, option = key.split('.')
+                if not config.config.has_section(section):
+                    config.config.add_section(section)
                 if option == "new__setting":
                     new_setting = query[key][0]
                 elif option == "new__value":
