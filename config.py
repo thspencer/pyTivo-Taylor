@@ -32,23 +32,6 @@ def write():
     config.write(f)
     f.close()
 
-if not config.has_section('_tivo_HD'):
-    f = open(configs_found[-1], 'a')
-    f.write('\n\n[_tivo_HD]'\
-                     '\n# section for default video options applicable to all HD TiVos'\
-                     '\n# see pyTivo Web Configuration for all available settings')
-    f.close()
-    reset()
-
-if not config.has_section('_tivo_SD'):
-    f = open(configs_found[-1], 'a')
-    f.write('\n\n[_tivo_SD]'\
-                     '\n# section for default video options applicable to all SD TiVos'\
-                     '\n# see pyTivo Web Configuration for all available settings')
-    f.close()
-    reset()
-
-
 def getGUID():
     if config.has_option('Server', 'GUID'):
         return config.get('Server', 'GUID')
