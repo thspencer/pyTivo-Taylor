@@ -115,39 +115,21 @@ class Video(Plugin):
 
     def getMetadataFromTxt(self, full_path):
         metadata = {}
-
-        default_meta = os.path.join(os.path.split(full_path)[0], 'default.txt')
-        standard_meta = full_path + '.txt'
-        subdir_meta = os.path.join(os.path.dirname(full_path), '.meta',
-                                   os.path.basename(full_path)) + '.txt'
-
-        for metafile in (default_meta, standard_meta, subdir_meta):
-            metadata.update(self.__getMetadataFromFile(metafile))
-
-        return metadata
-
-    def __getMetadataFromFile(self, f):
-        metadata = {}
-
-        if os.path.exists(f):
-            for line in open(f):
-                if line.strip().startswith('#'):
-                    continue
-                if not ':' in line:
-                    continue
-
-                key, value = line.split(':', 1)
-                key = key.strip()
-                value = value.strip()
-
-                if key.startswith('v'):
-                    if key in metadata:
-                        metadata[key].append(value)
+        path, name = os.path.split(full_path)
+        for metafile in [os.path.join(path, 'default.txt'), full_path + '.txt',
+                         os.path.join(path, '.meta', name) + '.txt']:
+            if os.path.exists(metafile):
+                for line in file(metafile):
+                    if line.strip().startswith('#') or not ':' in line:
+                        continue
+                    key, value = [x.strip() for x in line.split(':', 1)]
+                    if key.startswith('v'):
+                        if key in metadata:
+                            metadata[key].append(value)
+                        else:
+                            metadata[key] = [value]
                     else:
-                        metadata[key] = [value]
-                else:
-                    metadata[key] = value
-
+                        metadata[key] = value
         return metadata
 
     def metadata_basic(self, full_path):
