@@ -31,8 +31,12 @@
                 #end for
           </vDirector>
           <episodeNumber>$escape($video.episodeNumber)</episodeNumber>
+          #if $video.isEpisode != 'false' and ($video.episodeTitle or $video.seriesTitle)
           #if $video.episodeTitle
           <episodeTitle>$escape($video.episodeTitle)</episodeTitle>
+          #else
+          <episodeTitle>$escape($video.title)</episodeTitle>
+          #end if 
           #end if
           <vExecProducer>
                 #for $element in $video.vExecProducer
@@ -131,8 +135,12 @@
             #end for
       </vDirector>
       <episodeNumber>$escape($video.episodeNumber)</episodeNumber>
+      #if $video.isEpisode != 'false' and ($video.episodeTitle or $video.seriesTitle)
       #if $video.episodeTitle
       <episodeTitle>$escape($video.episodeTitle)</episodeTitle>
+      #else
+      <episodeTitle>$escape($video.title)</episodeTitle>
+      #end if 
       #end if
       <vExecProducer>
             #for $element in $video.vExecProducer
