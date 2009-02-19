@@ -64,6 +64,14 @@ ffmpeg=/usr/bin/ffmpeg
 #video_br=12Mi
 #ffmpeg_tmpl=%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_prams)s %(format)s
 
+#[_tivo_HD]
+# section for default video options applicable to all HD TiVos
+# see pyTivo Web Configuration for all available settings
+
+#[_tivo_SD]
+# section for default video options applicable to all SD TiVos
+# see pyTivo Web Configuration for all available settings
+
 [MyMovies]
 # Type can be 'video', 'music', or 'photo'
 type=video
