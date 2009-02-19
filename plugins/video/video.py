@@ -306,7 +306,7 @@ class Video(Plugin):
                 duration = file_info['duration'] / 1000,
                 size = file_info['size'],
                 title = file_info['title'],
-                subtitle = file_info['name'])
+                subtitle = file_info['episodeTitle'])
         except Exception, e:
             import traceback
             handler.send_response(500)
