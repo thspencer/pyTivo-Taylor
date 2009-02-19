@@ -56,10 +56,12 @@ else:
                 'size': size,
                 'source': title,
                 'state': 'complete',
-                'subtitle': subtitle,
                 'title': title,
                 'url': url
             }
+
+            if subtitle:
+                data['subtitle'] = subtitle
 
             offer_id, content_id = self.__bodyOfferModify(data)
             self.__subscribe(offer_id, content_id, tsn)
