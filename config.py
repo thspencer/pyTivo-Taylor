@@ -121,7 +121,11 @@ def getOptres(tsn=None):
         try:
             return config.getboolean(section_name, 'optres')
         except NoOptionError, ValueError:
-            return False
+            pass
+    try:
+        return config.getboolean('Server', 'optres')
+    except NoOptionError, ValueError:
+        return False
 
 def getPixelAR(ref):
     if config.has_option('Server', 'par'):
@@ -217,6 +221,11 @@ def getTivoHeight(tsn):
             return nearestTivoHeight(height)
         except NoOptionError:
             pass
+    try:
+        width = config.getint('Server', 'height')
+        return nearestTivoHeight(height)
+    except NoOptionError:
+        pass
     return [480, 720][isHDtivo(tsn)]
 
 def getTivoWidth(tsn):
@@ -233,6 +242,11 @@ def getTivoWidth(tsn):
             return nearestTivoWidth(width)
         except NoOptionError:
             pass
+    try:
+        width = config.getint('Server', 'width')
+        return nearestTivoWidth(width)
+    except NoOptionError:
+        pass
     return [544, 1280][isHDtivo(tsn)]
 
 def _trunc64(i):
@@ -273,6 +287,10 @@ def getVideoPCT(tsn=None):
             return config.getfloat(section_name, 'video_pct')
         except NoOptionError:
             pass
+    try:
+        return config.getfloat('Server', 'video_pct')
+    except NoOptionError:
+        pass
     return 85
 
 def getBuffSize(tsn=None):
@@ -303,6 +321,10 @@ def get_tsn(name, tsn=None):
             return config.get(section_name, name)
         except NoOptionError:
             pass
+    try:
+        return config.get('Server', name)
+    except NoOptionError:
+        pass
     return None
 
 def getAudioCodec(tsn=None):
