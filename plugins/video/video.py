@@ -136,9 +136,10 @@ class Video(Plugin):
         metadata = {}
 
         base_path, title = os.path.split(full_path)
-        ctime = os.stat(full_path).st_ctime
-        if (ctime < 0): ctime = 0
-        originalAirDate = datetime.fromtimestamp(ctime)
+        mtime = os.stat(full_path).st_mtime
+        if (mtime < 0):
+            mtime = 0
+        originalAirDate = datetime.fromtimestamp(mtime)
 
         metadata['title'] = '.'.join(title.split('.')[:-1])
         metadata['originalAirDate'] = originalAirDate.isoformat()

@@ -176,7 +176,7 @@ class Plugin(object):
             return cmp(x, y)
 
         def date_sort(x, y):
-            return cmp(os.stat(y).st_ctime, os.stat(x).st_ctime)
+            return cmp(os.stat(y).st_mtime, os.stat(x).st_mtime)
 
         if query.get('SortOrder', ['Normal'])[0] == 'Random':
             seed = query.get('RandomSeed', ['1'])[0]
