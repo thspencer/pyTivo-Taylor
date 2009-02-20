@@ -16,6 +16,11 @@ from plugin import GetPlugin
 
 SCRIPTDIR = os.path.dirname(__file__)
 
+VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
+<TiVoFormats><Format>
+<ContentType>video/x-tivo-mpeg</ContentType><Description/>
+</Format></TiVoFormats>"""
+
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
 
@@ -82,7 +87,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             command = query['Command'][0]
 
             # If we are looking at the root container
-            if (command == "QueryContainer" and
+            if (command == 'QueryContainer' and
                 (not 'Container' in query or query['Container'][0] == '/')):
                 self.root_container()
                 return
@@ -99,6 +104,13 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             return
                         else:
                             break
+
+            elif (command == 'QueryFormats' and 'SourceFormat' in query and
+                  query['SourceFormat'][0].startswith('video')):
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(VIDEO_FORMATS)
+                return
 
         # If we made it here it means we couldn't match the request to
         # anything.
