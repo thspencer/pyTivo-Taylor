@@ -133,7 +133,8 @@ class Music(Plugin):
             if duration:
                 cmd[-1:] = ['-t', '%.3f' % (duration / 1000.0), '-']
 
-            ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            ffmpeg = subprocess.Popen(cmd, bufsize=(64 * 1024),
+                                      stdout=subprocess.PIPE)
             try:
                 shutil.copyfileobj(ffmpeg.stdout, handler.wfile)
             except:
