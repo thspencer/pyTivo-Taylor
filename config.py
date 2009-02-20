@@ -171,7 +171,9 @@ def nearest(x, list):
     return reduce(lambda a, b: closest(x, a, b), list)
 
 def closest(x, a, b):
-    if abs(x - a) < abs(x - b) or (abs(x - a) == abs(x - b) and a > b):
+    da = abs(x - a)
+    db = abs(x - b)
+    if da < db or (da == db and a > b):
         return a
     else:
         return b
