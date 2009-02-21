@@ -32,24 +32,22 @@ Valid Entries: Valid port number
 Required: Yes, without a port setting in the conf file pyTivo will not start.
 Skill: Basic
 Description: The port which pyTivo uses to serve your files. Can be +\
-changed if it conflicts with another program. It is reported on Ubuntu +\
-that this port is already used so you may need to change it to something +\
-like port=9254.
+changed if it conflicts with another program.
 Example Settings: 9032
 Available In: Server
 
 guid
 
-Default Setting: 123456
-Valid Entries: Any 6 digit number
-Required: Generally NO, will default to '123456' if left blank. If you +\
-use more than one pyTivo server on the same network a different random +\
-number is required here.
+Default Setting: Random 10-character string
+Valid Entries: Almost any short string
+Required: No
 Skill: Advanced
 Description: A unique identifier used in the beacon to identify this +\
-server. If you have 2 or more pyTivo servers on one network each server +\
-must use its own unique identifier.
-Example Settings: Any 6 digit number.
+server. If you have two or more pyTivo servers on one network each server +\
+must use its own unique identifier. It used to be necessary to set these +\
+manually, but with the random generator, this option should never be +\
+needed.
+Example Settings: 123456, pyTivo-bedroom
 Available In: Server
 
 ffmpeg
@@ -60,7 +58,7 @@ Required: Yes!
 Skill: Basic
 Description: This is the full path to your ffmpeg binary. For windows +\
 users ffmpeg is distributed with pyTivo and is in the plugins/video +\
-folder
+folder.
 Example Settings: Linux = /usr/bin/ffmpeg | +\
 Windows = c:\Program Files\pyTivo\plugins\video\ffmpeg_mp2.exe
 Available In: Server
@@ -68,13 +66,19 @@ Available In: Server
 beacon
 
 Default Setting: 255.255.255.255
-Valid Entries: A Subnet or Listen
-Required: No, defaults to 255.255.255.255
+Valid Entries: Beacon IP address(es) or "listen".  Can contain multiple +\
+IPs separated by spaces.
+Required: No
 Skill: Advanced
-Description: The subnet which the beacon should broadcast on. Most +\
-people can leave this at the default setting. If set to listen will +\
-accept incoming TCP requests.
-Example Settings: 255.255.255.255
+Description: The addresses on which the beacon should broadcast.  Most +\
+people can leave this at the default. If set to "listen", will accept +\
+incoming TCP beacons. If you're having issues with your shares not +\
+appearing on TiVo, try using the broadcast address of your LAN. For +\
+example, if your gateway (router) used address 192.168.1.1, your +\
+broadcast address would be 192.168.1.255.  Alternatively, you can +\
+specify the exact addresses of your TiVos, e.g. 192.168.1.150 +\
+192.168.1.151.
+Example Settings: 192.168.1.255
 Available In: Server
 
 debug
@@ -92,7 +96,7 @@ Available In: Server
 
 precache
 
-Default Setting: false
+Default Setting: False
 Valid Entries: True/False
 Required: No
 Skill: Moderate
@@ -148,8 +152,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 par
 
-Recommended Setting: 1.0
-pyTivo Defaults To: blank
+Default Setting: 1.0
 Valid Entries: any valid par
 Required: No
 Skill: Very Advanced
@@ -174,8 +177,7 @@ Available In: Server
 
 video_fps
 
-Recommended Setting: blank
-pyTivo Defaults To: 29.97 for S2 Tivo, same as source for S3/HD TiVo
+Default Setting: 29.97 for S2 Tivo, same as source for S3/HD TiVo
 Valid Entries: 29.97, 23.98, 25, 59.94
 Required: No
 Skill: Advanced
@@ -197,15 +199,15 @@ there is a certain level of tolerance that is allowed. Also a low +\
 quality file will always have a low bit rate. The default is likely fine +\
 for most users. Higher values may slow down transcoding and will +\
 increase the file size. Increased file sizes take up more room on the +\
-TiVo.  (Higher settings are recommended for screen sizes above 47" such +\
-as: video_br=20Mi, width=1920, height=1080)
+TiVo and take longer to transfer over the network. (Higher settings are +\
+recommended for screen sizes above 47" such as: video_br=20Mi, width=1920, +\
+height=1080)
 Example Settings: 4096K, 8Mi, 12Mi, 16Mi, 20Mi
 Available In: Tivos, HD_tivos, SD_tivos
 
 video_pct
 
-Recommended Setting: blank
-pyTivo Defaults to: 85 (percent of source bitrate)
+Default Setting: 85 (percent of source bitrate)
 Valid Entries: Any number (set this to 0 to disable this option)
 Required: No
 Skill: Advanced
@@ -224,8 +226,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 max_video_br
 
-Recommended Setting: blank
-pyTivo Defaults to: 30000k
+Default Setting: 30000k
 Valid Entries: Any valid Bit rate. 1024K = 1Mi
 Required: No
 Skill: Advanced
@@ -234,18 +235,18 @@ strict than the video_br setting above. However setting this can cause +\
 buffer overflows and can cause issues with ffmpeg. In addition to +\
 setting the ffmpeg maxrate option, this setting is used to determine if +\
 the video bitrate of the source video file is too high for the TiVo. +\
-mpeg's with a video bitrate above this setting will be transcoded rather +\
-than sent to the TiVo untouched.  Lower this setting below the bitrate +\
-of your source file if you wish to force high bitrate sources to be +\
-transcoded.  Recommended only for skilled users. Note: there is a report +\
-that ffmpeg throws an error with 17Mi but accepts 17408K just fine.
+Otherwise compatible mpeg's with a video bitrate above this setting will +\
+be transcoded rather than sent to the TiVo untouched.  Lower this +\
+setting below the bitrate of your source file if you wish to force high +\
+bitrate sources to be transcoded.  Recommended only for skilled users. +\
+Note: there is a report that ffmpeg throws an error with 17Mi but +\
+accepts 17408K just fine.
 Example Settings: 17408k, 30000k
 Available In: Tivos, HD_tivos, SD_tivos
 
 bufsize
 
-Recommended Setting: blank
-pyTivo Defaults To: 1024k for S2, 4096k for S3
+Default Setting: 1024k for S2, 4096k for S3
 Valid Entries: Any valid byte size
 Required: No
 Skill: Very Advanced
@@ -263,11 +264,11 @@ width
 
 Default Setting: 544 for S2, 1280 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to +\
-nearest acceptable TiVo dimension
+nearest acceptable TiVo dimension.
 Required: No
 Skill: Moderate
 Description: Allows you to choose the output dimension of the transcoded +\
-videos. SD units are limited to 544 and below. Likely HD users will want +\
+videos. SD units are limited to 720 and below. Likely HD users will want +\
 to choose a higher value. Higher values may slow down transcoding and +\
 will increase the file size. Increased file sizes take up more room on +\
 the TiVo and take longer to transfer over the network.
@@ -291,9 +292,8 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 audio_br
 
-Recommended Setting: blank
-pyTivo Defaults To: same bitrate as source or 448k
-Valid Entries: Any valid Bit rate up to 448k.
+Default Setting: same bitrate as source or 448k
+Valid Entries: Any valid bitrate up to 448k
 Required: No
 Skill: Advanced
 Description: This allows you to choose the default audio bit rate used +\
@@ -306,21 +306,19 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 max_audio_br
 
-Recommended Setting: blank
-pyTivo Defaults To: 448k
-Valid Entries: Any valid Bit rate.
+Default Setting: 448k
+Valid Entries: Any valid bitrate
 Required: No
 Skill: Advanced
 Description: This sets the maximum audio bit rate that can be sent to +\
 the TiVo. Files having a higher bit rate will be transcoded to ensure +\
-TiVo compatibilty.
-Example Settings: 384K, 448K.
+TiVo compatibility.
+Example Settings: 384K, 448K
 Available In: Tivos, HD_tivos, SD_tivos
 
 audio_fr
 
-Recommended Setting: blank
-pyTivo Defaults To: same frequency as source
+Default Setting: same frequency as source
 Valid Entries: 44100, 48000
 Required: No
 Skill: Advanced
@@ -332,8 +330,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 audio_ch
 
-Recommended Setting: blank
-pyTivo Defaults To: same channels as source
+Default Setting: same channels as source
 Valid Entries: any number compatible with ffmpeg and the audio codec selected
 Required: No
 Skill: Advanced
@@ -351,8 +348,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 audio_codec
 
-Recommended Setting: blank
-pyTivo Defaults To: ac3 or copy
+Default Setting: ac3 or copy
 Valid Entries: mp2, ac3
 Required: No
 Skill: Advanced
@@ -382,11 +378,10 @@ Available In: Tivos, HD_tivos, SD_tivos
 audio_lang
 
 Recommended Setting: 5.1, DTS, en  (entire string including commas)
-pyTivo Defaults To: blank
+pyTivo Defaults To: first audio stream
 Valid Entries: any language tag or audio stream number reported by ffmpeg
 Required: No
 Skill: Basic
-
 Description: Sets the preferred language track used by pyTivo. +\
 ffmpeg/pytivo defaults to the first audio stream.  Specifying this +\
 parameter, tells pyTivo to use the first audio stream that matches this +\
@@ -408,9 +403,8 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 copy_ts
 
-Recommended Setting: blank
-pyTivo Defaults To: True
-Valid Entries: blank, True, False
+Default Setting: True
+Valid Entries: True/False
 Required: No
 Skill: Basic
 Description: Adds the copy timestamps setting (-copyts) to the ffmpeg +\
@@ -420,7 +414,7 @@ unless you wish to disable it. pyTivo defaults to True except when +\
 pyTivo uses acodec copy, in which case copyts is not needed, and a +\
 conflict could also occur if the source file has really corrupt +\
 sections.
-Example Settings: blank, True, False
+Example Settings: True, False
 Available In: Tivos, HD_tivos, SD_tivos
 
 ffmpeg_pram
@@ -438,8 +432,7 @@ Available In: Server, Tivos, HD_tivos, SD_tivos
 
 ffmpeg_tmpl
 
-Recommended Setting: blank
-pyTivo Defaults To: %(video_codec)s %(video_fps)s %(video_br)s +\
+Default Setting: %(video_codec)s %(video_fps)s %(video_br)s +\
 %(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py +\
 %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(audio_lang)s +\
 %(ffmpeg_pram)s %(format)s
@@ -457,13 +450,13 @@ Available In: Server, Tivos, HD_tivos, SD_tivos
 type
 
 Default Setting: None
-Valid Entries: video, music, or any other valid plugin name.
+Valid Entries: video, music, photo, or any other valid plugin name.
 Required: Yes
 Skill: Basic
 Description: Sets the type of share that this will be. This must be set +\
 to something otherwise pyTivo will not start. NOTE plugins names are +\
 generally lowercase.
-Example Settings: video, music
+Example Settings: video, music, photo
 Available In: Shares
 
 path
@@ -493,8 +486,8 @@ Available In: Tivos
 shares
 
 Default Setting: Blank, which is equivalent to allow all shares on this TiVo.
-Valid Entries: The name of any share in your pyTivo.conf file. A comma +\
-separated list.
+Valid Entries: The names of any shares in your pyTivo.conf file, in a +\
+comma-separated list.
 Required: No
 Skill: Easy
 Description: Only the shares listed in this setting will be visible on +\
@@ -505,8 +498,7 @@ Available In: Tivos
 
 ffmpeg_wait
 
-Recommended Setting: blank
-pyTivo Defaults To: 10 (seconds)
+Default Setting: 10 (seconds)
 Valid Entries: any integer
 Required: No
 Skill: Advanced
