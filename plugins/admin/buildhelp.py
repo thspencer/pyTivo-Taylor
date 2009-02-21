@@ -11,35 +11,32 @@ f = open(os.path.join(SCRIPTDIR, 'help.txt'))
 try:
     for line in f:
         line = line.strip()
-        if multiline != '':
-            if (line.rfind('+\\') + 2) == len(line):
-                multiline += line[0:(len(line) - 2)]
-                continue
+        if multiline:
+            if line.endswith('+\\'):
+                multiline += line[:-2]
             else:
                 multiline += line
                 help_list[title].append(multiline)
                 multiline = ''
-                continue
-        if line == '' or line.find('#') >= 0:
+            continue
+        if not line or line.startswith('#'):
             # skip blank or commented lines
             continue
-        if line.find(':') <= 0:
+        if ':' not in line:
             title = line
             help_list[title] = []
         else:
-            value = line.split(':', 1)[0].strip()
-            data = line.split(':', 1)[1].strip()
+            value, data = [x.strip() for x in line.split(':', 1)]
             if value.lower() == 'available in':
                 # special setting to create section_known array
-                data = data.split(',')
-                for section in data:
+                for section in data.split(','):
                     section = section.lower().strip()
                     if section not in settings_known:
                         settings_known[section] = []
                     settings_known[section].append(title)
             else:
-                if (line.rfind('+\\') + 2) == len(line):
-                    multiline += line[0:(len(line) - 2)]
+                if line.endswith('+\\'):
+                    multiline += line[:-2]
                 else:
                     help_list[title].append(line)
 finally:
