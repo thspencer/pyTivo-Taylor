@@ -94,7 +94,7 @@ Default Setting: False
 Valid Entries: True/False
 Required: No
 Skill: Moderate
-Description: Allows for the use of the Optimal Resolution in transcoding. By setting optes = true pyTivo will treat the height and width settings in the conf file as a maximum. If the video to be transcoded has smaller dimensions that are closer to other acceptable TiVo dimensions then pyTivo will use these dimensions. This allows for faster transcoding and small files when the initial video is a lower quality. pyTivo uses the same resolution as the source file on HD Tivos for optimal transcoding efficiency. It is not necessay to to set this option with HD TiVos unles you wish to force pyTivo to change the resolution to an "S2 compatible" resolution.
+Description: Allows for the use of the Optimal Resolution in transcoding. By setting optres = true pyTivo will treat the height and width settings in the conf file as a maximum. If the video to be transcoded has smaller dimensions that are closer to other acceptable TiVo dimensions then pyTivo will use these dimensions. This allows for faster transcoding and small files when the initial video is a lower quality. pyTivo uses the same resolution as the source file on HD Tivos for optimal transcoding efficiency. It is not necessay to to set this option with HD TiVos unles you wish to force pyTivo to change the resolution to an "S2 compatible" resolution.
 Example Settings: True/False
 Available In: Tivos, HD_tivos, SD_tivos
 
