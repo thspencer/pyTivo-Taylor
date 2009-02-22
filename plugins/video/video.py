@@ -246,6 +246,7 @@ class Video(Plugin):
         t.tivos = handler.tivos
         t.tivo_names = handler.tivo_names
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/xml')
         handler.end_headers()
         handler.wfile.write(t)
 
@@ -264,11 +265,13 @@ class Video(Plugin):
         t.video = file_info
         t.escape = escape
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/xml')
         handler.end_headers()
         handler.wfile.write(t)
 
     def XSL(self, handler, query):
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/xml')
         handler.end_headers()
         handler.wfile.write(XSL_TEMPLATE)
 
