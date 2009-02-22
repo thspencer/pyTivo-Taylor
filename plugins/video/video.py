@@ -71,9 +71,6 @@ class Video(Plugin):
         transcode.output_video(container['path'] + path[len(name) + 1:],
                                handler.wfile, tsn)
 
-    def __isdir(self, full_path):
-        return os.path.isdir(full_path)
-
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
 
@@ -218,7 +215,7 @@ class Video(Plugin):
             if not video['part_path'].startswith(os.path.sep):
                 video['part_path'] = os.path.sep + video['part_path']
             video['title'] = os.path.split(f)[1]
-            video['is_dir'] = self.__isdir(f)
+            video['is_dir'] = os.path.isdir(f)
             if video['is_dir']:
                 video['small_path'] = subcname + '/' + video['name']
                 video['total_items'] = self.__total_items(f)
