@@ -22,12 +22,12 @@ SCRIPTDIR = os.path.dirname(__file__)
 CLASS_NAME = 'Video'
 
 # Preload the templates
-tcname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
-ttname = os.path.join(SCRIPTDIR, 'templates', 'TvBus.tmpl')
-txname = os.path.join(SCRIPTDIR, 'templates', 'container.xsl')
-CONTAINER_TEMPLATE = file(tcname, 'rb').read()
-TVBUS_TEMPLATE = file(ttname, 'rb').read()
-XSL_TEMPLATE = file(txname, 'rb').read()
+def tmpl(name):
+    return file(os.path.join(SCRIPTDIR, 'templates', name), 'rb').read()
+
+CONTAINER_TEMPLATE = tmpl('container.tmpl')
+TVBUS_TEMPLATE = tmpl('TvBus.tmpl')
+XSL_TEMPLATE = tmpl('container.xsl')
 
 extfile = os.path.join(SCRIPTDIR, 'video.ext')
 try:
