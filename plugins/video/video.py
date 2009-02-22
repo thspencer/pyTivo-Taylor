@@ -190,8 +190,7 @@ class Video(Plugin):
 
         if (not cname in handler.server.containers or
             not self.get_local_path(handler, query)):
-            handler.send_response(404)
-            handler.end_headers()
+            handler.send_error(404)
             return
 
         container = handler.server.containers[cname]
