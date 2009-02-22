@@ -3,6 +3,7 @@ import os
 import re
 import socket
 import time
+import traceback
 import urllib
 import zlib
 from UserDict import DictMixin
@@ -52,8 +53,8 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def send_file(self, handler, container, name):
-        if (handler.headers.getheader('Range') and
-            handler.headers.getheader('Range') != 'bytes=0-'):
+        range = handler.headers.getheader('Range')
+        if range and range != 'bytes=0-':
             handler.send_response(206)
             handler.send_header('Connection', 'close')
             handler.send_header('Content-Type', 'video/x-tivo-mpeg')
@@ -102,7 +103,7 @@ class Video(Plugin):
         else:
             # Must be re-encoded
             if config.getAudioCodec(tsn) == None:
-                audioBPS = config.getMaxAudioBR(tsn)*1000
+                audioBPS = config.getMaxAudioBR(tsn) * 1000
             else:
                 audioBPS = config.strtod(config.getAudioBR(tsn))
             videoBPS = transcode.select_videostr(full_path, tsn)
@@ -130,42 +131,40 @@ class Video(Plugin):
         return metadata
 
     def metadata_basic(self, full_path):
-        metadata = {}
-
         base_path, title = os.path.split(full_path)
         mtime = os.stat(full_path).st_mtime
         if (mtime < 0):
             mtime = 0
         originalAirDate = datetime.fromtimestamp(mtime)
 
-        metadata['title'] = '.'.join(title.split('.')[:-1])
-        metadata['originalAirDate'] = originalAirDate.isoformat()
+        metadata = {'title': '.'.join(title.split('.')[:-1]),
+                    'originalAirDate': originalAirDate.isoformat()}
 
         metadata.update(self.getMetadataFromTxt(full_path))
 
         return metadata
 
     def metadata_full(self, full_path, tsn=''):
-        metadata = {}
-
         now = datetime.utcnow()
-
         duration = self.__duration(full_path)
         duration_delta = timedelta(milliseconds = duration)
 
-        metadata['time'] = now.isoformat()
-        metadata['startTime'] = now.isoformat()
-        metadata['stopTime'] = (now + duration_delta).isoformat()
-        metadata['size'] = self.__est_size(full_path, tsn)
-        metadata['duration'] = duration
+        metadata = {'time': now.isoformat(),
+                    'startTime': now.isoformat(),
+                    'stopTime': (now + duration_delta).isoformat(),
+                    'size': self.__est_size(full_path, tsn),
+                    'duration': duration}
+
         vInfo = transcode.video_info(full_path)
         transcode_options = {}
         if not transcode.tivo_compatible(full_path, tsn)[0]:
             transcode_options = transcode.transcode(True, full_path, '', tsn)
-        metadata['vHost'] = [str(transcode.tivo_compatible(full_path, tsn)[1])]+\
-                            ['SOURCE INFO: ']+["%s=%s" % (k, v) for k, v in sorted(transcode.video_info(full_path).items(), reverse=True)]+\
-                            ['TRANSCODE OPTIONS: ']+["%s" % (v) for k, v in transcode_options.items()]+\
-                            ['SOURCE FILE: ']+[str(os.path.split(full_path)[1])]
+
+        metadata['vHost'] = ([str(transcode.tivo_compatible(full_path, tsn)[1])] +
+                             ['SOURCE INFO: '] + ["%s=%s" % (k, v) for k, v in sorted(transcode.video_info(full_path).items(), reverse=True)] +
+                             ['TRANSCODE OPTIONS: '] + ["%s" % (v) for k, v in transcode_options.items()] +
+                             ['SOURCE FILE: '] + [str(os.path.split(full_path)[1])])
+
         if not (full_path[-5:]).lower() == '.tivo':
             if ((int(vInfo['vHeight']) >= 720 and
                  config.getTivoHeight >= 720) or
@@ -289,7 +288,6 @@ class Video(Plugin):
         if file_info['valid']:
             file_info.update(self.metadata_full(file_path, tsn))
 
-        import socket
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('tivo.com',123))
         ip = s.getsockname()[0]
@@ -313,7 +311,6 @@ class Video(Plugin):
                 title = title,
                 subtitle = file_info['episodeTitle'])
         except Exception, e:
-            import traceback
             handler.send_response(500)
             handler.end_headers()
             handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
