@@ -1,3 +1,4 @@
+import cgi
 import logging
 import os
 import re
@@ -53,11 +54,22 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def send_file(self, handler, container, name):
+        mime = 'video/x-tivo-mpeg'
+
+        try:
+            path, query = handler.path.split('?')
+        except ValueError:
+            path = handler.path
+        else:
+            opts = cgi.parse_qs(query)
+            if 'Format' in opts:
+                mime = opts['Format'][0]
+
         range = handler.headers.getheader('Range')
         if range and range != 'bytes=0-':
             handler.send_response(206)
             handler.send_header('Connection', 'close')
-            handler.send_header('Content-Type', 'video/x-tivo-mpeg')
+            handler.send_header('Content-Type', mime)
             handler.send_header('Transfer-Encoding', 'chunked')
             handler.end_headers()
             handler.wfile.write("\x30\x0D\x0A")
@@ -70,7 +82,7 @@ class Video(Plugin):
         handler.send_response(200)
         handler.end_headers()
         transcode.output_video(container['path'] + path[len(name) + 1:],
-                               handler.wfile, tsn)
+                               handler.wfile, tsn, mime)
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
@@ -94,11 +106,10 @@ class Video(Plugin):
             pass
         return count
 
-    def __est_size(self, full_path, tsn = ''):
+    def __est_size(self, full_path, tsn='', mime=''):
         # Size is estimated by taking audio and video bit rate adding 2%
 
-        if transcode.tivo_compatible(full_path, tsn)[0]:
-            # Is TiVo-compatible mpeg2
+        if transcode.tivo_compatible(full_path, tsn, mime)[0]:
             return int(os.stat(full_path).st_size)
         else:
             # Must be re-encoded
@@ -144,7 +155,7 @@ class Video(Plugin):
 
         return metadata
 
-    def metadata_full(self, full_path, tsn=''):
+    def metadata_full(self, full_path, tsn='', mime=''):
         now = datetime.utcnow()
         duration = self.__duration(full_path)
         duration_delta = timedelta(milliseconds = duration)
@@ -152,15 +163,15 @@ class Video(Plugin):
         metadata = {'time': now.isoformat(),
                     'startTime': now.isoformat(),
                     'stopTime': (now + duration_delta).isoformat(),
-                    'size': self.__est_size(full_path, tsn),
+                    'size': self.__est_size(full_path, tsn, mime),
                     'duration': duration}
 
         vInfo = transcode.video_info(full_path)
         transcode_options = {}
-        if not transcode.tivo_compatible(full_path, tsn)[0]:
+        if not transcode.tivo_compatible(full_path, tsn, mime)[0]:
             transcode_options = transcode.transcode(True, full_path, '', tsn)
 
-        metadata['vHost'] = ([str(transcode.tivo_compatible(full_path, tsn)[1])] +
+        metadata['vHost'] = ([str(transcode.tivo_compatible(full_path, tsn, mime)[1])] +
                              ['SOURCE INFO: '] + ["%s=%s" % (k, v) for k, v in sorted(transcode.video_info(full_path).items(), reverse=True)] +
                              ['TRANSCODE OPTIONS: '] + ["%s" % (v) for k, v in transcode_options.items()] +
                              ['SOURCE FILE: '] + [str(os.path.split(full_path)[1])])
@@ -284,8 +295,14 @@ class Video(Plugin):
 
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
+
+        mime = ''
+        if (config.isHDtivo(tsn) and
+            transcode.tivo_compatible_mp4(file_path, tsn)[0]):
+            mime = 'video/mp4'
+
         if file_info['valid']:
-            file_info.update(self.metadata_full(file_path, tsn))
+            file_info.update(self.metadata_full(file_path, tsn, mime))
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('tivo.com',123))
@@ -308,7 +325,8 @@ class Video(Plugin):
                 duration = file_info['duration'] / 1000,
                 size = file_info['size'],
                 title = title,
-                subtitle = file_info['episodeTitle'])
+                subtitle = file_info['episodeTitle'],
+                mime = mime)
         except Exception, e:
             handler.send_response(500)
             handler.end_headers()

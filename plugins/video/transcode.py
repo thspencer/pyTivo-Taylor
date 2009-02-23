@@ -36,8 +36,8 @@ mswindows = (sys.platform == "win32")
 if mswindows:
     patchSubprocess()
 
-def output_video(inFile, outFile, tsn=''):
-    if tivo_compatible(inFile, tsn)[0]:
+def output_video(inFile, outFile, tsn='', mime=''):
+    if tivo_compatible(inFile, tsn, mime)[0]:
         logger.debug('%s is tivo compatible' % inFile)
         f = file(inFile, 'rb')
         shutil.copyfileobj(f, outFile)
@@ -394,7 +394,26 @@ def select_aspect(inFile, tsn = ''):
 
             return settings
 
-def tivo_compatible(inFile, tsn=''):
+def tivo_compatible_mp4(inFile, tsn=''):
+    # This should also check for container type == mp4.
+    vInfo = video_info(inFile)
+
+    if vInfo['vCodec'] != 'h264':
+        message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
+                          vInfo['vCodec'])
+    elif vInfo['aCodec'] not in ('mpeg4aac', 'ac3', 'liba52'):
+        message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
+                          vInfo['aCodec'])
+    else:
+        message = (True, 'TRANSCODE=NO, passing through mp4.')
+
+    logger.debug('%s, %s' % (message, inFile))
+    return message
+
+def tivo_compatible(inFile, tsn='', mime=''):
+    if mime == 'video/mp4':
+        return tivo_compatible_mp4(inFile, tsn)
+
     supportedModes = [(720, 480), (704, 480), (544, 480),
                       (528, 480), (480, 480), (352, 480)]
     vInfo = video_info(inFile)
@@ -404,8 +423,7 @@ def tivo_compatible(inFile, tsn=''):
             message = (True, 'TRANSCODE=NO, ends with .tivo.')
             break
 
-        if not vInfo['vCodec'] == 'mpeg2video':
-            #print 'Not Tivo Codec'
+        if vInfo['vCodec'] != 'mpeg2video':
             message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                               vInfo['vCodec'])
             break
@@ -458,7 +476,6 @@ def tivo_compatible(inFile, tsn=''):
             break
         
         if not vInfo['vFps'] == '29.97':
-            #print 'Not Tivo fps'
             message = (False, 'TRANSCODE=YES, %s vFps, should be 29.97.' %
                               vInfo['vFps'])
             break
@@ -475,14 +492,12 @@ def tivo_compatible(inFile, tsn=''):
                 message = (True, 'TRANSCODE=NO, %s x %s is valid.' %
                                  (vInfo['vWidth'], vInfo['vHeight']))
                 break
-            #print 'Not Tivo dimensions'
             message = (False, 'TRANSCODE=YES, %s x %s not in supported modes.'
                        % (vInfo['vWidth'], vInfo['vHeight']))
         break
 
     logger.debug('%s, %s' % (message, inFile))
     return message
-
 
 def video_info(inFile):
     vInfo = dict()

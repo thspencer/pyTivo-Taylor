@@ -41,7 +41,7 @@ else:
                 self.__pcBodyStore('pyTivo', True)
 
         def pushVideo(self, tsn, url, description, duration, size,
-                      title, subtitle):
+                      title, subtitle, mime=''):
             # It looks like tivo only supports one pc per house
             pc_body_id = self.__pcBodySearch()[0]
 
@@ -49,16 +49,21 @@ else:
                 'bodyId': 'tsn:' + tsn,
                 'description': description,
                 'duration': duration,
-                'encodingType': 'mpeg2ProgramStream',
                 'partnerId': 'tivo:pt.3187',
                 'pcBodyId': pc_body_id,
                 'publishDate': time.strftime('%Y-%m-%d %H:%M%S', time.gmtime()),
                 'size': size,
                 'source': title,
                 'state': 'complete',
-                'title': title,
-                'url': url
+                'title': title
             }
+
+            if mime == 'video/mp4':
+                data['encodingType'] = 'avcL41MP4'
+                data['url'] = url + '?Format=' + mime
+            else:
+                data['encodingType'] = 'mpeg2ProgramStream'
+                data['url'] = url
 
             if subtitle:
                 data['subtitle'] = subtitle
