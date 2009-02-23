@@ -17,7 +17,8 @@ logger = logging.getLogger('pyTivo.video.transcode')
 info_cache = lrucache.LRUCache(1000)
 videotest = os.path.join(os.path.dirname(__file__), 'videotest.mpg')
 
-BAD_MPEG_FPS = ['15.00']
+GOOD_MPEG_FPS = ['23.97', '24.00', '25.00', '29.97',
+                 '30.00', '50.00', '59.94', '60.00']
 
 def ffmpeg_path():
     return config.get('Server', 'ffmpeg')
@@ -141,7 +142,7 @@ def select_audiolang(inFile, tsn):
 def select_videofps(inFile, tsn):
     vInfo =  video_info(inFile)
     fps = '-r 29.97'  # default
-    if config.isHDtivo(tsn) and vInfo['vFps'] not in BAD_MPEG_FPS:
+    if config.isHDtivo(tsn) and vInfo['vFps'] in GOOD_MPEG_FPS:
         fps = ' '
     if config.getVideoFPS(tsn) != None:
         fps = '-r ' + config.getVideoFPS(tsn)
