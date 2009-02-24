@@ -11,14 +11,15 @@ import urllib
 from urlparse import urlparse
 from xml.sax.saxutils import escape
 
-import eyeD3
+import mutagen
+from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import MP3
 from Cheetah.Template import Template
 from Cheetah.Filters import Filter
 from lrucache import LRUCache
 import config
 from plugin import Plugin, quote, unquote
 from plugins.video.transcode import kill
-from time import strftime
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -224,10 +225,18 @@ class Music(Plugin):
                         millisecs = 0
                     item['Duration'] = millisecs
             try:
-                audioFile = mutagen.File(file);
+                # If the file is an mp3, let's load the EasyID3 interface
+                if os.path.splitext(f.name)[1].lower() == '.mp3' :
+                    audioFile = MP3(f.name,ID3=EasyID3)
+                else :
+                    # Otherwise, let mutagen figure it out
+                    audioFile = mutagen.File(f.name);
+                
+                # Pull the length from the FileType, if present
                 if audioFile.info.length > 0 :
                     item['Duration'] = audioFile.info.length
-            
+                    
+                #Grab our other tags, if present
                 if audioFile.has_key('title') : item['SongTitle'] = audioFile['title'][0]
                 if audioFile.has_key('artist') : 
                     artist = audioFile['artist'][0]
@@ -236,8 +245,7 @@ class Music(Plugin):
                     item['ArtistName'] = artist
                 if audioFile.has_key('album') : item['AlbumTitle'] = audioFile['album'][0]
                 if audioFile.has_key('date') :
-                    date = time.strptime(audioFile['date'][0],"%Y-%m-%d")
-                    item['AlbumYear'] = strftime("%Y",date)
+                    item['AlbumYear'] = audioFile['date'][0]
                 if audioFile.has_key('genre') : item['MusicGenre'] = audioFile['genre'][0]
             except Exception, msg:
                 print msg
