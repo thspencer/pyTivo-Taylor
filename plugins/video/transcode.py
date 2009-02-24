@@ -11,6 +11,7 @@ import time
 import lrucache
 import config
 from plugin import GetPlugin
+import qtfaststart
 
 logger = logging.getLogger('pyTivo.video.transcode')
 
@@ -41,7 +42,10 @@ def output_video(inFile, outFile, tsn='', mime=''):
     if tivo_compatible(inFile, tsn, mime)[0]:
         logger.debug('%s is tivo compatible' % inFile)
         f = file(inFile, 'rb')
-        shutil.copyfileobj(f, outFile)
+        if mime == 'video/mp4':
+            qtfaststart.fast_start(f, outFile)
+        else:
+            shutil.copyfileobj(f, outFile)
         f.close()
     else:
         logger.debug('%s is not tivo compatible' % inFile)
