@@ -18,6 +18,7 @@ from lrucache import LRUCache
 import config
 from plugin import Plugin, quote, unquote
 from plugins.video.transcode import kill
+from time import strftime
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -222,23 +223,24 @@ class Music(Plugin):
                     else:
                         millisecs = 0
                     item['Duration'] = millisecs
-            else:
-                try:
-                    audioFile = eyeD3.Mp3AudioFile(unicode(f.name, 'utf-8'))
-                    item['Duration'] = audioFile.getPlayTime() * 1000
-
-                    tag = audioFile.getTag()
-                    artist = tag.getArtist()
-                    title = tag.getTitle()
-                    if artist == 'Various Artists' and '/' in title:
-                        artist, title = title.split('/')
-                    item['ArtistName'] = artist.strip()
-                    item['SongTitle'] = title.strip()
-                    item['AlbumTitle'] = tag.getAlbum()
-                    item['AlbumYear'] = tag.getYear()
-                    item['MusicGenre'] = tag.getGenre().getName()
-                except Exception, msg:
-                    print msg
+            try:
+                audioFile = mutagen.File(file);
+                if audioFile.info.length > 0 :
+                    item['Duration'] = audioFile.info.length
+            
+                if audioFile.has_key('title') : item['SongTitle'] = audioFile['title'][0]
+                if audioFile.has_key('artist') : 
+                    artist = audioFile['artist'][0]
+                    if artist == 'Various Artists' and '/' in item['SongTitle']:
+                        artist, item['SongTitle'] = title.split('/')
+                    item['ArtistName'] = artist
+                if audioFile.has_key('album') : item['AlbumTitle'] = audioFile['album'][0]
+                if audioFile.has_key('date') :
+                    date = time.strptime(audioFile['date'][0],"%Y-%m-%d")
+                    item['AlbumYear'] = strftime("%Y",date)
+                if audioFile.has_key('genre') : item['MusicGenre'] = audioFile['genre'][0]
+            except Exception, msg:
+                print msg
 
             if 'Duration' in item:
                 item['params'] = 'Yes'
