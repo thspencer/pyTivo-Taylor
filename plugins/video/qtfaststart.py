@@ -97,7 +97,7 @@ def get_index(datastream):
     for key in ["ftyp", "moov", "mdat"]:
         if not index.has_key(key):
             logger.debug( "%s atom not found, is this a valid MOV/MP4 file?" % key)
-            return  
+            return [] 
     
     return index
 
@@ -139,7 +139,7 @@ def fast_start(datastream, outfile):
         logger.debug('mp4 already streamable -- copying')
 	datastream.seek(0);
         shutil.copyfileobj(datastream, outfile)
-	return []
+	return
 
     # Read and fix moov
     datastream.seek(index["moov"][0])
