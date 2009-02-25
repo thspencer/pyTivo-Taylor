@@ -54,7 +54,7 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def send_file(self, handler, container, name):
-        mime = 'video/x-tivo-mpeg'
+        mime = 'video/mpeg'
 
         try:
             path, query = handler.path.split('?')
@@ -64,6 +64,9 @@ class Video(Plugin):
             opts = cgi.parse_qs(query)
             if 'Format' in opts:
                 mime = opts['Format'][0]
+
+        if path[-5:].lower() == '.tivo':
+            mime = 'video/x-tivo-mpeg'
 
         range = handler.headers.getheader('Range')
         if range and range != 'bytes=0-':
@@ -80,6 +83,7 @@ class Video(Plugin):
         o = urlparse("http://fake.host" + handler.path)
         path = unquote(o[2])
         handler.send_response(200)
+        handler.send_header('Content-Type', mime)
         handler.end_headers()
         transcode.output_video(container['path'] + path[len(name) + 1:],
                                handler.wfile, tsn, mime)
