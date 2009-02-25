@@ -1,11 +1,11 @@
 import BaseHTTPServer
 import SocketServer
+import cgi
 import logging
 import os
 import re
 import socket
 import time
-from cgi import parse_qs
 from urllib import unquote_plus, quote, unquote
 from urlparse import urlparse
 from xml.sax.saxutils import escape
@@ -73,14 +73,27 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 plugin.send_file(self, container, name)
                 return
 
-        ## Not a file not a TiVo command fuck them
+        ## Not a file not a TiVo command
         if not self.path.startswith('/TiVoConnect'):
             self.infopage()
             return
 
         o = urlparse("http://fake.host" + self.path)
-        query = parse_qs(o[4])
+        query = cgi.parse_qs(o[4])
 
+        self.handle_query(query)
+
+    def do_POST(self):
+        ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+        if ctype == 'multipart/form-data':
+            query = cgi.parse_multipart(self.rfile, pdict)
+        else:
+            length = int(self.headers.getheader('content-length'))
+            qs = self.rfile.read(length)
+            query = cgi.parse_qs(qs, keep_blank_values=1)
+        self.handle_query(query)
+
+    def handle_query(self, query):
         mname = False
         if 'Command' in query and len(query['Command']) >= 1:
 
