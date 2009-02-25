@@ -226,27 +226,30 @@ class Music(Plugin):
                     item['Duration'] = millisecs
             try:
                 # If the file is an mp3, let's load the EasyID3 interface
-                if os.path.splitext(f.name)[1].lower() == '.mp3' :
+                if os.path.splitext(f.name)[1].lower() == '.mp3':
                     audioFile = MP3(f.name,ID3=EasyID3)
                 else :
                     # Otherwise, let mutagen figure it out
-                    audioFile = mutagen.File(f.name);
-                
+                    audioFile = mutagen.File(f.name)
+
                 # Pull the length from the FileType, if present
-                if audioFile.info.length > 0 :
-                    item['Duration'] = audioFile.info.length
-                    
+                if audioFile.info.length > 0:
+                    item['Duration'] = int(audioFile.info.length * 1000)
+
                 #Grab our other tags, if present
-                if audioFile.has_key('title') : item['SongTitle'] = audioFile['title'][0]
-                if audioFile.has_key('artist') : 
+                if audioFile.has_key('title'):
+                    item['SongTitle'] = audioFile['title'][0]
+                if audioFile.has_key('artist'): 
                     artist = audioFile['artist'][0]
                     if artist == 'Various Artists' and '/' in item['SongTitle']:
                         artist, item['SongTitle'] = title.split('/')
                     item['ArtistName'] = artist
-                if audioFile.has_key('album') : item['AlbumTitle'] = audioFile['album'][0]
-                if audioFile.has_key('date') :
+                if audioFile.has_key('album'):
+                    item['AlbumTitle'] = audioFile['album'][0]
+                if audioFile.has_key('date'):
                     item['AlbumYear'] = audioFile['date'][0]
-                if audioFile.has_key('genre') : item['MusicGenre'] = audioFile['genre'][0]
+                if audioFile.has_key('genre'):
+                    item['MusicGenre'] = audioFile['genre'][0]
             except Exception, msg:
                 print msg
 
