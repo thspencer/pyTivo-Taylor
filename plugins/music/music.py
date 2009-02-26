@@ -213,13 +213,15 @@ class Music(Plugin):
                     item['Duration'] = int(audioFile.info.length * 1000)
 
                 # Grab our other tags, if present
+                artist, title = '', ''
                 if 'title' in audioFile:
-                    item['SongTitle'] = audioFile['title'][0]
+                    title = audioFile['title'][0]
                 if 'artist' in audioFile: 
                     artist = audioFile['artist'][0]
-                    if artist == 'Various Artists' and '/' in item['SongTitle']:
-                        artist, item['SongTitle'] = item['SongTitle'].split('/')
-                    item['ArtistName'] = artist
+                    if artist == 'Various Artists' and '/' in title:
+                        artist, title = title.split('/')
+                item['ArtistName'] = artist.strip()
+                item['SongTitle'] = title.strip()
                 if 'album' in audioFile:
                     item['AlbumTitle'] = audioFile['album'][0]
                 if 'date' in audioFile:
