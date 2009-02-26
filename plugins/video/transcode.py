@@ -400,13 +400,14 @@ def select_aspect(inFile, tsn = ''):
             return settings
 
 def tivo_compatible_mp4(inFile, tsn=''):
+    ACODECS = ('mpeg4aac', 'libfaad', 'm4a', 'aac', 'ac3', 'liba52')
     # This should also check for container type == mp4.
     vInfo = video_info(inFile)
 
     if vInfo['vCodec'] != 'h264':
         message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                           vInfo['vCodec'])
-    elif vInfo['aCodec'] not in ('mpeg4aac', 'libfaad', 'ac3', 'liba52'):
+    elif vInfo['aCodec'] not in ACODECS:
         message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
                           vInfo['aCodec'])
     else:
