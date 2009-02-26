@@ -188,16 +188,48 @@ class Music(Plugin):
                 self.media_data_cache[f.name] = item
                 return item
 
-            if os.path.splitext(f.name)[1].lower() in TRANSCODE:
-                # If the format is: (track #) Song name...
-                #artist, album, track = f.name.split(os.path.sep)[-3:]
-                #track = os.path.splitext(track)[0]
-                #if track[0].isdigit:
-                #    track = ' '.join(track.split(' ')[1:])
+            # If the format is: (track #) Song name...
+            #artist, album, track = f.name.split(os.path.sep)[-3:]
+            #track = os.path.splitext(track)[0]
+            #if track[0].isdigit:
+            #    track = ' '.join(track.split(' ')[1:])
 
-                #item['SongTitle'] = track
-                #item['AlbumTitle'] = album
-                #item['ArtistName'] = artist
+            #item['SongTitle'] = track
+            #item['AlbumTitle'] = album
+            #item['ArtistName'] = artist
+
+            ext = os.path.splitext(f.name)[1].lower()
+
+            try:
+                # If the file is an mp3, let's load the EasyID3 interface
+                if ext == '.mp3':
+                    audioFile = MP3(f.name, ID3=EasyID3)
+                else:
+                    # Otherwise, let mutagen figure it out
+                    audioFile = mutagen.File(f.name)
+
+                # Pull the length from the FileType, if present
+                if audioFile.info.length > 0:
+                    item['Duration'] = int(audioFile.info.length * 1000)
+
+                # Grab our other tags, if present
+                if 'title' in audioFile:
+                    item['SongTitle'] = audioFile['title'][0]
+                if 'artist' in audioFile: 
+                    artist = audioFile['artist'][0]
+                    if artist == 'Various Artists' and '/' in item['SongTitle']:
+                        artist, item['SongTitle'] = title.split('/')
+                    item['ArtistName'] = artist
+                if 'album' in audioFile:
+                    item['AlbumTitle'] = audioFile['album'][0]
+                if 'date' in audioFile:
+                    item['AlbumYear'] = audioFile['date'][0]
+                if 'genre' in audioFile:
+                    item['MusicGenre'] = audioFile['genre'][0]
+            except Exception, msg:
+                print msg
+
+            if 'Duration' not in item:
                 fname = unicode(f.name, 'utf-8')
                 if mswindows:
                     fname = fname.encode('iso8859-1')
@@ -224,34 +256,6 @@ class Music(Plugin):
                     else:
                         millisecs = 0
                     item['Duration'] = millisecs
-            try:
-                # If the file is an mp3, let's load the EasyID3 interface
-                if os.path.splitext(f.name)[1].lower() == '.mp3':
-                    audioFile = MP3(f.name,ID3=EasyID3)
-                else :
-                    # Otherwise, let mutagen figure it out
-                    audioFile = mutagen.File(f.name)
-
-                # Pull the length from the FileType, if present
-                if audioFile.info.length > 0:
-                    item['Duration'] = int(audioFile.info.length * 1000)
-
-                #Grab our other tags, if present
-                if audioFile.has_key('title'):
-                    item['SongTitle'] = audioFile['title'][0]
-                if audioFile.has_key('artist'): 
-                    artist = audioFile['artist'][0]
-                    if artist == 'Various Artists' and '/' in item['SongTitle']:
-                        artist, item['SongTitle'] = title.split('/')
-                    item['ArtistName'] = artist
-                if audioFile.has_key('album'):
-                    item['AlbumTitle'] = audioFile['album'][0]
-                if audioFile.has_key('date'):
-                    item['AlbumYear'] = audioFile['date'][0]
-                if audioFile.has_key('genre'):
-                    item['MusicGenre'] = audioFile['genre'][0]
-            except Exception, msg:
-                print msg
 
             if 'Duration' in item:
                 item['params'] = 'Yes'
