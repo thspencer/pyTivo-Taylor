@@ -18,9 +18,8 @@ port=9032
 #ffmpeg=c:\Program Files\pyTivo\plugins\video\ffmpeg_mp2.exe
 ffmpeg=/usr/bin/ffmpeg
 
-# This will make a large debug.txt file in your base directory.  It only 
-# debugs transcode.py right now.
-#debug=false
+# Setting this to True will log more ouput for debugging purposes.
+#debug=False
 
 # Max video bitrate, default 30000k
 # sets ffmpeg -maxrate setting to minimize bitrate peak playback issues.
