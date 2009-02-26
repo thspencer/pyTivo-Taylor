@@ -137,7 +137,7 @@ def fast_start(datastream, outfile):
     # Make sure moov occurs AFTER mdat, otherwise no need to run!
     if len(index) == 0 or index["moov"][0] < index["mdat"][0]:
         logger.debug('mp4 already streamable -- copying')
-	datastream.seek(0);
+	datastream.seek(0)
         shutil.copyfileobj(datastream, outfile)
 	return
 

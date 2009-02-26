@@ -140,11 +140,12 @@ class Music(Plugin):
             except:
                 kill(ffmpeg)
         else:
-            f = file(fname, 'rb')
+            f = open(fname, 'rb')
             try:
                 shutil.copyfileobj(f, handler.wfile)
             except:
                 pass
+            f.close()
 
     def QueryContainer(self, handler, query):
 
