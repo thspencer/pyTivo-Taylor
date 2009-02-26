@@ -41,7 +41,7 @@ if mswindows:
 def output_video(inFile, outFile, tsn='', mime=''):
     if tivo_compatible(inFile, tsn, mime)[0]:
         logger.debug('%s is tivo compatible' % inFile)
-        f = file(inFile, 'rb')
+        f = open(inFile, 'rb')
         if mime == 'video/mp4':
             qtfaststart.fast_start(f, outFile)
         else:
@@ -406,7 +406,7 @@ def tivo_compatible_mp4(inFile, tsn=''):
     if vInfo['vCodec'] != 'h264':
         message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                           vInfo['vCodec'])
-    elif vInfo['aCodec'] not in ('mpeg4aac', 'ac3', 'liba52'):
+    elif vInfo['aCodec'] not in ('mpeg4aac', 'libfaad', 'ac3', 'liba52'):
         message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
                           vInfo['aCodec'])
     else:
