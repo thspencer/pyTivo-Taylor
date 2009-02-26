@@ -218,7 +218,7 @@ class Music(Plugin):
                 if 'artist' in audioFile: 
                     artist = audioFile['artist'][0]
                     if artist == 'Various Artists' and '/' in item['SongTitle']:
-                        artist, item['SongTitle'] = title.split('/')
+                        artist, item['SongTitle'] = item['SongTitle'].split('/')
                     item['ArtistName'] = artist
                 if 'album' in audioFile:
                     item['AlbumTitle'] = audioFile['album'][0]
