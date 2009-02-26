@@ -48,8 +48,9 @@ class Plugin(object):
         path = unquote(o[2])
         handler.send_response(200)
         handler.end_headers()
-        f = file(container['path'] + path[len(name) + 1:], 'rb')
+        f = open(container['path'] + path[len(name) + 1:], 'rb')
         shutil.copyfileobj(f, handler.wfile)
+        f.close()
 
     def get_local_base_path(self, handler, query):
 

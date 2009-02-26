@@ -87,10 +87,7 @@ Default Setting: False
 Valid Entries: True/False
 Required: No
 Skill: Advanced
-Description: Will create a file named debug.txt in the base folder of +\
-pyTivo. This file will contain debug information helpful in diagnosing +\
-problems. Generally only necessary if you are having a problem and the +\
-information is requested by support staff.
+Description: Will generate more output for debugging purposes.
 Example Settings: True/False
 Available In: Server
 
