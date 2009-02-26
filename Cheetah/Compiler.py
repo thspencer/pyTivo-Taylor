@@ -1527,13 +1527,13 @@ class ModuleCompiler(SettingsManager, GenUtils):
         # it's painfully slow in the Python version and bites Windows users all
         # the time:
         if not NameMapper.C_VERSION:
-            if not sys.platform.startswith('java'):
-                warnings.warn(
-                    "\nYou don't have the C version of NameMapper installed! "
-                    "I'm disabling Cheetah's useStackFrames option as it is "
-                    "painfully slow with the Python version of NameMapper. "
-                    "You should get a copy of Cheetah with the compiled C version of NameMapper."
-                    )
+            #if not sys.platform.startswith('java'):
+            #    warnings.warn(
+            #        "\nYou don't have the C version of NameMapper installed! "
+            #        "I'm disabling Cheetah's useStackFrames option as it is "
+            #        "painfully slow with the Python version of NameMapper. "
+            #        "You should get a copy of Cheetah with the compiled C version of NameMapper."
+            #        )
             self.setSetting('useStackFrames', False)                    
 
         self._compiled = False
