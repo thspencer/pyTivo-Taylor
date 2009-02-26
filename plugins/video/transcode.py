@@ -18,7 +18,7 @@ logger = logging.getLogger('pyTivo.video.transcode')
 info_cache = lrucache.LRUCache(1000)
 videotest = os.path.join(os.path.dirname(__file__), 'videotest.mpg')
 
-GOOD_MPEG_FPS = ['23.97', '24.00', '25.00', '29.97',
+GOOD_MPEG_FPS = ['23.98', '24.00', '25.00', '29.97',
                  '30.00', '50.00', '59.94', '60.00']
 
 def ffmpeg_path():
