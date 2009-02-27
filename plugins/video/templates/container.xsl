@@ -20,7 +20,18 @@
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <tr>
-                                        <td><xsl:value-of select="Details/Title"/></td>
+                                        <td>
+                                        <b>
+                                        <xsl:value-of select="Details/Title"/>
+                                        <xsl:if test="Details/EpisodeTitle != ''">
+                                        : <xsl:value-of select="Details/EpisodeTitle"/>
+                                        </xsl:if>
+                                        </b>
+                                        <xsl:if test="Details/Description != ''">
+                                        <br/>
+                                        <xsl:value-of select="Details/Description"/>
+                                        </xsl:if>
+                                        </td>
                                         <td><form action="/TiVoConnect">
                                             <input type="hidden" name="Command" value="Push"/>
                                             <input type="hidden" name="Container">
