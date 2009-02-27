@@ -34,6 +34,12 @@ PLAYLISTS = ('.m3u', '.m3u8', '.ram', '.pls', '.b4s', '.wpl', '.asx',
 TRANSCODE = ('.mp4', '.m4a', '.flc', '.ogg', '.wma', '.aac', '.wav',
              '.aif', '.aiff', '.au', '.flac')
 
+TAGNAMES = {'artist': ['\xa9ART', 'Author'],
+            'title': ['\xa9nam', 'Title'],
+            'album': ['\xa9alb', u'WM/AlbumTitle'],
+            'date': ['\xa9day', u'WM/Year'],
+            'genre': ['\xa9gen', u'WM/Genre']}
+
 # Search strings for different playlist types
 asxfile = re.compile('ref +href *= *"(.+)"', re.IGNORECASE).search
 wplfile = re.compile('media +src *= *"(.+)"', re.IGNORECASE).search
@@ -214,15 +220,24 @@ class Music(Plugin):
                     item['Duration'] = int(audioFile.info.length * 1000)
 
                 # Grab our other tags, if present
-                artist = audioFile.get('artist', [''])[0]
-                title = audioFile.get('title', [''])[0]
+                def get_tag(tagname, d):
+                    for tag in ([tagname] + TAGNAMES[tagname]):
+                        try:
+                            if tag in d:
+                                return d[tag][0]
+                        except:
+                            pass
+                    return ''
+
+                artist = get_tag('artist', audioFile)
+                title = get_tag('title', audioFile)
                 if artist == 'Various Artists' and '/' in title:
-                    artist, title = title.split('/')
-                item['ArtistName'] = artist.strip()
-                item['SongTitle'] = title.strip()
-                item['AlbumTitle'] = audioFile.get('album', [''])[0]
-                item['AlbumYear'] = audioFile.get('date', [''])[0]
-                item['MusicGenre'] = audioFile.get('genre', [''])[0]
+                    artist, title = [x.strip() for x in title.split('/')]
+                item['ArtistName'] = artist
+                item['SongTitle'] = title
+                item['AlbumTitle'] = get_tag('album', audioFile)
+                item['AlbumYear'] = get_tag('date', audioFile)
+                item['MusicGenre'] = get_tag('genre', audioFile)
             except Exception, msg:
                 print msg
 
