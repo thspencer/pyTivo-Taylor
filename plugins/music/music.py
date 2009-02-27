@@ -214,21 +214,15 @@ class Music(Plugin):
                     item['Duration'] = int(audioFile.info.length * 1000)
 
                 # Grab our other tags, if present
-                artist, title = '', ''
-                if 'title' in audioFile:
-                    title = audioFile['title'][0]
-                if 'artist' in audioFile: 
-                    artist = audioFile['artist'][0]
-                    if artist == 'Various Artists' and '/' in title:
-                        artist, title = title.split('/')
+                artist = audioFile.get('artist', [''])[0]
+                title = audioFile.get('title', [''])[0]
+                if artist == 'Various Artists' and '/' in title:
+                    artist, title = title.split('/')
                 item['ArtistName'] = artist.strip()
                 item['SongTitle'] = title.strip()
-                if 'album' in audioFile:
-                    item['AlbumTitle'] = audioFile['album'][0]
-                if 'date' in audioFile:
-                    item['AlbumYear'] = audioFile['date'][0]
-                if 'genre' in audioFile:
-                    item['MusicGenre'] = audioFile['genre'][0]
+                item['AlbumTitle'] = audioFile.get('album', [''])[0]
+                item['AlbumYear'] = audioFile.get('date', [''])[0]
+                item['MusicGenre'] = audioFile.get('genre', [''])[0]
             except Exception, msg:
                 print msg
 
