@@ -136,7 +136,8 @@ class WebVideo(Video):
             file_info = VideoDetails()
 
             mime = ''
-            if tivo_compatible_mp4(file_name):
+            if (config.isHDtivo(tsn) and
+                transcode.tivo_compatible_mp4(file_path, tsn)[0]):
                 mime = 'video/mp4'
 
             file_info.update(self.metadata_full(file_name, tsn, mime))
