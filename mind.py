@@ -104,8 +104,12 @@ else:
 
             return requests
 
-        def completeDownloadRequest(self, request):
-            request['encodingType'] = 'mpeg2ProgramStream'
+        def completeDownloadRequest(self, request, mime=''):
+            if mime == 'video/mp4':
+                request['encodingType'] = 'avcL41MP4'
+                request['url'] += '?Format=' + mime
+            else:
+                request['encodingType'] = 'mpeg2ProgramStream'
             request['state'] = 'complete'
             request['type'] = 'bodyOfferModify'
             request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S',
@@ -121,10 +125,11 @@ else:
 
             xml = self.__bodyXmppInfoGet(pc_body_id)
 
-            results = {}
-            results['server'] = xml.findtext('server')
-            results['port'] = int(xml.findtext('port'))
-            results['username'] = xml.findtext('xmppId')
+            results = {
+                'server': xml.findtext('server'),
+                'port': int(xml.findtext('port')),
+                'username': xml.findtext('xmppId')
+            }
 
             for sendPresence in xml.findall('sendPresence'):
                 results.setdefault('presence_list',[]).append(sendPresence.text)

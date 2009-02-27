@@ -22,6 +22,7 @@ import xmpp
 import mind
 import config
 from plugins.video.video import Video, VideoDetails
+from plugins.video.transcode import tivo_compatible_mp4
 
 CLASS_NAME = 'WebVideo'
 
@@ -133,7 +134,13 @@ class WebVideo(Video):
 
             tsn = data['bodyId']
             file_info = VideoDetails()
-            file_info.update(self.metadata_full(file_name, tsn))
+
+            mime = ''
+            if (config.isHDtivo(tsn) and
+                transcode.tivo_compatible_mp4(file_path, tsn)[0]):
+                mime = 'video/mp4'
+
+            file_info.update(self.metadata_full(file_name, tsn, mime))
 
             import socket
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -150,7 +157,7 @@ class WebVideo(Video):
             self.__logger.debug('Complete request: %s' % data)
 
             m = mind.getMind()
-            m.completeDownloadRequest(data)
+            m.completeDownloadRequest(data, mime)
 
             self.in_progress_lock.acquire()
             try:
