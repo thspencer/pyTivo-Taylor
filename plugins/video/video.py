@@ -316,9 +316,13 @@ class Video(Plugin):
 
         url = 'http://%s:%s/%s%s' % (ip, port, container, quote(f))
 
+        title = file_info['seriesTitle']
+        if not title:
+            title = file_info['title']
+
         source = file_info['seriesId']
         if not source:
-            source = file_info['title']
+            source = title
 
         try:
             m = mind.getMind()
@@ -328,7 +332,7 @@ class Video(Plugin):
                 description = file_info['description'],
                 duration = file_info['duration'] / 1000,
                 size = file_info['size'],
-                title = file_info['title'],
+                title = title,
                 subtitle = file_info['episodeTitle'],
                 source = source,
                 mime = mime)
