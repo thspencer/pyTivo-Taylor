@@ -3,31 +3,34 @@
  <xsl:template match="TiVoContainer">
   <xsl:variable name="tivos" select="Tivos"/>
   <html>
-   <body>
-    <h2><xsl:value-of select="Details/Title"/></h2>
-    <table border="1">
-     <tr bgcolor="#9acd32">
-      <th align="left">Title</th>
-      <th align="left"></th>
-     </tr>
+   <body style="background-color: rgb(250, 250, 250);">
+    <p align="center"><font size="6">
+    <xsl:value-of select="Details/Title"/>
+    </font></p>
+    <table style="border: 1px solid rgb(220, 220, 220);background-color: 
+     rgb(255, 255, 255);text-align: left;" border="0" cellpadding="0" 
+     cellspacing="4" width="100%">
       <xsl:for-each select="Item">
+       <tr>
+       <xsl:if test="position() mod 2 = 1">
+        <xsl:attribute name="style">
+         <xsl:value-of select="'background-color: rgb(240, 240, 240);'"/>
+        </xsl:attribute>
+       </xsl:if>
        <xsl:choose>
         <xsl:when test="Details/ContentType = 'x-container/folder'">
-         <tr bgcolor="#bbbbbb">
-          <td>
-           <b><a>
+          <td width="100%">
+           <a>
             <xsl:attribute name="href">
              <xsl:value-of select="Links/Content/Url"/>
             </xsl:attribute>
             <xsl:value-of select="Details/Title"/>
-           </a></b>
+           </a>
           </td>
           <td><xsl:value-of select="Details/TotalItems"/> Items</td>
-         </tr>
         </xsl:when>
         <xsl:otherwise>
-         <tr>
-          <td>
+          <td width="100%">
            <b>
            <xsl:value-of select="Details/Title"/>
            <xsl:if test="Details/EpisodeTitle != ''">
@@ -38,7 +41,7 @@
            </b>
            <xsl:if test="Details/Description != ''">
             <br/>
-            <xsl:value-of select="Details/Description"/>
+            <small><xsl:value-of select="Details/Description"/></small>
            </xsl:if>
           </td>
           <td><form action="/TiVoConnect">
@@ -65,9 +68,9 @@
            </select>
            <input value="Send to TiVo" type="submit"/>
           </form></td>
-         </tr> 
         </xsl:otherwise>
        </xsl:choose>
+       </tr> 
       </xsl:for-each>
     </table>
    </body>
