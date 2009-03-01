@@ -24,7 +24,9 @@
                                         <b>
                                         <xsl:value-of select="Details/Title"/>
                                         <xsl:if test="Details/EpisodeTitle != ''">
+                                        <xsl:if test="Details/EpisodeTitle != Details/Title">
                                         : <xsl:value-of select="Details/EpisodeTitle"/>
+                                        </xsl:if>
                                         </xsl:if>
                                         </b>
                                         <xsl:if test="Details/Description != ''">
