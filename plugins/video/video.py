@@ -324,6 +324,11 @@ class Video(Plugin):
         if not source:
             source = title
 
+        subtitle = file_info['episodeTitle']
+        if (not subtitle and file_info['isEpisode'] != 'false' and 
+            file_info['seriesTitle']):
+            subtitle = file_info['title']
+
         try:
             m = mind.getMind()
             m.pushVideo(
@@ -333,7 +338,7 @@ class Video(Plugin):
                 duration = file_info['duration'] / 1000,
                 size = file_info['size'],
                 title = title,
-                subtitle = file_info['episodeTitle'],
+                subtitle = subtitle,
                 source = source,
                 mime = mime)
         except Exception, e:
