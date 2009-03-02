@@ -161,9 +161,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if 'type' in settings and settings['type'] == 'admin':
                 t.admin += ('<a href="/TiVoConnect?Command=Admin&Container=' +
                             quote(section) +
-                            '">pyTivo Web Configuration</a><br>' +
+                            '">Web Configuration</a><br>' +
                             '<a href="/TiVoConnect?Command=NPL&Container=' +
-                            quote(section) + '">pyTivo ToGo</a><br>')
+                            quote(section) + '">ToGo</a><br>')
         if t.admin == '':
             t.admin = ('<br><b>No Admin plugin installed in pyTivo.conf</b>' +
                        '<br> If you wish to use the admin plugin add the ' +
