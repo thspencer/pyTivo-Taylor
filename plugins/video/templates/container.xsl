@@ -66,6 +66,7 @@
              </option>
             </xsl:for-each>
            </select>
+           <br/>
            <input value="Send to TiVo" type="submit"/>
           </form></td>
         </xsl:otherwise>
