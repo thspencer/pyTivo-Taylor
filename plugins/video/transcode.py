@@ -416,9 +416,27 @@ def tivo_compatible_mp4(inFile, tsn=''):
     logger.debug('%s, %s' % (message, inFile))
     return message
 
+def tivo_compatible_vc1(inFile, tsn=''):
+    # This should also check for container type == asf.
+    vInfo = video_info(inFile)
+
+    if vInfo['vCodec'] != 'vc1':
+        message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
+                          vInfo['vCodec'])
+    elif vInfo['aCodec'] != 'wmav2':
+        message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
+                          vInfo['aCodec'])
+    else:
+        message = (True, 'TRANSCODE=NO, passing through vc1.')
+
+    logger.debug('%s, %s' % (message, inFile))
+    return message
+
 def tivo_compatible(inFile, tsn='', mime=''):
     if mime == 'video/mp4':
         return tivo_compatible_mp4(inFile, tsn)
+    elif mime == 'video/bif':
+        return tivo_compatible_vc1(inFile, tsn)
 
     supportedModes = [(720, 480), (704, 480), (544, 480),
                       (528, 480), (480, 480), (352, 480)]

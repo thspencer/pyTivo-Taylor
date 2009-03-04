@@ -64,6 +64,9 @@ else:
             if mime == 'video/mp4':
                 data['encodingType'] = 'avcL41MP4'
                 data['url'] = url + '?Format=' + mime
+            elif mime == 'video/bif':
+                data['encodingType'] = 'vc1ApL3'
+                data['url'] = url + '?Format=' + mime
             else:
                 data['encodingType'] = 'mpeg2ProgramStream'
                 data['url'] = url
@@ -111,6 +114,9 @@ else:
             if mime == 'video/mp4':
                 request['encodingType'] = 'avcL41MP4'
                 request['url'] += '?Format=' + mime
+            elif mime == 'video/bif':
+                request['encodingType'] = 'vc1ApL3'
+                request['url'] = url + '?Format=' + mime
             else:
                 request['encodingType'] = 'mpeg2ProgramStream'
             request['state'] = 'complete'
