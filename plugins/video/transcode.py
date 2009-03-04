@@ -45,7 +45,10 @@ def output_video(inFile, outFile, tsn='', mime=''):
         if mime == 'video/mp4':
             qtfaststart.fast_start(f, outFile)
         else:
-            shutil.copyfileobj(f, outFile)
+            try:
+                shutil.copyfileobj(f, outFile)
+            except Exception, msg:
+                logger.info(msg)
         f.close()
     else:
         logger.debug('%s is not tivo compatible' % inFile)
