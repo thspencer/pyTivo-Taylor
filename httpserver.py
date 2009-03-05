@@ -28,6 +28,7 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         BaseHTTPServer.HTTPServer.__init__(self, server_address,
                                            RequestHandlerClass)
         self.daemon_threads = True
+        self.logger = logging.getLogger('pyTivo')
 
     def add_container(self, name, settings):
         if name in self.containers or name == 'TiVoConnect':
@@ -44,7 +45,8 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
             self.add_container(section, settings)
 
     def handle_error(self, request, client_address):
-        logging.getLogger("pyTivo").exception("Exception during request from %s" % (client_address,))
+        self.logger.exception('Exception during request from %s' % 
+                              (client_address,))
 
     def set_beacon(self, beacon):
         self.beacon = beacon
@@ -133,10 +135,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.unsupported(query)
 
     def log_message(self, format, *args):
-        logging.getLogger("pyTivo").info("%s [%s] %s" %
-                          (self.address_string(), 
-                           self.log_date_time_string(),
-                           format%args))
+        self.server.logger.info("%s [%s] %s" % (self.address_string(),
+                                self.log_date_time_string(), format%args))
 
     def root_container(self):
         tsn = self.headers.getheader('TiVo_TCD_ID', '')
