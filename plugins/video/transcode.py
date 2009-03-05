@@ -636,8 +636,8 @@ def video_info(inFile):
         # Fallback method of getting video bitrate
         # Sample line:  Stream #0.0[0x1e0]: Video: mpeg2video, yuv420p,
         #               720x480 [PAR 32:27 DAR 16:9], 9800 kb/s, 59.94 tb(r)
-        rezre = re.compile(r'.*Stream #0\.0: Video: mpeg2video, \S+, ' +
-                           r'\S+ \[.*\], (\d+) (?:kb/s).*')
+        rezre = re.compile(r'.*Stream #0\.0\[.*\]: Video: mpeg2video, ' +
+                           r'\S+, \S+ \[.*\], (\d+) (?:kb/s).*')
         x = rezre.search(output)
         if x:
             vInfo['kbps'] = x.group(1)
