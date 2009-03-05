@@ -133,7 +133,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.unsupported(query)
 
     def log_message(self, format, *args):
-        logging.getLogger("pyTivo").info(format, *args)
+        logging.getLogger("pyTivo").info("%s [%s] %s" %
+                          (self.address_string(), 
+                           self.log_date_time_string(),
+                           format%args))
 
     def root_container(self):
         tsn = self.headers.getheader('TiVo_TCD_ID', '')
