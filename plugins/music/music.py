@@ -498,7 +498,8 @@ class Music(Plugin):
                         i = filelist.files.pop(index)
                         filelist.files.insert(0, i)
                     except ValueError:
-                        print 'Start not found:', start
+                        handler.server.logger.warning('Start not found: ' +
+                                                      start)
             else:
                 filelist.files.sort(dir_sort)
 
@@ -547,7 +548,7 @@ class Music(Plugin):
                     i = playlist.pop(index)
                     playlist.insert(0, i)
                 except ValueError:
-                    print 'Start not found:', start
+                    handler.server.logger.warning('Start not found: ' + start)
 
         # Trim the list
         return self.item_count(handler, query, cname, playlist)

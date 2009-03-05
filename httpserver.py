@@ -37,7 +37,7 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
             settings['content_type'] = GetPlugin(settings['type']).CONTENT_TYPE
             self.containers[name] = settings
         except KeyError:
-            print 'Unable to add container', name
+            self.logger.error('Unable to add container ' + name)
 
     def reset(self):
         self.containers.clear()
@@ -148,7 +148,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     GetPlugin(settings['type']).CONTENT_TYPE
                 tsncontainers[section] = settings
             except Exception, msg:
-                print section, '-', msg
+                self.server.logger.error(section + ' - ' + msg)
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'root_container.tmpl'))
         t.containers = tsncontainers

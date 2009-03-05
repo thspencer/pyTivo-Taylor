@@ -20,13 +20,15 @@ port = config.getPort()
 
 httpd = httpserver.TivoHTTPServer(('', int(port)), httpserver.TivoHTTPHandler)
 
+logger = logging.getLogger('pyTivo')
+
 for section, settings in config.getShares():
     httpd.add_container(section, settings)
     # Precaching of files: does a recursive list of base path
     if settings.get('precache', 'False').lower() == 'true':
         plugin = GetPlugin(settings.get('type'))
         if hasattr(plugin, 'pre_cache'):
-            print 'Pre-caching the', section, 'share.'
+            logger.info('Pre-caching the ' + section + ' share.')
             pre_cache_filter = getattr(plugin, 'pre_cache')
 
             def build_recursive_list(path):
@@ -48,7 +50,7 @@ b.start()
 if 'listen' in config.getBeaconAddresses():
     b.listen()
 
-logging.getLogger('pyTivo').info('pyTivo is ready.')
+logger.info('pyTivo is ready.')
 
 try:
     httpd.set_beacon(b)

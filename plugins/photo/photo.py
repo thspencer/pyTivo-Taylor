@@ -158,7 +158,8 @@ class Photo(Plugin):
         try:
             pic = Image.open(unicode(infile, 'utf-8'))
         except Exception, msg:
-            print 'Could not open', infile, '--', msg
+            handler.server.logger.error('Could not open %s -- %s' %
+                                        (infile, msg))
             handler.send_error(404)
             return
 
@@ -166,7 +167,8 @@ class Photo(Plugin):
         try:
             pic.draft('RGB', (width, height))
         except Exception, msg:
-            print 'Failed to set draft mode for', infile, '--', msg
+            handler.server.logger.error('Failed to set draft mode ' +
+                                        'for %s -- %s' % (infile, msg))
             handler.send_error(404)
             return
 
@@ -214,7 +216,8 @@ class Photo(Plugin):
             if rot:
                 pic = pic.rotate(rot)
         except Exception, msg:
-            print 'Rotate failed on', infile, '--', msg
+            handler.server.logger.error('Rotate failed on %s -- %s' %
+                                        (infile, msg))
             handler.send_error(404)
             return
 
@@ -223,7 +226,8 @@ class Photo(Plugin):
             if pic.mode == 'P':
                 pic = pic.convert()
         except Exception, msg:
-            print 'Palette conversion failed on', infile, '--', msg
+            handler.server.logger.error('Palette conversion failed ' +
+                                        'on %s -- %s' % (infile, msg))
             handler.send_error(404)
             return
 
@@ -250,7 +254,8 @@ class Photo(Plugin):
         try:
             pic = pic.resize((width, height), Image.ANTIALIAS)
         except Exception, msg:
-            print 'Resize failed on', infile, '--', msg
+            handler.server.logger.error('Resize failed on %s -- %s' %
+                                        (infile, msg))
             handler.send_error(404)
             return
 
@@ -261,7 +266,8 @@ class Photo(Plugin):
             encoded = out.getvalue()
             out.close()
         except Exception, msg:
-            print 'Encode failed on', infile, '--', msg
+            handler.server.logger.error('Encode failed on %s -- %s' %
+                                        (infile, msg))
             handler.send_error(404)
             return
 
@@ -439,7 +445,8 @@ class Photo(Plugin):
                         i = filelist.files.pop(index)
                         filelist.files.insert(0, i)
                     except ValueError:
-                        print 'Start not found:', start
+                        handler.server.logger.warning('Start not found: ' +
+                                                      start)
             else:
                 if 'CaptureDate' in sortby:
                     sortfunc = cdate_sort

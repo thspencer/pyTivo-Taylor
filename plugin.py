@@ -76,6 +76,9 @@ class Plugin(object):
            ItemCount, AnchorItem and AnchorOffset. 'files' is either a 
            list of strings, OR a list of objects with a 'name' attribute.
         """
+        def no_anchor(handler, anchor):
+            handler.server.logger.warning('Anchor not found: ' + anchor)
+
         totalFiles = len(files)
         index = 0
 
@@ -105,9 +108,9 @@ class Plugin(object):
                         try:
                             index = filenames.index(anchor, 0, last_start)
                         except ValueError:
-                            print 'Anchor not found:', anchor
+                            no_anchor(handler, anchor)
                     else:
-                        print 'Anchor not found:', anchor  # just use index = 0
+                        no_anchor(handler, anchor) # just use index = 0
 
                 if count > 0:
                     index += 1
