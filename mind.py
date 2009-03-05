@@ -127,7 +127,6 @@ else:
             offer_id, content_id = self.__bodyOfferModify(request)
             self.__subscribe(offer_id, content_id, request['bodyId'][4:])
 
-
         def getXMPPLoginInfo(self):
             # It looks like tivo only supports one pc per house
             pc_body_id = self.__pcBodySearch()[0]
