@@ -430,7 +430,7 @@ Available In: Server, Tivos, HD_tivos, SD_tivos
 ffmpeg_tmpl
 
 Default Setting: %(video_codec)s %(video_fps)s %(video_br)s +\
-%(max_video_br)s %(buff_size)s %(aspect_ratio)s -comment pyTivo.py +\
+%(max_video_br)s %(buff_size)s %(aspect_ratio)s +\
 %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(audio_lang)s +\
 %(ffmpeg_pram)s %(format)s
 Valid Entries: A valid ffmpeg command
