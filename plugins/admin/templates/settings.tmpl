@@ -138,7 +138,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
       <td style="border-right: 1px dotted rgb(153, 153, 153); vertical-align: top;">
       <div id="leftframe" style="position: relative; text-align: center; width: 200px;">
       <form name="select_section">Sections
-        <select name="section" size="7">
+        <select name="section" size="7" onclick="switchDiv(options[selectedIndex].value, 'set-');return true;"> 
         <option value="set-server">Global Server Settings</option>
         <option value="set-hd_tivos">HD TiVo Settings</option>
         <option value="set-sd_tivos">SD TiVo Settings</option>
@@ -150,7 +150,6 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #end for
         </select>
 
-        <input name="B3" value="Edit Section" type="button" onclick="switchDiv(select_section.section.options[select_section.section.selectedIndex].value, 'set-');return true;"> 
         <input name="B4" value="Delete Section" type="button" onclick="deleteSection(select_section.section.selectedIndex)">
         <input name="B5" value="Add Section" type="button" onclick="switchDiv('set-add', 'set-');return true;"></form>
 
