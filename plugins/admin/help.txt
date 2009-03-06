@@ -60,7 +60,7 @@ Description: This is the full path to your ffmpeg binary. For windows +\
 users ffmpeg is distributed with pyTivo and is in the plugins/video +\
 folder.
 Example Settings: Linux = /usr/bin/ffmpeg | +\
-Windows = c:\Program Files\pyTivo\plugins\video\ffmpeg_mp2.exe
+Windows = c:\Program Files\pyTivo\bin\ffmpeg.exe
 Available In: Server
 
 beacon

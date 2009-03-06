@@ -13,9 +13,9 @@ type=admin
 port=9032
 
 # Full path to ffmpeg including filename
-# For windows: ffmpeg=c:\Program Files\pyTivo\plugins\video\ffmpeg_mp2.exe
+# For windows: ffmpeg=c:\Program Files\pyTivo\bin\ffmpeg.exe
 # For linux:   ffmpeg=/usr/bin/ffmpeg
-#ffmpeg=c:\Program Files\pyTivo\plugins\video\ffmpeg_mp2.exe
+#ffmpeg=c:\Program Files\pyTivo\bin\ffmpeg.exe
 ffmpeg=/usr/bin/ffmpeg
 
 # Setting this to True will log more ouput for debugging purposes.
