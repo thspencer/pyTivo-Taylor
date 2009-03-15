@@ -466,12 +466,11 @@ def tivo_compatible(inFile, tsn='', mime=''):
                               vInfo['aCodec'])
             break
 
-        if vInfo['aCodec'] != None:
-            if (not vInfo['aKbps'] or
-                int(vInfo['aKbps']) > config.getMaxAudioBR(tsn)):
-                message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
-                                   'audio bitrate.') % vInfo['aKbps'])
-                break
+        if (not vInfo['aKbps'] or
+            int(vInfo['aKbps']) > config.getMaxAudioBR(tsn)):
+            message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
+                               'audio bitrate.') % vInfo['aKbps'])
+            break
 
         if vInfo['kbps'] != None:
             abit = max('0', vInfo['aKbps'])
