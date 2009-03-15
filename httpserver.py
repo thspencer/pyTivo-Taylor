@@ -55,6 +55,11 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     tivos = {}
     tivo_names = {}
 
+    def __init__(self, request, client_address, server):
+        self.wbufsize = 0x10000
+        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
+            client_address, server)
+
     def address_string(self):
         host, port = self.client_address[:2]
         return host
