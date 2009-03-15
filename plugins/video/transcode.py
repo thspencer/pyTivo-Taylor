@@ -461,7 +461,7 @@ def tivo_compatible(inFile, tsn='', mime=''):
                               os.path.splitext(inFile)[-1])
             break
 
-        if vInfo['aCodec'] == 'dca':
+        if vInfo['aCodec'] not in ('ac3', 'liba52', 'mp2'):
             message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
                               vInfo['aCodec'])
             break
