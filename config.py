@@ -280,9 +280,6 @@ def getCopyTS(tsn=None):
 def getVideoFPS(tsn=None):
     return get_tsn('video_fps', tsn)
 
-def getVideoCodec(tsn=None):
-    return get_tsn('video_codec', tsn)
-
 def getFormat(tsn=None):
     return get_tsn('format', tsn)
 

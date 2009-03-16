@@ -156,9 +156,7 @@ def select_videofps(inFile, tsn):
     return fps
 
 def select_videocodec(tsn):
-    codec = config.getVideoCodec(tsn)
-    if not codec:
-        codec = 'mpeg2video'  # default
+    codec = 'mpeg2video'  # default
     return '-vcodec ' + codec
 
 def select_videobr(inFile, tsn):
