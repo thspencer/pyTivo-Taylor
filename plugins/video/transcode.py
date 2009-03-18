@@ -402,10 +402,12 @@ def select_aspect(inFile, tsn = ''):
 
 def tivo_compatible_mp4(inFile, tsn=''):
     ACODECS = ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 'ac3', 'liba52')
-    # This should also check for container type == mp4.
     vInfo = video_info(inFile)
 
-    if vInfo['vCodec'] != 'h264':
+    if vInfo['container'] != 'mov':
+        message = (False, 'TRANSCODE=YES, container %s not compatible.' %
+                          vInfo['container'])
+    elif vInfo['vCodec'] != 'h264':
         message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                           vInfo['vCodec'])
     elif vInfo['aCodec'] not in ACODECS:
@@ -418,10 +420,12 @@ def tivo_compatible_mp4(inFile, tsn=''):
     return message
 
 def tivo_compatible_vc1(inFile, tsn=''):
-    # This should also check for container type == asf.
     vInfo = video_info(inFile)
 
-    if vInfo['vCodec'] != 'vc1':
+    if vInfo['container'] != 'asf':
+        message = (False, 'TRANSCODE=YES, container %s not compatible.' %
+                          vInfo['container'])
+    elif vInfo['vCodec'] != 'vc1':
         message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                           vInfo['vCodec'])
     elif vInfo['aCodec'] != 'wmav2':
@@ -564,6 +568,15 @@ def video_info(inFile):
     output = err_tmp.read()
     err_tmp.close()
     logging.debug('ffmpeg output=%s' % output)
+
+    rezre = re.compile(r'Input #0, ([^,]+),')
+    x = rezre.search(output)
+    if x:
+        vInfo['container'] = x.group(1)
+    else:
+        vInfo['container'] = ''
+        vInfo['Supported'] = False
+        logger.debug('failed at container')
 
     rezre = re.compile(r'.*Video: ([^,]+),.*')
     x = rezre.search(output)
