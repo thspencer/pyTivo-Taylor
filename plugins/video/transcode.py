@@ -452,15 +452,14 @@ def tivo_compatible(inFile, tsn='', mime=''):
             message = (True, 'TRANSCODE=NO, ends with .tivo.')
             break
 
+        if vInfo['container'] != 'mpeg':
+            message = (False, 'TRANSCODE=YES, container %s not compatible.' % 
+                              vInfo['container'])
+            break
+
         if vInfo['vCodec'] != 'mpeg2video':
             message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                               vInfo['vCodec'])
-            break
-
-        if os.path.splitext(inFile)[-1].lower() in ('.ts', '.mpv',
-                                                    '.tp', '.dvr-ms'):
-            message = (False, 'TRANSCODE=YES, ext %s not compatible.' % 
-                              os.path.splitext(inFile)[-1])
             break
 
         if vInfo['aCodec'] not in ('ac3', 'liba52', 'mp2'):
