@@ -189,9 +189,7 @@ def select_ffmpegprams(tsn):
     return params
 
 def select_format(tsn):
-    fmt = config.getFormat(tsn)
-    if not fmt:
-        fmt = 'vob'
+    fmt = 'vob'
     return '-f %s -' % fmt
 
 def select_aspect(inFile, tsn = ''):
