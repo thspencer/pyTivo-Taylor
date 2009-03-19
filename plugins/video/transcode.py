@@ -442,7 +442,7 @@ def tivo_compatible_vc1(inFile, tsn=''):
 def tivo_compatible_video(vInfo, tsn):
     message = (True, '')
     while True:
-        if vInfo['vCodec'] != 'mpeg2video':
+        if vInfo['vCodec'] not in ('mpeg2video', 'mpeg1video'):
             message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                               vInfo['vCodec'])
             break
@@ -536,7 +536,7 @@ def tivo_compatible(inFile, tsn='', mime=''):
             message = amessage
             break
 
-        if vInfo['container'] != 'mpeg':
+        if vInfo['container'] != 'mpeg' or vInfo['vCodec'] == 'mpeg1video':
             message = (False, 'TRANSCODE=YES, container %s not compatible.' % 
                               vInfo['container'])
         break
