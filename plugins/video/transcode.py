@@ -55,7 +55,7 @@ def output_video(inFile, outFile, tsn='', mime=''):
         transcode(False, inFile, outFile, tsn)
 
 def transcode(isQuery, inFile, outFile, tsn=''):
-    settings = {'video_codec': select_videocodec(tsn),
+    settings = {'video_codec': select_videocodec(inFile, tsn),
                 'video_br': select_videobr(inFile, tsn),
                 'video_fps': select_videofps(inFile, tsn),
                 'max_video_br': select_maxvideobr(tsn),
@@ -147,7 +147,7 @@ def select_audiolang(inFile, tsn):
     return ''
 
 def select_videofps(inFile, tsn):
-    vInfo =  video_info(inFile)
+    vInfo = video_info(inFile)
     fps = '-r 29.97'  # default
     if config.isHDtivo(tsn) and vInfo['vFps'] in GOOD_MPEG_FPS:
         fps = ' '
@@ -155,8 +155,12 @@ def select_videofps(inFile, tsn):
         fps = '-r ' + config.getVideoFPS(tsn)
     return fps
 
-def select_videocodec(tsn):
-    codec = 'mpeg2video'  # default
+def select_videocodec(inFile, tsn):
+    vInfo = video_info(inFile)
+    if tivo_compatible_video(vInfo)[0]:
+        codec = 'copy'
+    else:
+        codec = 'mpeg2video'  # default
     return '-vcodec ' + codec
 
 def select_videobr(inFile, tsn):
@@ -435,40 +439,11 @@ def tivo_compatible_vc1(inFile, tsn=''):
     logger.debug('%s, %s' % (message, inFile))
     return message
 
-def tivo_compatible(inFile, tsn='', mime=''):
-    if mime == 'video/mp4':
-        return tivo_compatible_mp4(inFile, tsn)
-    elif mime == 'video/bif':
-        return tivo_compatible_vc1(inFile, tsn)
-
-    supportedModes = [(720, 480), (704, 480), (544, 480),
-                      (528, 480), (480, 480), (352, 480)]
-    vInfo = video_info(inFile)
-
+def tivo_compatible_video(vInfo):
     while True:
-        if (inFile[-5:]).lower() == '.tivo':
-            message = (True, 'TRANSCODE=NO, ends with .tivo.')
-            break
-
-        if vInfo['container'] != 'mpeg':
-            message = (False, 'TRANSCODE=YES, container %s not compatible.' % 
-                              vInfo['container'])
-            break
-
         if vInfo['vCodec'] != 'mpeg2video':
             message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
                               vInfo['vCodec'])
-            break
-
-        if vInfo['aCodec'] not in ('ac3', 'liba52', 'mp2'):
-            message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
-                              vInfo['aCodec'])
-            break
-
-        if (not vInfo['aKbps'] or
-            int(vInfo['aKbps']) > config.getMaxAudioBR(tsn)):
-            message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
-                               'audio bitrate.') % vInfo['aKbps'])
             break
 
         if vInfo['kbps'] != None:
@@ -482,12 +457,6 @@ def tivo_compatible(inFile, tsn='', mime=''):
             message = (False, 'TRANSCODE=YES, %s kbps not supported.' %
                               vInfo['kbps'])
             break
-
-        if config.getAudioLang(tsn):
-            if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
-                message = (False, ('TRANSCODE=YES, %s preferred audio ' +
-                                   'track exists.') % config.getAudioLang(tsn))
-                break
 
         if config.isHDtivo(tsn):
             if vInfo['par2'] != 1.0:
@@ -512,13 +481,65 @@ def tivo_compatible(inFile, tsn='', mime=''):
                                    'by BLACKLIST_169 tivos.') % vInfo['dar1'])
                 break
 
-        for mode in supportedModes:
+        for mode in [(720, 480), (704, 480), (544, 480),
+                     (528, 480), (480, 480), (352, 480)]:
             if mode == (vInfo['vWidth'], vInfo['vHeight']):
                 message = (True, 'TRANSCODE=NO, %s x %s is valid.' %
                                  (vInfo['vWidth'], vInfo['vHeight']))
                 break
             message = (False, 'TRANSCODE=YES, %s x %s not in supported modes.'
                        % (vInfo['vWidth'], vInfo['vHeight']))
+        break
+
+    return message
+
+def tivo_compatible_audio(vInfo):
+    while True:
+        if vInfo['aCodec'] not in ('ac3', 'liba52', 'mp2'):
+            message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
+                              vInfo['aCodec'])
+            break
+
+        if (not vInfo['aKbps'] or
+            int(vInfo['aKbps']) > config.getMaxAudioBR(tsn)):
+            message = (False, ('TRANSCODE=YES, %s kbps exceeds max ' +
+                               'audio bitrate.') % vInfo['aKbps'])
+            break
+
+        if config.getAudioLang(tsn):
+            if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
+                message = (False, ('TRANSCODE=YES, %s preferred audio ' +
+                                   'track exists.') % config.getAudioLang(tsn))
+        break
+
+    return message
+
+def tivo_compatible(inFile, tsn='', mime=''):
+    if mime == 'video/mp4':
+        return tivo_compatible_mp4(inFile, tsn)
+    elif mime == 'video/bif':
+        return tivo_compatible_vc1(inFile, tsn)
+
+    vInfo = video_info(inFile)
+
+    while True:
+        if (inFile[-5:]).lower() == '.tivo':
+            message = (True, 'TRANSCODE=NO, ends with .tivo.')
+            break
+
+        vmessage = tivo_compatible_video(vInfo)
+        if not vmessage[0]:
+            message = vmessage
+            break
+
+        amessage = tivo_compatible_audio(vInfo)
+        if not amessage[0]:
+            message = amessage
+            break
+
+        if vInfo['container'] != 'mpeg':
+            message = (False, 'TRANSCODE=YES, container %s not compatible.' % 
+                              vInfo['container'])
         break
 
     logger.debug('%s, %s' % (message, inFile))
