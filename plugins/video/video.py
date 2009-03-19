@@ -308,9 +308,9 @@ class Video(Plugin):
 
         mime = ''
         if config.isHDtivo(tsn):
-            if transcode.tivo_compatible_mp4(file_path, tsn)[0]:
+            if transcode.tivo_compatible(file_path, tsn, 'video/mp4')[0]:
                 mime = 'video/mp4'
-            elif transcode.tivo_compatible_vc1(file_path, tsn)[0]:
+            elif transcode.tivo_compatible(file_path, tsn, 'video/bif')[0]:
                 mime = 'video/bif'
 
         if file_info['valid']:

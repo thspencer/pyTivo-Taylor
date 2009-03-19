@@ -22,7 +22,7 @@ import xmpp
 import mind
 import config
 from plugins.video.video import Video, VideoDetails
-from plugins.video.transcode import tivo_compatible_mp4, tivo_compatible_vc1
+from plugins.video.transcode import tivo_compatible
 
 CLASS_NAME = 'WebVideo'
 
@@ -137,9 +137,9 @@ class WebVideo(Video):
 
             mime = ''
             if config.isHDtivo(tsn):
-                if tivo_compatible_mp4(file_path, tsn)[0]:
+                if tivo_compatible(file_path, tsn, 'video/mp4')[0]:
                     mime = 'video/mp4'
-                elif tivo_compatible_vc1(file_path, tsn)[0]:
+                elif tivo_compatible(file_path, tsn, 'video/bif')[0]:
                     mime = 'video/bif'
 
             file_info.update(self.metadata_full(file_name, tsn, mime))

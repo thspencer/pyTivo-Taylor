@@ -402,44 +402,24 @@ def select_aspect(inFile, tsn = ''):
 
             return settings
 
-def tivo_compatible_mp4(inFile, tsn=''):
-    ACODECS = ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 'ac3', 'liba52')
-    vInfo = video_info(inFile)
-
-    if vInfo['container'] != 'mov':
-        message = (False, 'container %s not compatible' % vInfo['container'])
-    elif vInfo['vCodec'] != 'h264':
-        message = (False, 'vCodec %s not compatible' % vInfo['vCodec'])
-    elif vInfo['aCodec'] not in ACODECS:
-        message = (False, 'aCodec %s not compatible' % vInfo['aCodec'])
-    else:
-        message = (True, 'passing through mp4')
-
-    logger.debug('TRANSCODE=%s, %s, %s' % (['YES', 'NO'][message[0]],
-                                           message[1], inFile))
-    return message
-
-def tivo_compatible_vc1(inFile, tsn=''):
-    vInfo = video_info(inFile)
-
-    if vInfo['container'] != 'asf':
-        message = (False, 'container %s not compatible' % vInfo['container'])
-    elif vInfo['vCodec'] != 'vc1':
-        message = (False, 'vCodec %s not compatible' % vInfo['vCodec'])
-    elif vInfo['aCodec'] != 'wmav2':
-        message = (False, 'aCodec %s not compatible' % vInfo['aCodec'])
-    else:
-        message = (True, 'passing through vc1')
-
-    logger.debug('TRANSCODE=%s, %s, %s' % (['YES', 'NO'][message[0]],
-                                           message[1], inFile))
-    return message
-
-def tivo_compatible_video(vInfo, tsn):
+def tivo_compatible_video(vInfo, tsn, mime=''):
     message = (True, '')
     while True:
-        if vInfo['vCodec'] not in ('mpeg2video', 'mpeg1video'):
-            message = (False, 'vCodec %s not compatible' % vInfo['vCodec'])
+        codec = vInfo['vCodec']
+        if mime == 'video/mp4':
+            if codec != 'h264':
+                message = (False, 'vCodec %s not compatible' % codec)
+
+            break
+
+        if mime == 'video/bif':
+            if codec != 'vc1':
+                message = (False, 'vCodec %s not compatible' % codec)
+
+            break
+
+        if codec not in ('mpeg2video', 'mpeg1video'):
+            message = (False, 'vCodec %s not compatible' % codec)
             break
 
         if vInfo['kbps'] != None:
@@ -481,11 +461,25 @@ def tivo_compatible_video(vInfo, tsn):
 
     return message
 
-def tivo_compatible_audio(vInfo, inFile, tsn):
+def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
     message = (True, '')
     while True:
-        if vInfo['aCodec'] not in ('ac3', 'liba52', 'mp2'):
-            message = (False, 'aCodec %s not compatible' % vInfo['aCodec'])
+        codec = vInfo['aCodec']
+        if mime == 'video/mp4':
+            if codec not in ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
+                             'ac3', 'liba52'):
+                message = (False, 'aCodec %s not compatible' % codec)
+
+            break
+
+        if mime == 'video/bif':
+            if codec != 'wmav2':
+                message = (False, 'aCodec %s not compatible' % codec)
+
+            break
+
+        if codec not in ('ac3', 'liba52', 'mp2'):
+            message = (False, 'aCodec %s not compatible' % codec)
             break
 
         if (not vInfo['aKbps'] or
@@ -502,38 +496,37 @@ def tivo_compatible_audio(vInfo, inFile, tsn):
 
     return message
 
-def tivo_compatible_container(vInfo):
+def tivo_compatible_container(vInfo, mime=''):
     message = (True, '')
-    if vInfo['container'] != 'mpeg' or vInfo['vCodec'] == 'mpeg1video':
-        message = (False, 'container %s not compatible' % vInfo['container'])
+    container = vInfo['container']
+    if ((mime == 'video/mp4' and container != 'mov') or
+        (mime == 'video/bif' and container != 'asf') or
+        (not mime and (container != 'mpeg' or
+                       vInfo['vCodec'] == 'mpeg1video'))):
+        message = (False, 'container %s not compatible' % container)
 
     return message
 
 def tivo_compatible(inFile, tsn='', mime=''):
-    if mime == 'video/mp4':
-        return tivo_compatible_mp4(inFile, tsn)
-    elif mime == 'video/bif':
-        return tivo_compatible_vc1(inFile, tsn)
-
     vInfo = video_info(inFile)
 
     message = (True, 'all compatible')
     while True:
-        if (inFile[-5:]).lower() == '.tivo':
+        if not mime and inFile[-5:].lower() == '.tivo':
             message = (True, 'ends with .tivo')
             break
 
-        vmessage = tivo_compatible_video(vInfo, tsn)
+        vmessage = tivo_compatible_video(vInfo, tsn, mime)
         if not vmessage[0]:
             message = vmessage
             break
 
-        amessage = tivo_compatible_audio(vInfo, inFile, tsn)
+        amessage = tivo_compatible_audio(vInfo, inFile, tsn, mime)
         if not amessage[0]:
             message = amessage
             break
 
-        cmessage = tivo_compatible_container(vInfo)
+        cmessage = tivo_compatible_container(vInfo, mime)
         if not cmessage[0]:
             message = cmessage
 
@@ -553,7 +546,7 @@ def video_info(inFile):
 
     vInfo['Supported'] = True
 
-    if (inFile[-5:]).lower() == '.tivo':
+    if inFile[-5:].lower() == '.tivo':
         vInfo['millisecs'] = 0
         info_cache[inFile] = (mtime, vInfo)
         logger.debug('VALID, ends in .tivo. %s' % inFile)
