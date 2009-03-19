@@ -157,7 +157,7 @@ def select_videofps(inFile, tsn):
 
 def select_videocodec(inFile, tsn):
     vInfo = video_info(inFile)
-    if tivo_compatible_video(vInfo)[0]:
+    if tivo_compatible_video(vInfo, tsn)[0]:
         codec = 'copy'
     else:
         codec = 'mpeg2video'  # default
@@ -439,7 +439,8 @@ def tivo_compatible_vc1(inFile, tsn=''):
     logger.debug('%s, %s' % (message, inFile))
     return message
 
-def tivo_compatible_video(vInfo):
+def tivo_compatible_video(vInfo, tsn):
+    message = (True, '')
     while True:
         if vInfo['vCodec'] != 'mpeg2video':
             message = (False, 'TRANSCODE=YES, vCodec %s not compatible.' %
@@ -465,8 +466,7 @@ def tivo_compatible_video(vInfo):
                         message = (False, 'TRANSCODE=YES, %s not correct PAR.'
                                           % vInfo['par2'])
                         break
-            message = (True, 'TRANSCODE=NO, HD Tivo detected, skipping ' +
-                             'remaining tests.')
+            # HD Tivo detected, skipping remaining tests.
             break
         
         if not vInfo['vFps'] == '29.97':
@@ -481,19 +481,17 @@ def tivo_compatible_video(vInfo):
                                    'by BLACKLIST_169 tivos.') % vInfo['dar1'])
                 break
 
-        for mode in [(720, 480), (704, 480), (544, 480),
-                     (528, 480), (480, 480), (352, 480)]:
-            if mode == (vInfo['vWidth'], vInfo['vHeight']):
-                message = (True, 'TRANSCODE=NO, %s x %s is valid.' %
-                                 (vInfo['vWidth'], vInfo['vHeight']))
-                break
+        mode = (vInfo['vWidth'], vInfo['vHeight'])
+        if mode not in [(720, 480), (704, 480), (544, 480),
+                        (528, 480), (480, 480), (352, 480)]:
             message = (False, 'TRANSCODE=YES, %s x %s not in supported modes.'
-                       % (vInfo['vWidth'], vInfo['vHeight']))
+                       % mode)
         break
 
     return message
 
-def tivo_compatible_audio(vInfo):
+def tivo_compatible_audio(vInfo, inFile, tsn):
+    message = (True, '')
     while True:
         if vInfo['aCodec'] not in ('ac3', 'liba52', 'mp2'):
             message = (False, 'TRANSCODE=YES, aCodec %s not compatible.' %
@@ -522,17 +520,18 @@ def tivo_compatible(inFile, tsn='', mime=''):
 
     vInfo = video_info(inFile)
 
+    message = (True, 'TRANSCODE=NO, all compatible.')
     while True:
         if (inFile[-5:]).lower() == '.tivo':
             message = (True, 'TRANSCODE=NO, ends with .tivo.')
             break
 
-        vmessage = tivo_compatible_video(vInfo)
+        vmessage = tivo_compatible_video(vInfo, tsn)
         if not vmessage[0]:
             message = vmessage
             break
 
-        amessage = tivo_compatible_audio(vInfo)
+        amessage = tivo_compatible_audio(vInfo, inFile, tsn)
         if not amessage[0]:
             message = amessage
             break
