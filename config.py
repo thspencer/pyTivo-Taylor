@@ -96,6 +96,21 @@ def get169Setting(tsn):
 
     return True
 
+def getAllowedClients():
+    allowedips = []
+    try:
+        ipstr = config.get('Server', 'allowedips')
+        iplist = ipstr.split(" ")
+        for ip in iplist:
+            ip = ip.strip()
+            if (len(ip) > 0):
+                allowedips.append(ip)
+    except NoOptionError:
+        pass
+    return allowedips; 
+
+
+
 def getExternalUrl():
     try:
         return config.get('Server', 'externalurl')
@@ -109,6 +124,12 @@ def getIsExternal(tsn):
     except NoOptionError:
         pass
     return isext
+
+def isTsnInConfig(tsn):
+    section = '_tivo_' + tsn
+    if (section in config.sections()):
+        return True
+    return False
 
 def getConfigTivoNames():
     tivo_names = {}

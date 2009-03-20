@@ -54,6 +54,8 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
 class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     tivos = {}
     tivo_names = config.getConfigTivoNames() 
+    allowed_clients = config.getAllowedClients()
+    passwords = {}
 
     def __init__(self, request, client_address, server):
         self.wbufsize = 0x10000
@@ -67,6 +69,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         tsn = self.headers.getheader('TiVo_TCD_ID',
                                      self.headers.getheader('tsn', ''))
+        if (not self.authorize(tsn)):
+            return
         if tsn:
             ip = self.address_string()
             self.tivos[tsn] = ip
@@ -94,6 +98,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.handle_query(query)
 
     def do_POST(self):
+        tsn = self.headers.getheader('TiVo_TCD_ID',
+                                     self.headers.getheader('tsn', ''))
+        if (not self.authorize()):
+            return
         ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
         if ctype == 'multipart/form-data':
             query = cgi.parse_multipart(self.rfile, pdict)
@@ -138,6 +146,23 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # If we made it here it means we couldn't match the request to
         # anything.
         self.unsupported(query)
+
+    def authorize(self, tsn=None):
+        if (config.isTsnInConfig(tsn)):
+            return True
+        # if allowed_clients is empty, we are completely open
+        if (len(self.allowed_clients) == 0):
+            return True;
+        client_ip = self.client_address[0]
+        for allowedip in self.allowed_clients:
+            if (client_ip.startswith(allowedip)):
+                return True
+
+        self.send_response(404)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write("Unauthorized.")
+        return False
 
     def log_message(self, format, *args):
         self.server.logger.info("%s [%s] %s" % (self.address_string(),
