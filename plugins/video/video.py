@@ -19,6 +19,8 @@ import mind
 import transcode
 from plugin import Plugin, quote, unquote
 
+logger = logging.getLogger('pyTivo.video.logger')
+
 SCRIPTDIR = os.path.dirname(__file__)
 
 CLASS_NAME = 'Video'
@@ -322,7 +324,13 @@ class Video(Plugin):
         container = quote(query['Container'][0].split('/')[0])
         port = config.getPort()
 
-        url = 'http://%s:%s/%s%s' % (ip, port, container, quote(f))
+        baseurl = 'http://%s:%s' % (ip, port)
+        if (config.getIsExternal(tsn)):
+            exturl = config.getExternalUrl()
+            if (exturl != None):
+                baseurl = exturl
+         
+        url = baseurl + '/%s%s' % (container, quote(f))
 
         title = file_info['seriesTitle']
         if not title:
@@ -336,9 +344,9 @@ class Video(Plugin):
         if (not subtitle and file_info['isEpisode'] != 'false' and 
             file_info['seriesTitle']):
             subtitle = file_info['title']
-
+        logger.debug('Pushing ' + url)
         try:
-            m = mind.getMind()
+            m = mind.getMind(tsn)
             m.pushVideo(
                 tsn = tsn,
                 url = url,

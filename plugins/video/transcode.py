@@ -52,6 +52,7 @@ def output_video(inFile, outFile, tsn='', mime=''):
     else:
         logger.debug('%s is not tivo compatible' % inFile)
         transcode(False, inFile, outFile, tsn)
+    logger.debug("Finished outputing video")
 
 def transcode(isQuery, inFile, outFile, tsn=''):
     settings = {'video_codec': select_videocodec(inFile, tsn),

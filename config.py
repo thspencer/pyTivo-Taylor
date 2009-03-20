@@ -55,11 +55,11 @@ def getGUID():
     else:
         return guid
 
-def getTivoUsername():
-    return config.get('Server', 'tivo_username')
+def getTivoUsername(tsn=None):
+    return get_tsn('tivo_username', tsn)
 
-def getTivoPassword():
-    return config.get('Server', 'tivo_password')
+def getTivoPassword(tsn=None):
+    return get_tsn('tivo_password', tsn)
 
 def getBeaconAddresses():
     if config.has_option('Server', 'beacon'):
@@ -95,6 +95,31 @@ def get169Setting(tsn):
         return False
 
     return True
+
+def getExternalUrl():
+    try:
+        return config.get('Server', 'externalurl')
+    except NoOptionError:
+        return None
+
+def getIsExternal(tsn):
+    isext = False
+    try:
+        isext=config.getboolean('_tivo_' + tsn, 'external')
+    except NoOptionError:
+        pass
+    return isext
+
+def getConfigTivoNames():
+    tivo_names = {}
+    for section in config.sections():
+        if (section.startswith('_tivo_')):
+	    tsn = section[6:]
+            try:
+                tivo_names[tsn] = config.get(section, 'name')
+            except NoOptionError:
+                tivo_names[tsn] = tsn
+    return tivo_names
 
 def getShares(tsn=''):
     shares = [(section, dict(config.items(section)))

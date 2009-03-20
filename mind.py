@@ -281,9 +281,9 @@ else:
         output.append( chr(i | 0x80) )
         return ''.join(output)
 
-def getMind():
-    username = config.getTivoUsername()
-    password = config.getTivoPassword()
+def getMind(tsn=None):
+    username = config.getTivoUsername(tsn)
+    password = config.getTivoPassword(tsn)
 
     if not username or not password:
        raise Exception("tivo_username and tivo_password required")
