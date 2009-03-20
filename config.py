@@ -119,8 +119,13 @@ def getExternalUrl():
 
 def getIsExternal(tsn):
     isext = False
+
+    tsnsect = '_tivo_' + tsn
+    if (not tsnsect in config.sections()):
+        return False
+
     try:
-        isext=config.getboolean('_tivo_' + tsn, 'external')
+        isext=config.getboolean(tsnsect, 'external')
     except NoOptionError:
         pass
     return isext
