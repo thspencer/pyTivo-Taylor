@@ -329,7 +329,10 @@ class Video(Plugin):
             exturl = config.getExternalUrl()
             if (exturl != None):
                 baseurl = exturl
-         
+            else:
+                ip = self.readip()
+                baseurl = 'http://%s:%s' % (ip, port)
+ 
         url = baseurl + '/%s%s' % (container, quote(f))
 
         title = file_info['seriesTitle']
@@ -368,6 +371,13 @@ class Video(Plugin):
         handler.send_header('Location', referer)
         handler.end_headers()
 
+    def readip(self):
+        """returns your external IP address by querying dyndns.org
+        """
+        f = urllib.urlopen('http://checkip.dyndns.org')
+        s = f.read()
+        m = re.search('([\d]*\.[\d]*\.[\d]*\.[\d]*)', s)
+        return m.group(0)
 
 class VideoDetails(DictMixin):
 
