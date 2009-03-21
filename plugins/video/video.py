@@ -308,10 +308,10 @@ class Video(Plugin):
 
         mime = ''
         if config.isHDtivo(tsn):
-            if transcode.tivo_compatible(file_path, tsn, 'video/mp4')[0]:
-                mime = 'video/mp4'
-            elif transcode.tivo_compatible(file_path, tsn, 'video/bif')[0]:
-                mime = 'video/bif'
+            for m in ['video/mp4', 'video/bif']:
+                if transcode.tivo_compatible(file_path, tsn, m)[0]:
+                    mime = m
+                    break
 
         if file_info['valid']:
             file_info.update(self.metadata_full(file_path, tsn, mime))
