@@ -9,9 +9,9 @@ import httpserver
 import config
 from plugin import GetPlugin
 
-def exceptionLogger(type, value, tb):
+def exceptionLogger(*args):
     sys.excepthook = sys.__excepthook__
-    logging.getLogger('pyTivo').exception('Exception in pyTivo')
+    logging.getLogger('pyTivo').error('Exception in pyTivo', exc_info=args)
 
 config.init_logging()
 sys.excepthook = exceptionLogger
