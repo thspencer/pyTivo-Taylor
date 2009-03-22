@@ -497,15 +497,18 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
 
     return message
 
-def tivo_compatible_container(vInfo, mime=''):
+def tivo_compatible_container(vInfo, tsn, mime=''):
     message = (True, '')
     container = vInfo['container']
     if ((mime == 'video/mp4' and container != 'mov') or
         (mime == 'video/bif' and container != 'asf') or
-        (not mime and (container != 'mpeg' or
-                       vInfo['vCodec'] == 'mpeg1video'))):
+        (mime in ['video/mpeg', ''] and
+         (container != 'mpeg' or (isHDtivo(tsn) and
+                                  vInfo['vCodec'] == 'mpeg1video'))):
         message = (False, 'container %s not compatible' % container)
 
+    logger.debug('mime: "%s", container: "%s", codec: "%s"' %
+                 (mime, container, vInfo['vCodec']))
     return message
 
 def tivo_compatible(inFile, tsn='', mime=''):
@@ -527,7 +530,7 @@ def tivo_compatible(inFile, tsn='', mime=''):
             message = amessage
             break
 
-        cmessage = tivo_compatible_container(vInfo, mime)
+        cmessage = tivo_compatible_container(vInfo, tsn, mime)
         if not cmessage[0]:
             message = cmessage
 
