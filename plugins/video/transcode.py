@@ -501,7 +501,7 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
 
     return message
 
-def tivo_compatible_container(vInfo, tsn, mime=''):
+def tivo_compatible_container(vInfo, mime=''):
     message = (True, '')
     container = vInfo['container']
     if ((mime == 'video/mp4' and container != 'mov') or
@@ -531,7 +531,7 @@ def tivo_compatible(inFile, tsn='', mime=''):
             message = amessage
             break
 
-        cmessage = tivo_compatible_container(vInfo, tsn, mime)
+        cmessage = tivo_compatible_container(vInfo, mime)
         if not cmessage[0]:
             message = cmessage
 
