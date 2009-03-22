@@ -705,9 +705,8 @@ def video_info(inFile):
     x = rezre.search(output)
     if x and x.group(1) != "0" and x.group(2) != "0":
         vInfo['dar1'] = x.group(1) + ':' + x.group(2)
-        vInfo['dar2'] = float(x.group(1)) / float(x.group(2))
     else:
-        vInfo['dar1'], vInfo['dar2'] = None, None
+        vInfo['dar1'] = None
 
     # get Video Stream mapping.
     rezre = re.compile(r'([0-9]+\.[0-9]+).*: Video:.*')
