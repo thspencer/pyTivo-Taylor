@@ -503,12 +503,10 @@ def tivo_compatible_container(vInfo, tsn, mime=''):
     if ((mime == 'video/mp4' and container != 'mov') or
         (mime == 'video/bif' and container != 'asf') or
         (mime in ['video/mpeg', ''] and
-         (container != 'mpeg' or (isHDtivo(tsn) and
-                                  vInfo['vCodec'] == 'mpeg1video'))):
+         (container != 'mpeg' or (config.isHDtivo(tsn) and
+                                  vInfo['vCodec'] == 'mpeg1video')))):
         message = (False, 'container %s not compatible' % container)
 
-    logger.debug('mime: "%s", container: "%s", codec: "%s"' %
-                 (mime, container, vInfo['vCodec']))
     return message
 
 def tivo_compatible(inFile, tsn='', mime=''):
