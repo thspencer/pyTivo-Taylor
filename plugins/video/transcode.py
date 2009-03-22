@@ -167,14 +167,18 @@ def select_videobr(inFile, tsn):
     return '-b ' + str(select_videostr(inFile, tsn) / 1000) + 'k'
 
 def select_videostr(inFile, tsn):
-    video_str = config.strtod(config.getVideoBR(tsn))
-    if config.isHDtivo(tsn):
-        vInfo =  video_info(inFile)
-        if vInfo['kbps'] != None and config.getVideoPCT(tsn) > 0:
-            video_percent = int(vInfo['kbps']) * 10 * config.getVideoPCT(tsn)
-            video_str = max(video_str, video_percent)
-    video_str = int(min(config.strtod(config.getMaxVideoBR(tsn)) * 0.95,
-                        video_str))
+    vInfo = video_info(inFile)
+    if tivo_compatible_video(vInfo, tsn):
+        video_str = (int(vInfo['kbps']) - int(vInfo['aKbps'])) * 1000
+    else:
+        video_str = config.strtod(config.getVideoBR(tsn))
+        if config.isHDtivo(tsn):
+            if vInfo['kbps'] != None and config.getVideoPCT(tsn) > 0:
+                video_percent = (int(vInfo['kbps']) * 10 *
+                                 config.getVideoPCT(tsn))
+                video_str = max(video_str, video_percent)
+        video_str = int(min(config.strtod(config.getMaxVideoBR(tsn)) * 0.95,
+                            video_str))
     return video_str
 
 def select_audiobr(tsn):
