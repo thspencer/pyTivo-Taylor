@@ -169,7 +169,10 @@ def select_videobr(inFile, tsn):
 def select_videostr(inFile, tsn):
     vInfo = video_info(inFile)
     if tivo_compatible_video(vInfo, tsn):
-        video_str = (int(vInfo['kbps']) - int(vInfo['aKbps'])) * 1000
+        video_str = int(vInfo['kbps'])
+        if vInfo['aKbps']:
+            video_str -= int(vInfo['aKbps'])
+        video_str *= 1000
     else:
         video_str = config.strtod(config.getVideoBR(tsn))
         if config.isHDtivo(tsn):
