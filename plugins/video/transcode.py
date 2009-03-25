@@ -168,7 +168,7 @@ def select_videobr(inFile, tsn):
 
 def select_videostr(inFile, tsn):
     vInfo = video_info(inFile)
-    if tivo_compatible_video(vInfo, tsn):
+    if tivo_compatible_video(vInfo, tsn)[0]:
         video_str = int(vInfo['kbps'])
         if vInfo['aKbps']:
             video_str -= int(vInfo['aKbps'])
