@@ -520,9 +520,12 @@ def tivo_compatible(inFile, tsn='', mime=''):
 
     message = (True, 'all compatible')
     while True:
-        if (mime not in ['video/mp4', 'video/bif'] and
-            inFile[-5:].lower() == '.tivo'):
-            message = (True, 'ends with .tivo')
+        if inFile[-5:].lower() == '.tivo':
+            e = 'ends with .tivo'
+            if mime in ['video/mp4', 'video/bif']:
+                message = (False, e)
+            else:
+                message = (True, e)
             break
 
         vmessage = tivo_compatible_video(vInfo, tsn, mime)
