@@ -131,7 +131,7 @@ def select_audioch(tsn):
     return ''
 
 def select_audiolang(inFile, tsn):
-    vInfo =  video_info(inFile)
+    vInfo = video_info(inFile)
     if config.getAudioLang(tsn) != None and vInfo['mapVideo'] != None:
         stream = vInfo['mapAudio'][0][0]
         langmatch = []
@@ -207,7 +207,7 @@ def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
     TIVO_HEIGHT = config.getTivoHeight(tsn)
 
-    vInfo =  video_info(inFile)
+    vInfo = video_info(inFile)
 
     logging.debug('tsn: %s' % tsn)
 
