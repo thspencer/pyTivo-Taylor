@@ -46,8 +46,6 @@ logger = logging.getLogger('pyTivo.video.qt-faststart')
 import os
 import shutil
 import struct
-import sys
-import tempfile
 
 from optparse import OptionParser
 from StringIO import StringIO
