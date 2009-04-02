@@ -13,6 +13,7 @@ def exceptionLogger(*args):
     sys.excepthook = sys.__excepthook__
     logging.getLogger('pyTivo').error('Exception in pyTivo', exc_info=args)
 
+config.init(sys.argv[1:])
 config.init_logging()
 sys.excepthook = exceptionLogger
 

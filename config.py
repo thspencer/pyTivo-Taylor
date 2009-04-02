@@ -1,4 +1,5 @@
 import ConfigParser
+import getopt
 import logging
 import logging.config
 import os
@@ -14,12 +15,28 @@ config = ConfigParser.ConfigParser()
 
 p = os.path.dirname(__file__)
 config_files = ['/etc/pyTivo.conf', os.path.join(p, 'pyTivo.conf')]
+configs_found = []
 
-configs_found = config.read(config_files)
-if not configs_found:
-    print ('ERROR: pyTivo.conf does not exist.\n' +
-           'You must create this file before running pyTivo.')
-    sys.exit(1)
+def init(argv):
+    global config_files
+    global configs_found
+
+    try:
+        opts, _ = getopt.getopt(argv, 'c:e:', ['config=', 'extraconf='])
+    except getopt.GetoptError, msg:
+        print msg
+
+    for opt, value in opts:
+        if opt in ('-c', '--config'):
+            config_files = [value]
+        elif opt in ('-e', '--extraconf'):
+            config_files.append(value)
+
+    configs_found = config.read(config_files)
+    if not configs_found:
+        print ('ERROR: pyTivo.conf does not exist.\n' +
+               'You must create this file before running pyTivo.')
+        sys.exit(1)
 
 def reset():
     global config
