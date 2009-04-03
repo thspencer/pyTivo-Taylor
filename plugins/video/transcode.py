@@ -16,7 +16,6 @@ import qtfaststart
 logger = logging.getLogger('pyTivo.video.transcode')
 
 info_cache = lrucache.LRUCache(1000)
-videotest = os.path.join(os.path.dirname(__file__), 'videotest.mpg')
 
 GOOD_MPEG_FPS = ['23.98', '24.00', '25.00', '29.97',
                  '30.00', '50.00', '59.94', '60.00']
@@ -93,18 +92,13 @@ def select_audiocodec(isQuery, inFile, tsn=''):
         # Default, compatible with all TiVo's
         codec = 'ac3'
         if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
-            if vInfo['aKbps'] == None:
+            aKbps = vInfo['aKbps']
+            if aKbps == None:
                 if not isQuery:
-                    cmd_string = ('-y -vcodec mpeg2video -r 29.97 ' +
-                                  '-b 1000k -acodec copy ' +
-                                  select_audiolang(inFile, tsn) +
-                                  ' -t 00:00:01 -f vob -')
-                    if video_check(inFile, cmd_string):
-                        vInfo = video_info(videotest)
+                    aKbps = audio_check(inFile, tsn)
                 else:
                     codec = 'TBD'
-            if (not vInfo['aKbps'] == None and
-                int(vInfo['aKbps']) <= config.getMaxAudioBR(tsn)):
+            if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
     copy_flag = config.getCopyTS(tsn)
@@ -548,10 +542,10 @@ def tivo_compatible(inFile, tsn='', mime=''):
                                            message[1], inFile))
     return message
 
-def video_info(inFile):
+def video_info(inFile, cache=True):
     vInfo = dict()
     mtime = os.stat(inFile).st_mtime
-    if inFile != videotest:
+    if cache:
         if inFile in info_cache and info_cache[inFile][0] == mtime:
             logging.debug('CACHE HIT! %s' % inFile)
             return info_cache[inFile][1]
@@ -560,7 +554,8 @@ def video_info(inFile):
 
     if inFile[-5:].lower() == '.tivo':
         vInfo['millisecs'] = 0
-        info_cache[inFile] = (mtime, vInfo)
+        if cache:
+            info_cache[inFile] = (mtime, vInfo)
         logger.debug('VALID, ends in .tivo. %s' % inFile)
         return vInfo
 
@@ -582,7 +577,8 @@ def video_info(inFile):
     if ffmpeg.poll() == None:
         kill(ffmpeg)
         vInfo['Supported'] = False
-        info_cache[inFile] = (mtime, vInfo)
+        if cache:
+            info_cache[inFile] = (mtime, vInfo)
         return vInfo
 
     err_tmp.seek(0)
@@ -761,19 +757,29 @@ def video_info(inFile):
             else:
                 vInfo[key.replace('Override_', '')] = metadata[key]
 
-    info_cache[inFile] = (mtime, vInfo)
+    if cache:
+        info_cache[inFile] = (mtime, vInfo)
     logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
     return vInfo
 
-def video_check(inFile, cmd_string):
+def audio_check(inFile, tsn):
+    cmd_string = ('-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy ' +
+                  select_audiolang(inFile, tsn) + ' -t 00:00:01 -f vob -')
     cmd = [ffmpeg_path(), '-i', inFile] + cmd_string.split()
     ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    fd, testname = tempfile.mkstemp()
+    testfile = os.fdopen(fd, 'wb')
     try:
-        shutil.copyfileobj(ffmpeg.stdout, open(videotest, 'wb'))
-        return True
+        shutil.copyfileobj(ffmpeg.stdout, testfile)
     except:
         kill(ffmpeg)
-        return False
+        testfile.close()
+        aKbps = None
+    else:
+        testfile.close()
+        aKbps = video_info(testname, False)['aKbps']
+    os.remove(testname)
+    return aKbps
 
 def supported_format(inFile):
     if video_info(inFile)['Supported']:
