@@ -53,11 +53,12 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
 class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     tivos = {}
-    tivo_names = config.getConfigTivoNames() 
-    allowed_clients = config.getAllowedClients()
+    tivo_names = {}
 
     def __init__(self, request, client_address, server):
         self.wbufsize = 0x10000
+        if not self.tivo_names:
+            self.tivo_names.update(config.getConfigTivoNames())
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
             client_address, server)
 
@@ -148,10 +149,11 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def authorize(self, tsn=None):
         # if allowed_clients is empty, we are completely open
-        if not self.allowed_clients or (tsn and config.isTsnInConfig(tsn)):
+        allowed_clients = config.getAllowedClients()
+        if not allowed_clients or (tsn and config.isTsnInConfig(tsn)):
             return True
         client_ip = self.client_address[0]
-        for allowedip in self.allowed_clients:
+        for allowedip in allowed_clients:
             if client_ip.startswith(allowedip):
                 return True
 
