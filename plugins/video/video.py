@@ -19,7 +19,7 @@ import mind
 import transcode
 from plugin import Plugin, quote, unquote
 
-logger = logging.getLogger('pyTivo.video.logger')
+logger = logging.getLogger('pyTivo.video.video')
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -325,9 +325,9 @@ class Video(Plugin):
         port = config.getPort()
 
         baseurl = 'http://%s:%s' % (ip, port)
-        if (config.getIsExternal(tsn)):
+        if config.getIsExternal(tsn):
             exturl = config.getExternalUrl()
-            if (exturl != None):
+            if exturl:
                 baseurl = exturl
             else:
                 ip = self.readip()
@@ -372,9 +372,8 @@ class Video(Plugin):
         handler.end_headers()
 
     def readip(self):
-        """returns your external IP address by querying dyndns.org
-        """
-        f = urllib.urlopen('http://checkip.dyndns.org')
+        """ returns your external IP address by querying dyndns.org """
+        f = urllib.urlopen('http://checkip.dyndns.org/')
         s = f.read()
         m = re.search('([\d]*\.[\d]*\.[\d]*\.[\d]*)', s)
         return m.group(0)

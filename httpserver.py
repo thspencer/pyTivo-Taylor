@@ -55,7 +55,6 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     tivos = {}
     tivo_names = config.getConfigTivoNames() 
     allowed_clients = config.getAllowedClients()
-    passwords = {}
 
     def __init__(self, request, client_address, server):
         self.wbufsize = 0x10000
@@ -69,7 +68,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         tsn = self.headers.getheader('TiVo_TCD_ID',
                                      self.headers.getheader('tsn', ''))
-        if (not self.authorize(tsn)):
+        if not self.authorize(tsn):
             return
         if tsn:
             ip = self.address_string()
@@ -100,7 +99,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
         tsn = self.headers.getheader('TiVo_TCD_ID',
                                      self.headers.getheader('tsn', ''))
-        if (not self.authorize()):
+        if not self.authorize(tsn):
             return
         ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
         if ctype == 'multipart/form-data':
@@ -148,14 +147,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.unsupported(query)
 
     def authorize(self, tsn=None):
-        if (config.isTsnInConfig(tsn)):
-            return True
         # if allowed_clients is empty, we are completely open
-        if (len(self.allowed_clients) == 0):
-            return True;
+        if not self.allowed_clients or (tsn and config.isTsnInConfig(tsn)):
+            return True
         client_ip = self.client_address[0]
         for allowedip in self.allowed_clients:
-            if (client_ip.startswith(allowedip)):
+            if client_ip.startswith(allowedip):
                 return True
 
         self.send_response(404)

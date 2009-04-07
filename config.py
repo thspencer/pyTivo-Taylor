@@ -97,53 +97,39 @@ def get169Setting(tsn):
     return True
 
 def getAllowedClients():
-    allowedips = []
-    try:
-        ipstr = config.get('Server', 'allowedips')
-        iplist = ipstr.split(" ")
-        for ip in iplist:
-            ip = ip.strip()
-            if (len(ip) > 0):
-                allowedips.append(ip)
-    except NoOptionError:
-        pass
-    return allowedips; 
-
-
+    if config.has_option('Server', 'allowedips'):
+        return config.get('Server', 'allowedips').split()
+    else:
+        return []
 
 def getExternalUrl():
-    try:
+    if config.has_option('Server', 'externalurl'):
         return config.get('Server', 'externalurl')
-    except NoOptionError:
+    else:
         return None
 
 def getIsExternal(tsn):
-    isext = False
-
     tsnsect = '_tivo_' + tsn
-    if (not tsnsect in config.sections()):
-        return False
+    if tsnsect in config.sections():
+        if config.has_option(tsnsect, 'external'):
+            try:
+                return config.getboolean(tsnsect, 'external')
+            except ValueError:
+                pass
 
-    try:
-        isext=config.getboolean(tsnsect, 'external')
-    except NoOptionError:
-        pass
-    return isext
+    return False
 
 def isTsnInConfig(tsn):
-    section = '_tivo_' + tsn
-    if (section in config.sections()):
-        return True
-    return False
+    return ('_tivo_' + tsn) in config.sections()
 
 def getConfigTivoNames():
     tivo_names = {}
     for section in config.sections():
-        if (section.startswith('_tivo_')):
-	    tsn = section[6:]
-            try:
+        if section.startswith('_tivo_'):
+            tsn = section[6:]
+            if config.has_option(section, 'name'):
                 tivo_names[tsn] = config.get(section, 'name')
-            except NoOptionError:
+            else:
                 tivo_names[tsn] = tsn
     return tivo_names
 
