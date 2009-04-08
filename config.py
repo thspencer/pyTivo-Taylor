@@ -242,13 +242,13 @@ def getTivoHeight(tsn):
     height = get_tsn('height', tsn)
     if height:
         return nearestTivoHeight(int(height))
-    return [480, 720][isHDtivo(tsn)]
+    return [480, 1080][isHDtivo(tsn)]
 
 def getTivoWidth(tsn):
     width = get_tsn('width', tsn)
     if width:
         return nearestTivoWidth(int(width))
-    return [544, 1280][isHDtivo(tsn)]
+    return [544, 1920][isHDtivo(tsn)]
 
 def _trunc64(i):
     return max(int(strtod(i)) / 64000, 1) * 64
