@@ -259,7 +259,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 width
 
-Default Setting: 544 for S2, 1280 for S3
+Default Setting: 544 for S2, 1920 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to +\
 nearest acceptable TiVo dimension.
 Required: No
@@ -274,7 +274,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 height
 
-Default Setting: 480 for S2, 720 for S3
+Default Setting: 480 for S2, 1080 for S3
 Valid Entries: Any valid pixel dimension. Setting will be rounded to +\
 nearest acceptable TiVo dimension
 Required: No

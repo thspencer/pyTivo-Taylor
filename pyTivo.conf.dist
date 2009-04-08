@@ -42,12 +42,12 @@ ffmpeg=/usr/bin/ffmpeg
 #beacon=192.168.1.255 listen
 
 # Output Pixel Width:
-# Width, defaults to 544 for S2, 1280 for S3/HD
-# Height, defaults to 480 for S2, 720 for S3/HD
+# Width, defaults to 544 for S2, 1920 for S3/HD
+# Height, defaults to 480 for S2, 1080 for S3/HD
 # Valid widths: [S3/HD = 1920, 1440, 1280], [S2/S3/HD = 720, 704, 544, 480, 352]
 # Valid heights: [S3/HD = 1080, 720], [S2/S3/HD = 480]
-#width=1280
-#height=720
+#width=1920
+#height=1080
 #ffmpeg_tmpl=%(video_codec)s %(video_fps)s %(video_br)s %(max_video_br)s %(buff_size)s %(aspect_ratio)s %(audio_br)s %(audio_fr)s %(audio_ch)s %(audio_codec)s %(ffmpeg_pram)s %(format)s
 
 # Per tivo options
