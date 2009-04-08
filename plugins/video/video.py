@@ -319,7 +319,7 @@ class Video(Plugin):
             file_info.update(self.metadata_full(file_path, tsn, mime))
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('tivo.com',123))
+        s.connect(('tivo.com', 123))
         ip = s.getsockname()[0]
         container = quote(query['Container'][0].split('/')[0])
         port = config.getPort()
