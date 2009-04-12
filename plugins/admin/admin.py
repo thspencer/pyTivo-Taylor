@@ -154,35 +154,29 @@ class Admin(Plugin):
         handler.wfile.write(t)
 
     def UpdateSettings(self, handler, query):
-        new_setting = new_value = ' '
         config.reset()
-        for key in query:
-            if key.startswith('Server.') \
-                or key.startswith('_tivo_SD.') \
-                or key.startswith('_tivo_HD.'):
-                section, option = key.split('.')
-                if not config.config.has_section(section):
-                    config.config.add_section(section)
-                if option == "new__setting":
-                    n = query[key][0]
-                    if n != ' ':
-                        new_setting = n
-                elif option == "new__value":
-                    n = query[key][0]
-                    if n != ' ':
-                        new_value = n
-                elif query[key][0] == " ":
-                    config.config.remove_option(section, option)
-                else:
-                    config.config.set(section, option, query[key][0])
-        if not(new_setting == ' ' and new_value == ' '):
-            config.config.set('Server', new_setting, new_value)
+        for section in ['Server', '_tivo_SD', '_tivo_HD']:
+            for key in query:
+                if key.startswith(section + '.'):
+                    _, option = key.split('.')
+                    if not config.config.has_section(section):
+                        config.config.add_section(section)
+                    if option == 'new__setting':
+                        new_setting = query[key][0]
+                    elif option == 'new__value':
+                        new_value = query[key][0]
+                    elif query[key][0] == ' ':
+                        config.config.remove_option(section, option)
+                    else:
+                        config.config.set(section, option, query[key][0])
+            if not(new_setting == ' ' and new_value == ' '):
+                config.config.set(section, new_setting, new_value)
 
         sections = query['Section_Map'][0].split(']')
         sections.pop() # last item is junk
         for section in sections:
             ID, name = section.split('|')
-            if query[ID][0] == "Delete_Me":
+            if query[ID][0] == 'Delete_Me':
                 config.config.remove_section(name)
                 continue
             if query[ID][0] != name:
@@ -190,18 +184,18 @@ class Admin(Plugin):
                 config.config.add_section(query[ID][0])
             for key in query:
                 if key.startswith(ID + '.'):
-                    junk, option = key.split('.')
-                    if option == "new__setting":
+                    _, option = key.split('.')
+                    if option == 'new__setting':
                         new_setting = query[key][0]
-                    elif option == "new__value":
+                    elif option == 'new__value':
                         new_value = query[key][0]
-                    elif query[key][0] == " ":
+                    elif query[key][0] == ' ':
                         config.config.remove_option(query[ID][0], option)
                     else:
                         config.config.set(query[ID][0], option, query[key][0])
             if not(new_setting == ' ' and new_value == ' '):
                 config.config.set(query[ID][0], new_setting, new_value)
-        if query['new_Section'][0] != " ":
+        if query['new_Section'][0] != ' ':
             config.config.add_section(query['new_Section'][0])
         config.write()
 
