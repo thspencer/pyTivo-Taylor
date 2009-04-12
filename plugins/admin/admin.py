@@ -154,6 +154,7 @@ class Admin(Plugin):
         handler.wfile.write(t)
 
     def UpdateSettings(self, handler, query):
+        new_setting = new_value = ' '
         config.reset()
         for key in query:
             if key.startswith('Server.') \
@@ -163,9 +164,13 @@ class Admin(Plugin):
                 if not config.config.has_section(section):
                     config.config.add_section(section)
                 if option == "new__setting":
-                    new_setting = query[key][0]
+                    n = query[key][0]
+                    if n != ' ':
+                        new_setting = n
                 elif option == "new__value":
-                    new_value = query[key][0]
+                    n = query[key][0]
+                    if n != ' ':
+                        new_value = n
                 elif query[key][0] == " ":
                     config.config.remove_option(section, option)
                 else:
