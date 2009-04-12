@@ -6,26 +6,25 @@ SCRIPTDIR = os.path.dirname(__file__)
 help_list = {}
 title = ''
 settings_known = {}
-multiline = ''
+titlemode = True
 f = open(os.path.join(SCRIPTDIR, 'help.txt'))
 try:
     for line in f:
         line = line.strip()
-        if multiline:
-            if line.endswith('+\\'):
-                multiline += line[:-2]
-            else:
-                multiline += line
-                help_list[title].append(multiline)
-                multiline = ''
-            continue
         if not line or line.startswith('#'):
             # skip blank or commented lines
-            continue
-        if ':' not in line:
-            title = line
-            help_list[title] = []
+            titlemode = True
+        elif line.startswith('>'):
+            help_list[title][-1] += ' ' + line[1:]
+        elif ':' not in line:
+            if titlemode:
+                title = line
+                help_list[title] = []
+                titlemode = False
+            else:
+                help_list[title][-1] += ' ' + line
         else:
+            titlemode = False
             value, data = [x.strip() for x in line.split(':', 1)]
             if value.lower() == 'available in':
                 # special setting to create section_known array
@@ -35,10 +34,7 @@ try:
                         settings_known[section] = []
                     settings_known[section].append(title)
             else:
-                if line.endswith('+\\'):
-                    multiline += line[:-2]
-                else:
-                    help_list[title].append(line)
+                help_list[title].append(line)
 finally:
     f.close()
 ## Done building help list
