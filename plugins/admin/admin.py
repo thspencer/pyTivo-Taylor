@@ -243,28 +243,12 @@ class Admin(Plugin):
             opener = urllib2.build_opener(auth_handler)
             urllib2.install_opener(opener)
 
-            if theurl in tivo_cache: #check if we've accessed this page before
-                if (tivo_cache[theurl]['thepage'] == '' or
-                   (time.time() - tivo_cache[theurl]['thepage_time']) >= 60):
-                    # if page is empty or old then retreive it
-                    try:
-                        handle = urllib2.urlopen(r)
-                    except IOError, e:
-                        t = Template(REDIRECT_TEMPLATE)
-                        t.container = cname
-                        t.time = '20'
-                        t.url = ('/TiVoConnect?Command=NPL&Container=' +
-                                 quote(cname))
-                        t.text = UNABLE % (tivoIP, quote(cname))
-                        handler.send_response(200)
-                        handler.end_headers()
-                        handler.wfile.write(t)
-                        return
-                    tivo_cache[theurl]['thepage'] = handle.read()
-                    tivo_cache[theurl]['thepage_time'] = time.time()
-            else: # not in cache
+            if (theurl not in tivo_cache or
+                (tivo_cache[theurl]['thepage'] == '' or
+                 (time.time() - tivo_cache[theurl]['thepage_time']) >= 60)):
+                # if page is not cached, empty or old then retreive it
                 try:
-                    handle = urllib2.urlopen(r)
+                    page = urllib2.urlopen(r)
                 except IOError, e:
                     t = Template(REDIRECT_TEMPLATE)
                     t.container = cname
@@ -275,9 +259,9 @@ class Admin(Plugin):
                     handler.end_headers()
                     handler.wfile.write(t)
                     return
-                tivo_cache[theurl] = {}
-                tivo_cache[theurl]['thepage'] = handle.read()
-                tivo_cache[theurl]['thepage_time'] = time.time()
+                tivo_cache[theurl] = {'thepage': page.read(),
+                                      'thepage_time': time.time()}
+                page.close()
 
             xmldoc = minidom.parseString(tivo_cache[theurl]['thepage'])
             items = xmldoc.getElementsByTagName('Item')
