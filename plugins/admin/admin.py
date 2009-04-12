@@ -452,12 +452,10 @@ class Admin(Plugin):
 
     def SaveNPL(self, handler, query):
         config.reset()
-        if 'tivo_mak' in query:
-            config.config.set(query['Container'][0], 'tivo_mak',
-                              query['tivo_mak'][0])
-        if 'togo_path' in query:
-            config.config.set(query['Container'][0], 'togo_path',
-                              query['togo_path'][0])
+        for key in ['tivo_mak', 'togo_path']:
+            if key in query:
+                config.config.set(query['Container'][0], key,
+                                  query[key][0])
         config.write()
 
         subcname = query['Container'][0]
