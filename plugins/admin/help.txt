@@ -505,3 +505,26 @@ reporting supported videos as not supported (copy protected).
 Increasing this setting will give ffmpeg more time to scan the file.
 Example Settings: 10, 15, 20.
 Available In: Server
+
+tivo_username
+
+Default Setting: blank
+Valid Entries: tivo.com username
+Required: No
+Skill: Basic
+Description: Your username (email address) at tivo.com. This is required 
+for the "Push" feature. If you don't plan to use Push, you don't need to 
+set this.
+Example Settings: user@example.com
+Available In: Server
+
+tivo_password
+
+Default Setting: blank
+Valid Entries: tivo.com password
+Required: No
+Skill: Basic
+Description: Your password at tivo.com. This is required for the "Push" 
+feature. If you don't plan to use Push, you don't need to set this.
+Example Settings: password
+Available In: Server
