@@ -13,9 +13,9 @@
 # don't mark a new subhead must be escaped by placing '>' in the
 # first position.
 #
-# SPECIAL SECTION: In order for the web plugin to know which settings
-# are available. To do this the follow line should be present in
-# every setting:
+# In order for the web config plugin to know which settings are 
+# available in which sections, the following line should be present in 
+# each setting:
 #
 # Available In:
 #
