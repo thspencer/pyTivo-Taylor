@@ -183,14 +183,14 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
       </td>
 
       <td style="vertical-align: top;">
-      <div id="settings" style="width: 400px; overflow: scroll; height: 450px; position: relative;">
+      <div id="settings" style="width: 300px; overflow: scroll; height: 450px; position: relative;">
       <form name="config" method="POST" action="TiVoConnect" onsubmit="fillBlank();showData(this);">
       <input type="hidden" name="Command" value="UpdateSettings">
       <input type="hidden" name="Container" value="$container">
-<div id="set-server" style="width: 100%; text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
+<div id="set-server" style="width: 280px; text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
 	<b>Global Server Settings</b><br>
         <hr style="width: 100%; height: 2px;"> 
-        <table align="center" width="100%">
+        <table align="center">
 #set $i = 0
 #for $key in $server_known
 #set $i += 1
@@ -199,8 +199,8 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #else
 <tr>
 #end if
-<td>$key :</td>
-<td><input id="Server.$key" name="Server.$key"
+<td>
+        $key :</td><td><input size="20" id="Server.$key" name="Server.$key"
 #if $key in $server_data
         value="$server_data[$key]"
 #else
@@ -220,32 +220,32 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 			<tr>
 		#end if
 		<td>         $key :</td><td>
-	        <input id="Server.$key" name="Server.$key" value="$server_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+	        <input size="20" id="Server.$key" name="Server.$key" value="$server_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 		</td></tr>
 	#end if 
 #end for 
 	</table>
-	<div style="width: 100%; position: relative;">
-		<div id="add-server-button" style="width: 100%; position: absolute; position: absolute; left: 0px; top: 0px;">
+	<div style="width: 280px; position: relative;">
+		<div id="add-server-button" style="width: 280px; position: absolute; position: absolute; left: 0px; top: 0px;">
 			<br>
 			<center>
 			<input type="button" value="Add Setting" onclick="switchDiv('add-server-field', 'add-server-');return true;">
 			</center>
 		</div>
 		<div id="add-server-field" style="position: absolute; position: absolute; left: 0px; top: 0px; visibility: hidden;">
-			<table style="width: 100%;">
+			<table style="width: 265px;">
 			<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">Add a Setting</td></tr>
 			<tr><td>Setting Name:</td><td>Setting Value:</td></tr>
-			<tr><td><input id="Server.new_settting" name="Server.new__setting" onChange="saveNotify();" type="text" value=""></td><td><input type="text" onChange="saveNotify();" id="Server.new_value"  name="Server.new__value" value=""></td></tr>
+			<tr><td><input size="16" id="Server.new_settting" name="Server.new__setting" onChange="saveNotify();" type="text" value=""></td><td><input size="16" type="text" onChange="saveNotify();" id="Server.new_value"  name="Server.new__value" value=""></td></tr>
 			</table>
 		</div>
 	</div>
 </div>
 
-<div id="set-hd_tivos" style="width: 100%; text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
+<div id="set-hd_tivos" style="width: 280px; text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
 	<b>HD TiVo Settings</b><br>
         <hr style="width: 100%; height: 2px;"> 
-        <table align="center" width="100%">
+        <table align="center">
 #set $i = 0
 #for $key in $hd_tivos_known
 #set $i += 1
@@ -254,8 +254,8 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #else
 <tr>
 #end if
-<td>$key :</td>
-<td><input id="_tivo_HD.$key" name="_tivo_HD.$key"
+<td>
+        $key :</td><td><input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key"
 #if $key in $hd_tivos_data
         value="$hd_tivos_data[$key]"
 #else
@@ -274,33 +274,33 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 		#else
 			<tr>
 		#end if
-		<td>$key :</td><td>
-	        <input id="_tivo_HD.$key" name="_tivo_HD.$key" value="$hd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+		<td>         $key :</td><td>
+	        <input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key" value="$hd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 		</td></tr>
 	#end if 
 #end for 
 	</table>
-	<div style="width: 100%; position: relative;">
-		<div id="add-hd_tivos-button" style="width: 100%; position: absolute; position: absolute; left: 0px; top: 0px;">
+	<div style="width: 280px; position: relative;">
+		<div id="add-hd_tivos-button" style="width: 280px; position: absolute; position: absolute; left: 0px; top: 0px;">
 			<br>
 			<center>
 			<input type="button" value="Add Setting" onclick="switchDiv('add-hd_tivos-field', 'add-hd_tivos-');return true;">
 			</center>
 		</div>
 		<div id="add-hd_tivos-field" style="position: absolute; position: absolute; left: 0px; top: 0px; visibility: hidden;">
-			<table style="width: 100%;">
+			<table style="width: 265px;">
 			<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">Add a Setting</td></tr>
 			<tr><td>Setting Name:</td><td>Setting Value:</td></tr>
-			<tr><td><input id="_tivo_HD.new_settting" name="_tivo_HD.new__setting" onChange="saveNotify();" type="text" value=""></td><td><input type="text" onChange="saveNotify();" id="_tivo_HD.new_value" name="_tivo_HD.new__value" value=""></td></tr>
+			<tr><td><input size="16" id="_tivo_HD.new_settting" name="_tivo_HD.new__setting" onChange="saveNotify();" type="text" value=""></td><td><input size="16" type="text" onChange="saveNotify();" id="_tivo_HD.new_value"  name="_tivo_HD.new__value" value=""></td></tr>
 			</table>
 		</div>
 	</div>
 </div>
 
-<div id="set-sd_tivos" style="width: 100%; text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
+<div id="set-sd_tivos" style="width: 280px; text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
 	<b>SD TiVo Settings</b><br>
         <hr style="width: 100%; height: 2px;"> 
-        <table align="center" width="100%">
+        <table align="center">
 #set $i = 0
 #for $key in $sd_tivos_known
 #set $i += 1
@@ -309,8 +309,8 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #else
 <tr>
 #end if
-<td>$key :</td>
-<td><input id="_tivo_SD.$key" name="_tivo_SD.$key"
+<td>
+        $key :</td><td><input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key"
 #if $key in $sd_tivos_data
         value="$sd_tivos_data[$key]"
 #else
@@ -329,24 +329,24 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 		#else
 			<tr>
 		#end if
-		<td>$key :</td><td>
-	        <input id="_tivo_SD.$key" name="_tivo_SD.$key" value="$sd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+		<td>         $key :</td><td>
+	        <input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key" value="$sd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 		</td></tr>
 	#end if 
 #end for 
 	</table>
-	<div style="width: 100%; position: relative;">
-		<div id="add-sd_tivos-button" style="width: 100%; position: absolute; position: absolute; left: 0px; top: 0px;">
+	<div style="width: 280px; position: relative;">
+		<div id="add-sd_tivos-button" style="width: 280px; position: absolute; position: absolute; left: 0px; top: 0px;">
 			<br>
 			<center>
 			<input type="button" value="Add Setting" onclick="switchDiv('add-sd_tivos-field', 'add-sd_tivos-');return true;">
 			</center>
 		</div>
 		<div id="add-sd_tivos-field" style="position: absolute; position: absolute; left: 0px; top: 0px; visibility: hidden;">
-			<table style="width: 100%;">
+			<table style="width: 265px;">
 			<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">Add a Setting</td></tr>
 			<tr><td>Setting Name:</td><td>Setting Value:</td></tr>
-			<tr><td><input id="_tivo_SD.new_settting" name="_tivo_SD.new__setting" onChange="saveNotify();" type="text" value=""></td><td><input type="text" onChange="saveNotify();" id="_tivo_SD.new_value" name="_tivo_SD.new__value" value=""></td></tr>
+			<tr><td><input size="16" id="_tivo_SD.new_settting" name="_tivo_SD.new__setting" onChange="saveNotify();" type="text" value=""></td><td><input size="16" type="text" onChange="saveNotify();" id="_tivo_SD.new_value"  name="_tivo_SD.new__value" value=""></td></tr>
 			</table>
 		</div>
 	</div>
@@ -359,9 +359,9 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	#set $section_number = 'section-' + str($section_count)
 	<input type="hidden" name="$name" id="$name" value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
-	<div id="set-$name" style="text-align: center;position: absolute; left: 0px; top: 0px; width: 100%; visibility: hidden;">
-	[<input onChange="saveNotify();" id="$section_number" name="$section_number" value="$name">]<br>
-	<hr style="width: 100%; height: 2px;"><table align="center" width="100%">
+	<div id="set-$name" style="text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
+	[<input size="20" onChange="saveNotify();" id="$section_number" name="$section_number" value="$name">]<br>
+	<hr style="width: 100%; height: 2px;"><table align="center">
 	#set $i = 0
 	#for $key in $shares_known
 		#set $i += 1
@@ -370,7 +370,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 		#else
 			<tr>
 		#end if
-			<td>$key :</td><td><input onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key"
+			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key"
 		#if $key in $data
 			value="$data[$key]"
 		#else
@@ -391,24 +391,24 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 			#else
 				<tr>
 			#end if
-			<td>$key :</td><td>
-			<input onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+			<td> $key : </td><td>
+			<input size="20" onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 			</td></tr>
 		#end if 
 	#end for
 	</table>
 		<div style="position: relative;">
-			<div id="add-$name-button" style="width: 100%; position: absolute; position: absolute; left: 0px; top: 0px;">
+			<div id="add-$name-button" style="width: 280px; position: absolute; position: absolute; left: 0px; top: 0px;">
 				<br>
 				<center>
 				<input type="button" value="Add Setting" onclick="switchDiv('add-$name-field', 'add-$name-');return true;">
 				</center>
 			</div>
 			<div id="add-$name-field" style="position: absolute; position: absolute; left: 0px; top: 0px; visibility: hidden;">
-				<table style="width: 100%;">
+				<table style="width: 265px;">
 				<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">Add a Setting</td></tr>
 				<tr><td>Setting Name:</td><td>Setting Value:</td></tr>
-				<tr><td><input onChange="saveNotify();" id="$(section_number).new__setting" name="$(section_number).new__setting" type="text" value=""></td><td><input onChange="saveNotify();" type="text" id="$(section_number).new__value" name="$(section_number).new__value" value=""></td></tr>
+				<tr><td><input onChange="saveNotify();" size="16" id="$(section_number).new__setting" name="$(section_number).new__setting" type="text" value=""></td><td><input onChange="saveNotify();" size="16" type="text" id="$(section_number).new__value" name="$(section_number).new__value" value=""></td></tr>
 				</table>
 			</div>
 		</div>
@@ -421,8 +421,8 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	<input type="hidden" name="$name" id="$name" value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
 	<div id="set-$name" style="text-align: center;position: absolute; left: 0px; top: 0px; visibility: hidden;">
-	[<input onChange="saveNotify();" id="$section_number" name="$section_number" value="$name">]<br>
-	<hr style="width: 100%; height: 2px;"><table align="center" width="100%">
+	[<input size="20" onChange="saveNotify();" id="$section_number" name="$section_number" value="$name">]<br>
+	<hr style="width: 100%; height: 2px;"><table align="center">
 	#set $i = 0
 	#for $key in $tivos_known
 		#set $i += 1
@@ -431,7 +431,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 		#else
 			<tr>
 		#end if
-			<td>$key :</td><td><input onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key"
+			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key"
 		#if $key in $data
 			value="$data[$key]"
 		#else
@@ -453,23 +453,23 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 				<tr>
 			#end if
 			<td> $key :</td><td> 
-			<input onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+			<input size="20" onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 			</td></tr>
 		#end if 
 	#end for
 	</table>
 		<div style="position: relative;">
-			<div id="add-$name-button" style="width: 100%; position: absolute; position: absolute; left: 0px; top: 0px;">
+			<div id="add-$name-button" style="width: 280px; position: absolute; position: absolute; left: 0px; top: 0px;">
 				<br>
 				<center>
 				<input type="button" value="Add Setting" onclick="switchDiv('add-$name-field', 'add-$name-');return true;">
 				</center>
 			</div>
 			<div id="add-$name-field" style="position: absolute; position: absolute; left: 0px; top: 0px; visibility: hidden;">
-				<table style="width: 100%;">
+				<table style="width: 265px;">
 				<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">Add a Setting</td></tr>
 				<tr><td>Setting Name:</td><td>Setting Value:</td></tr>
-				<tr><td><input onChange="saveNotify();" id="$(section_number).new__setting" name="$(section_number).new__setting" type="text" value=""></td><td><input onChange="saveNotify();" type="text" id="$(section_number).new__value" name="$(section_number).new__value" value=""></td></tr>
+				<tr><td><input onChange="saveNotify();" size="16" id="$(section_number).new__setting" name="$(section_number).new__setting" type="text" value=""></td><td><input onChange="saveNotify();" size="16" type="text" id="$(section_number).new__value" name="$(section_number).new__value" value=""></td></tr>
 				</table>
 			</div>
 		</div>
@@ -481,7 +481,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	<table>
 	<tr>
 	<td> Section Name :</td><td> 
-		<input onChange="saveNotify();" type="text" name="new_Section" value="" onfocus="switchDiv('help-add', 'help-');return true;">
+		<input onChange="saveNotify();" type="text" size="20" name="new_Section" value="" onfocus="switchDiv('help-add', 'help-');return true;">
 	</td></tr></table>
 	The new section name will be added to the pyTivo.conf file when you click <b>Save Changes</b>.
 </div>
@@ -499,8 +499,8 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
       </td>
 
       <td style="border-left: 1px dotted rgb(153, 153, 153); vertical-align: top;">
-      <div id="sidesections" style="width: 350px; position: relative;"><!-- HELP SECTIONS -->
-      <div id="help-instructions" style="visibility: visible; width:350px; overflow: scroll; height: 450px; position: absolute; left: 0px; top: 0px;">
+      <div id="sidesections" style="width: 400px; position: relative;"><!-- HELP SECTIONS -->
+      <div id="help-instructions" style="visibility: visible; width: 400px; overflow: scroll; height: 450px; position: absolute; left: 0px; top: 0px;">
       <p align="center"><strong>Instructions</strong>
       </p>
       <b>To Edit a Share:</b><br>
@@ -545,7 +545,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 
       </div>
 #for $setting in $help_list
-	<div id="help-$setting" style="visibility: hidden; width: 350px; overflow: scroll; height: 450px; position: absolute; left: 0px; top: 0px;">
+	<div id="help-$setting" style="visibility: hidden; width: 400px; overflow: scroll; height: 450px; position: absolute; left: 0px; top: 0px;">
 	      <p align="center"><strong>$setting</strong></p>
 	      #for $line in $help_list[$setting]
 	          <strong>$(line.split(':',1)[0]):</strong>$(line.split(':',1)[1])</p>
