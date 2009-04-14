@@ -200,13 +200,13 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 <tr>
 #end if
 <td>
+        $key :</td><td><input size="20" id="Server.$key" name="Server.$key"
 #if $key in $server_data
-        $key :</td><td><input size="20" id="Server.$key" name="Server.$key" value="$server_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-
+        value="$server_data[$key]"
 #else
-        $key :</td><td><input size="20" id="Server.$key" name="Server.$key" value="" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-
+        value=""
 #end if
+        onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 </td></tr>
 #end for
 <tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr>        
@@ -255,13 +255,13 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 <tr>
 #end if
 <td>
+        $key :</td><td><input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key"
 #if $key in $hd_tivos_data
-        $key :</td><td><input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key" value="$hd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-
+        value="$hd_tivos_data[$key]"
 #else
-        $key :</td><td><input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key" value="" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-
+        value=""
 #end if
+        onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 </td></tr>
 #end for
 <tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr>        
@@ -310,13 +310,13 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 <tr>
 #end if
 <td>
+        $key :</td><td><input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key"
 #if $key in $sd_tivos_data
-        $key :</td><td><input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key" value="$sd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-
+        value="$sd_tivos_data[$key]"
 #else
-        $key :</td><td><input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key" value="" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-
+        value=""
 #end if
+        onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
 </td></tr>
 #end for
 <tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr>        
@@ -370,13 +370,14 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 		#else
 			<tr>
 		#end if
+			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key"
 		#if $key in $data
-			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td>
+			value="$data[$key]"
 		#else
-			<td>$key : </td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key" value="" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td>
+			value=""
 		#end if
+			onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+			</td>
 		</tr>
 	#end for
 
@@ -430,13 +431,14 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 		#else
 			<tr>
 		#end if
+			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key"
 		#if $key in $data
-			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td>
+			value="$data[$key]"
 		#else
-			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key" value="" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td>
+			value=""
 		#end if
+			onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
+			</td>
 		</tr>
 	#end for
 
