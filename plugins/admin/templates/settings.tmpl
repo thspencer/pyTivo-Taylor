@@ -144,6 +144,26 @@ function saveNotify()
 </head>
 <body style="background-color: rgb(250, 250, 250);">
 
+#def row($i, $key, $section, $source)
+    #if $i%2
+        <tr style="background-color: rgb(240, 240, 240);">
+    #else
+        <tr>
+    #end if
+    <td>$key :</td>
+    <td>
+    <input size="20" id="$section.$key" name="$section.$key"
+    #if $key in $source
+        value="$source[$key]"
+    #else
+        value=""
+    #end if
+     onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');
+     return true;" type="text">
+    </td>
+    </tr>
+#end def
+
 <p align="center"><font size="6">pyTivo Web
 Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-');">help</a></p>
 <center>
@@ -194,34 +214,14 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #set $i = 0
 #for $key in $server_known
 #set $i += 1
-#if $i%2
-<tr style="background-color: rgb(240, 240, 240);">
-#else
-<tr>
-#end if
-<td>
-        $key :</td><td><input size="20" id="Server.$key" name="Server.$key"
-#if $key in $server_data
-        value="$server_data[$key]"
-#else
-        value=""
-#end if
-        onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-</td></tr>
+$row($i, $key, 'Server', $server_data)
 #end for
 <tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr>        
 #set $i = 0
 #for $key in $server_data 
 	#if not $key in $server_known
 		#set $i += 1
-		#if $i%2
-			<tr style="background-color: rgb(240, 240, 240);">
-		#else
-			<tr>
-		#end if
-		<td>         $key :</td><td>
-	        <input size="20" id="Server.$key" name="Server.$key" value="$server_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-		</td></tr>
+                $row($i, $key, 'Server', $server_data)
 	#end if 
 #end for 
 	</table>
@@ -249,34 +249,14 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #set $i = 0
 #for $key in $hd_tivos_known
 #set $i += 1
-#if $i%2
-<tr style="background-color: rgb(240, 240, 240);">
-#else
-<tr>
-#end if
-<td>
-        $key :</td><td><input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key"
-#if $key in $hd_tivos_data
-        value="$hd_tivos_data[$key]"
-#else
-        value=""
-#end if
-        onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-</td></tr>
+$row($i, $key, '_tivo_HD', $hd_tivos_data)
 #end for
 <tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr>        
 #set $i = 0
 #for $key in $hd_tivos_data 
 	#if not $key in $hd_tivos_known
 		#set $i += 1
-		#if $i%2
-			<tr style="background-color: rgb(240, 240, 240);">
-		#else
-			<tr>
-		#end if
-		<td>         $key :</td><td>
-	        <input size="20" id="_tivo_HD.$key" name="_tivo_HD.$key" value="$hd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-		</td></tr>
+                $row($i, $key, '_tivo_HD', $hd_tivos_data)
 	#end if 
 #end for 
 	</table>
@@ -304,34 +284,14 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 #set $i = 0
 #for $key in $sd_tivos_known
 #set $i += 1
-#if $i%2
-<tr style="background-color: rgb(240, 240, 240);">
-#else
-<tr>
-#end if
-<td>
-        $key :</td><td><input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key"
-#if $key in $sd_tivos_data
-        value="$sd_tivos_data[$key]"
-#else
-        value=""
-#end if
-        onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-</td></tr>
+$row($i, $key, '_tivo_SD', $sd_tivos_data)
 #end for
 <tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr>        
 #set $i = 0
 #for $key in $sd_tivos_data 
 	#if not $key in $sd_tivos_known
 		#set $i += 1
-		#if $i%2
-			<tr style="background-color: rgb(240, 240, 240);">
-		#else
-			<tr>
-		#end if
-		<td>         $key :</td><td>
-	        <input size="20" id="_tivo_SD.$key" name="_tivo_SD.$key" value="$sd_tivos_data[$key]" onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-		</td></tr>
+                $row($i, $key, '_tivo_SD', $sd_tivos_data)
 	#end if 
 #end for 
 	</table>
@@ -365,20 +325,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	#set $i = 0
 	#for $key in $shares_known
 		#set $i += 1
-		#if $i%2
-			<tr style="background-color: rgb(240, 240, 240);">
-		#else
-			<tr>
-		#end if
-			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key"
-		#if $key in $data
-			value="$data[$key]"
-		#else
-			value=""
-		#end if
-			onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td>
-		</tr>
+                $row($i, $key, $section_number, $data)
 	#end for
 
 	<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr> 
@@ -386,14 +333,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	#for $key in $data 
 		#if not $key in $shares_known
 			#set $i += 1
-			#if $i%2
-				<tr style="background-color: rgb(240, 240, 240);">
-			#else
-				<tr>
-			#end if
-			<td> $key : </td><td>
-			<input size="20" onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td></tr>
+                        $row($i, $key, $section_number, $data)
 		#end if 
 	#end for
 	</table>
@@ -426,20 +366,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	#set $i = 0
 	#for $key in $tivos_known
 		#set $i += 1
-		#if $i%2
-			<tr style="background-color: rgb(240, 240, 240);">
-		#else
-			<tr>
-		#end if
-			<td>$key :</td><td><input onChange="saveNotify();" size="20" id="$section_number.$key" name="$section_number.$key"
-		#if $key in $data
-			value="$data[$key]"
-		#else
-			value=""
-		#end if
-			onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td>
-		</tr>
+                $row($i, $key, $section_number, $data)
 	#end for
 
 	<tr><td colspan="2" align="center" style="border-bottom: 1px solid rgb(153, 153, 153);">User Defined Settings:</td></tr> 
@@ -447,14 +374,7 @@ Configuration</font> <a href="javascript:switchDiv('help-instructions', 'help-')
 	#for $key in $data 
 		#if not $key in $tivos_known
 			#set $i += 1
-			#if $i%2
-				<tr style="background-color: rgb(240, 240, 240);">
-			#else
-				<tr>
-			#end if
-			<td> $key :</td><td> 
-			<input size="20" onChange="saveNotify();" id="$section_number.$key" name="$section_number.$key" value="$data[$key]" onfocus="switchDiv('help-$key', 'help-');return true;" type="text">
-			</td></tr>
+                        $row($i, $key, $section_number, $data)
 		#end if 
 	#end for
 	</table>
