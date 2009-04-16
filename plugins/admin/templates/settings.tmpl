@@ -142,11 +142,11 @@ function saveNotify()
 
 </script>
 </head>
-<body style="background-color: rgb(250, 250, 250);">
+<body style="background-color: rgb(250, 250, 250)">
 
 #def row($i, $key, $section, $source)
     #if $i%2
-        <tr style="background-color: rgb(240, 240, 240);">
+        <tr style="background-color: rgb(240, 240, 240)">
     #else
         <tr>
     #end if
@@ -218,18 +218,16 @@ function saveNotify()
     </div>
 #end def
 
-#set $section_size = 'width: 200px; height: 450px'
-#set $settings_size = 'width: 350px; height: 450px; overflow: auto'
-#set $help_size = 'width: 350px; height: 450px; overflow: auto'
+#set $section_size = 'width: 200px; height: 100%'
+#set $settings_size = 'width: 350px; height: 100%; overflow: auto'
+#set $help_size = 'width: 350px; height: 100%; overflow: auto'
 
 <p align="center"><font size="6">pyTivo Web Configuration</font>
 <a href="javascript:switchDiv('help-Instructions', 'help-');">help</a></p>
 <center>
-<table style="border: 1px solid rgb(220, 220, 220);
+<table style="border: 1px solid rgb(220, 220, 220); height: 85%;
  background-color: rgb(255, 255, 255); text-align: left; margin-left: auto;
  margin-right: auto;" border="0" cellpadding="0" cellspacing="4">
-
-  <tbody>
 
     <tr>
 
@@ -382,7 +380,6 @@ function saveNotify()
 
     </tr>
 
-  </tbody>
 </table>
 </center>
 </body>
