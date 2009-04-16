@@ -206,14 +206,12 @@ function saveNotify()
     </tr>
     <tr><td>Setting Name:</td><td>Setting Value:</td></tr>
     <tr>
-    <td>
-    <input size="16" type="text" onChange="saveNotify();"
-     id="$(section).new_settting" name="$(section).new__setting" value="">
-    </td>
-    <td>
-    <input size="16" type="text" onChange="saveNotify();"
-     id="$(section).new_value" name="$(section).new__value" value="">
-    </td>
+    #for $x in ('setting', 'value')
+        <td>
+        <input size="16" type="text" onChange="saveNotify();"
+         id="$(section).new_$x" name="$(section).new__$x" value="">
+        </td>
+    #end for
     </tr>
     </table>
     </div>
