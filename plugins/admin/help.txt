@@ -26,6 +26,38 @@
 #
 ######################################################################
 
+Instructions
+
+To Edit a Share: Select the share in the left hand menu.
+To Delete a Share: Select the share in the left hand menu and click 
+delete.
+To Add a Share/Tivo/Section: Click the "Add Section" button.  Then 
+provide the name of the share or TiVo. You must save your changes before 
+you can edit settings in the new share.
+To Add a Setting: Select your share first.  If the setting is a known 
+setting simply add the value to the appropriate setting. If the setting 
+is not listed you can add a "User Defined Setting".  Simple click add 
+setting and provide the name and value of this new setting.
+To Delete a Setting: Delete the value of the setting so that it is 
+blank.  If this is a known share the name will remain after a save. If 
+the setting is a user defined setting the name will be deleted after the 
+save.
+Save Settings: Clicking Save Settings will write your changes to the 
+pyTivo.conf file. These settings will not have an effect on your pyTivo 
+server until it is Soft Reset or restarted.
+Soft Reset: Soft Reset allows your new settings to take effect without 
+manually restarting the TiVo.  The Soft Reset will cause a re-read of 
+the pyTivo.conf file so your changes must be saved to the file before 
+the reset.
+Note: The only setting that will not take effect until a hard restart is 
+the Port setting.  Changing the Port setting requires a full restart.
+
+Add a New Section
+
+Add the name of a new section: If you want to add a TiVo section, 
+remember it must start with "_tivo_". You must save your settings before 
+the new section will be editable.
+
 port
 
 Default Setting: None, must be entered. Distributed conf file uses 9032
