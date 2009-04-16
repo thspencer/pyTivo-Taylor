@@ -357,17 +357,22 @@ function saveNotify()
        vertical-align: top;">
       <div id="sidesections" style="width: 400px; position: relative;">
       <!-- HELP SECTIONS -->
-#for $setting in $help_list
-	<div id="help-$setting" style="visibility: hidden; width: 400px;
-         overflow: scroll; height: 450px; position: absolute; left: 0px; 
-         top: 0px;">
-	      <p align="center"><strong>$setting</strong></p>
-	      #for $line in $help_list[$setting]
-	          <p><strong>$(line.split(':',1)[0]):</strong>
-                  $(line.split(':',1)[1])</p>
-	      #end for
-	</div>
-#end for
+      #for $setting in $help_list
+          #if $setting == 'Instructions'
+              #set $vis = 'visible'
+          #else
+              #set $vis = 'hidden'
+          #end if
+          <div id="help-$setting" style="visibility: $vis; width: 400px;
+           overflow: scroll; height: 450px; position: absolute; left: 0px; 
+           top: 0px;">
+          <p align="center"><strong>$setting</strong></p>
+          #for $line in $help_list[$setting]
+              <p><strong>$(line.split(':', 1)[0]):</strong>
+               $(line.split(':', 1)[1])</p>
+          #end for
+          </div>
+      #end for
       <!-- END HELP SECTIONS -->
       </div>
 
