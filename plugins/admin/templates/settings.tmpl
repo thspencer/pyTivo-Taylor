@@ -218,6 +218,10 @@ function saveNotify()
     </div>
 #end def
 
+#set $section_size = 'width: 200px; height: 450px'
+#set $settings_size = 'width: 350px; height: 450px; overflow: auto'
+#set $help_size = 'width: 350px; height: 450px; overflow: auto'
+
 <p align="center"><font size="6">pyTivo Web Configuration</font>
 <a href="javascript:switchDiv('help-Instructions', 'help-');">help</a></p>
 <center>
@@ -232,7 +236,7 @@ function saveNotify()
       <td style="border-right: 1px dotted rgb(153, 153, 153); 
        vertical-align: top;">
       <div id="leftframe" style="position: relative; text-align: center; 
-       width: 200px;">
+       $section_size">
       <form name="select_section">Sections
         <select name="section" size="7" 
          onclick="switchDiv(options[selectedIndex].value, 'set-');
@@ -265,8 +269,7 @@ function saveNotify()
 
       <td style="vertical-align: top;">
 
-      <div id="settings" style="width: 350px; overflow: scroll;
-       height: 450px; position: relative;">
+      <div id="settings" style="$settings_size; position: relative;">
 
       <form name="config" method="POST" action="TiVoConnect" 
        onsubmit="fillBlank(); showData(this);">
@@ -274,22 +277,22 @@ function saveNotify()
       <input type="hidden" name="Command" value="UpdateSettings">
       <input type="hidden" name="Container" value="$container">
 
-<div id="set-server" style="width: 330px; text-align: center;
- position: absolute; left: 0px; top: 0px; visibility: hidden;">
+<div id="set-server" style="$settings_size; text-align: center;
+ position: absolute; left: 0px; top: 0px; visibility: hidden">
 	<b>Global Server Settings</b><br>
         $rows('Server', $server_data, $server_known)
         $add_setting('server', 'Server')
 </div>
 
-<div id="set-hd_tivos" style="width: 330px; text-align: center;
- position: absolute; left: 0px; top: 0px; visibility: hidden;">
+<div id="set-hd_tivos" style="$settings_size; text-align: center;
+ position: absolute; left: 0px; top: 0px; visibility: hidden">
 	<b>HD TiVo Settings</b><br>
         $rows('_tivo_HD', $hd_tivos_data, $hd_tivos_known)
         $add_setting('hd_tivos', '_tivo_HD')
 </div>
 
-<div id="set-sd_tivos" style="width: 330px; text-align: center;
- position: absolute; left: 0px; top: 0px; visibility: hidden;">
+<div id="set-sd_tivos" style="$settings_size; text-align: center;
+ position: absolute; left: 0px; top: 0px; visibility: hidden">
 	<b>SD TiVo Settings</b><br>
         $rows('_tivo_SD', $sd_tivos_data, $sd_tivos_known)
         $add_setting('sd_tivos', '_tivo_SD')
@@ -303,7 +306,7 @@ function saveNotify()
 	<input type="hidden" name="$name" id="$name" value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
 	<div id="set-$name" style="text-align: center; position: absolute;
-         left: 0px; top: 0px; visibility: hidden;">
+         $settings_size; left: 0px; top: 0px; visibility: hidden">
 	[<input size="20" onChange="saveNotify();" id="$section_number" 
          name="$section_number" value="$name">]<br>
         $rows($section_number, $data, $shares_known)
@@ -317,7 +320,7 @@ function saveNotify()
 	<input type="hidden" name="$name" id="$name" value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
 	<div id="set-$name" style="text-align: center; position: absolute;
-         left: 0px; top: 0px; visibility: hidden;">
+         $settings_size; left: 0px; top: 0px; visibility: hidden">
 	[<input size="20" onChange="saveNotify();" id="$section_number" 
          name="$section_number" value="$name">]<br>
         $rows($section_number, $data, $tivos_known)
@@ -325,7 +328,7 @@ function saveNotify()
 	</div>
 #end for
 <div id="set-add" style="text-align: center;position: absolute; left: 0px;
- top: 0px; visibility: hidden;">
+ top: 0px; visibility: hidden; $settings_size">
 	Add a New Section
 	<hr>
 	<table>
@@ -339,7 +342,7 @@ function saveNotify()
         you click <b>Save Changes</b>.
 </div>
 <div id="set-delete" style="text-align: center; position: absolute;
- left: 0px; top: 0px; visibility: hidden;">
+ left: 0px; top: 0px; visibility: hidden; $settings_size">
 	Delete a Section
 	<hr>
 	<br>
@@ -355,7 +358,7 @@ function saveNotify()
 
       <td style="border-left: 1px dotted rgb(153, 153, 153);
        vertical-align: top;">
-      <div id="sidesections" style="width: 350px; position: relative;">
+      <div id="sidesections" style="$help_size; position: relative;">
       <!-- HELP SECTIONS -->
       #for $setting in $help_list
           #if $setting == 'Instructions'
@@ -363,9 +366,8 @@ function saveNotify()
           #else
               #set $vis = 'hidden'
           #end if
-          <div id="help-$setting" style="visibility: $vis; width: 350px;
-           overflow: scroll; height: 450px; position: absolute; left: 0px; 
-           top: 0px;">
+          <div id="help-$setting" style="visibility: $vis; $help_size;
+           position: absolute; left: 0px; top: 0px;">
           <p align="center"><strong>$setting</strong></p>
           #for $line in $help_list[$setting]
               <p><strong>$(line.split(':', 1)[0]):</strong>
