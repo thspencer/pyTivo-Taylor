@@ -294,7 +294,7 @@ class Video(Plugin):
         handler.wfile.write(XSL_TEMPLATE)
 
     def Push(self, handler, query):
-        f = unquote(query['File'][0])
+        f = query['File'][0]
 
         tsn = query['tsn'][0]
         for key in handler.tivo_names:
