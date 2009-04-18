@@ -12,7 +12,7 @@ from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
 import config
-from plugin import GetPlugin
+from plugin import GetPlugin, EncodeUnicode
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -179,7 +179,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             except Exception, msg:
                 self.server.logger.error(section + ' - ' + msg)
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
-                                       'root_container.tmpl'))
+                                       'root_container.tmpl'),
+                     filter=EncodeUnicode)
         t.containers = tsncontainers
         t.hostname = socket.gethostname()
         t.escape = escape

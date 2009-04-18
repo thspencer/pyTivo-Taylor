@@ -15,7 +15,7 @@ from Cheetah.Template import Template
 import buildhelp
 import config
 import logging
-from plugin import Plugin
+from plugin import EncodeUnicode, Plugin
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -125,7 +125,7 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        t = Template(SETTINGS_TEMPLATE)
+        t = Template(SETTINGS_TEMPLATE, filter=EncodeUnicode)
         t.container = cname
         t.quote = quote
         t.server_data = dict(config.config.items('Server', raw=True))
@@ -324,7 +324,7 @@ class Admin(Plugin):
 
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
-        t = Template(NPL_TEMPLATE)
+        t = Template(NPL_TEMPLATE, filter=EncodeUnicode)
         t.quote = quote
         t.folder = folder
         t.status = status
@@ -343,9 +343,9 @@ class Admin(Plugin):
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
         handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html; charset=UTF-8')
+        handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
-        handler.wfile.write(unicode(t).encode('utf-8'))
+        handler.wfile.write(t)
 
     def get_tivo_file(self, url, mak, tivoIP, outfile):
         # global status
