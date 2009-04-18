@@ -40,9 +40,8 @@ except ImportError:
     print 'Photo Plugin Error: The Python Imaging Library is not installed'
 
 from Cheetah.Template import Template
-from Cheetah.Filters import Filter
 from lrucache import LRUCache
-from plugin import Plugin, quote, unquote
+from plugin import EncodeUnicode, Plugin, quote, unquote
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -60,18 +59,6 @@ exif_orient_m = \
 # Preload the template
 tname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
 PHOTO_TEMPLATE = file(tname, 'rb').read()
-
-class EncodeUnicode(Filter):
-    def filter(self, val, **kw):
-        """Encode Unicode strings, by default in UTF-8"""
-
-        encoding = kw.get('encoding', 'utf8')
-                            
-        if type(val) == type(u''):
-            filtered = val.encode(encoding)
-        else:
-            filtered = str(val)
-        return filtered
 
 class Photo(Plugin):
     

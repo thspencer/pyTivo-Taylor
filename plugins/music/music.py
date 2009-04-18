@@ -15,10 +15,9 @@ import mutagen
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 from Cheetah.Template import Template
-from Cheetah.Filters import Filter
 from lrucache import LRUCache
 import config
-from plugin import Plugin, quote, unquote
+from plugin import EncodeUnicode, Plugin, quote, unquote
 from plugins.video.transcode import kill
 
 SCRIPTDIR = os.path.dirname(__file__)
@@ -79,18 +78,6 @@ class FileData:
         self.isplay = os.path.splitext(name)[1].lower() in PLAYLISTS
         self.title = ''
         self.duration = 0
-
-class EncodeUnicode(Filter):
-    def filter(self, val, **kw):
-        """Encode Unicode strings, by default in UTF-8"""
-
-        encoding = kw.get('encoding', 'utf8')
-                            
-        if type(val) == type(u''):
-            filtered = val.encode(encoding)
-        else:
-            filtered = str(val)
-        return filtered
 
 class Music(Plugin):
 

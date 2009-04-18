@@ -5,6 +5,8 @@ import threading
 import urllib
 from urlparse import urlparse
 
+from Cheetah.Filters import Filter
+
 if os.path.sep == '/':
     quote = urllib.quote
     unquote = urllib.unquote_plus
@@ -25,6 +27,18 @@ def GetPlugin(name):
         print 'Error no', name, 'plugin exists. Check the type ' \
         'setting for your share.'
         return Error
+
+class EncodeUnicode(Filter):
+    def filter(self, val, **kw):
+        """Encode Unicode strings, by default in UTF-8"""
+
+        encoding = kw.get('encoding', 'utf8')
+                            
+        if type(val) == type(u''):
+            filtered = val.encode(encoding)
+        else:
+            filtered = str(val)
+        return filtered
 
 class Plugin(object):
 
