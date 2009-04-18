@@ -264,7 +264,7 @@ else:
             else:
                 if not type(v) in (str, unicode):
                     v = str(v)
-                v = unicode(v, 'utf-8').encode('utf-8')
+                v = v.encode('utf-8')
                 output.append( chr(1) )
                 output.append( varint( len(v) ) )
                 output.append( v )
