@@ -315,9 +315,9 @@ class Video(Plugin):
                 ip = self.readip()
                 baseurl = 'http://%s:%s' % (ip, port)
  
-        path = self.get_local_path(handler, query)
+        path = self.get_local_base_path(handler, query)
 
-        for f in query['File']:
+        for f in query.get('File', []):
             file_path = path + f
 
             file_info = VideoDetails()
