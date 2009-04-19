@@ -4,6 +4,7 @@
   <xsl:variable name="tivos" select="Tivos"/>
   <html>
    <body style="background-color: rgb(250, 250, 250);">
+   <form action="/TiVoConnect" method="POST">
     <p align="center"><font size="6">
     <xsl:value-of select="Details/Title"/>
     </font></p>
@@ -19,6 +20,7 @@
        </xsl:if>
        <xsl:choose>
         <xsl:when test="Details/ContentType = 'x-container/folder'">
+          <td/>
           <td width="100%">
            <a>
             <xsl:attribute name="href">
@@ -30,6 +32,13 @@
           <td><xsl:value-of select="Details/TotalItems"/> Items</td>
         </xsl:when>
         <xsl:otherwise>
+          <td>
+           <input type="checkbox" name="File">
+            <xsl:attribute name="value">
+             <xsl:value-of select="Links/Push/File"/>
+            </xsl:attribute>
+           </input>
+          </td>
           <td width="100%">
            <b>
            <xsl:value-of select="Details/Title"/>
@@ -44,36 +53,32 @@
             <small><xsl:value-of select="Details/Description"/></small>
            </xsl:if>
           </td>
-          <td><form action="/TiVoConnect">
-           <input type="hidden" name="Command" value="Push"/>
-           <input type="hidden" name="Container">
-            <xsl:attribute name="value">
-             <xsl:value-of select="Links/Push/Container"/>
-            </xsl:attribute>
-           </input>
-           <input type="hidden" name="File">
-            <xsl:attribute name="value">
-             <xsl:value-of select="Links/Push/File"/>
-            </xsl:attribute>
-           </input>
-           <select name="tsn">
-            <xsl:for-each select="/TiVoContainer/Tivos/Tivo">
-             <option>
-              <xsl:attribute name="value">
-               <xsl:value-of select="."/>
-              </xsl:attribute>
-              <xsl:value-of select="."/>
-             </option>
-            </xsl:for-each>
-           </select>
-           <br/>
-           <input value="Send to TiVo" type="submit"/>
-          </form></td>
+          <td/>
         </xsl:otherwise>
        </xsl:choose>
-       </tr> 
+       </tr>
       </xsl:for-each>
     </table>
+    <p>
+      <input type="hidden" name="Command" value="Push"/>
+      <input type="hidden" name="Container">
+       <xsl:attribute name="value">
+        <xsl:value-of select="/TiVoContainer/Details/Title"/>
+       </xsl:attribute>
+      </input>
+      <select name="tsn">
+       <xsl:for-each select="/TiVoContainer/Tivos/Tivo">
+        <option>
+         <xsl:attribute name="value">
+          <xsl:value-of select="."/>
+         </xsl:attribute>
+         <xsl:value-of select="."/>
+        </option>
+       </xsl:for-each>
+      </select>
+      <input value="Send to TiVo" type="submit"/>
+    </p>
+   </form>
    </body>
   </html>
  </xsl:template>

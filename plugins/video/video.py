@@ -294,29 +294,11 @@ class Video(Plugin):
         handler.wfile.write(XSL_TEMPLATE)
 
     def Push(self, handler, query):
-        f = query['File'][0]
-
         tsn = query['tsn'][0]
         for key in handler.tivo_names:
             if handler.tivo_names[key] == tsn:
                 tsn = key
                 break
-
-        path = self.get_local_path(handler, query)
-        file_path = path + f
-
-        file_info = VideoDetails()
-        file_info['valid'] = transcode.supported_format(file_path)
-
-        mime = ''
-        if config.isHDtivo(tsn):
-            for m in ['video/mp4', 'video/bif']:
-                if transcode.tivo_compatible(file_path, tsn, m)[0]:
-                    mime = m
-                    break
-
-        if file_info['valid']:
-            file_info.update(self.metadata_full(file_path, tsn, mime))
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('tivo.com', 123))
@@ -333,38 +315,56 @@ class Video(Plugin):
                 ip = self.readip()
                 baseurl = 'http://%s:%s' % (ip, port)
  
-        url = baseurl + '/%s%s' % (container, quote(f))
+        path = self.get_local_path(handler, query)
 
-        title = file_info['seriesTitle']
-        if not title:
-            title = file_info['title']
+        for f in query['File']:
+            file_path = path + f
 
-        source = file_info['seriesId']
-        if not source:
-            source = title
+            file_info = VideoDetails()
+            file_info['valid'] = transcode.supported_format(file_path)
 
-        subtitle = file_info['episodeTitle']
-        if (not subtitle and file_info['isEpisode'] != 'false' and 
-            file_info['seriesTitle']):
-            subtitle = file_info['title']
-        logger.debug('Pushing ' + url)
-        try:
-            m = mind.getMind(tsn)
-            m.pushVideo(
-                tsn = tsn,
-                url = url,
-                description = file_info['description'],
-                duration = file_info['duration'] / 1000,
-                size = file_info['size'],
-                title = title,
-                subtitle = subtitle,
-                source = source,
-                mime = mime)
-        except Exception, e:
-            handler.send_response(500)
-            handler.end_headers()
-            handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
-            raise
+            mime = ''
+            if config.isHDtivo(tsn):
+                for m in ['video/mp4', 'video/bif']:
+                    if transcode.tivo_compatible(file_path, tsn, m)[0]:
+                        mime = m
+                        break
+
+            if file_info['valid']:
+                file_info.update(self.metadata_full(file_path, tsn, mime))
+
+            url = baseurl + '/%s%s' % (container, quote(f))
+
+            title = file_info['seriesTitle']
+            if not title:
+                title = file_info['title']
+
+            source = file_info['seriesId']
+            if not source:
+                source = title
+
+            subtitle = file_info['episodeTitle']
+            if (not subtitle and file_info['isEpisode'] != 'false' and 
+                file_info['seriesTitle']):
+                subtitle = file_info['title']
+            logger.debug('Pushing ' + url)
+            try:
+                m = mind.getMind(tsn)
+                m.pushVideo(
+                    tsn = tsn,
+                    url = url,
+                    description = file_info['description'],
+                    duration = file_info['duration'] / 1000,
+                    size = file_info['size'],
+                    title = title,
+                    subtitle = subtitle,
+                    source = source,
+                    mime = mime)
+            except Exception, e:
+                handler.send_response(500)
+                handler.end_headers()
+                handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
+                raise
 
         referer = handler.headers.getheader('Referer')
         handler.send_response(302)
