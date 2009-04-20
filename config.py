@@ -49,11 +49,14 @@ def write():
     config.write(f)
     f.close()
 
-def getGUID():
-    if config.has_option('Server', 'GUID'):
-        return config.get('Server', 'GUID')
+def get_server(name, default):
+    if config.has_option('Server', name):
+        return config.get('Server', name)
     else:
-        return guid
+        return default
+
+def getGUID():
+    return get_server('GUID', guid)
 
 def getTivoUsername(tsn=None):
     return get_tsn('tivo_username', tsn)
@@ -62,17 +65,10 @@ def getTivoPassword(tsn=None):
     return get_tsn('tivo_password', tsn)
 
 def getBeaconAddresses():
-    if config.has_option('Server', 'beacon'):
-        beacon_ips = config.get('Server', 'beacon')
-    else:
-        beacon_ips = '255.255.255.255'
-    return beacon_ips
+    return get_server('beacon', '255.255.255.255')
 
 def getPort():
-    if config.has_option('Server', 'Port'):
-        return config.get('Server', 'Port')
-    else:
-        return '9032'
+    return get_server('port', '9032')
 
 def get169Blacklist(tsn):  # tivo does not pad 16:9 video
     return tsn and not isHDtivo(tsn) and not get169Letterbox(tsn)
@@ -100,16 +96,10 @@ def get169Setting(tsn):
     return True
 
 def getAllowedClients():
-    if config.has_option('Server', 'allowedips'):
-        return config.get('Server', 'allowedips').split()
-    else:
-        return []
+    return get_server('allowedips', '').split()
 
 def getExternalUrl():
-    if config.has_option('Server', 'externalurl'):
-        return config.get('Server', 'externalurl')
-    else:
-        return None
+    return get_server('externalurl', None)
 
 def getIsExternal(tsn):
     tsnsect = '_tivo_' + tsn
