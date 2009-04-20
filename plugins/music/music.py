@@ -22,9 +22,6 @@ from plugins.video.transcode import kill
 
 SCRIPTDIR = os.path.dirname(__file__)
 
-def ffmpeg_path():
-    return config.get('Server', 'ffmpeg')
-
 CLASS_NAME = 'Music'
 
 PLAYLISTS = ('.m3u', '.m3u8', '.ram', '.pls', '.b4s', '.wpl', '.asx',
@@ -121,7 +118,7 @@ class Music(Plugin):
         if needs_transcode:
             if mswindows:
                 fname = fname.encode('iso8859-1')
-            cmd = [ffmpeg_path(), '-i', fname, '-ab', 
+            cmd = [config.ffmpeg_path(), '-i', fname, '-ab', 
                    '320k', '-ar', '44100', '-f', 'mp3', '-']
             if seek:
                 cmd[-1:] = ['-ss', '%.3f' % (seek / 1000.0), '-']
@@ -232,7 +229,7 @@ class Music(Plugin):
                 fname = unicode(f.name, 'utf-8')
                 if mswindows:
                     fname = fname.encode('iso8859-1')
-                cmd = [ffmpeg_path(), '-i', fname]
+                cmd = [config.ffmpeg_path(), '-i', fname]
                 ffmpeg = subprocess.Popen(cmd, stderr=subprocess.PIPE,
                                                stdout=subprocess.PIPE, 
                                                stdin=subprocess.PIPE)

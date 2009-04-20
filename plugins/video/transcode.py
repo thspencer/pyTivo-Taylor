@@ -20,9 +20,6 @@ info_cache = lrucache.LRUCache(1000)
 GOOD_MPEG_FPS = ['23.98', '24.00', '25.00', '29.97',
                  '30.00', '50.00', '59.94', '60.00']
 
-def ffmpeg_path():
-    return config.get('Server', 'ffmpeg')
-
 # XXX BIG HACK
 # subprocess is broken for me on windows so super hack
 def patchSubprocess():
@@ -74,7 +71,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
 
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
-    cmd = [ffmpeg_path(), '-i', inFile] + cmd_string.split()
+    cmd = [config.ffmpeg_path(), '-i', inFile] + cmd_string.split()
     logging.debug('transcoding to tivo model ' + tsn[:3] +
                   ' using ffmpeg command:')
     logging.debug(' '.join(cmd))
@@ -560,7 +557,7 @@ def video_info(inFile, cache=True):
         logger.debug('VALID, ends in .tivo. %s' % inFile)
         return vInfo
 
-    cmd = [ffmpeg_path(), '-i', inFile]
+    cmd = [config.ffmpeg_path(), '-i', inFile]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
     err_tmp = tempfile.TemporaryFile()
     ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
@@ -766,7 +763,7 @@ def video_info(inFile, cache=True):
 def audio_check(inFile, tsn):
     cmd_string = ('-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy ' +
                   select_audiolang(inFile, tsn) + ' -t 00:00:01 -f vob -')
-    cmd = [ffmpeg_path(), '-i', inFile] + cmd_string.split()
+    cmd = [config.ffmpeg_path(), '-i', inFile] + cmd_string.split()
     ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     fd, testname = tempfile.mkstemp()
     testfile = os.fdopen(fd, 'wb')

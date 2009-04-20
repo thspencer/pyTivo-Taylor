@@ -192,8 +192,8 @@ def getPixelAR(ref):
             pass
     return (False, 1.0)[ref]
 
-def get(section, key):
-    return config.get(section, key)
+def ffmpeg_path():
+    return config.get('Server', 'ffmpeg')
 
 def getFFmpegWait():
     if config.has_option('Server', 'ffmpeg_wait'):
