@@ -60,9 +60,9 @@ the new section will be editable.
 
 port
 
-Default Setting: None, must be entered. Distributed conf file uses 9032
+Default Setting: 9032
 Valid Entries: Valid port number
-Required: Yes, without a port setting in the conf file pyTivo will not start.
+Required: No
 Skill: Basic
 Description: The port which pyTivo uses to serve your files. Can be
 changed if it conflicts with another program.

@@ -69,7 +69,10 @@ def getBeaconAddresses():
     return beacon_ips
 
 def getPort():
-    return config.get('Server', 'Port')
+    if config.has_option('Server', 'Port'):
+        return config.get('Server', 'Port')
+    else:
+        return '9032'
 
 def get169Blacklist(tsn):  # tivo does not pad 16:9 video
     return tsn and not isHDtivo(tsn) and not get169Letterbox(tsn)
