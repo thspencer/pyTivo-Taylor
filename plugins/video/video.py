@@ -188,12 +188,11 @@ class Video(Plugin):
             ['SOURCE FILE: ', os.path.split(full_path)[1]]
         )
 
-        if not (full_path[-5:]).lower() == '.tivo':
-            if ((int(vInfo['vHeight']) >= 720 and
-                 config.getTivoHeight >= 720) or
-                (int(vInfo['vWidth']) >= 1280 and
-                 config.getTivoWidth >= 1280)):
-                metadata['showingBits'] = '4096'
+        if ((int(vInfo['vHeight']) >= 720 and
+             config.getTivoHeight >= 720) or
+            (int(vInfo['vWidth']) >= 1280 and
+             config.getTivoWidth >= 1280)):
+            metadata['showingBits'] = '4096'
 
         metadata.update(self.metadata_basic(full_path))
 
