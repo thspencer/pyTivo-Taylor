@@ -440,8 +440,8 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
                         break
             # HD Tivo detected, skipping remaining tests.
             break
-        
-        if not vInfo['vFps'] == '29.97':
+
+        if not vInfo['vFps'] in ['29.97', '59.94']:
             message = (False, '%s vFps, should be 29.97' % vInfo['vFps'])
             break
 
