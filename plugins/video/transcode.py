@@ -598,7 +598,7 @@ def video_info(inFile, cache=True):
         vInfo['Supported'] = False
         logger.debug('failed at vWidth/vHeight')
 
-    rezre = re.compile(r'.*Video: .+, (.+) (?:fps|tb).*')
+    rezre = re.compile(r'.*Video: .+, (.+) (?:fps|tb\(r\)|tbr).*')
     x = rezre.search(output)
     if x:
         vInfo['vFps'] = x.group(1)
