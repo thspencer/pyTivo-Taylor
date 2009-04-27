@@ -17,7 +17,7 @@ from lrucache import LRUCache
 import config
 import mind
 import transcode
-from plugin import Plugin, quote, unquote
+from plugin import EncodeUnicode, Plugin, quote, unquote
 
 logger = logging.getLogger('pyTivo.video.video')
 
@@ -250,7 +250,7 @@ class Video(Plugin):
 
             videos.append(video)
 
-        t = Template(CONTAINER_TEMPLATE)
+        t = Template(CONTAINER_TEMPLATE, filter=EncodeUnicode)
         t.container = cname
         t.name = subcname
         t.total = total
@@ -278,7 +278,7 @@ class Video(Plugin):
         if file_info['valid']:
             file_info.update(self.metadata_full(file_path, tsn))
 
-        t = Template(TVBUS_TEMPLATE)
+        t = Template(TVBUS_TEMPLATE, filter=EncodeUnicode)
         t.video = file_info
         t.escape = escape
         handler.send_response(200)

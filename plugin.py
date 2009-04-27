@@ -1,6 +1,7 @@
 import os
-import shutil
 import random
+import shutil
+import sys
 import threading
 import urllib
 from urlparse import urlparse
@@ -33,12 +34,18 @@ class EncodeUnicode(Filter):
         """Encode Unicode strings, by default in UTF-8"""
 
         encoding = kw.get('encoding', 'utf8')
-                            
-        if type(val) == type(u''):
-            filtered = val.encode(encoding)
-        else:
-            filtered = str(val)
-        return filtered
+
+        if type(val) == str:
+            try:
+                val = val.decode('utf8')
+            except:
+                if sys.platform == 'darwin':
+                    val = val.decode('macroman')
+                else:
+                    val = val.decode('iso8859-1')
+        elif type(val) != unicode:
+            val = str(val)
+        return val.encode(encoding)
 
 class Plugin(object):
 
