@@ -143,6 +143,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.wfile.write(VIDEO_FORMATS)
                 return
 
+            elif command == 'FlushServer':
+                # Does nothing -- included for completeness
+                self.send_response(200)
+                self.end_headers()
+                return
+
         # If we made it here it means we couldn't match the request to
         # anything.
         self.unsupported(query)
