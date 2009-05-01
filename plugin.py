@@ -200,13 +200,14 @@ class Plugin(object):
         def date_sort(x, y):
             return cmp(os.stat(y).st_mtime, os.stat(x).st_mtime)
 
-        if query.get('SortOrder', ['Normal'])[0] == 'Random':
+        sortby = query.get('SortOrder', ['Normal'])[0]
+        if sortby == 'Random':
             seed = query.get('RandomSeed', ['1'])[0]
             self.random_lock.acquire()
             random.seed(seed)
             random.shuffle(files)
             self.random_lock.release()
-        elif query.get('SortOrder', ['Normal'])[0] == '!CaptureDate':
+        elif sortby == '!CaptureDate':
             files.sort(date_sort)
         else:
             files.sort(dir_sort)
