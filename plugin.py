@@ -4,7 +4,6 @@ import shutil
 import sys
 import threading
 import urllib
-from urlparse import urlparse
 
 from Cheetah.Filters import Filter
 
@@ -13,7 +12,7 @@ if os.path.sep == '/':
     unquote = urllib.unquote_plus
 else:
     quote = lambda x: urllib.quote(x.replace(os.path.sep, '/'))
-    unquote = lambda x: urllib.unquote_plus(x).replace('/', os.path.sep)
+    unquote = lambda x: os.path.normpath(urllib.unquote_plus(x))
 
 class Error:
     CONTENT_TYPE = 'text/html'
@@ -64,12 +63,10 @@ class Plugin(object):
     def init(self):
         pass
 
-    def send_file(self, handler, container, name):
-        o = urlparse("http://fake.host" + handler.path)
-        path = unquote(o[2])
+    def send_file(self, handler, path, query):
         handler.send_response(200)
         handler.end_headers()
-        f = open(container['path'] + path[len(name) + 1:], 'rb')
+        f = open(path, 'rb')
         shutil.copyfileobj(f, handler.wfile)
         f.close()
 

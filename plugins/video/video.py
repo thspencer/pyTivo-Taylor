@@ -9,7 +9,6 @@ import urllib
 import zlib
 from UserDict import DictMixin
 from datetime import datetime, timedelta
-from urlparse import urlparse
 from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
@@ -17,7 +16,7 @@ from lrucache import LRUCache
 import config
 import mind
 import transcode
-from plugin import EncodeUnicode, Plugin, quote, unquote
+from plugin import EncodeUnicode, Plugin, quote
 
 logger = logging.getLogger('pyTivo.video.video')
 
@@ -55,17 +54,11 @@ class Video(Plugin):
         else:
             return transcode.supported_format(full_path)
 
-    def send_file(self, handler, container, name):
+    def send_file(self, handler, path, query):
         mime = 'video/mpeg'
 
-        try:
-            path, query = handler.path.split('?')
-        except ValueError:
-            path = handler.path
-        else:
-            opts = cgi.parse_qs(query)
-            if 'Format' in opts:
-                mime = opts['Format'][0]
+        if 'Format' in query:
+            mime = query['Format'][0]
 
         if path[-5:].lower() == '.tivo':
             mime = 'video/x-tivo-mpeg'
@@ -82,13 +75,10 @@ class Video(Plugin):
 
         tsn = handler.headers.getheader('tsn', '')
 
-        o = urlparse("http://fake.host" + handler.path)
-        path = unquote(o[2])
         handler.send_response(200)
         handler.send_header('Content-Type', mime)
         handler.end_headers()
-        transcode.output_video(container['path'] + path[len(name) + 1:],
-                               handler.wfile, tsn, mime)
+        transcode.output_video(path, handler.wfile, tsn, mime)
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']

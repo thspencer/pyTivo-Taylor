@@ -95,7 +95,7 @@ class Photo(Plugin):
     recurse_cache = LockedLRUCache(5)       # recursive directory lists
     dir_cache = LockedLRUCache(10)          # non-recursive lists
 
-    def send_file(self, handler, container, name):
+    def send_file(self, handler, path, query):
 
         def send_jpeg(data):
             handler.send_response(200)
@@ -105,17 +105,12 @@ class Photo(Plugin):
             handler.end_headers()
             handler.wfile.write(data)
 
-        path, query = handler.path.split('?')
-        infile = os.path.join(os.path.normpath(container['path']),
-                              unquote(path)[len(name) + 2:])
-        opts = cgi.parse_qs(query)
-
-        if 'Format' in opts and opts['Format'][0] != 'image/jpeg':
+        if 'Format' in query and query['Format'][0] != 'image/jpeg':
             handler.send_error(415)
             return
 
         try:
-            attrs = self.media_data_cache[infile]
+            attrs = self.media_data_cache[path]
         except:
             attrs = None
 
@@ -125,16 +120,16 @@ class Photo(Plugin):
         else:
             rot = 0
 
-        if 'Rotation' in opts:
-            rot = (rot - int(opts['Rotation'][0])) % 360
+        if 'Rotation' in query:
+            rot = (rot - int(query['Rotation'][0])) % 360
             if attrs:
                 attrs['rotation'] = rot
                 if 'thumb' in attrs:
                     del attrs['thumb']
 
         # Requested size
-        width = int(opts.get('Width', ['0'])[0])
-        height = int(opts.get('Height', ['0'])[0])
+        width = int(query.get('Width', ['0'])[0])
+        height = int(query.get('Height', ['0'])[0])
 
         # Return saved thumbnail?
         if attrs and 'thumb' in attrs and 0 < width < 100 and 0 < height < 100:
@@ -143,10 +138,10 @@ class Photo(Plugin):
 
         # Load
         try:
-            pic = Image.open(unicode(infile, 'utf-8'))
+            pic = Image.open(unicode(path, 'utf-8'))
         except Exception, msg:
             handler.server.logger.error('Could not open %s -- %s' %
-                                        (infile, msg))
+                                        (path, msg))
             handler.send_error(404)
             return
 
@@ -155,7 +150,7 @@ class Photo(Plugin):
             pic.draft('RGB', (width, height))
         except Exception, msg:
             handler.server.logger.error('Failed to set draft mode ' +
-                                        'for %s -- %s' % (infile, msg))
+                                        'for %s -- %s' % (path, msg))
             handler.send_error(404)
             return
 
@@ -204,7 +199,7 @@ class Photo(Plugin):
                 pic = pic.rotate(rot)
         except Exception, msg:
             handler.server.logger.error('Rotate failed on %s -- %s' %
-                                        (infile, msg))
+                                        (path, msg))
             handler.send_error(404)
             return
 
@@ -214,7 +209,7 @@ class Photo(Plugin):
                 pic = pic.convert()
         except Exception, msg:
             handler.server.logger.error('Palette conversion failed ' +
-                                        'on %s -- %s' % (infile, msg))
+                                        'on %s -- %s' % (path, msg))
             handler.send_error(404)
             return
 
@@ -225,8 +220,8 @@ class Photo(Plugin):
         if not height: height = oldh
 
         # Correct aspect ratio
-        if 'PixelShape' in opts:
-            pixw, pixh = opts['PixelShape'][0].split(':')
+        if 'PixelShape' in query:
+            pixw, pixh = query['PixelShape'][0].split(':')
             oldw *= int(pixh)
             oldh *= int(pixw)
 
@@ -242,7 +237,7 @@ class Photo(Plugin):
             pic = pic.resize((width, height), Image.ANTIALIAS)
         except Exception, msg:
             handler.server.logger.error('Resize failed on %s -- %s' %
-                                        (infile, msg))
+                                        (path, msg))
             handler.send_error(404)
             return
 
@@ -254,7 +249,7 @@ class Photo(Plugin):
             out.close()
         except Exception, msg:
             handler.server.logger.error('Encode failed on %s -- %s' %
-                                        (infile, msg))
+                                        (path, msg))
             handler.send_error(404)
             return
 

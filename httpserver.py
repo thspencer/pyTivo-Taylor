@@ -7,7 +7,6 @@ import re
 import socket
 import time
 from urllib import unquote_plus, quote, unquote
-from urlparse import urlparse
 from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
@@ -78,24 +77,29 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if not tsn in self.tivo_names or self.tivo_names[tsn] == tsn:
                 self.tivo_names[tsn] = self.server.beacon.get_name(ip)
 
-        basepath = unquote_plus(self.path).split('/')[1]
+        if '?' in self.path:
+            path, opts = self.path.split('?', 1)
+            query = cgi.parse_qs(opts)
+        else:
+            path = self.path
+            query = {}
 
-        ## Get File
-        for name, container in self.server.containers.items():
-            if basepath == name:
-                plugin = GetPlugin(container['type'])
-                plugin.send_file(self, container, name)
-                return
+        if path == '/TiVoConnect':
+            self.handle_query(query)
+        else:
+            ## Get File
+            path = unquote_plus(path)
+            basepath = path.split('/')[1]
+            for name, container in self.server.containers.items():
+                if basepath == name:
+                    path = os.path.join(os.path.normpath(container['path']),
+                                        os.path.normpath(path[len(name) + 2:]))
+                    plugin = GetPlugin(container['type'])
+                    plugin.send_file(self, path, query)
+                    return
 
-        ## Not a file not a TiVo command
-        if not self.path.startswith('/TiVoConnect'):
+            ## Not a file not a TiVo command
             self.infopage()
-            return
-
-        o = urlparse("http://fake.host" + self.path)
-        query = cgi.parse_qs(o[4])
-
-        self.handle_query(query)
 
     def do_POST(self):
         tsn = self.headers.getheader('TiVo_TCD_ID',

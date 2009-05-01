@@ -6,7 +6,6 @@ import threading
 import time
 import urllib
 import urllib2
-import urlparse
 import warnings
 
 try:
@@ -195,12 +194,8 @@ class WebVideo(Video):
 
         self.__logger.info('Done downloading %s to %s' % (url, file_path))
 
-    def send_file(self, handler, container, name):
-        Video.send_file(self, handler, container, name)
-
-        o = urlparse.urlparse("http://fake.host" + handler.path)
-        path = urllib.unquote(o[2])
-        file_path = container['path'] + path[len(name) + 1:]
-        if os.path.exists(file_path):
-            self.__logger.info('Deleting file %s' % file_path)
-            os.unlink(file_path)
+    def send_file(self, handler, path, query):
+        Video.send_file(self, handler, path, query)
+        if os.path.exists(path):
+            self.__logger.info('Deleting file %s' % path)
+            os.remove(path)

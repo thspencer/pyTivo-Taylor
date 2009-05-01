@@ -8,7 +8,6 @@ import subprocess
 import sys
 import time
 import urllib
-from urlparse import urlparse
 from xml.sax.saxutils import escape
 
 import mutagen
@@ -88,21 +87,11 @@ class Music(Plugin):
     recurse_cache = LRUCache(5)
     dir_cache = LRUCache(10)
 
-    def send_file(self, handler, container, name):
-        seek, duration = 0, 0
+    def send_file(self, handler, path, query):
+        seek = int(query.get('Seek', [0])[0])
+        duration = int(query.get('Duration', [0])[0])
 
-        try:
-            path, query = handler.path.split('?')
-        except ValueError:
-            path = handler.path
-        else:
-            opts = cgi.parse_qs(query)
-            seek = int(opts.get('Seek', [0])[0])
-            duration = int(opts.get('Duration', [0])[0])
-
-        fname = os.path.join(os.path.normpath(container['path']),
-                             unquote(path)[len(name) + 2:])
-        fname = unicode(fname, 'utf-8')
+        fname = unicode(path, 'utf-8')
 
         needs_transcode = (os.path.splitext(fname)[1].lower() in TRANSCODE
                            or seek or duration)
