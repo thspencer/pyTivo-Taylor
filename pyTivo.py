@@ -5,8 +5,8 @@ import os
 import sys
 
 import beacon
-import httpserver
 import config
+import httpserver
 from plugin import GetPlugin
 
 def exceptionLogger(*args):
