@@ -143,10 +143,7 @@ class WebVideo(Video):
 
             file_info.update(self.metadata_full(file_name, tsn, mime))
 
-            import socket
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(('tivo.com',123))
-            ip = s.getsockname()[0]
+            ip = config.get_ip()
             port = config.getPort()
 
             data['url'] = ('http://%s:%s' % (ip, port) +

@@ -2,7 +2,6 @@ import cgi
 import logging
 import os
 import re
-import socket
 import time
 import traceback
 import urllib
@@ -289,10 +288,8 @@ class Video(Plugin):
                 tsn = key
                 break
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('tivo.com', 123))
-        ip = s.getsockname()[0]
         container = quote(query['Container'][0].split('/')[0])
+        ip = config.get_ip()
         port = config.getPort()
 
         baseurl = 'http://%s:%s' % (ip, port)

@@ -5,12 +5,13 @@ import logging.config
 import os
 import re
 import random
+import socket
 import string
 import sys
 from ConfigParser import NoOptionError
 
 guid = ''.join([random.choice(string.letters) for i in range(10)])
-
+our_ip = ''
 config = ConfigParser.ConfigParser()
 
 p = os.path.dirname(__file__)
@@ -57,6 +58,14 @@ def get_server(name, default):
 
 def getGUID():
     return get_server('GUID', guid)
+
+def get_ip():
+    global our_ip
+    if not our_ip:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('4.2.2.1', 0))
+        our_ip = s.getsockname()[0]
+    return our_ip
 
 def getTivoUsername(tsn=None):
     return get_tsn('tivo_username', tsn)
