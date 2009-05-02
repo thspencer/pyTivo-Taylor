@@ -1,3 +1,4 @@
+import os
 import select
 import sys
 import win32event
@@ -17,9 +18,7 @@ class PyTivoService(win32serviceutil.ServiceFramework):
         self.stop_event = win32event.CreateEvent(None, 0, 0, None)
     
     def SvcDoRun(self): 
-       
-        import sys, os
-
+        config.init([])
         config.init_logging()
 
         p = os.path.dirname(__file__)
