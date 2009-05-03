@@ -15,54 +15,29 @@ function fillBlank()
     }
 }
 
+function divSet(div, mode)
+{
+    if (document.getElementById) {
+        div.style.visibility = mode;
+    } else {
+        if (document.layers) {  // Netscape 4
+            document.layers[div].display = mode;
+        } else {        // IE 4
+            document.all.hideshow.div.visibility = mode;
+        }
+    }
+}
+
 function switchDiv(pass, type)
 {
-    hideallids(type);
-    showDiv(pass);
-}
-
-function hideallids(type)
-{
-    //loop through the array and hide each element by id
+    //loop through the array and hide/show each element by id
     var divs = document.getElementsByTagName('div');
     for (var i = 0; i < divs.length; i++) {
-        if (divs[i].id.match(type)) {
-            hideDiv(divs[i].id);
-        }
-    }
-}
-
-function hideDiv(pass)
-{
-    var divs = document.getElementsByTagName('div');
-    for (i = 0; i < divs.length; i++) {
-        if (divs[i].id.match(pass)) {   //if they are 'see' divs
-            if (document.getElementById) {      // DOM3 = IE5, NS6
-                divs[i].style.visibility = "hidden";    // show/hide
-            } else {
-                if (document.layers) {  // Netscape 4
-                    document.layers[divs[i]].display = 'hidden';
-                } else {        // IE 4
-                    document.all.hideshow.divs[i].visibility = 'hidden';
-                }
-            }
-        }
-    }
-}
-
-function showDiv(pass)
-{
-    var divs = document.getElementsByTagName('div');
-    for (i = 0; i < divs.length; i++) {
         if (divs[i].id == pass) {
-            if (document.getElementById) {
-                divs[i].style.visibility = "";
-            } else {
-                if (document.layers) {  // Netscape 4
-                    document.layers[divs[i]].display = '';
-                } else {        // IE 4
-                    document.all.hideshow.divs[i].visibility = '';
-                }
+            divSet(divs[i], '')
+        } else {
+            if (divs[i].id.match(type)) {
+                divSet(divs[i], 'hidden')
             }
         }
     }
