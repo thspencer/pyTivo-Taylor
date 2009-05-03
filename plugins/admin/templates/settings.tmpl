@@ -33,10 +33,10 @@ function switchDiv(pass, type)
     //loop through the array and hide/show each element by id
     var divs = document.getElementsByTagName('div');
     for (var i = 0; i < divs.length; i++) {
-        if (divs[i].id == pass) {
-            divSet(divs[i], '')
-        } else {
-            if (divs[i].id.match(type)) {
+        if (divs[i].id.match(type)) {
+            if (divs[i].id == pass) {
+                divSet(divs[i], '')
+            } else {
                 divSet(divs[i], 'hidden')
             }
         }
