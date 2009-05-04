@@ -1,15 +1,34 @@
+import logging
 import re
 import struct
+import time
 from socket import *
 from threading import Timer
 
+import Zeroconf
+
 import config
+
+class ZCListener:
+    def __init__(self, names):
+        self.names = names
+
+    def removeService(self, server, type, name):
+        self.names.remove(name)
+
+    def addService(self, server, type, name):
+        self.names.append(name)
 
 class Beacon:
 
     UDPSock = socket(AF_INET, SOCK_DGRAM)
     UDPSock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
     services = []
+
+    def __init__(self):
+        logger = logging.getLogger('pyTivo.beacon')
+        logger.info('Scanning for TiVos...')
+        self.scan_zc()
 
     def add_service(self, service):
         self.services.append(service)
@@ -98,6 +117,29 @@ class Beacon:
             name = address
 
         return name
+
+    def scan_zc(self):
+        """ Look for TiVos using Zeroconf. """
+        VIDS = '_tivo-videos._tcp.local.'
+        names = []
+
+        # Get the names of servers offering TiVo videos
+        serv = Zeroconf.Zeroconf()
+        browser = Zeroconf.ServiceBrowser(serv, VIDS, ZCListener(names))
+
+        # Give them half a second to respond
+        time.sleep(0.5)
+
+        # Now get the addresses -- this is the slow part
+        for name in names:
+            info = serv.getServiceInfo(VIDS, name)
+            if 'TSN' in info.properties:
+                tsn = info.properties['TSN']
+                address = inet_ntoa(info.getAddress())
+                config.tivos[tsn] = address
+                config.tivo_names[tsn] = name.replace('.' + VIDS, '')
+
+        serv.close()
 
 if __name__ == '__main__':
     b = Beacon()
