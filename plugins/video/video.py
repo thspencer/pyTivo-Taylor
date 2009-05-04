@@ -249,8 +249,8 @@ class Video(Plugin):
         t.escape = escape
         t.crc = zlib.crc32
         t.guid = config.getGUID()
-        t.tivos = handler.tivos
-        t.tivo_names = handler.tivo_names
+        t.tivos = config.tivos
+        t.tivo_names = config.tivo_names
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/xml')
         handler.end_headers()
@@ -283,8 +283,8 @@ class Video(Plugin):
 
     def Push(self, handler, query):
         tsn = query['tsn'][0]
-        for key in handler.tivo_names:
-            if handler.tivo_names[key] == tsn:
+        for key in config.tivo_names:
+            if config.tivo_names[key] == tsn:
                 tsn = key
                 break
 

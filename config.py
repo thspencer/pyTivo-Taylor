@@ -18,9 +18,13 @@ p = os.path.dirname(__file__)
 config_files = ['/etc/pyTivo.conf', os.path.join(p, 'pyTivo.conf')]
 configs_found = []
 
+tivos = {}
+tivo_names = {}
+
 def init(argv):
     global config_files
     global configs_found
+    global tivo_names
 
     try:
         opts, _ = getopt.getopt(argv, 'c:e:', ['config=', 'extraconf='])
@@ -38,6 +42,14 @@ def init(argv):
         print ('ERROR: pyTivo.conf does not exist.\n' +
                'You must create this file before running pyTivo.')
         sys.exit(1)
+
+    for section in config.sections():
+        if section.startswith('_tivo_'):
+            tsn = section[6:]
+            if config.has_option(section, 'name'):
+                tivo_names[tsn] = config.get(section, 'name')
+            else:
+                tivo_names[tsn] = tsn
 
 def reset():
     global config
@@ -123,17 +135,6 @@ def getIsExternal(tsn):
 
 def isTsnInConfig(tsn):
     return ('_tivo_' + tsn) in config.sections()
-
-def getConfigTivoNames():
-    tivo_names = {}
-    for section in config.sections():
-        if section.startswith('_tivo_'):
-            tsn = section[6:]
-            if config.has_option(section, 'name'):
-                tivo_names[tsn] = config.get(section, 'name')
-            else:
-                tivo_names[tsn] = tsn
-    return tivo_names
 
 def getShares(tsn=''):
     shares = [(section, dict(config.items(section)))

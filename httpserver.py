@@ -51,13 +51,8 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         self.beacon = beacon
 
 class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    tivos = {}
-    tivo_names = {}
-
     def __init__(self, request, client_address, server):
         self.wbufsize = 0x10000
-        if not self.tivo_names:
-            self.tivo_names.update(config.getConfigTivoNames())
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
             client_address, server)
 
@@ -72,10 +67,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
         if tsn:
             ip = self.address_string()
-            self.tivos[tsn] = ip
+            config.tivos[tsn] = ip
 
-            if not tsn in self.tivo_names or self.tivo_names[tsn] == tsn:
-                self.tivo_names[tsn] = self.server.beacon.get_name(ip)
+            if not tsn in config.tivo_names or config.tivo_names[tsn] == tsn:
+                config.tivo_names[tsn] = self.server.beacon.get_name(ip)
 
         if '?' in self.path:
             path, opts = self.path.split('?', 1)
