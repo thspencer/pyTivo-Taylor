@@ -8,6 +8,9 @@ from threading import Timer
 import Zeroconf
 
 import config
+from plugin import GetPlugin
+
+SHARE_TEMPLATE = '/TiVoConnect?Command=QueryContainer&Container=%s'
 
 class ZCListener:
     def __init__(self, names):
@@ -19,6 +22,33 @@ class ZCListener:
     def addService(self, server, type, name):
         self.names.append(name)
 
+class ZCBroadcast:
+    def __init__(self):
+        self.share_names = []
+        self.share_info = []
+        self.rz = Zeroconf.Zeroconf()
+        address = inet_aton(config.get_ip())
+        port = int(config.getPort())
+        for section, settings in config.getShares():
+            ct = GetPlugin(settings['type']).CONTENT_TYPE
+            if ct.startswith('x-container/'):
+                print 'Registering:', section
+                self.share_names.append(section)
+                desc = {'path': SHARE_TEMPLATE % section,
+                        'platform': 'pc', 'protocol': 'http'}
+                tt = ct.split('/')[1]
+                info = Zeroconf.ServiceInfo('_%s._tcp.local.' % tt,
+                    '%s._%s._tcp.local.' % (section, tt),
+                    address, port, 0, 0, desc)
+                self.rz.registerService(info)
+                self.share_info.append(info)
+
+    def shutdown(self):
+        print 'Unregistering:', ' '.join(self.share_names)
+        for info in self.share_info:
+            self.rz.unregisterService(info)
+        self.rz.close()
+
 class Beacon:
 
     UDPSock = socket(AF_INET, SOCK_DGRAM)
@@ -27,6 +57,8 @@ class Beacon:
 
     def __init__(self):
         logger = logging.getLogger('pyTivo.beacon')
+        logger.info('Announcing shares...')
+        self.bd = ZCBroadcast()
         logger.info('Scanning for TiVos...')
         self.scan_zc()
 
@@ -69,6 +101,7 @@ class Beacon:
 
     def stop(self):
         self.timer.cancel()
+        self.bd.shutdown()
 
     def listen(self):
         """ For the direct-connect, TCP-style beacon """
