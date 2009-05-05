@@ -1,5 +1,6 @@
 import cookielib
 import logging
+import sys
 import time
 import urllib2
 import urllib
@@ -262,7 +263,15 @@ else:
                 output.append( dictcode(v) )
 
             else:
-                if not type(v) in (str, unicode):
+                if type(v) == str:
+                    try:
+                        v = v.decode('utf8')
+                    except:
+                        if sys.platform == 'darwin':
+                            v = v.decode('macroman')
+                        else:
+                            v = v.decode('iso8859-1')
+                elif type(v) != unicode:
                     v = str(v)
                 v = v.encode('utf-8')
                 output.append( chr(1) )
