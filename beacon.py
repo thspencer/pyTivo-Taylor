@@ -4,6 +4,7 @@ import struct
 import time
 from socket import *
 from threading import Timer
+from urllib import quote
 
 import Zeroconf
 
@@ -36,7 +37,7 @@ class ZCBroadcast:
             if ct.startswith('x-container/'):
                 logger.info('Registering: %s' % section)
                 self.share_names.append(section)
-                desc = {'path': SHARE_TEMPLATE % section,
+                desc = {'path': SHARE_TEMPLATE % quote(section),
                         'platform': 'pc', 'protocol': 'http'}
                 tt = ct.split('/')[1]
                 info = Zeroconf.ServiceInfo('_%s._tcp.local.' % tt,
