@@ -72,9 +72,9 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
     cmd = [config.ffmpeg_path(), '-i', inFile] + cmd_string.split()
-    logging.debug('transcoding to tivo model ' + tsn[:3] +
+    logger.debug('transcoding to tivo model ' + tsn[:3] +
                   ' using ffmpeg command:')
-    logging.debug(' '.join(cmd))
+    logger.debug(' '.join(cmd))
     ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
                               stdout=subprocess.PIPE)
     try:
@@ -201,15 +201,15 @@ def select_aspect(inFile, tsn = ''):
 
     vInfo = video_info(inFile)
 
-    logging.debug('tsn: %s' % tsn)
+    logger.debug('tsn: %s' % tsn)
 
     aspect169 = config.get169Setting(tsn)
 
-    logging.debug('aspect169: %s' % aspect169)
+    logger.debug('aspect169: %s' % aspect169)
 
     optres = config.getOptres(tsn)
 
-    logging.debug('optres: %s' % optres)
+    logger.debug('optres: %s' % optres)
 
     if optres:
         optHeight = config.nearestTivoHeight(vInfo['vHeight'])
@@ -369,7 +369,7 @@ def select_aspect(inFile, tsn = ''):
                 else:   # if only very small amount of padding needed, 
                         # then just stretch it
                     settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
-                logging.debug(('File is wider than 4:3 padding ' +
+                logger.debug(('File is wider than 4:3 padding ' +
                                'top and bottom\n%s') % ' '.join(settings))
 
             return settings
@@ -537,7 +537,7 @@ def video_info(inFile, cache=True):
     mtime = os.stat(inFile).st_mtime
     if cache:
         if inFile in info_cache and info_cache[inFile][0] == mtime:
-            logging.debug('CACHE HIT! %s' % inFile)
+            logger.debug('CACHE HIT! %s' % inFile)
             return info_cache[inFile][1]
 
     vInfo['Supported'] = True
@@ -550,7 +550,7 @@ def video_info(inFile, cache=True):
 
     # wait configured # of seconds: if ffmpeg is not back give up
     wait = config.getFFmpegWait()
-    logging.debug(
+    logger.debug(
      'starting ffmpeg, will wait %s seconds for it to complete' % wait)
     for i in xrange(wait * 20):
         time.sleep(.05)
@@ -567,7 +567,7 @@ def video_info(inFile, cache=True):
     err_tmp.seek(0)
     output = err_tmp.read()
     err_tmp.close()
-    logging.debug('ffmpeg output=%s' % output)
+    logger.debug('ffmpeg output=%s' % output)
 
     rezre = re.compile(r'Input #0, ([^,]+),')
     x = rezre.search(output)
