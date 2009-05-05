@@ -6,7 +6,7 @@ import os
 import re
 import socket
 import time
-from urllib import unquote_plus, quote, unquote
+from urllib import unquote_plus, quote
 from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
@@ -124,7 +124,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             if 'Container' in query:
                 # Dispatch to the container plugin
-                basepath = unquote(query['Container'][0].split('/')[0])
+                basepath = query['Container'][0].split('/')[0]
                 for name, container in self.server.containers.items():
                     if basepath == name:
                         plugin = GetPlugin(container['type'])
