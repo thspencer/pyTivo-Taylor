@@ -34,9 +34,20 @@ mswindows = (sys.platform == "win32")
 if mswindows:
     patchSubprocess()
 
+def debug(msg):
+    if type(msg) == str:
+        try:
+            msg = msg.decode('utf8')
+        except:
+            if sys.platform == 'darwin':
+                msg = msg.decode('macroman')
+            else:
+                msg = msg.decode('iso8859-1')
+    logger.debug(msg)
+
 def output_video(inFile, outFile, tsn='', mime=''):
     if tivo_compatible(inFile, tsn, mime)[0]:
-        logger.debug('%s is tivo compatible' % inFile)
+        debug('%s is tivo compatible' % inFile)
         f = open(inFile, 'rb')
         try:
             if mime == 'video/mp4':
@@ -47,9 +58,9 @@ def output_video(inFile, outFile, tsn='', mime=''):
             logger.info(msg)
         f.close()
     else:
-        logger.debug('%s is not tivo compatible' % inFile)
+        debug('%s is not tivo compatible' % inFile)
         transcode(False, inFile, outFile, tsn)
-    logger.debug("Finished outputing video")
+    debug("Finished outputing video")
 
 def transcode(isQuery, inFile, outFile, tsn=''):
     settings = {'video_codec': select_videocodec(inFile, tsn),
@@ -72,9 +83,9 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
     cmd = [config.ffmpeg_path(), '-i', inFile] + cmd_string.split()
-    logger.debug('transcoding to tivo model ' + tsn[:3] +
+    debug('transcoding to tivo model ' + tsn[:3] +
                   ' using ffmpeg command:')
-    logger.debug(' '.join(cmd))
+    debug(' '.join(cmd))
     ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
                               stdout=subprocess.PIPE)
     try:
@@ -201,15 +212,15 @@ def select_aspect(inFile, tsn = ''):
 
     vInfo = video_info(inFile)
 
-    logger.debug('tsn: %s' % tsn)
+    debug('tsn: %s' % tsn)
 
     aspect169 = config.get169Setting(tsn)
 
-    logger.debug('aspect169: %s' % aspect169)
+    debug('aspect169: %s' % aspect169)
 
     optres = config.getOptres(tsn)
 
-    logger.debug('optres: %s' % optres)
+    debug('optres: %s' % optres)
 
     if optres:
         optHeight = config.nearestTivoHeight(vInfo['vHeight'])
@@ -223,7 +234,7 @@ def select_aspect(inFile, tsn = ''):
     ratio = vInfo['vWidth'] * 100 / vInfo['vHeight']
     rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
 
-    logger.debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
+    debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
                   'millisecs=%s ratio=%s rheight=%s rwidth=%s ' +
                   'TIVO_HEIGHT=%s TIVO_WIDTH=%s') % (inFile,
                   vInfo['vCodec'], vInfo['vWidth'], vInfo['vHeight'],
@@ -262,19 +273,19 @@ def select_aspect(inFile, tsn = ''):
         # else, resize video.
 
     if (rwidth, rheight) in [(1, 1)] and vInfo['par1'] == '8:9':
-        logger.debug('File + PAR is within 4:3.')
+        debug('File + PAR is within 4:3.')
         return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
     elif ((rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), 
                                 (59, 72), (59, 36), (59, 54)] or
           vInfo['dar1'] == '4:3'):
-        logger.debug('File is within 4:3 list.')
+        debug('File is within 4:3 list.')
         return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
     elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), 
                                 (59, 27)] or vInfo['dar1'] == '16:9')
           and (aspect169 or config.get169Letterbox(tsn))):
-        logger.debug('File is within 16:9 list and 16:9 allowed.')
+        debug('File is within 16:9 list and 16:9 allowed.')
 
         if config.get169Blacklist(tsn) or (aspect169 and 
                                            config.get169Letterbox(tsn)):
@@ -317,7 +328,7 @@ def select_aspect(inFile, tsn = ''):
                             # needed, then just stretch it
                         settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
-                    logger.debug(('16:9 aspect allowed, file is wider ' +
+                    debug(('16:9 aspect allowed, file is wider ' +
                                   'than 16:9 padding top and bottom\n%s') %
                                  ' '.join(settings))
 
@@ -343,7 +354,7 @@ def select_aspect(inFile, tsn = ''):
                     else: # if only very small amount of padding needed, 
                           # then just stretch it
                         settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
-                    logger.debug(('16:9 aspect allowed, file is narrower ' +
+                    debug(('16:9 aspect allowed, file is narrower ' +
                                   'than 16:9 padding left and right\n%s') %
                                  ' '.join(settings))
             else: # this is a 4:3 file or 16:9 output not allowed
@@ -369,7 +380,7 @@ def select_aspect(inFile, tsn = ''):
                 else:   # if only very small amount of padding needed, 
                         # then just stretch it
                     settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
-                logger.debug(('File is wider than 4:3 padding ' +
+                debug(('File is wider than 4:3 padding ' +
                                'top and bottom\n%s') % ' '.join(settings))
 
             return settings
@@ -396,7 +407,7 @@ def select_aspect(inFile, tsn = ''):
                   # just stretch it
                 settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
-            logger.debug('File is taller than 4:3 padding left and right\n%s'
+            debug('File is taller than 4:3 padding left and right\n%s'
                          % ' '.join(settings))
 
             return settings
@@ -528,7 +539,7 @@ def tivo_compatible(inFile, tsn='', mime=''):
 
         break
 
-    logger.debug('TRANSCODE=%s, %s, %s' % (['YES', 'NO'][message[0]],
+    debug('TRANSCODE=%s, %s, %s' % (['YES', 'NO'][message[0]],
                                            message[1], inFile))
     return message
 
@@ -537,7 +548,7 @@ def video_info(inFile, cache=True):
     mtime = os.stat(inFile).st_mtime
     if cache:
         if inFile in info_cache and info_cache[inFile][0] == mtime:
-            logger.debug('CACHE HIT! %s' % inFile)
+            debug('CACHE HIT! %s' % inFile)
             return info_cache[inFile][1]
 
     vInfo['Supported'] = True
@@ -550,7 +561,7 @@ def video_info(inFile, cache=True):
 
     # wait configured # of seconds: if ffmpeg is not back give up
     wait = config.getFFmpegWait()
-    logger.debug(
+    debug(
      'starting ffmpeg, will wait %s seconds for it to complete' % wait)
     for i in xrange(wait * 20):
         time.sleep(.05)
@@ -567,7 +578,7 @@ def video_info(inFile, cache=True):
     err_tmp.seek(0)
     output = err_tmp.read()
     err_tmp.close()
-    logger.debug('ffmpeg output=%s' % output)
+    debug('ffmpeg output=%s' % output)
 
     rezre = re.compile(r'Input #0, ([^,]+),')
     x = rezre.search(output)
@@ -576,7 +587,7 @@ def video_info(inFile, cache=True):
     else:
         vInfo['container'] = ''
         vInfo['Supported'] = False
-        logger.debug('failed at container')
+        debug('failed at container')
 
     rezre = re.compile(r'.*Video: ([^,]+),.*')
     x = rezre.search(output)
@@ -585,7 +596,7 @@ def video_info(inFile, cache=True):
     else:
         vInfo['vCodec'] = ''
         vInfo['Supported'] = False
-        logger.debug('failed at vCodec')
+        debug('failed at vCodec')
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
@@ -596,7 +607,7 @@ def video_info(inFile, cache=True):
         vInfo['vWidth'] = ''
         vInfo['vHeight'] = ''
         vInfo['Supported'] = False
-        logger.debug('failed at vWidth/vHeight')
+        debug('failed at vWidth/vHeight')
 
     rezre = re.compile(r'.*Video: .+, (.+) (?:fps|tb\(r\)|tbr).*')
     x = rezre.search(output)
@@ -611,20 +622,20 @@ def video_info(inFile, cache=True):
             rezre = re.compile(r'.*film source: 29.97.*')
             x = rezre.search(output.lower())
             if x:
-                logger.debug('film source: 29.97 setting vFps to 29.97')
+                debug('film source: 29.97 setting vFps to 29.97')
                 vInfo['vFps'] = '29.97'
             else:
                 # for build 8047:
                 rezre = re.compile(r'.*frame rate differs from container ' +
                                    r'frame rate: 29.97.*')
-                logger.debug('Bug in VideoReDo')
+                debug('Bug in VideoReDo')
                 x = rezre.search(output.lower())
                 if x:
                     vInfo['vFps'] = '29.97'
     else:
         vInfo['vFps'] = ''
         vInfo['Supported'] = False
-        logger.debug('failed at vFps')
+        debug('failed at vFps')
 
     durre = re.compile(r'.*Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+),')
     d = durre.search(output)
@@ -653,7 +664,7 @@ def video_info(inFile, cache=True):
             vInfo['kbps'] = x.group(1)
         else:
             vInfo['kbps'] = None
-            logger.debug('failed at kbps')
+            debug('failed at kbps')
 
     # get audio bitrate of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: .+, (.+) (?:kb/s).*')
@@ -662,7 +673,7 @@ def video_info(inFile, cache=True):
         vInfo['aKbps'] = x.group(1)
     else:
         vInfo['aKbps'] = None
-        logger.debug('failed at aKbps')
+        debug('failed at aKbps')
 
     # get audio codec of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: ([^,]+),.*')
@@ -671,7 +682,7 @@ def video_info(inFile, cache=True):
         vInfo['aCodec'] = x.group(1)
     else:
         vInfo['aCodec'] = None
-        logger.debug('failed at aCodec')
+        debug('failed at aCodec')
 
     # get audio frequency of source for tivo compatibility test.
     rezre = re.compile(r'.*Audio: .+, (.+) (?:Hz).*')
@@ -680,7 +691,7 @@ def video_info(inFile, cache=True):
         vInfo['aFreq'] = x.group(1)
     else:
         vInfo['aFreq'] = None
-        logger.debug('failed at aFreq')
+        debug('failed at aFreq')
 
     # get par.
     rezre = re.compile(r'.*Video: .+PAR ([0-9]+):([0-9]+) DAR [0-9:]+.*')
@@ -706,7 +717,7 @@ def video_info(inFile, cache=True):
         vInfo['mapVideo'] = x.group(1)
     else:
         vInfo['mapVideo'] = None
-        logger.debug('failed at mapVideo')
+        debug('failed at mapVideo')
 
     # get Audio Stream mapping.
     rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:.*')
@@ -717,7 +728,7 @@ def video_info(inFile, cache=True):
             amap.append(x.groups())
     else:
         amap.append(('', ''))
-        logger.debug('failed at mapAudio')
+        debug('failed at mapAudio')
     vInfo['mapAudio'] = amap
 
     vInfo['par'] = None
@@ -742,7 +753,7 @@ def video_info(inFile, cache=True):
 
     if cache:
         info_cache[inFile] = (mtime, vInfo)
-    logger.debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
+    debug("; ".join(["%s=%s" % (k, v) for k, v in vInfo.items()]))
     return vInfo
 
 def audio_check(inFile, tsn):
@@ -768,25 +779,25 @@ def supported_format(inFile):
     if video_info(inFile)['Supported']:
         return True
     else:
-        logger.debug('FALSE, file not supported %s' % inFile)
+        debug('FALSE, file not supported %s' % inFile)
         return False
 
 def kill(popen):
-    logger.debug('killing pid=%s' % str(popen.pid))
+    debug('killing pid=%s' % str(popen.pid))
     if mswindows:
         win32kill(popen.pid)
     else:
         import os, signal
         for i in xrange(3):
-            logger.debug('sending SIGTERM to pid: %s' % popen.pid)
+            debug('sending SIGTERM to pid: %s' % popen.pid)
             os.kill(popen.pid, signal.SIGTERM)
             time.sleep(.5)
             if popen.poll() is not None:
-                logger.debug('process %s has exited' % popen.pid)
+                debug('process %s has exited' % popen.pid)
                 break
         else:
             while popen.poll() is None:
-                logger.debug('sending SIGKILL to pid: %s' % popen.pid)
+                debug('sending SIGKILL to pid: %s' % popen.pid)
                 os.kill(popen.pid, signal.SIGKILL)
                 time.sleep(.5)
 
