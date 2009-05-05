@@ -79,6 +79,12 @@ def get_ip():
         our_ip = s.getsockname()[0]
     return our_ip
 
+def get_zc():
+    try:
+        return config.getboolean('Server', 'zeroconf')
+    except NoOptionError, ValueError:
+        return False
+
 def getTivoUsername(tsn=None):
     return get_tsn('tivo_username', tsn)
 
