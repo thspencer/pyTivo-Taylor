@@ -75,7 +75,7 @@ def get_ip():
     global our_ip
     if not our_ip:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('4.2.2.1', 0))
+        s.connect(('4.2.2.1', 123))
         our_ip = s.getsockname()[0]
     return our_ip
 
