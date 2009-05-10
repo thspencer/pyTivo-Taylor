@@ -46,10 +46,11 @@ def init(argv):
     for section in config.sections():
         if section.startswith('_tivo_'):
             tsn = section[6:]
-            if config.has_option(section, 'name'):
-                tivo_names[tsn] = config.get(section, 'name')
-            else:
-                tivo_names[tsn] = tsn
+            if tsn.upper() not in ['SD', 'HD']:
+                if config.has_option(section, 'name'):
+                    tivo_names[tsn] = config.get(section, 'name')
+                else:
+                    tivo_names[tsn] = tsn
 
 def reset():
     global config
