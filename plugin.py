@@ -156,7 +156,7 @@ class Plugin(object):
 
         return files, totalFiles, index
 
-    def get_files(self, handler, query, filterFunction=None):
+    def get_files(self, handler, query, filterFunction=None, force_alpha=False):
 
         def build_recursive_list(path, recurse=True):
             files = []
@@ -207,10 +207,12 @@ class Plugin(object):
             random.seed(seed)
             random.shuffle(files)
             self.random_lock.release()
+        elif force_alpha:
+            files.sort(dir_sort)
         elif sortby == '!CaptureDate':
             files.sort(date_sort)
         else:
-            files.sort(dir_sort)
+            files.sort(name_sort)
 
         # Trim the list
         return self.item_count(handler, query, cname, files)

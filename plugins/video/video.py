@@ -206,9 +206,11 @@ class Video(Plugin):
 
         container = handler.server.containers[cname]
         precache = container.get('precache', 'False').lower() == 'true'
+        force_alpha = container.get('force_alpha', 'False').lower() == 'true'
 
         files, total, start = self.get_files(handler, query,
-                                             self.video_file_filter)
+                                             self.video_file_filter,
+                                             force_alpha)
 
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
