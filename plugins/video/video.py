@@ -262,7 +262,7 @@ class Video(Plugin):
         tsn = handler.headers.getheader('tsn', '')
         f = query['File'][0]
         path = self.get_local_path(handler, query)
-        file_path = path + f
+        file_path = path + os.path.normpath(f)
 
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(file_path)
@@ -306,7 +306,7 @@ class Video(Plugin):
         path = self.get_local_base_path(handler, query)
 
         for f in query.get('File', []):
-            file_path = path + f
+            file_path = path + os.path.normpath(f)
 
             file_info = VideoDetails()
             file_info['valid'] = transcode.supported_format(file_path)
