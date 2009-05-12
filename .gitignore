@@ -1,7 +1,0 @@
-*.pyc
-pyTivo.conf
-pyTivo.conf.bak
-debug.txt
-.gitignore
-.bin
-pytivo.cmd
