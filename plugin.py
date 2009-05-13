@@ -6,6 +6,7 @@ import threading
 import urllib
 
 from Cheetah.Filters import Filter
+from lrucache import LRUCache
 
 if os.path.sep == '/':
     quote = urllib.quote
@@ -51,6 +52,9 @@ class Plugin(object):
     random_lock = threading.Lock()
 
     CONTENT_TYPE = ''
+
+    recurse_cache = LRUCache(5)
+    dir_cache = LRUCache(10)
 
     def __new__(cls, *args, **kwds):
         it = cls.__dict__.get('__it__')
@@ -158,6 +162,20 @@ class Plugin(object):
 
     def get_files(self, handler, query, filterFunction=None, force_alpha=False):
 
+        class FileData:
+            def __init__(self, name, isdir):
+                self.name = name
+                self.isdir = isdir
+                st = os.stat(name)
+                self.mdate = int(st.st_mtime)
+
+        class SortList:
+            def __init__(self, files):
+                self.files = files
+                self.unsorted = True
+                self.sortby = None
+                self.last_start = 0
+
         def build_recursive_list(path, recurse=True):
             files = []
             try:
@@ -165,11 +183,12 @@ class Plugin(object):
                     if f.startswith('.'):
                         continue
                     f = os.path.join(path, f)
-                    if recurse and os.path.isdir(f):
+                    isdir = os.path.isdir(f)
+                    if recurse and isdir:
                         files.extend(build_recursive_list(f))
                     else:
                        if not filterFunction or filterFunction(f, file_type):
-                           files.append(f)
+                           files.append(FileData(f, isdir))
             except:
                 pass
             return files
@@ -181,38 +200,51 @@ class Plugin(object):
         file_type = query.get('Filter', [''])[0]
 
         recurse = query.get('Recurse', ['No'])[0] == 'Yes'
-        files = build_recursive_list(path, recurse)
 
-        totalFiles = len(files)
+        filelist = []
+        if recurse and path in self.recurse_cache:
+            if self.recurse_cache.mtime(path) + 300 >= time.time():
+                filelist = self.recurse_cache[path]
+        elif not recurse and path in self.dir_cache:
+            if self.dir_cache.mtime(path) >= os.stat(path)[8]:
+                filelist = self.dir_cache[path]
+
+        if not filelist:
+            filelist = SortList(build_recursive_list(path, recurse))
+
+            if recurse:
+                self.recurse_cache[path] = filelist
+            else:
+                self.dir_cache[path] = filelist
 
         def dir_sort(x, y):
-            xdir = os.path.isdir(os.path.join(path, x))
-            ydir = os.path.isdir(os.path.join(path, y))
-
-            if xdir == ydir:
+            if x.isdir == y.isdir:
                 return name_sort(x, y)
             else:
-                return ydir - xdir
+                return y.isdir - x.isdir
 
         def name_sort(x, y):
-            return cmp(x, y)
+            return cmp(x.name, y.name)
 
         def date_sort(x, y):
-            return cmp(os.stat(y).st_mtime, os.stat(x).st_mtime)
+            return cmp(y.mdate, x.mdate)
 
         sortby = query.get('SortOrder', ['Normal'])[0]
-        if sortby == 'Random':
-            seed = query.get('RandomSeed', ['1'])[0]
-            self.random_lock.acquire()
-            random.seed(seed)
-            random.shuffle(files)
-            self.random_lock.release()
-        elif force_alpha:
-            files.sort(dir_sort)
-        elif sortby == '!CaptureDate':
-            files.sort(date_sort)
-        else:
-            files.sort(name_sort)
+        if filelist.unsorted or filelist.sortby != sortby:
+            if force_alpha:
+                filelist.files.sort(dir_sort)
+            elif sortby == '!CaptureDate':
+                filelist.files.sort(date_sort)
+            else:
+                filelist.files.sort(name_sort)
+
+            filelist.sortby = sortby
+            filelist.unsorted = False
+
+        files = filelist.files[:]
 
         # Trim the list
-        return self.item_count(handler, query, cname, files)
+        files, total, start = self.item_count(handler, query, cname, files,
+                                              filelist.last_start)
+        filelist.last_start = start
+        return files, total, start

@@ -215,29 +215,27 @@ class Video(Plugin):
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
         for f in files:
-            mtime = os.stat(f).st_mtime
-            if (mtime < 0): mtime = 0
-            mtime = datetime.fromtimestamp(mtime)
+            mtime = datetime.fromtimestamp(f.mdate)
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
-            video['name'] = os.path.split(f)[1]
-            video['path'] = f
-            video['part_path'] = f.replace(local_base_path, '', 1)
+            video['name'] = os.path.split(f.name)[1]
+            video['path'] = f.name
+            video['part_path'] = f.name.replace(local_base_path, '', 1)
             if not video['part_path'].startswith(os.path.sep):
                 video['part_path'] = os.path.sep + video['part_path']
-            video['title'] = os.path.split(f)[1]
-            video['is_dir'] = os.path.isdir(f)
+            video['title'] = os.path.split(f.name)[1]
+            video['is_dir'] = f.isdir
             if video['is_dir']:
                 video['small_path'] = subcname + '/' + video['name']
-                video['total_items'] = self.__total_items(f)
+                video['total_items'] = self.__total_items(f.name)
             else:
-                if precache or len(files) == 1 or f in transcode.info_cache:
-                    video['valid'] = transcode.supported_format(f)
+                if precache or len(files) == 1 or f.name in transcode.info_cache:
+                    video['valid'] = transcode.supported_format(f.name)
                     if video['valid']:
-                        video.update(self.metadata_full(f, tsn))
+                        video.update(self.metadata_full(f.name, tsn))
                 else:
                     video['valid'] = True
-                    video.update(self.metadata_basic(f))
+                    video.update(self.metadata_basic(f.name))
 
             videos.append(video)
 
