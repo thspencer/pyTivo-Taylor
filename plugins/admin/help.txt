@@ -87,11 +87,10 @@ ffmpeg
 
 Default Setting: There is none.
 Valid Entries: Operating system path
-Required: Yes!
+Required: No
 Skill: Basic
-Description: This is the full path to your ffmpeg binary. For windows
-users ffmpeg is distributed with pyTivo and is in the plugins/video
-folder.
+Description: This is the full path to your ffmpeg binary. If not set, 
+pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
 Example Settings: Linux = /usr/bin/ffmpeg |
 >Windows = c:\Program Files\pyTivo\bin\ffmpeg.exe
 Available In: Server
