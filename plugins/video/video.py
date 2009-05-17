@@ -33,6 +33,7 @@ XSL_TEMPLATE = tmpl('container.xsl')
 
 extfile = os.path.join(SCRIPTDIR, 'video.ext')
 try:
+    assert(config.ffmpeg_path())
     extensions = file(extfile).read().split()
 except:
     extensions = None

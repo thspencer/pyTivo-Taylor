@@ -525,6 +525,9 @@ def tivo_compatible(inFile, tsn='', mime=''):
     vInfo = video_info(inFile)
 
     message = (True, 'all compatible')
+    if not config.ffmpeg_path():
+        return message
+
     while True:
         vmessage = tivo_compatible_video(vInfo, tsn, mime)
         if not vmessage[0]:
@@ -556,7 +559,17 @@ def video_info(inFile, cache=True):
 
     vInfo['Supported'] = True
 
-    cmd = [config.ffmpeg_path(), '-i', inFile]
+    ffmpeg_path = config.ffmpeg_path()
+    if not ffmpeg_path:
+        if os.path.splitext(inFile)[1].lower() not in ['.mpg', '.mpeg',
+                                                       '.vob', '.tivo']:
+            vInfo['Supported'] = False
+        vInfo.update({'millisecs': 0, 'vWidth': 704, 'vHeight': 480})
+        if cache:
+            info_cache[inFile] = (mtime, vInfo)
+        return vInfo
+
+    cmd = [ffmpeg_path, '-i', inFile]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
     err_tmp = tempfile.TemporaryFile()
     ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
