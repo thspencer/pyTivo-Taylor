@@ -217,10 +217,12 @@ class Admin(Plugin):
         folder = ''
         AnchorItem = ''
         AnchorOffset = ''
+        tivo_mak = config.get_server('tivo_mak')
         for name, data in config.getShares():
             if cname == name:
-                tivo_mak = data.get('tivo_mak', '')
                 togo_path = data.get('togo_path', '')
+                if not tivo_mak:
+                    tivo_mak = data.get('tivo_mak', '')
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
@@ -398,10 +400,12 @@ class Admin(Plugin):
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
         tivoIP = query['TiVo'][0]
+        tivo_mak = config.get_server('tivo_mak')
         for name, data in config.getShares():
             if cname == name:
-                tivo_mak = data.get('tivo_mak', '')
                 togo_path = data.get('togo_path', '')
+                if not tivo_mak:
+                    tivo_mak = data.get('tivo_mak', '')
         t = Template(REDIRECT_TEMPLATE)
         command = query['Redirect'][0]
         params = (command, quote(cname), tivoIP)
@@ -452,10 +456,12 @@ class Admin(Plugin):
 
     def SaveNPL(self, handler, query):
         config.reset()
-        for key in ['tivo_mak', 'togo_path']:
-            if key in query:
-                config.config.set(query['Container'][0], key,
-                                  query[key][0])
+        if 'tivo_mak' in query:
+            config.config.set('Server', 'tivo_mak', query['tivo_mak'][0])
+            config.config.remove_option(query['Container'][0], 'tivo_mak')
+        if 'togo_path' in query:
+            config.config.set(query['Container'][0], 'togo_path',
+                              query['togo_path'][0])
         config.write()
 
         subcname = query['Container'][0]

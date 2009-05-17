@@ -64,7 +64,7 @@ def write():
     config.write(f)
     f.close()
 
-def get_server(name, default):
+def get_server(name, default=None):
     if config.has_option('Server', name):
         return config.get('Server', name)
     else:
@@ -128,7 +128,7 @@ def getAllowedClients():
     return get_server('allowedips', '').split()
 
 def getExternalUrl():
-    return get_server('externalurl', None)
+    return get_server('externalurl')
 
 def getIsExternal(tsn):
     tsnsect = '_tivo_' + tsn
