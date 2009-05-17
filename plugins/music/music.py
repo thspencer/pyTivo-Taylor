@@ -133,7 +133,8 @@ class Music(Plugin):
         def AudioFileFilter(f, filter_type=None):
             ext = os.path.splitext(f)[1].lower()
 
-            if ext in ('.mp3', '.mp2') or ext in TRANSCODE:
+            if ext in ('.mp3', '.mp2') or (ext in TRANSCODE and
+                                           config.ffmpeg_path()):
                 return self.AUDIO
             else:
                 file_type = False
@@ -214,11 +215,12 @@ class Music(Plugin):
             except Exception, msg:
                 print msg
 
-            if 'Duration' not in item:
+            ffmpeg_path = config.ffmpeg_path()
+            if 'Duration' not in item and ffmpeg_path:
                 fname = unicode(f.name, 'utf-8')
                 if mswindows:
                     fname = fname.encode('iso8859-1')
-                cmd = [config.ffmpeg_path(), '-i', fname]
+                cmd = [ffmpeg_path, '-i', fname]
                 ffmpeg = subprocess.Popen(cmd, stderr=subprocess.PIPE,
                                                stdout=subprocess.PIPE, 
                                                stdin=subprocess.PIPE)
@@ -242,7 +244,7 @@ class Music(Plugin):
                         millisecs = 0
                     item['Duration'] = millisecs
 
-            if 'Duration' in item:
+            if 'Duration' in item and ffmpeg_path:
                 item['params'] = 'Yes'
 
             self.media_data_cache[f.name] = item
