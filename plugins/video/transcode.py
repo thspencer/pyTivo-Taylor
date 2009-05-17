@@ -526,6 +526,8 @@ def tivo_compatible(inFile, tsn='', mime=''):
 
     message = (True, 'all compatible')
     if not config.ffmpeg_path():
+        if mime not in ['video/x-tivo-mpeg', 'video/mpeg', '']:
+            message = (False, 'no ffmpeg')
         return message
 
     while True:
