@@ -80,20 +80,38 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     if isQuery:
         return settings
 
+    ffmpeg_path = config.ffmpeg_path()
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
-    cmd = [config.ffmpeg_path(), '-i', inFile] + cmd_string.split()
-    debug('transcoding to tivo model ' + tsn[:3] +
-                  ' using ffmpeg command:')
+    if inFile[-5:].lower() == '.tivo':
+        tivodecode_path = config.get_bin('tivodecode')
+        tivo_mak = config.get_server('tivo_mak')
+        if tivodecode_path and tivo_mak:
+            tcmd = [tivodecode_path, '-m', tivo_mak, inFile]
+            cmd = [ffmpeg_path, '-i', '-'] + cmd_string.split()
+            tivodecode = subprocess.Popen(tcmd, stdout=subprocess.PIPE,
+                                          bufsize=(512 * 1024))
+            ffmpeg = subprocess.Popen(cmd, stdin=tivodecode.stdout,
+                                      stdout=subprocess.PIPE,
+                                      bufsize=(512 * 1024))
+        else:
+            return
+    else:
+        cmd = [ffmpeg_path, '-i', inFile] + cmd_string.split()
+        ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
+                                  stdout=subprocess.PIPE)
+
+    debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
     debug(' '.join(cmd))
-    ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
-                              stdout=subprocess.PIPE)
+
     try:
         shutil.copyfileobj(ffmpeg.stdout, outFile)
     except:
         kill(ffmpeg)
 
 def select_audiocodec(isQuery, inFile, tsn=''):
+    if inFile[-5:].lower() == '.tivo':
+        return '-acodec copy'
     vInfo = video_info(inFile)
     codectype = vInfo['vCodec']
     codec = config.getAudioCodec(tsn)

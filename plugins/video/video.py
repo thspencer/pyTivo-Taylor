@@ -56,11 +56,13 @@ class Video(Plugin):
 
     def send_file(self, handler, path, query):
         mime = 'video/mpeg'
+        tsn = handler.headers.getheader('tsn', '')
 
         if 'Format' in query:
             mime = query['Format'][0]
 
-        if path[-5:].lower() == '.tivo':
+        if (path[-5:].lower() == '.tivo' and
+            transcode.tivo_compatible(path, tsn, mime)[0]):
             mime = 'video/x-tivo-mpeg'
 
         range = handler.headers.getheader('Range')
@@ -72,8 +74,6 @@ class Video(Plugin):
             handler.end_headers()
             handler.wfile.write("\x30\x0D\x0A")
             return
-
-        tsn = handler.headers.getheader('tsn', '')
 
         handler.send_response(200)
         handler.send_header('Content-Type', mime)
