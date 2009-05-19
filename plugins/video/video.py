@@ -109,7 +109,7 @@ class Video(Plugin):
             return int(os.stat(full_path).st_size)
         else:
             # Must be re-encoded
-            if config.getAudioCodec(tsn) == None:
+            if config.get_tsn('audio_codec', tsn) == None:
                 audioBPS = config.getMaxAudioBR(tsn) * 1000
             else:
                 audioBPS = config.strtod(config.getAudioBR(tsn))
@@ -295,7 +295,7 @@ class Video(Plugin):
 
         baseurl = 'http://%s:%s' % (ip, port)
         if config.getIsExternal(tsn):
-            exturl = config.getExternalUrl()
+            exturl = config.get_server('externalurl')
             if exturl:
                 baseurl = exturl
             else:

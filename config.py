@@ -87,12 +87,6 @@ def get_zc():
     except NoOptionError, ValueError:
         return False
 
-def getTivoUsername(tsn=None):
-    return get_tsn('tivo_username', tsn)
-
-def getTivoPassword(tsn=None):
-    return get_tsn('tivo_password', tsn)
-
 def getBeaconAddresses():
     return get_server('beacon', '255.255.255.255')
 
@@ -126,9 +120,6 @@ def get169Setting(tsn):
 
 def getAllowedClients():
     return get_server('allowedips', '').split()
-
-def getExternalUrl():
-    return get_server('externalurl')
 
 def getIsExternal(tsn):
     tsnsect = '_tivo_' + tsn
@@ -216,9 +207,6 @@ def get_bin(fname):
                 bin_paths[fname] = fpath
                 return fpath
         return None
-
-def ffmpeg_path():
-    return get_bin('ffmpeg')
 
 def getFFmpegWait():
     if config.has_option('Server', 'ffmpeg_wait'):
@@ -343,24 +331,6 @@ def get_tsn(name, tsn=None, raw=False):
     except NoOptionError:
         pass
     return None
-
-def getAudioCodec(tsn=None):
-    return get_tsn('audio_codec', tsn)
-
-def getAudioCH(tsn=None):
-    return get_tsn('audio_ch', tsn)
-
-def getAudioFR(tsn=None):
-    return get_tsn('audio_fr', tsn)
-
-def getAudioLang(tsn=None):
-    return get_tsn('audio_lang', tsn)
-
-def getCopyTS(tsn=None):
-    return get_tsn('copy_ts', tsn)
-
-def getVideoFPS(tsn=None):
-    return get_tsn('video_fps', tsn)
 
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216

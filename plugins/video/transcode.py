@@ -80,7 +80,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     if isQuery:
         return settings
 
-    ffmpeg_path = config.ffmpeg_path()
+    ffmpeg_path = config.get_bin('ffmpeg')
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
     if inFile[-5:].lower() == '.tivo':
@@ -114,7 +114,7 @@ def select_audiocodec(isQuery, inFile, tsn=''):
         return '-acodec copy'
     vInfo = video_info(inFile)
     codectype = vInfo['vCodec']
-    codec = config.getAudioCodec(tsn)
+    codec = config.get_tsn('audio_codec', tsn)
     if not codec:
         # Default, compatible with all TiVo's
         codec = 'ac3'
@@ -128,7 +128,7 @@ def select_audiocodec(isQuery, inFile, tsn=''):
             if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
-    copy_flag = config.getCopyTS(tsn)
+    copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
     if ((codec == 'copy' and codectype == 'mpeg2video' and not copy_flag) or
         (copy_flag and copy_flag.lower() == 'false')):
@@ -141,22 +141,24 @@ def select_audiofr(inFile, tsn):
     if not vInfo['aFreq'] == None and vInfo['aFreq'] in ('44100', '48000'):
         # compatible frequency
         freq = vInfo['aFreq']
-    if config.getAudioFR(tsn) != None:
-        freq = config.getAudioFR(tsn)
+    audio_fr = config.get_tsn('audio_fr', tsn)
+    if audio_fr != None:
+        freq = audio_fr
     return '-ar ' + freq
 
 def select_audioch(tsn):
-    ch = config.getAudioCH(tsn)
+    ch = config.get_tsn('audio_ch', tsn)
     if ch:
         return '-ac ' + ch
     return ''
 
 def select_audiolang(inFile, tsn):
     vInfo = video_info(inFile)
-    if config.getAudioLang(tsn) != None and vInfo['mapVideo'] != None:
+    audio_lang = config.get_tsn('audio_lang', tsn)
+    if audio_lang != None and vInfo['mapVideo'] != None:
         stream = vInfo['mapAudio'][0][0]
         langmatch = []
-        for lang in config.getAudioLang(tsn).replace(' ','').lower().split(','):
+        for lang in audio_lang.replace(' ','').lower().split(','):
             for s, l in vInfo['mapAudio']:
                 if lang in s + l.replace(' ','').lower():
                     langmatch.append(s)
@@ -172,8 +174,9 @@ def select_videofps(inFile, tsn):
     fps = '-r 29.97'  # default
     if config.isHDtivo(tsn) and vInfo['vFps'] in GOOD_MPEG_FPS:
         fps = ' '
-    if config.getVideoFPS(tsn) != None:
-        fps = '-r ' + config.getVideoFPS(tsn)
+    video_fps = config.get_tsn('video_fps', tsn)
+    if video_fps != None:
+        fps = '-r ' + video_fps
     return fps
 
 def select_videocodec(inFile, tsn):
@@ -520,10 +523,11 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
                               vInfo['aKbps'])
             break
 
-        if config.getAudioLang(tsn):
+        audio_lang = config.get_tsn('audio_lang', tsn)
+        if audio_lang:
             if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
                 message = (False, '%s preferred audio track exists' % 
-                                  config.getAudioLang(tsn))
+                                  audio_lang)
         break
 
     return message
@@ -543,7 +547,7 @@ def tivo_compatible(inFile, tsn='', mime=''):
     vInfo = video_info(inFile)
 
     message = (True, 'all compatible')
-    if not config.ffmpeg_path():
+    if not config.get_bin('ffmpeg'):
         if mime not in ['video/x-tivo-mpeg', 'video/mpeg', '']:
             message = (False, 'no ffmpeg')
         return message
@@ -579,7 +583,7 @@ def video_info(inFile, cache=True):
 
     vInfo['Supported'] = True
 
-    ffmpeg_path = config.ffmpeg_path()
+    ffmpeg_path = config.get_bin('ffmpeg')
     if not ffmpeg_path:
         if os.path.splitext(inFile)[1].lower() not in ['.mpg', '.mpeg',
                                                        '.vob', '.tivo']:
@@ -795,7 +799,7 @@ def video_info(inFile, cache=True):
 def audio_check(inFile, tsn):
     cmd_string = ('-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy ' +
                   select_audiolang(inFile, tsn) + ' -t 00:00:01 -f vob -')
-    cmd = [config.ffmpeg_path(), '-i', inFile] + cmd_string.split()
+    cmd = [config.get_bin('ffmpeg'), '-i', inFile] + cmd_string.split()
     ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     fd, testname = tempfile.mkstemp()
     testfile = os.fdopen(fd, 'wb')

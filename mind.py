@@ -293,8 +293,8 @@ else:
         return ''.join(output)
 
 def getMind(tsn=None):
-    username = config.getTivoUsername(tsn)
-    password = config.getTivoPassword(tsn)
+    username = config.get_tsn('tivo_username', tsn)
+    password = config.get_tsn('tivo_password', tsn)
 
     if not username or not password:
        raise Exception("tivo_username and tivo_password required")

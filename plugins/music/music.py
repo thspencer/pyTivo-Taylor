@@ -107,7 +107,7 @@ class Music(Plugin):
         if needs_transcode:
             if mswindows:
                 fname = fname.encode('iso8859-1')
-            cmd = [config.ffmpeg_path(), '-i', fname, '-ab', 
+            cmd = [config.get_bin('ffmpeg'), '-i', fname, '-ab', 
                    '320k', '-ar', '44100', '-f', 'mp3', '-']
             if seek:
                 cmd[-1:] = ['-ss', '%.3f' % (seek / 1000.0), '-']
@@ -134,7 +134,7 @@ class Music(Plugin):
             ext = os.path.splitext(f)[1].lower()
 
             if ext in ('.mp3', '.mp2') or (ext in TRANSCODE and
-                                           config.ffmpeg_path()):
+                                           config.get_bin('ffmpeg')):
                 return self.AUDIO
             else:
                 file_type = False
@@ -215,7 +215,7 @@ class Music(Plugin):
             except Exception, msg:
                 print msg
 
-            ffmpeg_path = config.ffmpeg_path()
+            ffmpeg_path = config.get_bin('ffmpeg')
             if 'Duration' not in item and ffmpeg_path:
                 fname = unicode(f.name, 'utf-8')
                 if mswindows:
