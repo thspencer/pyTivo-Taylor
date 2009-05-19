@@ -42,7 +42,7 @@ else:
                 self.__pcBodyStore('pyTivo', True)
 
         def pushVideo(self, tsn, url, description, duration, size,
-                      title, subtitle, source='', mime=''):
+                      title, subtitle, source='', mime='video/mpeg'):
             # It looks like tivo only supports one pc per house
             pc_body_id = self.__pcBodySearch()[0]
 
@@ -64,13 +64,12 @@ else:
 
             if mime == 'video/mp4':
                 data['encodingType'] = 'avcL41MP4'
-                data['url'] = url + '?Format=' + mime
             elif mime == 'video/bif':
                 data['encodingType'] = 'vc1ApL3'
-                data['url'] = url + '?Format=' + mime
             else:
                 data['encodingType'] = 'mpeg2ProgramStream'
-                data['url'] = url
+
+            data['url'] = url + '?Format=' + mime
 
             if subtitle:
                 data['subtitle'] = subtitle
@@ -111,15 +110,14 @@ else:
 
             return requests
 
-        def completeDownloadRequest(self, request, mime=''):
+        def completeDownloadRequest(self, request, mime='video/mpeg'):
             if mime == 'video/mp4':
                 request['encodingType'] = 'avcL41MP4'
-                request['url'] += '?Format=' + mime
             elif mime == 'video/bif':
                 request['encodingType'] = 'vc1ApL3'
-                request['url'] = url + '?Format=' + mime
             else:
                 request['encodingType'] = 'mpeg2ProgramStream'
+            request['url'] = url + '?Format=' + mime
             request['state'] = 'complete'
             request['type'] = 'bodyOfferModify'
             request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S',

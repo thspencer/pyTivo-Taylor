@@ -53,6 +53,15 @@ def output_video(inFile, outFile, tsn='', mime=''):
             if mime == 'video/mp4':
                 qtfaststart.fast_start(f, outFile)
             else:
+                if mime == 'video/mpeg' and inFile[-5:].lower() == '.tivo':
+                    tivodecode_path = config.get_bin('tivodecode')
+                    tivo_mak = config.get_server('tivo_mak')
+                    if tivodecode_path and tivo_mak:
+                        f.close()
+                        tcmd = [tivodecode_path, '-m', tivo_mak, inFile]
+                        tivodecode = subprocess.Popen(tcmd,
+                            stdout=subprocess.PIPE, bufsize=(512 * 1024))
+                        f = tivodecode.stdout
                 shutil.copyfileobj(f, outFile)
         except Exception, msg:
             logger.info(msg)

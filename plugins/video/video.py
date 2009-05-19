@@ -58,12 +58,12 @@ class Video(Plugin):
         mime = 'video/mpeg'
         tsn = handler.headers.getheader('tsn', '')
 
-        if 'Format' in query:
-            mime = query['Format'][0]
-
         if (path[-5:].lower() == '.tivo' and
             transcode.tivo_compatible(path, tsn, mime)[0]):
             mime = 'video/x-tivo-mpeg'
+
+        if 'Format' in query:
+            mime = query['Format'][0]
 
         range = handler.headers.getheader('Range')
         if range and range != 'bytes=0-':
@@ -310,7 +310,7 @@ class Video(Plugin):
             file_info = VideoDetails()
             file_info['valid'] = transcode.supported_format(file_path)
 
-            mime = ''
+            mime = 'video/mpeg'
             if config.isHDtivo(tsn):
                 for m in ['video/mp4', 'video/bif']:
                     if transcode.tivo_compatible(file_path, tsn, m)[0]:
