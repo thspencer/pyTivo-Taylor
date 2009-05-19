@@ -93,8 +93,8 @@ class Music(Plugin):
 
         fname = unicode(path, 'utf-8')
 
-        needs_transcode = (os.path.splitext(fname)[1].lower() in TRANSCODE
-                           or seek or duration)
+        ext = os.path.splitext(fname)[1].lower()
+        needs_transcode = ext in TRANSCODE or seek or duration
 
         handler.send_response(200)
         handler.send_header('Content-Type', 'audio/mpeg')
@@ -107,8 +107,13 @@ class Music(Plugin):
         if needs_transcode:
             if mswindows:
                 fname = fname.encode('iso8859-1')
-            cmd = [config.get_bin('ffmpeg'), '-i', fname, '-ab', 
-                   '320k', '-ar', '44100', '-f', 'mp3', '-']
+
+            cmd = [config.get_bin('ffmpeg'), '-i', fname]
+            if ext in ['.mp3', '.mp2']:
+                cmd += ['-acodec', 'copy']
+            else:
+                cmd += ['-ab', '320k', '-ar', '44100']
+            cmd += ['-f', 'mp3', '-']
             if seek:
                 cmd[-1:] = ['-ss', '%.3f' % (seek / 1000.0), '-']
             if duration:
