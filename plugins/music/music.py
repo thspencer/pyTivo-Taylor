@@ -185,14 +185,15 @@ class Music(Plugin):
             #item['ArtistName'] = artist
 
             ext = os.path.splitext(f.name)[1].lower()
+            fname = unicode(f.name, 'utf-8')
 
             try:
                 # If the file is an mp3, let's load the EasyID3 interface
                 if ext == '.mp3':
-                    audioFile = MP3(f.name, ID3=EasyID3)
+                    audioFile = MP3(fname, ID3=EasyID3)
                 else:
                     # Otherwise, let mutagen figure it out
-                    audioFile = mutagen.File(f.name)
+                    audioFile = mutagen.File(fname)
 
                 # Pull the length from the FileType, if present
                 if audioFile.info.length > 0:
@@ -222,7 +223,6 @@ class Music(Plugin):
 
             ffmpeg_path = config.get_bin('ffmpeg')
             if 'Duration' not in item and ffmpeg_path:
-                fname = unicode(f.name, 'utf-8')
                 if mswindows:
                     fname = fname.encode('iso8859-1')
                 cmd = [ffmpeg_path, '-i', fname]
@@ -437,7 +437,7 @@ class Music(Plugin):
             if self.recurse_cache.mtime(path) + 3600 >= time.time():
                 filelist = self.recurse_cache[path]
         elif not recurse and path in self.dir_cache:
-            if self.dir_cache.mtime(path) >= os.stat(path)[8]:
+            if self.dir_cache.mtime(path) >= os.stat(unicode(path, 'utf-8'))[8]:
                 filelist = self.dir_cache[path]
 
         if not filelist:

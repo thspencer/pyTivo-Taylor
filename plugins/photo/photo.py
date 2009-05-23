@@ -323,7 +323,7 @@ class Photo(Plugin):
             def __init__(self, name, isdir):
                 self.name = name
                 self.isdir = isdir
-                st = os.stat(name)
+                st = os.stat(unicode(name, 'utf-8'))
                 self.cdate = int(st.st_ctime)
                 self.mdate = int(st.st_mtime)
 
