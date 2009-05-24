@@ -202,20 +202,26 @@ class Plugin(object):
         recurse = query.get('Recurse', ['No'])[0] == 'Yes'
 
         filelist = []
-        if recurse and path in self.recurse_cache:
-            if self.recurse_cache.mtime(path) + 300 >= time.time():
-                filelist = self.recurse_cache[path]
-        elif not recurse and path in self.dir_cache:
-            if self.dir_cache.mtime(path) >= os.stat(path)[8]:
-                filelist = self.dir_cache[path]
+        rc = self.recurse_cache
+        dc = self.dir_cache
+        if recurse:
+            if path in rc and rc.mtime(path) + 300 >= time.time():
+                filelist = rc[path]
+        else:
+            updated = os.stat(path)[8]
+            if path in dc and dc.mtime(path) >= updated:
+                filelist = dc[path]
+            for p in rc:
+                if path.startswith(p) and rc.mtime(p) < updated:
+                    del rc[p]
 
         if not filelist:
             filelist = SortList(build_recursive_list(path, recurse))
 
             if recurse:
-                self.recurse_cache[path] = filelist
+                rc[path] = filelist
             else:
-                self.dir_cache[path] = filelist
+                dc[path] = filelist
 
         def dir_sort(x, y):
             if x.isdir == y.isdir:
