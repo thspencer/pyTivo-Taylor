@@ -152,16 +152,7 @@ class Video(Plugin):
         return metadata
 
     def metadata_full(self, full_path, tsn='', mime=''):
-        now = datetime.utcnow()
-        duration = self.__duration(full_path)
-        duration_delta = timedelta(milliseconds = duration)
-
-        metadata = {'time': now.isoformat(),
-                    'startTime': now.isoformat(),
-                    'stopTime': (now + duration_delta).isoformat(),
-                    'size': self.__est_size(full_path, tsn, mime),
-                    'duration': duration}
-
+        metadata = {}
         vInfo = transcode.video_info(full_path)
         compat = transcode.tivo_compatible(full_path, tsn, mime)
         if not compat[0]:
@@ -186,12 +177,21 @@ class Video(Plugin):
 
         metadata.update(self.metadata_basic(full_path))
 
+        now = datetime.utcnow()
+        duration = self.__duration(full_path)
+        duration_delta = timedelta(milliseconds = duration)
         min = duration_delta.seconds / 60
         sec = duration_delta.seconds % 60
         hours = min / 60
         min = min % 60
-        metadata['iso_duration'] = ('P%sDT%sH%sM%sS' % 
-                                    (duration_delta.days, hours, min, sec))
+
+        metadata.update({'time': now.isoformat(),
+                         'startTime': now.isoformat(),
+                         'stopTime': (now + duration_delta).isoformat(),
+                         'size': self.__est_size(full_path, tsn, mime),
+                         'duration': duration,
+                         'iso_duration': ('P%sDT%sH%sM%sS' % 
+                              (duration_delta.days, hours, min, sec))})
 
         return metadata
 
