@@ -69,20 +69,6 @@ changed if it conflicts with another program.
 Example Settings: 9032
 Available In: Server
 
-guid
-
-Default Setting: Random 10-character string
-Valid Entries: Almost any short string
-Required: No
-Skill: Advanced
-Description: A unique identifier used in the beacon to identify this
-server. If you have two or more pyTivo servers on one network each server
-must use its own unique identifier. It used to be necessary to set these
-manually, but with the random generator, this option should never be
-needed.
-Example Settings: 123456, pyTivo-bedroom
-Available In: Server
-
 ffmpeg
 
 Default Setting: There is none.

@@ -71,7 +71,7 @@ def get_server(name, default=None):
         return default
 
 def getGUID():
-    return get_server('GUID', guid)
+    return guid
 
 def get_ip():
     global our_ip
