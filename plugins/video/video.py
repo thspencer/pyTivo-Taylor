@@ -160,14 +160,16 @@ class Video(Plugin):
         else:
             transcode_options = {}
 
-        metadata['vHost'] = (
-            ['TRANSCODE=%s, %s' % (['YES', 'NO'][compat[0]], compat[1])] +
-            ['SOURCE INFO: '] +
-            ["%s=%s" % (k, v) for k, v in sorted(vInfo.items(), reverse=True)] +
-            ['TRANSCODE OPTIONS: '] +
-            ["%s" % (v) for k, v in transcode_options.items()] +
-            ['SOURCE FILE: ', os.path.split(full_path)[1]]
-        )
+        if config.getDebug():
+            metadata['vHost'] = (
+                ['TRANSCODE=%s, %s' % (['YES', 'NO'][compat[0]], compat[1])] +
+                ['SOURCE INFO: '] +
+                ["%s=%s" % (k, v)
+                 for k, v in sorted(vInfo.items(), reverse=True)] +
+                ['TRANSCODE OPTIONS: '] +
+                ["%s" % (v) for k, v in transcode_options.items()] +
+                ['SOURCE FILE: ', os.path.split(full_path)[1]]
+            )
 
         if ((int(vInfo['vHeight']) >= 720 and
              config.getTivoHeight >= 720) or
