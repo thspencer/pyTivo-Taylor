@@ -163,7 +163,7 @@ sort always, with folders listed first. Note that the TiVo doesn't
 request alpha sorts for folders below the top level, so if you want them 
 alpha-sorted, you need this option.
 Example Settings: True/False
-Availale In: Shares
+Available In: Shares
 
 precache
 
