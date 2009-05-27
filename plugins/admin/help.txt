@@ -149,6 +149,22 @@ start with an invalid path your shares will not work at all.
 Example Settings: Windows = C:\videos | Linux = /home/user/media
 Available In: Shares
 
+force_alpha
+
+Default Setting: False
+Valid Entries: True/False
+Required: No
+Skill: Basic
+Description: Only meaningful in shares of type "video". When false, 
+pyTivo will display videos in the order requested by the TiVo, as 
+described at the bottom of the screen. When true, pyTivo will ignore the 
+sort options and revert to its "classic" behavior, using an alphabetical 
+sort always, with folders listed first. Note that the TiVo doesn't 
+request alpha sorts for folders below the top level, so if you want them 
+alpha-sorted, you need this option.
+Example Settings: True/False
+Availale In: Shares
+
 precache
 
 Default Setting: False
