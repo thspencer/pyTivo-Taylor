@@ -61,7 +61,7 @@ the new section will be editable.
 port
 
 Default Setting: 9032
-Valid Entries: Valid port number
+Valid Entries: 1-65535
 Required: No
 Skill: Basic
 Description: The port which pyTivo uses to serve your files. Can be
