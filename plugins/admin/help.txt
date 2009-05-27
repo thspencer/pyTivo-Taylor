@@ -71,14 +71,31 @@ Available In: Server
 
 ffmpeg
 
-Default Setting: There is none.
+Default Setting: None
 Valid Entries: Operating system path
 Required: No
 Skill: Basic
 Description: This is the full path to your ffmpeg binary. If not set, 
-pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
+pyTivo checks for it in a "bin" subdirectory, and then in the PATH. If 
+no ffmpeg is found, pyTivo will operate in a limited mode, serving only 
+MPEG and TiVo files in video shares, and only MP3 files in music shares, 
+with no seek capability.
 Example Settings: Linux = /usr/bin/ffmpeg |
 >Windows = c:\Program Files\pyTivo\bin\ffmpeg.exe
+Available In: Server
+
+tivodecode
+
+Default Setting: None
+Valid Entries: Operating system path
+Required: No
+Skill: Basic
+Description: This is the full path to your tivodecode binary. If not 
+set, pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
+tivodecode is only needed for certain functions (currently pushing .TiVo 
+files or transcoding HD .TiVo files to SD).
+Example Settings: Linux = /usr/bin/tivodecode |
+>Windows = c:\Program Files\pyTivo\bin\tivodecode.exe
 Available In: Server
 
 beacon
@@ -544,4 +561,19 @@ Skill: Basic
 Description: Your password at tivo.com. This is required for the "Push" 
 feature. If you don't plan to use Push, you don't need to set this.
 Example Settings: password
+Available In: Server
+
+tivo_mak
+
+Default Setting: blank
+Valid Entries: Your Media Access Key
+Required: No
+Skill: Basic
+Description: Your Media Access Key -- find it on your TiVo under 
+Messages and Settings, Account and System information, Media Access Key. 
+This is required for the "ToGo" feature, and for anything that uses 
+tivodecode (pushing .TiVo files, transcoding HD .TiVo files to SD 
+TiVos). If you don't plan to use these features, you don't need to set 
+this.
+Example Settings: 012345678
 Available In: Server
