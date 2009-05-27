@@ -80,7 +80,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             query = {}
 
         if path == '/TiVoConnect':
-            self.handle_query(query)
+            self.handle_query(query, tsn)
         else:
             ## Get File
             path = unquote_plus(path)
@@ -108,9 +108,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             length = int(self.headers.getheader('content-length'))
             qs = self.rfile.read(length)
             query = cgi.parse_qs(qs, keep_blank_values=1)
-        self.handle_query(query)
+        self.handle_query(query, tsn)
 
-    def handle_query(self, query):
+    def handle_query(self, query, tsn):
         mname = False
         if 'Command' in query and len(query['Command']) >= 1:
 
@@ -125,7 +125,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if 'Container' in query:
                 # Dispatch to the container plugin
                 basepath = query['Container'][0].split('/')[0]
-                for name, container in self.server.containers.items():
+                for name, container in config.getShares(tsn):
                     if basepath == name:
                         plugin = GetPlugin(container['type'])
                         if hasattr(plugin, command):
