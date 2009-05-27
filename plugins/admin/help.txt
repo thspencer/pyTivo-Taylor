@@ -126,6 +126,29 @@ Description: Will generate more output for debugging purposes.
 Example Settings: True/False
 Available In: Server
 
+type
+
+Default Setting: None
+Valid Entries: video, music, photo, or any other valid plugin name.
+Required: Yes
+Skill: Basic
+Description: Sets the type of share that this will be. This must be set
+to something otherwise pyTivo will not start. NOTE plugins names are
+generally lowercase.
+Example Settings: video, music, photo
+Available In: Shares
+
+path
+
+Default Setting: None
+Valid Entries: Any operating system path
+Required: Yes
+Skill: Basic
+Description: Sets the base path to your media content. While pyTivo will
+start with an invalid path your shares will not work at all.
+Example Settings: Windows = C:\videos | Linux = /home/user/media
+Available In: Shares
+
 precache
 
 Default Setting: False
@@ -478,29 +501,6 @@ it cannot be overridden by specifying that parameter in the pyTivo.conf
 file.
 Example Settings: See Above and the forum.
 Available In: Server, Tivos, HD_tivos, SD_tivos
-
-type
-
-Default Setting: None
-Valid Entries: video, music, photo, or any other valid plugin name.
-Required: Yes
-Skill: Basic
-Description: Sets the type of share that this will be. This must be set
-to something otherwise pyTivo will not start. NOTE plugins names are
-generally lowercase.
-Example Settings: video, music, photo
-Available In: Shares
-
-path
-
-Default Setting: None
-Valid Entries: Any operating system path
-Required: Yes
-Skill: Basic
-Description: Sets the base path to your media content. While pyTivo will
-start with an invalid path your shares will not work at all.
-Example Settings: Windows = C:\videos | Linux = /home/user/media
-Available In: Shares
 
 aspect169
 
