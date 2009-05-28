@@ -33,7 +33,6 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         if name in self.containers or name == 'TiVoConnect':
             raise "Container Name in use"
         try:
-            settings['content_type'] = GetPlugin(settings['type']).CONTENT_TYPE
             self.containers[name] = settings
         except KeyError:
             self.logger.error('Unable to add container ' + name)
