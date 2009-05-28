@@ -230,13 +230,3 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                        'unsupported.tmpl'))
         t.query = query
         self.wfile.write(t)
-
-if __name__ == '__main__':
-    def start_server():
-        httpd = TivoHTTPServer(('', 9032), TivoHTTPHandler)
-        httpd.add_container('test', 'x-container/tivo-videos',
-                            r'C:\Documents and Settings\Armooo' +
-                            r'\Desktop\pyTivo\test')
-        httpd.serve_forever()
-
-    start_server()

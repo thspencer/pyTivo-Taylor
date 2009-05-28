@@ -177,9 +177,3 @@ class Beacon:
             name = address
 
         return name
-
-if __name__ == '__main__':
-    b = Beacon()
-
-    b.add_service('TiVoMediaServer:9032/http')
-    b.send_beacon()
