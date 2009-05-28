@@ -593,3 +593,18 @@ TiVos). If you don't plan to use these features, you don't need to set
 this.
 Example Settings: 012345678
 Available In: Server
+
+zeroconf
+
+Default Setting: Auto
+Valid Entries: True/False/Auto
+Required: No
+Skill: Moderate
+Description: Controls whether or not new-style, zeroconf-based beacons 
+are used. The default is to use them, unless there's a "_tivo_" section 
+with "shares" defined. The zeroconf beacons bypass the usual mechanism 
+whereby only the allowed shares are announced to specific TiVos; the 
+contents of the shares will still not appear on unauthorized TiVos, but 
+the names will.
+Example Settings: True/False/Auto
+Available In: Server

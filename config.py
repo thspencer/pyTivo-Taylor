@@ -82,10 +82,17 @@ def get_ip():
     return our_ip
 
 def get_zc():
-    try:
-        return config.getboolean('Server', 'zeroconf')
-    except NoOptionError, ValueError:
+    opt = get_server('zeroconf', 'auto').lower()
+
+    if opt == 'auto':
+        for section in config.sections():
+            if section.startswith('_tivo_'):
+                if config.has_option(section, 'shares'):
+                    return False
+    elif opt in ['false', 'no', 'off']:
         return False
+
+    return True
 
 def getBeaconAddresses():
     return get_server('beacon', '255.255.255.255')
