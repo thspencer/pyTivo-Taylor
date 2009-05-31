@@ -97,10 +97,8 @@ class Admin(Plugin):
         else:
             last_page = 'Admin'
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
-        t.container = cname
         t.time = '3'
         t.url = '/TiVoConnect?Command='+ last_page +'&Container=' + quote(cname)
         t.text = RESET_MSG % (quote(last_page), quote(cname))
@@ -123,8 +121,7 @@ class Admin(Plugin):
                                         dict(config.config.items(section,
                                                                  raw=True))))
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         t = Template(SETTINGS_TEMPLATE, filter=EncodeUnicode)
         t.container = cname
         t.quote = quote
@@ -199,10 +196,8 @@ class Admin(Plugin):
             config.config.add_section(query['new_Section'][0])
         config.write()
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
-        t.container = cname
         t.time = '10'
         t.url = '/TiVoConnect?Command=Admin&Container=' + quote(cname)
         t.text = SETTINGS1 % quote(cname)
@@ -212,8 +207,7 @@ class Admin(Plugin):
 
     def NPL(self, handler, query):
         shows_per_page = 50 # Change this to alter the number of shows returned
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         folder = ''
         AnchorItem = ''
         AnchorOffset = ''
@@ -253,7 +247,6 @@ class Admin(Plugin):
                     page = urllib2.urlopen(r)
                 except IOError, e:
                     t = Template(REDIRECT_TEMPLATE)
-                    t.container = cname
                     t.time = '20'
                     t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
                     t.text = UNABLE % (tivoIP, quote(cname))
@@ -324,8 +317,7 @@ class Admin(Plugin):
             ItemCount = 0
             FirstAnchor = ''
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         t = Template(NPL_TEMPLATE, filter=EncodeUnicode)
         t.quote = quote
         t.folder = folder
@@ -381,24 +373,29 @@ class Admin(Plugin):
         f = open(outfile, 'wb')
         kilobytes = 0
         start_time = time.time()
-        output = handle.read(1024)
-        while status[url]['running'] and output:
-            kilobytes += 1
-            f.write(output)
-            now = time.time()
-            elapsed = now - start_time
-            if elapsed >= 5:
-                status[url]['rate'] = int(kilobytes / elapsed)
-                kilobytes = 0
-                start_time = now
+        try:
             output = handle.read(1024)
-        status[url]['running'] = False
-        handle.close()
-        f.close()
+            while status[url]['running'] and output:
+                kilobytes += 1
+                f.write(output)
+                now = time.time()
+                elapsed = now - start_time
+                if elapsed >= 5:
+                    status[url]['rate'] = int(kilobytes / elapsed)
+                    status[url]['size'] += (kilobytes * 1024)
+                    kilobytes = 0
+                    start_time = now
+                output = handle.read(1024)
+            status[url]['finished'] = True
+        except Exception, msg:
+            logging.getLogger('pyTivo.admin').info(msg)
+        finally:
+            status[url]['running'] = False
+            handle.close()
+            f.close()
 
     def ToGo(self, handler, query):
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         tivoIP = query['TiVo'][0]
         tivo_mak = config.get_server('tivo_mak')
         for name, data in config.getShares():
@@ -413,12 +410,12 @@ class Admin(Plugin):
             parse_url = urlparse(str(query['Url'][0]))
             theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
                                          parse_url[2], parse_url[4])
-            name = unquote(parse_url[2])[10:300].split('.')
+            name = unquote(parse_url[2])[10:].split('.')
             name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
             outfile = os.path.join(togo_path, "".join(name))
 
             status[theurl] = {'running': True, 'error': '', 'rate': '',
-                              'finished': False}
+                              'size': 0, 'finished': False}
 
             thread.start_new_thread(Admin.get_tivo_file,
                                     (self, theurl, tivo_mak, tivoIP, outfile))
@@ -441,8 +438,7 @@ class Admin(Plugin):
 
         status[theurl]['running'] = False
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         tivoIP = query['TiVo'][0]
         command = query['Redirect'][0]
         t = Template(REDIRECT_TEMPLATE)
@@ -464,10 +460,8 @@ class Admin(Plugin):
                               query['togo_path'][0])
         config.write()
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
+        cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
-        t.container = cname
         t.time = '2'
         t.url = ('/TiVoConnect?last_page=NPL&Command=Reset&Container=' +
                  quote(cname))
