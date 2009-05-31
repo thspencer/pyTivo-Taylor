@@ -88,6 +88,8 @@ def get_zc():
         for section in config.sections():
             if section.startswith('_tivo_'):
                 if config.has_option(section, 'shares'):
+                    logger = logging.getLogger('pyTivo.config')
+                    logger.info('Shares security in use -- zeroconf disabled')
                     return False
     elif opt in ['false', 'no', 'off']:
         return False
