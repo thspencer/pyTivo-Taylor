@@ -374,9 +374,9 @@ class Admin(Plugin):
         kilobytes = 0
         start_time = time.time()
         try:
-            output = handle.read(1024)
+            output = handle.read(1024000)
             while status[url]['running'] and output:
-                kilobytes += 1
+                kilobytes += 1000
                 f.write(output)
                 now = time.time()
                 elapsed = now - start_time
@@ -385,8 +385,9 @@ class Admin(Plugin):
                     status[url]['size'] += (kilobytes * 1024)
                     kilobytes = 0
                     start_time = now
-                output = handle.read(1024)
-            status[url]['finished'] = True
+                output = handle.read(1024000)
+            if status[url]['running']:
+                status[url]['finished'] = True
         except Exception, msg:
             logging.getLogger('pyTivo.admin').info(msg)
         finally:
