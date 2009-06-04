@@ -343,9 +343,9 @@ class Admin(Plugin):
 
         # remove the port from the URL to avoid authentication errors
         parse_url = urlparse(url)
-        theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
+        newurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
                                      parse_url[2], parse_url[4])
-        r = urllib2.Request(theurl)
+        r = urllib2.Request(newurl)
         auth_handler = urllib2.HTTPDigestAuthHandler()
         auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', mak)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
