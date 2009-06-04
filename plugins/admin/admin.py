@@ -48,7 +48,7 @@ The <a href="/TiVoConnect?last_page=NPL&Command=Reset&Container=%s">Reset</a>
 will occur in 2 seconds."""
 
 TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
-You selected transfer has been initiated.<br>
+Your selected transfer has been initiated.<br>
 The <a href="/TiVoConnect?Command=%s&Container=%s&TiVo=%s">ToGo</a> page 
 will reload in 3 seconds."""
 
