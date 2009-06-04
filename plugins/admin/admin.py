@@ -341,6 +341,7 @@ class Admin(Plugin):
         # global status
         cj = cookielib.LWPCookieJar()
 
+        # remove the port from the URL to avoid authentication errors
         parse_url = urlparse(url)
         theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
                                      parse_url[2], parse_url[4])
