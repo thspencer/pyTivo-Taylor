@@ -285,10 +285,7 @@ class Admin(Plugin):
                         entry['Icon'] = icon
                     url = tag_data(item, 'Links/Content/Url')
                     if url:
-                        parse_url = urlparse(url)
-                        entry['Url'] = quote('http://%s%s?%s' %
-                                             (parse_url[1].split(':')[0],
-                                              parse_url[2], parse_url[4]))
+                        entry['Url'] = quote(url)
                     keys = ('SourceSize', 'Duration', 'CaptureDate',
                             'EpisodeTitle', 'Description',
                             'SourceChannel', 'SourceStation')
@@ -345,7 +342,10 @@ class Admin(Plugin):
         # global status
         cj = cookielib.LWPCookieJar()
 
-        r = urllib2.Request(url)
+        parse_url = urlparse(url)
+        theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
+                                     parse_url[2], parse_url[4])
+        r = urllib2.Request(theurl)
         auth_handler = urllib2.HTTPDigestAuthHandler()
         auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', mak)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
@@ -408,9 +408,8 @@ class Admin(Plugin):
         command = query['Redirect'][0]
         params = (command, quote(cname), tivoIP)
         if tivo_mak and togo_path:
-            parse_url = urlparse(str(query['Url'][0]))
-            theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
-                                         parse_url[2], parse_url[4])
+            theurl = query['Url'][0]
+            parse_url = urlparse(theurl)
             name = unquote(parse_url[2])[10:].split('.')
             name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
             outfile = os.path.join(togo_path, "".join(name))
@@ -433,10 +432,7 @@ class Admin(Plugin):
         handler.wfile.write(t)
 
     def ToGoStop(self, handler, query):
-        parse_url = urlparse(str(query['Url'][0]))
-        theurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
-                                     parse_url[2], parse_url[4])
-
+        theurl = query['Url'][0]
         status[theurl]['running'] = False
 
         cname = query['Container'][0].split('/')[0]
