@@ -285,7 +285,7 @@ class Admin(Plugin):
                         entry['Icon'] = icon
                     url = tag_data(item, 'Links/Content/Url')
                     if url:
-                        entry['Url'] = quote(url)
+                        entry['Url'] = url
                     keys = ('SourceSize', 'Duration', 'CaptureDate',
                             'EpisodeTitle', 'Description',
                             'SourceChannel', 'SourceStation')
@@ -326,7 +326,6 @@ class Admin(Plugin):
         t.tivoIP = tivoIP
         t.container = cname
         t.data = data
-        t.unquote = unquote
         t.len = len
         t.TotalItems = int(TotalItems)
         t.ItemStart = int(ItemStart)
