@@ -240,9 +240,8 @@ class Admin(Plugin):
             urllib2.install_opener(opener)
 
             if (theurl not in tivo_cache or
-                (tivo_cache[theurl]['thepage'] == '' or
-                 (time.time() - tivo_cache[theurl]['thepage_time']) >= 60)):
-                # if page is not cached, empty or old then retreive it
+                (time.time() - tivo_cache[theurl]['thepage_time']) >= 60):
+                # if page is not cached or old then retreive it
                 try:
                     page = urllib2.urlopen(r)
                 except IOError, e:
@@ -254,11 +253,11 @@ class Admin(Plugin):
                     handler.end_headers()
                     handler.wfile.write(t)
                     return
-                tivo_cache[theurl] = {'thepage': page.read(),
+                tivo_cache[theurl] = {'thepage': minidom.parse(page),
                                       'thepage_time': time.time()}
                 page.close()
 
-            xmldoc = minidom.parseString(tivo_cache[theurl]['thepage'])
+            xmldoc = tivo_cache[theurl]['thepage']
             items = xmldoc.getElementsByTagName('Item')
             TotalItems = tag_data(xmldoc, 'Details/TotalItems')
             ItemStart = tag_data(xmldoc, 'ItemStart')
