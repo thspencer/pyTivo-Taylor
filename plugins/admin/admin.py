@@ -209,8 +209,6 @@ class Admin(Plugin):
         shows_per_page = 50 # Change this to alter the number of shows returned
         cname = query['Container'][0].split('/')[0]
         folder = ''
-        AnchorItem = ''
-        AnchorOffset = ''
         tivo_mak = config.get_server('tivo_mak')
         for name, data in config.getShares():
             if cname == name:
@@ -224,14 +222,12 @@ class Admin(Plugin):
                       '/TiVoConnect?Command=QueryContainer&ItemCount=' +
                       str(shows_per_page) + '&Container=/NowPlaying')
             if 'Folder' in query:
-                folder += str(query['Folder'][0])
+                folder += query['Folder'][0]
                 theurl += '/' + folder
             if 'AnchorItem' in query:
-                AnchorItem += str(query['AnchorItem'][0])
-                theurl += '&AnchorItem=' + quote(AnchorItem)
+                theurl += '&AnchorItem=' + quote(query['AnchorItem'][0])
             if 'AnchorOffset' in query:
-                AnchorOffset += str(query['AnchorOffset'][0])
-                theurl += '&AnchorOffset=' + AnchorOffset
+                theurl += '&AnchorOffset=' + query['AnchorOffset'][0]
 
             r = urllib2.Request(theurl)
             auth_handler = urllib2.HTTPDigestAuthHandler()
