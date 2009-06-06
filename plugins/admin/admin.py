@@ -48,7 +48,7 @@ The <a href="/TiVoConnect?last_page=NPL&Command=Reset&Container=%s">Reset</a>
 will occur in 2 seconds."""
 
 TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
-You selected transfer has been initiated.<br>
+Your selected transfer has been initiated.<br>
 The <a href="/TiVoConnect?Command=%s&Container=%s&TiVo=%s">ToGo</a> page 
 will reload in 3 seconds."""
 
@@ -209,8 +209,6 @@ class Admin(Plugin):
         shows_per_page = 50 # Change this to alter the number of shows returned
         cname = query['Container'][0].split('/')[0]
         folder = ''
-        AnchorItem = ''
-        AnchorOffset = ''
         tivo_mak = config.get_server('tivo_mak')
         for name, data in config.getShares():
             if cname == name:
@@ -224,14 +222,12 @@ class Admin(Plugin):
                       '/TiVoConnect?Command=QueryContainer&ItemCount=' +
                       str(shows_per_page) + '&Container=/NowPlaying')
             if 'Folder' in query:
-                folder += str(query['Folder'][0])
+                folder += query['Folder'][0]
                 theurl += '/' + folder
             if 'AnchorItem' in query:
-                AnchorItem += str(query['AnchorItem'][0])
-                theurl += '&AnchorItem=' + quote(AnchorItem)
+                theurl += '&AnchorItem=' + quote(query['AnchorItem'][0])
             if 'AnchorOffset' in query:
-                AnchorOffset += str(query['AnchorOffset'][0])
-                theurl += '&AnchorOffset=' + AnchorOffset
+                theurl += '&AnchorOffset=' + query['AnchorOffset'][0]
 
             r = urllib2.Request(theurl)
             auth_handler = urllib2.HTTPDigestAuthHandler()
@@ -240,9 +236,8 @@ class Admin(Plugin):
             urllib2.install_opener(opener)
 
             if (theurl not in tivo_cache or
-                (tivo_cache[theurl]['thepage'] == '' or
-                 (time.time() - tivo_cache[theurl]['thepage_time']) >= 60)):
-                # if page is not cached, empty or old then retreive it
+                (time.time() - tivo_cache[theurl]['thepage_time']) >= 60):
+                # if page is not cached or old then retreive it
                 try:
                     page = urllib2.urlopen(r)
                 except IOError, e:
@@ -254,11 +249,11 @@ class Admin(Plugin):
                     handler.end_headers()
                     handler.wfile.write(t)
                     return
-                tivo_cache[theurl] = {'thepage': page.read(),
+                tivo_cache[theurl] = {'thepage': minidom.parse(page),
                                       'thepage_time': time.time()}
                 page.close()
 
-            xmldoc = minidom.parseString(tivo_cache[theurl]['thepage'])
+            xmldoc = tivo_cache[theurl]['thepage']
             items = xmldoc.getElementsByTagName('Item')
             TotalItems = tag_data(xmldoc, 'Details/TotalItems')
             ItemStart = tag_data(xmldoc, 'ItemStart')
