@@ -461,8 +461,7 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
 
         if ((config.get169Blacklist(tsn) and not config.get169Setting(tsn))
             or (config.get169Letterbox(tsn) and config.get169Setting(tsn))):
-            if vInfo['dar1'] == None or not vInfo['dar1'] in ('4:3', '8:9',
-                                                              '880:657'):
+            if vInfo['dar1'] and vInfo['dar1'] not in ('4:3', '8:9', '880:657'):
                 message = (False, ('DAR %s not supported ' +
                                    'by BLACKLIST_169 tivos') % vInfo['dar1'])
                 break
