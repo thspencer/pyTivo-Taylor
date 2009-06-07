@@ -62,13 +62,14 @@ class Video(Plugin):
         tsn = handler.headers.getheader('tsn', '')
 
         is_tivo_file = (path[-5:].lower() == '.tivo')
-        compatible = transcode.tivo_compatible(path, tsn, mime)[0]
 
-        if is_tivo_file and compatible:
+        if is_tivo_file and transcode.tivo_compatible(path, tsn, mime)[0]:
             mime = 'video/x-tivo-mpeg'
 
         if 'Format' in query:
             mime = query['Format'][0]
+
+        compatible = transcode.tivo_compatible(path, tsn, mime)[0]
 
         offset = handler.headers.getheader('Range')
         if offset:
