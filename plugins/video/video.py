@@ -57,14 +57,6 @@ class Video(Plugin):
         else:
             return transcode.supported_format(full_path)
 
-    def terminate_file(self, handler, mime):
-        handler.send_response(206)
-        handler.send_header('Connection', 'close')
-        handler.send_header('Content-Type', mime)
-        handler.send_header('Transfer-Encoding', 'chunked')
-        handler.end_headers()
-        handler.wfile.write('0\r\n')
-
     def send_file(self, handler, path, query):
         mime = 'video/mpeg'
         tsn = handler.headers.getheader('tsn', '')
@@ -81,14 +73,19 @@ class Video(Plugin):
         offset = handler.headers.getheader('Range')
         if offset:
             offset = int(offset[6:-1])  # "bytes=XXX-"
+
+        handler.send_response(206)
+        handler.send_header('Content-Type', mime)
+
         if offset:
             if (not compatible or (mime == 'video/mpeg' and is_tivo_file) or
                 offset >= os.stat(path).st_size):
-                self.terminate_file(handler, mime)
+                handler.send_header('Connection', 'close')
+                handler.send_header('Transfer-Encoding', 'chunked')
+                handler.end_headers()
+                handler.wfile.write('0\r\n')
                 return
 
-        handler.send_response(200)
-        handler.send_header('Content-Type', mime)
         handler.end_headers()
 
         if compatible:
