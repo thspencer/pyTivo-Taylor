@@ -129,7 +129,9 @@ def find_atoms(size, datastream):
 def output(outfile, offset, data):
     global count
     length = len(data)
-    if count + length > offset:
+    if count > offset:
+        outfile.write(data)
+    elif count + length > offset:
         outfile.write(data[offset - count:])
     count += length
 
