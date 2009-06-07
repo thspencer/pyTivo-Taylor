@@ -79,9 +79,10 @@ class Video(Plugin):
             mime = query['Format'][0]
 
         range = handler.headers.getheader('Range')
-        if range and range != 'bytes=0-':
+        if range:
+            range = int(range[6:-1])
+        if range:
             if notrans and not (mime == 'video/mpeg' and is_tivo_file):
-                range = int(range[6:-1])
                 if range >= os.stat(path).st_size:
                     self.terminate_file(handler, mime)
                     return
