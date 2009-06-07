@@ -2,6 +2,8 @@ import cgi
 import logging
 import os
 import re
+import shutil
+import subprocess
 import time
 import traceback
 import urllib
@@ -14,6 +16,7 @@ from Cheetah.Template import Template
 from lrucache import LRUCache
 import config
 import mind
+import qtfaststart
 import transcode
 from plugin import EncodeUnicode, Plugin, quote
 
@@ -54,12 +57,22 @@ class Video(Plugin):
         else:
             return transcode.supported_format(full_path)
 
+    def terminate_file(self, handler, mime):
+        handler.send_response(206)
+        handler.send_header('Connection', 'close')
+        handler.send_header('Content-Type', mime)
+        handler.send_header('Transfer-Encoding', 'chunked')
+        handler.end_headers()
+        handler.wfile.write("\x30\x0D\x0A")
+
     def send_file(self, handler, path, query):
         mime = 'video/mpeg'
         tsn = handler.headers.getheader('tsn', '')
 
-        if (path[-5:].lower() == '.tivo' and
-            transcode.tivo_compatible(path, tsn, mime)[0]):
+        is_tivo_file = (path[-5:].lower() == '.tivo')
+        notrans = transcode.tivo_compatible(path, tsn, mime)[0]
+
+        if is_tivo_file and notrans:
             mime = 'video/x-tivo-mpeg'
 
         if 'Format' in query:
@@ -67,18 +80,45 @@ class Video(Plugin):
 
         range = handler.headers.getheader('Range')
         if range and range != 'bytes=0-':
-            handler.send_response(206)
-            handler.send_header('Connection', 'close')
-            handler.send_header('Content-Type', mime)
-            handler.send_header('Transfer-Encoding', 'chunked')
-            handler.end_headers()
-            handler.wfile.write("\x30\x0D\x0A")
-            return
+            if notrans and not (mime == 'video/mpeg' and is_tivo_file):
+                range = int(range[6:-1])
+                if range >= os.stat(path).st_size:
+                    self.terminate_file(handler, mime)
+                    return
+            else:
+                self.terminate_file(handler, mime)
+                return
 
         handler.send_response(200)
         handler.send_header('Content-Type', mime)
         handler.end_headers()
-        transcode.output_video(path, handler.wfile, tsn, mime)
+
+        if notrans:
+            logger.debug('%s is tivo compatible' % path)
+            f = open(path, 'rb')
+            try:
+                if mime == 'video/mp4':
+                    qtfaststart.fast_start(f, handler.wfile)
+                else:
+                    if mime == 'video/mpeg' and is_tivo_file:
+                        tivodecode_path = config.get_bin('tivodecode')
+                        tivo_mak = config.get_server('tivo_mak')
+                        if tivodecode_path and tivo_mak:
+                            f.close()
+                            tcmd = [tivodecode_path, '-m', tivo_mak, path]
+                            tivodecode = subprocess.Popen(tcmd,
+                                stdout=subprocess.PIPE, bufsize=(512 * 1024))
+                            f = tivodecode.stdout
+                    elif range:
+                        f.seek(range)
+                    shutil.copyfileobj(f, handler.wfile)
+            except Exception, msg:
+                logger.info(msg)
+            f.close()
+        else:
+            logger.debug('%s is not tivo compatible' % path)
+            transcode.transcode(False, path, handler.wfile, tsn)
+        logger.debug("Finished outputing video")
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
