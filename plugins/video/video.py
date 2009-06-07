@@ -63,30 +63,27 @@ class Video(Plugin):
         handler.send_header('Content-Type', mime)
         handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
-        handler.wfile.write("\x30\x0D\x0A")
+        handler.wfile.write('0\r\n')
 
     def send_file(self, handler, path, query):
         mime = 'video/mpeg'
         tsn = handler.headers.getheader('tsn', '')
 
         is_tivo_file = (path[-5:].lower() == '.tivo')
-        notrans = transcode.tivo_compatible(path, tsn, mime)[0]
+        compatible = transcode.tivo_compatible(path, tsn, mime)[0]
 
-        if is_tivo_file and notrans:
+        if is_tivo_file and compatible:
             mime = 'video/x-tivo-mpeg'
 
         if 'Format' in query:
             mime = query['Format'][0]
 
-        range = handler.headers.getheader('Range')
-        if range:
-            range = int(range[6:-1])
-        if range:
-            if notrans and not (mime == 'video/mpeg' and is_tivo_file):
-                if range >= os.stat(path).st_size:
-                    self.terminate_file(handler, mime)
-                    return
-            else:
+        offset = handler.headers.getheader('Range')
+        if offset:
+            offset = int(offset[6:-1])  # "bytes=XXX-"
+        if offset:
+            if (not compatible or (mime == 'video/mpeg' and is_tivo_file) or
+                offset >= os.stat(path).st_size):
                 self.terminate_file(handler, mime)
                 return
 
@@ -94,7 +91,7 @@ class Video(Plugin):
         handler.send_header('Content-Type', mime)
         handler.end_headers()
 
-        if notrans:
+        if compatible:
             logger.debug('%s is tivo compatible' % path)
             f = open(path, 'rb')
             try:
@@ -110,8 +107,8 @@ class Video(Plugin):
                             tivodecode = subprocess.Popen(tcmd,
                                 stdout=subprocess.PIPE, bufsize=(512 * 1024))
                             f = tivodecode.stdout
-                    elif range:
-                        f.seek(range)
+                    elif offset:
+                        f.seek(offset)
                     shutil.copyfileobj(f, handler.wfile)
             except Exception, msg:
                 logger.info(msg)
