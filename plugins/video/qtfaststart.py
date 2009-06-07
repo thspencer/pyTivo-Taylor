@@ -53,6 +53,8 @@ from StringIO import StringIO
 VERSION = "1.0"
 CHUNK_SIZE = 8192
 
+count = 0
+
 def read_atom(datastream):
     """
         Read an atom and return a tuple of (size, type) where size is the size
@@ -124,20 +126,30 @@ def find_atoms(size, datastream):
             # Ignore this atom, seek to the end of it.
             datastream.seek(atom_size - 8, os.SEEK_CUR)
 
-def fast_start(datastream, outfile):
+def output(outfile, offset, data):
+    global count
+    length = len(data)
+    if count + length > offset:
+        outfile.write(data[offset - count:])
+    count += length
+
+def fast_start(datastream, outfile, offset=0):
     """
         Convert a Quicktime/MP4 file for streaming by moving the metadata to
         the front of the file. This method writes a new file.
     """
+
+    global count
+    count = 0
     
     # Get the top level atom index
     index = get_index(datastream)
     # Make sure moov occurs AFTER mdat, otherwise no need to run!
     if len(index) == 0 or index["moov"][0] < index["mdat"][0]:
         logger.debug('mp4 already streamable -- copying')
-	datastream.seek(0)
+        datastream.seek(offset)
         shutil.copyfileobj(datastream, outfile)
-	return
+        return
 
     # Read and fix moov
     datastream.seek(index["moov"][0])
@@ -165,11 +177,11 @@ def fast_start(datastream, outfile):
 
     # Write ftype
     datastream.seek(index["ftyp"][0])
-    outfile.write(datastream.read(index["ftyp"][1]))
+    output(outfile, offset, datastream.read(index["ftyp"][1]))
     
     # Write moov
     moov.seek(0)
-    outfile.write(moov.read())
+    output(outfile, offset, moov.read())
     
     # Write the rest
     atoms = [atom for atom in index.keys() if atom not in ["ftyp", "moov"]]
@@ -180,7 +192,7 @@ def fast_start(datastream, outfile):
         
         # Write in chunks to not use too much memory
         for x in range(size / CHUNK_SIZE):
-            outfile.write(datastream.read(CHUNK_SIZE))
+            output(outfile, offset, datastream.read(CHUNK_SIZE))
             
         if size % CHUNK_SIZE:
-            outfile.write(datastream.read(size % CHUNK_SIZE))
+            outupt(outfile, offset, datastream.read(size % CHUNK_SIZE))

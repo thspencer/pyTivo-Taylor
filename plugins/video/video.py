@@ -93,7 +93,7 @@ class Video(Plugin):
             f = open(path, 'rb')
             try:
                 if mime == 'video/mp4':
-                    qtfaststart.fast_start(f, handler.wfile)
+                    qtfaststart.fast_start(f, handler.wfile, offset)
                 else:
                     if mime == 'video/mpeg' and is_tivo_file:
                         tivodecode_path = config.get_bin('tivodecode')
