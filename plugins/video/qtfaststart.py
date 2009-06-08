@@ -197,4 +197,4 @@ def fast_start(datastream, outfile, offset=0):
             output(outfile, offset, datastream.read(CHUNK_SIZE))
             
         if size % CHUNK_SIZE:
-            outupt(outfile, offset, datastream.read(size % CHUNK_SIZE))
+            output(outfile, offset, datastream.read(size % CHUNK_SIZE))
