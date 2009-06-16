@@ -23,6 +23,7 @@ GOOD_MPEG_FPS = ['23.98', '24.00', '25.00', '29.97',
 
 BLOCKSIZE = 512 * 1024
 MAXBLOCKS = 2
+TIMEOUT = 600
 
 # XXX BIG HACK
 # subprocess is broken for me on windows so super hack
@@ -92,7 +93,8 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     debug(' '.join(cmd))
 
     ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0, 
-                            'blocks': []}
+                            'last_read': time.time(), 'blocks': []}
+    reap_process(inFile)
     transfer_blocks(inFile, outFile)
 
 def is_resumable(inFile, offset):
@@ -129,6 +131,7 @@ def transfer_blocks(inFile, outFile):
     while True:
         try:
             block = proc['process'].stdout.read(BLOCKSIZE)
+            proc['last_read'] = time.time()
         except Exception, msg:
             logger.error(msg)
             del ffmpeg_procs[inFile]
@@ -155,6 +158,15 @@ def transfer_blocks(inFile, outFile):
         except Exception, msg:
             logger.error(msg)
             break
+
+def reap_process(inFile):
+    if inFile in ffmpeg_procs:
+        proc = ffmpeg_procs[inFile]
+        if proc['last_read'] + TIMEOUT < time.time():
+            del ffmpeg_procs[inFile]
+            kill(proc['process'])
+        else:
+            threading.Timer(TIMEOUT, reap_process, (inFile,)).start()
 
 def select_audiocodec(isQuery, inFile, tsn=''):
     if inFile[-5:].lower() == '.tivo':
