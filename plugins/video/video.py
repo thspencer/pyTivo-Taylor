@@ -69,6 +69,8 @@ class Video(Plugin):
         if 'Format' in query:
             mime = query['Format'][0]
 
+        is_tivo_push = (mime == 'video/mpeg' and is_tivo_file)
+
         compatible = transcode.tivo_compatible(path, tsn, mime)[0]
 
         offset = handler.headers.getheader('Range')
@@ -79,7 +81,7 @@ class Video(Plugin):
         handler.send_header('Content-Type', mime)
 
         if offset:
-            if ((compatible and ((mime == 'video/mpeg' and is_tivo_file)
+            if ((compatible and (is_tivo_push
                  or offset >= os.stat(path).st_size)) or
                 (not compatible and not transcode.is_resumable(path, offset))):
                 handler.send_header('Connection', 'close')
@@ -97,7 +99,7 @@ class Video(Plugin):
                 if mime == 'video/mp4':
                     qtfaststart.fast_start(f, handler.wfile, offset)
                 else:
-                    if mime == 'video/mpeg' and is_tivo_file:
+                    if is_tivo_push:
                         tivodecode_path = config.get_bin('tivodecode')
                         tivo_mak = config.get_server('tivo_mak')
                         if tivodecode_path and tivo_mak:
