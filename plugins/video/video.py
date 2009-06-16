@@ -79,8 +79,9 @@ class Video(Plugin):
         handler.send_header('Content-Type', mime)
 
         if offset:
-            if (not compatible or (mime == 'video/mpeg' and is_tivo_file) or
-                offset >= os.stat(path).st_size):
+            if ((compatible and ((mime == 'video/mpeg' and is_tivo_file)
+                 or offset >= os.stat(path).st_size)) or
+                (not compatible and not transcode.is_resumable(path, offset))):
                 handler.send_header('Connection', 'close')
                 handler.send_header('Transfer-Encoding', 'chunked')
                 handler.end_headers()
@@ -113,7 +114,10 @@ class Video(Plugin):
             f.close()
         else:
             logger.debug('%s is not tivo compatible' % path)
-            transcode.transcode(False, path, handler.wfile, tsn)
+            if offset:
+                transcode.resume_transfer(path, handler.wfile, offset)
+            else:
+                transcode.transcode(False, path, handler.wfile, tsn)
         logger.debug("Finished outputing video")
 
     def __duration(self, full_path):

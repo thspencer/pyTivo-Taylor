@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 import lrucache
@@ -15,9 +16,13 @@ from plugin import GetPlugin
 logger = logging.getLogger('pyTivo.video.transcode')
 
 info_cache = lrucache.LRUCache(1000)
+ffmpeg_procs = {}
 
 GOOD_MPEG_FPS = ['23.98', '24.00', '25.00', '29.97',
                  '30.00', '50.00', '59.94', '60.00']
+
+BLOCKSIZE = 512 * 1024
+MAXBLOCKS = 2
 
 # XXX BIG HACK
 # subprocess is broken for me on windows so super hack
@@ -86,10 +91,78 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
     debug(' '.join(cmd))
 
+    transfer_blocks(ffmpeg, inFile, outFile)
+
+def is_resumable(inFile, offset):
+    if inFile in ffmpeg_procs:
+        process, start, end, blocks, timer = ffpeg_procs[inFile]
+        if start <= offset < end:
+            return True
+        else:
+            timer.cancel()
+            del ffmpeg_procs[inFile]
+            kill(process)
+    return False
+
+def resume_transfer(inFile, outFile, offset):
+    process, start, end, blocks, timer = ffpeg_procs[inFile]
+    offset -= start
     try:
-        shutil.copyfileobj(ffmpeg.stdout, outFile)
-    except:
-        kill(ffmpeg)
+        for block in blocks:
+            if offset < len(block):
+                outFile.write(block[offset:])
+            offset -= len(block)
+        outFile.flush()
+    except Exception, msg:
+        logger.error(msg)
+        return
+    timer.cancel()
+    del ffmpeg_procs[inFile]
+
+    transfer_blocks(process, inFile, outFile, end)
+
+def transfer_blocks(process, inFile, outFile, start=0):
+    blocks = []
+
+    while True:
+        try:
+            block = process.stdout.read(BLOCKSIZE)
+        except Exception, msg:
+            logger.error(msg)
+            kill(process)
+            break
+
+        if not block:
+            try:
+                outFile.flush()
+            except Exception, msg:
+                logger.error(msg)
+                save_process(process, inFile, start, blocks)
+            break
+
+        blocks.append(block)
+        if len(blocks) > MAXBLOCKS:
+            start += len(blocks[0])
+            blocks.pop(0)
+
+        try:
+            outFile.write(block)
+        except Exception, msg:
+            logger.error(msg)
+            save_process(process, inFile, start, blocks)
+            break
+
+def save_process(process, inFile, start, blocks):
+    end = start + sum([len(b) for b in blocks])
+    timer = threading.Timer(600, reap_process, inFile)
+    ffmpeg_procs[inFile] = (process, start, end, blocks, timer)
+    timer.start()
+
+def reap_process(inFile):
+    if inFile in ffmpeg_procs:
+        process = ffmpeg_procs[inFile][0]
+        del ffmpeg_procs[inFile]
+        kill(process)
 
 def select_audiocodec(isQuery, inFile, tsn=''):
     if inFile[-5:].lower() == '.tivo':
