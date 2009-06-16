@@ -91,24 +91,25 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
     debug(' '.join(cmd))
 
-    transfer_blocks(ffmpeg, inFile, outFile)
+    ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0, 
+                            'blocks': []}
+    transfer_blocks(inFile, outFile)
 
 def is_resumable(inFile, offset):
     if inFile in ffmpeg_procs:
-        process, start, end, blocks, timer = ffpeg_procs[inFile]
-        if start <= offset < end:
+        proc = ffmpeg_procs[inFile]
+        if proc['start'] <= offset < proc['end']:
             return True
         else:
-            timer.cancel()
             del ffmpeg_procs[inFile]
-            kill(process)
+            kill(proc['process'])
     return False
 
 def resume_transfer(inFile, outFile, offset):
-    process, start, end, blocks, timer = ffpeg_procs[inFile]
-    offset -= start
+    proc = ffmpeg_procs[inFile]
+    offset -= proc['start']
     try:
-        for block in blocks:
+        for block in proc['blocks']:
             if offset < len(block):
                 outFile.write(block[offset:])
             offset -= len(block)
@@ -116,20 +117,22 @@ def resume_transfer(inFile, outFile, offset):
     except Exception, msg:
         logger.error(msg)
         return
-    timer.cancel()
-    del ffmpeg_procs[inFile]
+    proc['start'] = proc['end']
+    proc['blocks'] = []
 
-    transfer_blocks(process, inFile, outFile, end)
+    transfer_blocks(inFile, outFile)
 
-def transfer_blocks(process, inFile, outFile, start=0):
-    blocks = []
+def transfer_blocks(inFile, outFile):
+    proc = ffmpeg_procs[inFile]
+    blocks = proc['blocks']
 
     while True:
         try:
-            block = process.stdout.read(BLOCKSIZE)
+            block = proc['process'].stdout.read(BLOCKSIZE)
         except Exception, msg:
             logger.error(msg)
-            kill(process)
+            del ffmpeg_procs[inFile]
+            kill(proc['process'])
             break
 
         if not block:
@@ -137,32 +140,21 @@ def transfer_blocks(process, inFile, outFile, start=0):
                 outFile.flush()
             except Exception, msg:
                 logger.error(msg)
-                save_process(process, inFile, start, blocks)
+            else:
+                del ffmpeg_procs[inFile]
             break
 
         blocks.append(block)
+        proc['end'] += len(block)
         if len(blocks) > MAXBLOCKS:
-            start += len(blocks[0])
+            proc['start'] += len(blocks[0])
             blocks.pop(0)
 
         try:
             outFile.write(block)
         except Exception, msg:
             logger.error(msg)
-            save_process(process, inFile, start, blocks)
             break
-
-def save_process(process, inFile, start, blocks):
-    end = start + sum([len(b) for b in blocks])
-    timer = threading.Timer(600, reap_process, inFile)
-    ffmpeg_procs[inFile] = (process, start, end, blocks, timer)
-    timer.start()
-
-def reap_process(inFile):
-    if inFile in ffmpeg_procs:
-        process = ffmpeg_procs[inFile][0]
-        del ffmpeg_procs[inFile]
-        kill(process)
 
 def select_audiocodec(isQuery, inFile, tsn=''):
     if inFile[-5:].lower() == '.tivo':
