@@ -213,12 +213,16 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                        'following lines to pyTivo.conf<br><br>' +
                        '[Admin]<br>type=admin')
 
-        t.shares = 'Video shares:<br/>'
-        for section, settings in config.getShares():
-            if settings.get('type') == 'video':
-                t.shares += ('<a href="TiVoConnect?Command=QueryContainer&' +
-                             'Container=' + quote(section) + '">' + section +
-                             '</a><br/>')
+        if (config.get_server('tivo_username') and
+            config.get_server('tivo_password')):
+            t.shares = 'Push from video shares:<br/>'
+            for section, settings in config.getShares():
+                if settings.get('type') == 'video':
+                    t.shares += ('<a href="TiVoConnect?Command=' +
+                                 'QueryContainer&Container=' +
+                                 quote(section) + '">' + section + '</a><br/>')
+        else:
+            t.shares = ''
 
         self.wfile.write(t)
 
