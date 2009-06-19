@@ -15,19 +15,6 @@ function fillBlank()
     }
 }
 
-function divSet(div, mode)
-{
-    if (document.getElementById) {
-        div.style.visibility = mode;
-    } else {
-        if (document.layers) {  // Netscape 4
-            document.layers[div].display = mode;
-        } else {        // IE 4
-            document.all.hideshow.div.visibility = mode;
-        }
-    }
-}
-
 function switchDiv(pass, type)
 {
     //loop through the array and hide/show each element by id
@@ -35,9 +22,9 @@ function switchDiv(pass, type)
     for (var i = 0; i < divs.length; i++) {
         if (divs[i].id.match(type)) {
             if (divs[i].id == pass) {
-                divSet(divs[i], '')
+                divs[i].style.visibility = ''
             } else {
-                divSet(divs[i], 'hidden')
+                divs[i].style.visibility = 'hidden'
             }
         }
     }
