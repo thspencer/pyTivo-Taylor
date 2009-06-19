@@ -96,6 +96,9 @@ def get_zc():
 
     return True
 
+def get_mind():
+    return get_server('tivo_mind', 'mind.tivo.com:8181')
+
 def getBeaconAddresses():
     return get_server('beacon', '255.255.255.255')
 

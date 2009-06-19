@@ -31,6 +31,7 @@ else:
             self.__logger = logging.getLogger('pyTivo.mind')
             self.__username = username
             self.__password = password
+            self.__mind = config.get_mind()
 
             cj = cookielib.CookieJar()
             cp = urllib2.HTTPCookieProcessor(cj)
@@ -154,7 +155,7 @@ else:
             }
 
             r =  urllib2.Request(
-                'https://mind.tivo.com:8181/mind/login',
+                'https://%s/mind/login' % self.__mind,
                 urllib.urlencode(data)
             )
             try:
@@ -166,7 +167,7 @@ else:
 
         def __dict_request(self, data, req):
             r = urllib2.Request(
-                'https://mind.tivo.com:8181/mind/mind7?type=' + req,
+                'https://%s/mind/mind7?type=%s' % (self.__mind, req),
                 dictcode(data),
                 {'Content-Type': 'x-tivo/dict-binary'}
             )
