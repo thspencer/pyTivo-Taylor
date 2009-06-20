@@ -74,23 +74,25 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     if inFile[-5:].lower() == '.tivo':
         tivodecode_path = config.get_bin('tivodecode')
         tivo_mak = config.get_server('tivo_mak')
-        if tivodecode_path and tivo_mak:
-            tcmd = [tivodecode_path, '-m', tivo_mak, inFile]
+        tcmd = [tivodecode_path, '-m', tivo_mak, inFile]
+        tivodecode = subprocess.Popen(tcmd, stdout=subprocess.PIPE,
+                                      bufsize=(512 * 1024))
+        if tivo_compatible(inFile, tsn)[0]:
+            cmd = ''
+            ffmpeg = tivodecode
+        else:
             cmd = [ffmpeg_path, '-i', '-'] + cmd_string.split()
-            tivodecode = subprocess.Popen(tcmd, stdout=subprocess.PIPE,
-                                          bufsize=(512 * 1024))
             ffmpeg = subprocess.Popen(cmd, stdin=tivodecode.stdout,
                                       stdout=subprocess.PIPE,
                                       bufsize=(512 * 1024))
-        else:
-            return
     else:
         cmd = [ffmpeg_path, '-i', inFile] + cmd_string.split()
         ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
                                   stdout=subprocess.PIPE)
 
-    debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
-    debug(' '.join(cmd))
+    if cmd:
+        debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
+        debug(' '.join(cmd))
 
     ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0, 
                             'last_read': time.time(), 'blocks': []}

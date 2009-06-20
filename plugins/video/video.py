@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import shutil
-import subprocess
 import time
 import traceback
 import urllib
@@ -69,27 +68,32 @@ class Video(Plugin):
         if 'Format' in query:
             mime = query['Format'][0]
 
-        is_tivo_push = (mime == 'video/mpeg' and is_tivo_file)
-
-        compatible = transcode.tivo_compatible(path, tsn, mime)[0]
+        needs_tivodecode = (is_tivo_file and mime == 'video/mpeg')
+        compatible = (not needs_tivodecode and
+                      transcode.tivo_compatible(path, tsn, mime)[0])
 
         offset = handler.headers.getheader('Range')
         if offset:
             offset = int(offset[6:-1])  # "bytes=XXX-"
 
+        if needs_tivodecode:
+            valid = bool(config.get_bin('tivodecode') and
+                         config.get_server('tivo_mak'))
+        else:
+            valid = True
+
+        if valid and offset:
+            valid = ((compatible and offset < os.stat(path).st_size) or
+                     (not compatible and transcode.is_resumable(path, offset)))
+
         handler.send_response(206)
         handler.send_header('Content-Type', mime)
-
-        if offset:
-            if ((compatible and (is_tivo_push
-                 or offset >= os.stat(path).st_size)) or
-                (not compatible and not transcode.is_resumable(path, offset))):
-                handler.send_header('Connection', 'close')
-                handler.send_header('Transfer-Encoding', 'chunked')
-                handler.end_headers()
-                handler.wfile.write('0\r\n')
-                return
-
+        if not valid:
+            handler.send_header('Connection', 'close')
+            handler.send_header('Transfer-Encoding', 'chunked')
+            handler.end_headers()
+            handler.wfile.write('0\r\n')
+            return
         handler.end_headers()
 
         if compatible:
@@ -99,16 +103,7 @@ class Video(Plugin):
                 if mime == 'video/mp4':
                     qtfaststart.fast_start(f, handler.wfile, offset)
                 else:
-                    if is_tivo_push:
-                        tivodecode_path = config.get_bin('tivodecode')
-                        tivo_mak = config.get_server('tivo_mak')
-                        if tivodecode_path and tivo_mak:
-                            f.close()
-                            tcmd = [tivodecode_path, '-m', tivo_mak, path]
-                            tivodecode = subprocess.Popen(tcmd,
-                                stdout=subprocess.PIPE, bufsize=(512 * 1024))
-                            f = tivodecode.stdout
-                    elif offset:
+                    if offset:
                         f.seek(offset)
                     shutil.copyfileobj(f, handler.wfile)
             except Exception, msg:
