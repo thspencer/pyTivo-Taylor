@@ -119,9 +119,12 @@ class Video(Plugin):
                     transcode.resume_transfer(path, handler.wfile, offset)
                 else:
                     transcode.transcode(False, path, handler.wfile, tsn)
-
-        if not compatible:
-            handler.wfile.write('0\r\n\r\n')
+        try:
+            if not compatible:
+                 handler.wfile.write('0\r\n\r\n')
+            handler.wfile.flush()
+        except Exception, msg:
+            logger.info(msg)
         logger.debug("Finished outputing video")
 
     def __duration(self, full_path):

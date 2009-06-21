@@ -124,7 +124,7 @@ def resume_transfer(inFile, outFile, offset):
             offset -= length
         outFile.flush()
     except Exception, msg:
-        logger.error(msg)
+        logger.info(msg)
         return
     proc['start'] = proc['end']
     proc['blocks'] = []
@@ -140,7 +140,7 @@ def transfer_blocks(inFile, outFile):
             block = proc['process'].stdout.read(BLOCKSIZE)
             proc['last_read'] = time.time()
         except Exception, msg:
-            logger.error(msg)
+            logger.info(msg)
             del ffmpeg_procs[inFile]
             kill(proc['process'])
             break
@@ -149,7 +149,7 @@ def transfer_blocks(inFile, outFile):
             try:
                 outFile.flush()
             except Exception, msg:
-                logger.error(msg)
+                logger.info(msg)
             else:
                 del ffmpeg_procs[inFile]
             break
@@ -165,7 +165,7 @@ def transfer_blocks(inFile, outFile):
             outFile.write(block)
             outFile.write('\r\n')
         except Exception, msg:
-            logger.error(msg)
+            logger.info(msg)
             break
 
 def reap_process(inFile):
