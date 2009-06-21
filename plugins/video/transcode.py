@@ -114,9 +114,14 @@ def resume_transfer(inFile, outFile, offset):
     offset -= proc['start']
     try:
         for block in proc['blocks']:
-            if offset < len(block):
-                outFile.write(block[offset:])
-            offset -= len(block)
+            length = len(block)
+            if offset < length:
+                if offset > 0:
+                    block = block[offset:]
+                outFile.write('%x\r\n' % len(block))
+                outFile.write(block)
+                outFile.write('\r\n')
+            offset -= length
         outFile.flush()
     except Exception, msg:
         logger.error(msg)
@@ -156,7 +161,9 @@ def transfer_blocks(inFile, outFile):
             blocks.pop(0)
 
         try:
+            outFile.write('%x\r\n' % len(block))
             outFile.write(block)
+            outFile.write('\r\n')
         except Exception, msg:
             logger.error(msg)
             break

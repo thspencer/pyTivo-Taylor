@@ -44,14 +44,13 @@ logger = logging.getLogger('pyTivo.video.qt-faststart')
 """
 
 import os
-import shutil
 import struct
 
 from optparse import OptionParser
 from StringIO import StringIO
 
 VERSION = "1.0"
-CHUNK_SIZE = 8192
+CHUNK_SIZE = 512 * 1024
 
 count = 0
 
@@ -129,10 +128,12 @@ def find_atoms(size, datastream):
 def output(outfile, offset, data):
     global count
     length = len(data)
-    if count >= offset:
+    if count + length > offset:
+        if offset > count:
+            data = data[offset - count:]
+        outfile.write('%x\r\n' % len(data))
         outfile.write(data)
-    elif count + length > offset:
-        outfile.write(data[offset - count:])
+        outfile.write('\r\n')
     count += length
 
 def fast_start(datastream, outfile, offset=0):
@@ -150,7 +151,13 @@ def fast_start(datastream, outfile, offset=0):
     if len(index) == 0 or index["moov"][0] < index["mdat"][0]:
         logger.debug('mp4 already streamable -- copying')
         datastream.seek(offset)
-        shutil.copyfileobj(datastream, outfile)
+        while True:
+            block = datastream.read(CHUNK_SIZE)
+            if not block:
+                break
+            outfile.write('%x\r\n' % len(block))
+            outfile.write(block)
+            outfile.write('\r\n')
         return
 
     # Read and fix moov

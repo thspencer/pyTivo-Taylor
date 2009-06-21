@@ -2,7 +2,6 @@ import cgi
 import logging
 import os
 import re
-import shutil
 import time
 import traceback
 import urllib
@@ -88,33 +87,38 @@ class Video(Plugin):
 
         handler.send_response(206)
         handler.send_header('Content-Type', mime)
-        if not valid:
-            handler.send_header('Connection', 'close')
-            handler.send_header('Transfer-Encoding', 'chunked')
-            handler.end_headers()
-            handler.wfile.write('0\r\n')
-            return
+        handler.send_header('Connection', 'close')
+        handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
 
-        if compatible:
-            logger.debug('%s is tivo compatible' % path)
-            f = open(path, 'rb')
-            try:
-                if mime == 'video/mp4':
-                    qtfaststart.fast_start(f, handler.wfile, offset)
-                else:
-                    if offset:
-                        f.seek(offset)
-                    shutil.copyfileobj(f, handler.wfile)
-            except Exception, msg:
-                logger.info(msg)
-            f.close()
-        else:
-            logger.debug('%s is not tivo compatible' % path)
-            if offset:
-                transcode.resume_transfer(path, handler.wfile, offset)
+        if valid:
+            if compatible:
+                logger.debug('%s is tivo compatible' % path)
+                f = open(path, 'rb')
+                try:
+                    if mime == 'video/mp4':
+                        qtfaststart.fast_start(f, handler.wfile, offset)
+                    else:
+                        if offset:
+                            f.seek(offset)
+                        while True:
+                            block = f.read(512 * 1024)
+                            if not block:
+                                break
+                            handler.wfile.write('%x\r\n' % len(block))
+                            handler.wfile.write(block)
+                            handler.wfile.write('\r\n')
+                except Exception, msg:
+                    logger.info(msg)
+                f.close()
             else:
-                transcode.transcode(False, path, handler.wfile, tsn)
+                logger.debug('%s is not tivo compatible' % path)
+                if offset:
+                    transcode.resume_transfer(path, handler.wfile, offset)
+                else:
+                    transcode.transcode(False, path, handler.wfile, tsn)
+
+        handler.wfile.write('0\r\n\r\n')
         logger.debug("Finished outputing video")
 
     def __duration(self, full_path):
