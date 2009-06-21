@@ -131,9 +131,7 @@ def output(outfile, offset, data):
     if count + length > offset:
         if offset > count:
             data = data[offset - count:]
-        outfile.write('%x\r\n' % len(data))
         outfile.write(data)
-        outfile.write('\r\n')
     count += length
 
 def fast_start(datastream, outfile, offset=0):
@@ -155,9 +153,7 @@ def fast_start(datastream, outfile, offset=0):
             block = datastream.read(CHUNK_SIZE)
             if not block:
                 break
-            outfile.write('%x\r\n' % len(block))
             outfile.write(block)
-            outfile.write('\r\n')
         return
 
     # Read and fix moov

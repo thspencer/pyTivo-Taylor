@@ -88,7 +88,11 @@ class Video(Plugin):
         handler.send_response(206)
         handler.send_header('Content-Type', mime)
         handler.send_header('Connection', 'close')
-        handler.send_header('Transfer-Encoding', 'chunked')
+        if compatible:
+            handler.send_header('Content-Length',
+                                os.stat(path).st_size - offset)
+        else:
+            handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
 
         if valid:
@@ -105,9 +109,7 @@ class Video(Plugin):
                             block = f.read(512 * 1024)
                             if not block:
                                 break
-                            handler.wfile.write('%x\r\n' % len(block))
                             handler.wfile.write(block)
-                            handler.wfile.write('\r\n')
                 except Exception, msg:
                     logger.info(msg)
                 f.close()
@@ -118,7 +120,8 @@ class Video(Plugin):
                 else:
                     transcode.transcode(False, path, handler.wfile, tsn)
 
-        handler.wfile.write('0\r\n\r\n')
+        if not compatible:
+            handler.wfile.write('0\r\n\r\n')
         logger.debug("Finished outputing video")
 
     def __duration(self, full_path):
