@@ -17,6 +17,7 @@ logger = logging.getLogger('pyTivo.video.transcode')
 
 info_cache = lrucache.LRUCache(1000)
 ffmpeg_procs = {}
+reapers = {}
 
 GOOD_MPEG_FPS = ['23.98', '24.00', '25.00', '29.97',
                  '30.00', '50.00', '59.94', '60.00']
@@ -105,7 +106,7 @@ def is_resumable(inFile, offset):
         if proc['start'] <= offset < proc['end']:
             return True
         else:
-            del ffmpeg_procs[inFile]
+            cleanup(inFile)
             kill(proc['process'])
     return False
 
@@ -141,7 +142,7 @@ def transfer_blocks(inFile, outFile):
             proc['last_read'] = time.time()
         except Exception, msg:
             logger.info(msg)
-            del ffmpeg_procs[inFile]
+            cleanup(inFile)
             kill(proc['process'])
             break
 
@@ -151,7 +152,7 @@ def transfer_blocks(inFile, outFile):
             except Exception, msg:
                 logger.info(msg)
             else:
-                del ffmpeg_procs[inFile]
+                cleanup(inFile)
             break
 
         blocks.append(block)
@@ -173,9 +174,17 @@ def reap_process(inFile):
         proc = ffmpeg_procs[inFile]
         if proc['last_read'] + TIMEOUT < time.time():
             del ffmpeg_procs[inFile]
+            del reapers[inFile]
             kill(proc['process'])
         else:
-            threading.Timer(TIMEOUT, reap_process, (inFile,)).start()
+            reaper = threading.Timer(TIMEOUT, reap_process, (inFile,))
+            reapers[inFile] = reaper
+            reaper.start()
+
+def cleanup(inFile):
+    del ffmpeg_procs[inFile]
+    reapers[inFile].cancel()
+    del reapers[inFile]
 
 def select_audiocodec(isQuery, inFile, tsn=''):
     if inFile[-5:].lower() == '.tivo':
