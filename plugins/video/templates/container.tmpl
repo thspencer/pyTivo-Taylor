@@ -51,12 +51,8 @@
             <SourceFormat>video/x-ms-wmv</SourceFormat>
             <SourceSize>$video.size</SourceSize>
             <Duration>$video.duration</Duration>
-            #if $video.isEpisode != 'false' and ($video.episodeTitle or $video.seriesTitle)
-            #if $video.episodeTitle
+            #if $video.isEpisode != 'false' and $video.episodeTitle
             <EpisodeTitle>$escape($video.episodeTitle)</EpisodeTitle>
-            #else
-            <EpisodeTitle>$escape($video.title)</EpisodeTitle>
-            #end if 
             #end if 
             <Description>$escape($video.description)</Description>
             <SourceChannel>$escape($video.displayMajorNumber)</SourceChannel>

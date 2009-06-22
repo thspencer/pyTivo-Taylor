@@ -426,9 +426,6 @@ class Video(Plugin):
                 source = title
 
             subtitle = file_info['episodeTitle']
-            if (not subtitle and file_info['isEpisode'] != 'false' and 
-                file_info['seriesTitle']):
-                subtitle = file_info['title']
             logger.debug('Pushing ' + url)
             try:
                 m = mind.getMind(tsn)
