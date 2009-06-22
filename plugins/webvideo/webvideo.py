@@ -179,7 +179,7 @@ class WebVideo(Video):
                 raise
             infile = urllib2.urlopen(url)
             if int(infile.info()['Content-Length']) == size:
-                self.__logger.debug('File was alraedy done. %s' % url)
+                self.__logger.debug('File was already done. %s' % url)
                 return
             else:
                 self.__logger.debug('File was not done but could not resume. %s'
