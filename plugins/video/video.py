@@ -201,15 +201,16 @@ class Video(Plugin):
     def metadata_full(self, full_path, tsn='', mime=''):
         metadata = {}
         vInfo = transcode.video_info(full_path)
-        compat = transcode.tivo_compatible(full_path, tsn, mime)
-        if not compat[0]:
-            transcode_options = transcode.transcode(True, full_path, '', tsn)
-        else:
-            transcode_options = {}
 
         if config.getDebug():
+            compatible, reason = transcode.tivo_compatible(full_path, tsn, mime)
+            if compatible:
+                transcode_options = {}
+            else:
+                transcode_options = transcode.transcode(True, full_path,
+                                                        '', tsn)
             metadata['vHost'] = (
-                ['TRANSCODE=%s, %s' % (['YES', 'NO'][compat[0]], compat[1])] +
+                ['TRANSCODE=%s, %s' % (['YES', 'NO'][compatible], reason)] +
                 ['SOURCE INFO: '] +
                 ["%s=%s" % (k, v)
                  for k, v in sorted(vInfo.items(), reverse=True)] +
