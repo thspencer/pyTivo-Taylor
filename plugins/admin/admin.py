@@ -15,7 +15,7 @@ from Cheetah.Template import Template
 import buildhelp
 import config
 import logging
-from plugin import EncodeUnicode, Plugin
+from plugin import EncodeUnicode, Plugin, tag_data, TRIBUNE_CR
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -72,19 +72,8 @@ REDIRECT_TEMPLATE = file(trname, 'rb').read()
 SETTINGS_TEMPLATE = file(tsname, 'rb').read()
 NPL_TEMPLATE = file(tnname, 'rb').read()
 
-# Something to strip
-TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
-
 status = {} # Global variable to control download threads
 tivo_cache = {} # Cache of TiVo NPL
-
-def tag_data(element, tag):
-    for name in tag.split('/'):
-        new_element = element.getElementsByTagName(name)
-        if not new_element:
-            return ''
-        element = new_element[0]
-    return element.firstChild.data
 
 class Admin(Plugin):
     CONTENT_TYPE = 'text/html'

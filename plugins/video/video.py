@@ -2,12 +2,14 @@ import cgi
 import logging
 import os
 import re
+import subprocess
 import time
 import traceback
 import urllib
 import zlib
 from UserDict import DictMixin
 from datetime import datetime, timedelta
+from xml.dom import minidom
 from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
@@ -16,7 +18,7 @@ import config
 import mind
 import qtfaststart
 import transcode
-from plugin import EncodeUnicode, Plugin, quote
+from plugin import EncodeUnicode, Plugin, quote, tag_data, TRIBUNE_CR
 
 logger = logging.getLogger('pyTivo.video.video')
 
@@ -42,6 +44,8 @@ except:
 class Video(Plugin):
 
     CONTENT_TYPE = 'x-container/tivo-videos'
+
+    tivo_cache = LRUCache(50)  # Metadata from .TiVo files
 
     def pre_cache(self, full_path):
         if Video.video_file_filter(self, full_path):
@@ -198,6 +202,43 @@ class Video(Plugin):
 
         return metadata
 
+    def metadata_tivo(self, full_path):
+        if full_path in self.tivo_cache:
+            return self.tivo_cache[full_path]
+
+        metadata = {}
+
+        tdcat_path = config.get_bin('tdcat')
+        tivo_mak = config.get_server('tivo_mak')
+        if tdcat_path and tivo_mak:
+            tcmd = [tdcat_path, '-m', tivo_mak, '-2', full_path]
+            tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
+            xmldoc = minidom.parse(tdcat.stdout)
+            showing = xmldoc.getElementsByTagName('showing')[0]
+
+            items = {'description': 'program/description',
+                     'title': 'program/title',
+                     'episodeTitle': 'program/episodeTitle',
+                     'episodeNumber': 'program/episodeNumber',
+                     'seriesTitle': 'program/series/seriesTitle',
+                     'seriesId': 'program/series/uniqueId',
+                     'originalAirDate': 'program/originalAirDate',
+                     'isEpisode': 'program/isEpisode',
+                     'movieYear': 'program/movieYear'}
+
+            for item in items.keys():
+                data = tag_data(showing, item)
+                if data:
+                    metadata[item] = data
+
+            if 'description' in metadata:
+                desc = metadata['description']
+                metadata['description'] = desc.replace(TRIBUNE_CR, '')
+
+            self.tivo_cache[full_path] = metadata
+
+        return metadata
+
     def metadata_full(self, full_path, tsn='', mime=''):
         metadata = {}
         vInfo = transcode.video_info(full_path)
@@ -226,6 +267,8 @@ class Video(Plugin):
             metadata['showingBits'] = '4096'
 
         metadata.update(self.metadata_basic(full_path))
+        if full_path[-5:].lower() == '.tivo':
+            metadata.update(self.metadata_tivo(full_path))
 
         now = datetime.utcnow()
         duration = self.__duration(full_path)
