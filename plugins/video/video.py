@@ -221,10 +221,12 @@ class Video(Plugin):
                      'episodeTitle': 'program/episodeTitle',
                      'episodeNumber': 'program/episodeNumber',
                      'seriesTitle': 'program/series/seriesTitle',
-                     'seriesId': 'program/series/uniqueId',
                      'originalAirDate': 'program/originalAirDate',
                      'isEpisode': 'program/isEpisode',
-                     'movieYear': 'program/movieYear'}
+                     'movieYear': 'program/movieYear',
+                     'showingBits': 'showingBits',
+                     'partCount': 'partCount',
+                     'partIndex': 'partIndex'}
 
             for item in items.keys():
                 data = tag_data(showing, item)
