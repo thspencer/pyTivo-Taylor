@@ -98,6 +98,20 @@ Example Settings: Linux = /usr/bin/tivodecode |
 >Windows = c:\Program Files\pyTivo\bin\tivodecode.exe
 Available In: Server
 
+tdcat
+
+Default Setting: None
+Valid Entries: Operating system path
+Required: No
+Skill: Basic
+Description: This is the full path to your tdcat binary. If not set, 
+pyTivo checks for it in a "bin" subdirectory, and then in the PATH. 
+tdcat is only needed to view the data from a .TiVo file in the details 
+screen. It comes with tivodecode.
+Example Settings: Linux = /usr/bin/tdcat |
+>Windows = c:\Program Files\pyTivo\bin\tdcat.exe
+Available In: Server
+
 beacon
 
 Default Setting: 255.255.255.255
