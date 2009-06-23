@@ -71,11 +71,59 @@ def basic(full_path):
 
     return metadata
 
+def from_details(xmldoc):
+    metadata = {}
+
+    showing = xmldoc.getElementsByTagName('showing')[0]
+    program = showing.getElementsByTagName('program')[0]
+
+    items = {'description': 'program/description',
+             'title': 'program/title',
+             'episodeTitle': 'program/episodeTitle',
+             'episodeNumber': 'program/episodeNumber',
+             'seriesTitle': 'program/series/seriesTitle',
+             'originalAirDate': 'program/originalAirDate',
+             'isEpisode': 'program/isEpisode',
+             'movieYear': 'program/movieYear',
+             'partCount': 'partCount',
+             'partIndex': 'partIndex'}
+
+    for item in items:
+        data = tag_data(showing, item)
+        if data:
+            metadata[item] = data
+
+    vItems = ['vActor', 'vChoreographer', 'vDirector',
+              'vExecProducer', 'vProgramGenre', 'vGuestStar',
+              'vHost', 'vProducer', 'vWriter']
+
+    for item in vItems:
+        data = _vtag_data(program, item)
+        if data:
+            metadata[item] = data
+
+    sb = showing.getElementsByTagName('showingBits')
+    if sb:
+        metadata['showingBits'] = sb[0].attributes['value'].value
+
+    for tag in ['starRating', 'mpaaRating', 'colorCode']:
+        value = _tag_value(program, tag)
+        if value:
+            metadata[tag] = value
+
+    rating = _tag_value(showing, 'tvRating')
+    if rating:
+        metadata['tvRating'] = 'x' + rating[1]
+
+    if 'description' in metadata:
+        desc = metadata['description']
+        metadata['description'] = desc.replace(TRIBUNE_CR, '')
+
+    return metadata
+
 def from_tivo(full_path):
     if full_path in tivo_cache:
         return tivo_cache[full_path]
-
-    metadata = {}
 
     tdcat_path = config.get_bin('tdcat')
     tivo_mak = config.get_server('tivo_mak')
@@ -83,51 +131,9 @@ def from_tivo(full_path):
         tcmd = [tdcat_path, '-m', tivo_mak, '-2', full_path]
         tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
         xmldoc = minidom.parse(tdcat.stdout)
-        showing = xmldoc.getElementsByTagName('showing')[0]
-        program = showing.getElementsByTagName('program')[0]
-
-        items = {'description': 'program/description',
-                 'title': 'program/title',
-                 'episodeTitle': 'program/episodeTitle',
-                 'episodeNumber': 'program/episodeNumber',
-                 'seriesTitle': 'program/series/seriesTitle',
-                 'originalAirDate': 'program/originalAirDate',
-                 'isEpisode': 'program/isEpisode',
-                 'movieYear': 'program/movieYear',
-                 'partCount': 'partCount',
-                 'partIndex': 'partIndex'}
-
-        for item in items:
-            data = tag_data(showing, item)
-            if data:
-                metadata[item] = data
-
-        vItems = ['vActor', 'vChoreographer', 'vDirector',
-                  'vExecProducer', 'vProgramGenre', 'vGuestStar',
-                  'vHost', 'vProducer', 'vWriter']
-
-        for item in vItems:
-            data = _vtag_data(program, item)
-            if data:
-                metadata[item] = data
-
-        sb = showing.getElementsByTagName('showingBits')
-        if sb:
-            metadata['showingBits'] = sb[0].attributes['value'].value
-
-        for tag in ['starRating', 'mpaaRating', 'colorCode']:
-            value = _tag_value(program, tag)
-            if value:
-                metadata[tag] = value
-
-        rating = _tag_value(showing, 'tvRating')
-        if rating:
-            metadata['tvRating'] = 'x' + rating[1]
-
-        if 'description' in metadata:
-            desc = metadata['description']
-            metadata['description'] = desc.replace(TRIBUNE_CR, '')
-
+        metadata = from_details(xmldoc)
         tivo_cache[full_path] = metadata
+    else:
+        metadata = {}
 
     return metadata
