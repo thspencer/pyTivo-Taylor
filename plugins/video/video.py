@@ -212,6 +212,13 @@ class Video(Plugin):
             elements = element.getElementsByTagName('element')
             return [x.firstChild.data for x in elements if x.firstChild]
 
+        def tag_value(element, tag):
+            item = element.getElementsByTagName(tag)
+            if item:
+                value = item[0].attributes['value'].value
+                name = item[0].firstChild.data
+                return name[0] + value[0]
+
         if full_path in self.tivo_cache:
             return self.tivo_cache[full_path]
 
@@ -234,7 +241,6 @@ class Video(Plugin):
                      'originalAirDate': 'program/originalAirDate',
                      'isEpisode': 'program/isEpisode',
                      'movieYear': 'program/movieYear',
-                     'showingBits': 'showingBits',
                      'partCount': 'partCount',
                      'partIndex': 'partIndex'}
 
@@ -251,6 +257,19 @@ class Video(Plugin):
                 data = vtag_data(program, item)
                 if data:
                     metadata[item] = data
+
+            sb = showing.getElementsByTagName('showingBits')
+            if sb:
+                metadata['showingBits'] = sb[0].attributes['value'].value
+
+            for tag in ['starRating', 'mpaaRating', 'colorCode']:
+                value = tag_value(program, tag)
+                if value:
+                    metadata[tag] = value
+
+            rating = tag_value(showing, 'tvRating')
+            if rating:
+                metadata['tvRating'] = 'x' + rating[1]
 
             if 'description' in metadata:
                 desc = metadata['description']
