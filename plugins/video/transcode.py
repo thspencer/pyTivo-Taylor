@@ -10,8 +10,9 @@ import threading
 import time
 
 import lrucache
+
 import config
-from plugin import GetPlugin
+import metadata
 
 logger = logging.getLogger('pyTivo.video.transcode')
 
@@ -848,24 +849,23 @@ def video_info(inFile, cache=True):
     vInfo['mapAudio'] = amap
 
     vInfo['par'] = None
-    videoPlugin = GetPlugin('video')
-    metadata = videoPlugin.getMetadataFromTxt(inFile)
 
-    for key in metadata:
+    data = metadata.from_text(inFile)
+    for key in data:
         if key.startswith('Override_'):
             vInfo['Supported'] = True
             if key.startswith('Override_mapAudio'):
                 audiomap = dict(vInfo['mapAudio'])
                 stream = key.replace('Override_mapAudio', '').strip()
                 if stream in audiomap:
-                    newaudiomap = (stream, metadata[key])
+                    newaudiomap = (stream, data[key])
                     audiomap.update([newaudiomap])
                     vInfo['mapAudio'] = sorted(audiomap.items(),
                                                key=lambda (k,v): (k,v))
             elif key.startswith('Override_millisecs'):
-                vInfo[key.replace('Override_', '')] = int(metadata[key])
+                vInfo[key.replace('Override_', '')] = int(data[key])
             else:
-                vInfo[key.replace('Override_', '')] = metadata[key]
+                vInfo[key.replace('Override_', '')] = data[key]
 
     if cache:
         info_cache[inFile] = (mtime, vInfo)

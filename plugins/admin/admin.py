@@ -1,7 +1,8 @@
 import cookielib
+import logging
 import os
-import socket
 import re
+import socket
 import sys
 import thread
 import time
@@ -10,12 +11,13 @@ from urllib import unquote_plus, quote, unquote
 from urlparse import urlparse
 from xml.dom import minidom
 
-from lrucache import LRUCache
 from Cheetah.Template import Template
+from lrucache import LRUCache
+
 import buildhelp
 import config
-import logging
-from plugin import EncodeUnicode, Plugin, tag_data, TRIBUNE_CR
+from metadata import tag_data, TRIBUNE_CR
+from plugin import EncodeUnicode, Plugin
 
 SCRIPTDIR = os.path.dirname(__file__)
 

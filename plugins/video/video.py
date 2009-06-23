@@ -2,23 +2,22 @@ import cgi
 import logging
 import os
 import re
-import subprocess
 import time
 import traceback
 import urllib
 import zlib
 from UserDict import DictMixin
 from datetime import datetime, timedelta
-from xml.dom import minidom
 from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
-from lrucache import LRUCache
+
 import config
+import metadata
 import mind
 import qtfaststart
 import transcode
-from plugin import EncodeUnicode, Plugin, quote, tag_data, TRIBUNE_CR
+from plugin import EncodeUnicode, Plugin, quote
 
 logger = logging.getLogger('pyTivo.video.video')
 
@@ -44,8 +43,6 @@ except:
 class Video(Plugin):
 
     CONTENT_TYPE = 'x-container/tivo-videos'
-
-    tivo_cache = LRUCache(50)  # Metadata from .TiVo files
 
     def pre_cache(self, full_path):
         if Video.video_file_filter(self, full_path):
@@ -169,138 +166,28 @@ class Video(Plugin):
             return int((self.__duration(full_path) / 1000) *
                        (bitrate * 1.02 / 8))
 
-    def getMetadataFromTxt(self, full_path):
-        metadata = {}
-        path, name = os.path.split(full_path)
-        for metafile in [os.path.join(path, 'default.txt'), full_path + '.txt',
-                         os.path.join(path, '.meta', name) + '.txt']:
-            if os.path.exists(metafile):
-                for line in file(metafile):
-                    if line.strip().startswith('#') or not ':' in line:
-                        continue
-                    key, value = [x.strip() for x in line.split(':', 1)]
-                    if key.startswith('v'):
-                        if key in metadata:
-                            metadata[key].append(value)
-                        else:
-                            metadata[key] = [value]
-                    else:
-                        metadata[key] = value
-        return metadata
-
-    def metadata_basic(self, full_path):
-        base_path, title = os.path.split(full_path)
-        mtime = os.stat(full_path).st_mtime
-        if (mtime < 0):
-            mtime = 0
-        originalAirDate = datetime.fromtimestamp(mtime)
-
-        metadata = {'title': '.'.join(title.split('.')[:-1]),
-                    'originalAirDate': originalAirDate.isoformat()}
-
-        metadata.update(self.getMetadataFromTxt(full_path))
-
-        return metadata
-
-    def metadata_tivo(self, full_path):
-        def vtag_data(element, tag):
-            for name in tag.split('/'):
-                new_element = element.getElementsByTagName(name)
-                if not new_element:
-                    return []
-                element = new_element[0]
-            elements = element.getElementsByTagName('element')
-            return [x.firstChild.data for x in elements if x.firstChild]
-
-        def tag_value(element, tag):
-            item = element.getElementsByTagName(tag)
-            if item:
-                value = item[0].attributes['value'].value
-                name = item[0].firstChild.data
-                return name[0] + value[0]
-
-        if full_path in self.tivo_cache:
-            return self.tivo_cache[full_path]
-
-        metadata = {}
-
-        tdcat_path = config.get_bin('tdcat')
-        tivo_mak = config.get_server('tivo_mak')
-        if tdcat_path and tivo_mak:
-            tcmd = [tdcat_path, '-m', tivo_mak, '-2', full_path]
-            tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
-            xmldoc = minidom.parse(tdcat.stdout)
-            showing = xmldoc.getElementsByTagName('showing')[0]
-            program = showing.getElementsByTagName('program')[0]
-
-            items = {'description': 'program/description',
-                     'title': 'program/title',
-                     'episodeTitle': 'program/episodeTitle',
-                     'episodeNumber': 'program/episodeNumber',
-                     'seriesTitle': 'program/series/seriesTitle',
-                     'originalAirDate': 'program/originalAirDate',
-                     'isEpisode': 'program/isEpisode',
-                     'movieYear': 'program/movieYear',
-                     'partCount': 'partCount',
-                     'partIndex': 'partIndex'}
-
-            for item in items.keys():
-                data = tag_data(showing, item)
-                if data:
-                    metadata[item] = data
-
-            vItems = ['vActor', 'vChoreographer', 'vDirector',
-                      'vExecProducer', 'vProgramGenre', 'vGuestStar',
-                      'vHost', 'vProducer', 'vWriter']
-
-            for item in vItems:
-                data = vtag_data(program, item)
-                if data:
-                    metadata[item] = data
-
-            sb = showing.getElementsByTagName('showingBits')
-            if sb:
-                metadata['showingBits'] = sb[0].attributes['value'].value
-
-            for tag in ['starRating', 'mpaaRating', 'colorCode']:
-                value = tag_value(program, tag)
-                if value:
-                    metadata[tag] = value
-
-            rating = tag_value(showing, 'tvRating')
-            if rating:
-                metadata['tvRating'] = 'x' + rating[1]
-
-            if 'description' in metadata:
-                desc = metadata['description']
-                metadata['description'] = desc.replace(TRIBUNE_CR, '')
-
-            self.tivo_cache[full_path] = metadata
-
-        return metadata
-
     def metadata_full(self, full_path, tsn='', mime=''):
-        metadata = {}
+        data = {}
         vInfo = transcode.video_info(full_path)
 
         if ((int(vInfo['vHeight']) >= 720 and
              config.getTivoHeight >= 720) or
             (int(vInfo['vWidth']) >= 1280 and
              config.getTivoWidth >= 1280)):
-            metadata['showingBits'] = '4096'
+            data['showingBits'] = '4096'
 
-        metadata.update(self.metadata_basic(full_path))
+        data.update(metadata.basic(full_path))
         if full_path[-5:].lower() == '.tivo':
-            metadata.update(self.metadata_tivo(full_path))
+            data.update(metadata.from_tivo(full_path))
 
-        if config.getDebug() and 'vHost' not in metadata:
+        if config.getDebug() and 'vHost' not in data:
             compatible, reason = transcode.tivo_compatible(full_path, tsn, mime)
             if compatible:
                 transcode_options = {}
             else:
                 transcode_options = transcode.transcode(True, full_path,
                                                         '', tsn)
-            metadata['vHost'] = (
+            data['vHost'] = (
                 ['TRANSCODE=%s, %s' % (['YES', 'NO'][compatible], reason)] +
                 ['SOURCE INFO: '] +
                 ["%s=%s" % (k, v)
@@ -318,15 +205,15 @@ class Video(Plugin):
         hours = min / 60
         min = min % 60
 
-        metadata.update({'time': now.isoformat(),
-                         'startTime': now.isoformat(),
-                         'stopTime': (now + duration_delta).isoformat(),
-                         'size': self.__est_size(full_path, tsn, mime),
-                         'duration': duration,
-                         'iso_duration': ('P%sDT%sH%sM%sS' % 
-                              (duration_delta.days, hours, min, sec))})
+        data.update({'time': now.isoformat(),
+                     'startTime': now.isoformat(),
+                     'stopTime': (now + duration_delta).isoformat(),
+                     'size': self.__est_size(full_path, tsn, mime),
+                     'duration': duration,
+                     'iso_duration': ('P%sDT%sH%sM%sS' % 
+                          (duration_delta.days, hours, min, sec))})
 
-        return metadata
+        return data
 
     def QueryContainer(self, handler, query):
         tsn = handler.headers.getheader('tsn', '')
@@ -369,7 +256,7 @@ class Video(Plugin):
                         video.update(self.metadata_full(f.name, tsn))
                 else:
                     video['valid'] = True
-                    video.update(self.metadata_basic(f.name))
+                    video.update(metadata.basic(f.name))
 
             videos.append(video)
 

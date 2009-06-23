@@ -19,19 +19,6 @@ else:
 class Error:
     CONTENT_TYPE = 'text/html'
 
-# Something to strip
-TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
-
-def tag_data(element, tag):
-    for name in tag.split('/'):
-        new_element = element.getElementsByTagName(name)
-        if not new_element:
-            return ''
-        element = new_element[0]
-    if not element.firstChild:
-        return ''
-    return element.firstChild.data
-
 def GetPlugin(name):
     try:
         module_name = '.'.join(['plugins', name, name])
