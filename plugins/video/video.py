@@ -203,6 +203,15 @@ class Video(Plugin):
         return metadata
 
     def metadata_tivo(self, full_path):
+        def vtag_data(element, tag):
+            for name in tag.split('/'):
+                new_element = element.getElementsByTagName(name)
+                if not new_element:
+                    return []
+                element = new_element[0]
+            elements = element.getElementsByTagName('element')
+            return [x.firstChild.data for x in elements if x.firstChild]
+
         if full_path in self.tivo_cache:
             return self.tivo_cache[full_path]
 
@@ -215,6 +224,7 @@ class Video(Plugin):
             tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
             xmldoc = minidom.parse(tdcat.stdout)
             showing = xmldoc.getElementsByTagName('showing')[0]
+            program = showing.getElementsByTagName('program')[0]
 
             items = {'description': 'program/description',
                      'title': 'program/title',
@@ -230,6 +240,15 @@ class Video(Plugin):
 
             for item in items.keys():
                 data = tag_data(showing, item)
+                if data:
+                    metadata[item] = data
+
+            vItems = ['vActor', 'vChoreographer', 'vDirector',
+                      'vExecProducer', 'vProgramGenre', 'vGuestStar',
+                      'vHost', 'vProducer', 'vWriter']
+
+            for item in vItems:
+                data = vtag_data(program, item)
                 if data:
                     metadata[item] = data
 
