@@ -245,7 +245,17 @@ class Video(Plugin):
         metadata = {}
         vInfo = transcode.video_info(full_path)
 
-        if config.getDebug():
+        if ((int(vInfo['vHeight']) >= 720 and
+             config.getTivoHeight >= 720) or
+            (int(vInfo['vWidth']) >= 1280 and
+             config.getTivoWidth >= 1280)):
+            metadata['showingBits'] = '4096'
+
+        metadata.update(self.metadata_basic(full_path))
+        if full_path[-5:].lower() == '.tivo':
+            metadata.update(self.metadata_tivo(full_path))
+
+        if config.getDebug() and 'vHost' not in metadata:
             compatible, reason = transcode.tivo_compatible(full_path, tsn, mime)
             if compatible:
                 transcode_options = {}
@@ -261,16 +271,6 @@ class Video(Plugin):
                 ["%s" % (v) for k, v in transcode_options.items()] +
                 ['SOURCE FILE: ', os.path.split(full_path)[1]]
             )
-
-        if ((int(vInfo['vHeight']) >= 720 and
-             config.getTivoHeight >= 720) or
-            (int(vInfo['vWidth']) >= 1280 and
-             config.getTivoWidth >= 1280)):
-            metadata['showingBits'] = '4096'
-
-        metadata.update(self.metadata_basic(full_path))
-        if full_path[-5:].lower() == '.tivo':
-            metadata.update(self.metadata_tivo(full_path))
 
         now = datetime.utcnow()
         duration = self.__duration(full_path)
