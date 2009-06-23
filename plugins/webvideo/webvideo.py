@@ -54,7 +54,7 @@ class WebVideo(Video):
         cl.connect()
         cl.RegisterHandler('message', self.processMessage)
         self.__logger.debug('Loging in as %s/pyTivo' % xmpp_info['username'])
-        cl.auth(user=jid.getNode(), password=config.getTivoPassword(),
+        cl.auth(user=jid.getNode(), password=config.get_server('tivo_password'),
                 resource='pyTivo')
 
         cl.sendInitPresence(requestRoster=0)
