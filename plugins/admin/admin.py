@@ -12,11 +12,10 @@ from urlparse import urlparse
 from xml.dom import minidom
 
 from Cheetah.Template import Template
-from lrucache import LRUCache
 
 import buildhelp
 import config
-from metadata import tag_data, TRIBUNE_CR
+from metadata import tag_data, from_container
 from plugin import EncodeUnicode, Plugin
 
 SCRIPTDIR = os.path.dirname(__file__)
@@ -254,29 +253,28 @@ class Admin(Plugin):
             data = []
             for item in items:
                 entry = {}
-                entry['Title'] = tag_data(item, 'Title')
                 entry['ContentType'] = tag_data(item, 'ContentType')
                 for tag in ('CopyProtected', 'UniqueId'):
                     value = tag_data(item, tag)
                     if value:
                         entry[tag] = value
                 if entry['ContentType'] == 'x-tivo-container/folder':
+                    entry['Title'] = tag_data(item, 'Title')
                     entry['TotalItems'] = tag_data(item, 'TotalItems')
                     lc = int(tag_data(item, 'LastChangeDate'), 16)
                     entry['LastChangeDate'] = time.strftime('%b %d, %Y',
                                                             time.localtime(lc))
                 else:
-                    icon = tag_data(item, 'Links/CustomIcon/Url')
-                    if icon:
-                        entry['Icon'] = icon
-                    url = tag_data(item, 'Links/Content/Url')
-                    if url:
-                        entry['Url'] = url
-                    keys = ('SourceSize', 'Duration', 'CaptureDate',
-                            'EpisodeTitle', 'Description',
-                            'SourceChannel', 'SourceStation')
+                    entry.update(from_container(item))
+                    keys = {'Icon': 'Links/CustomIcon/Url',
+                            'Url': 'Links/Content/Url',
+                            'SourceSize': 'Details/SourceSize',
+                            'Duration': 'Details/Duration',
+                            'CaptureDate': 'Details/CaptureDate'}
                     for key in keys:
-                        entry[key] = tag_data(item, key)
+                        value = tag_data(item, key)
+                        if value:
+                            entry[key] = value
 
                     entry['SourceSize'] = ( '%.3f GB' %
                         (float(entry['SourceSize']) / (1024 ** 3)) )
@@ -287,9 +285,6 @@ class Admin(Plugin):
 
                     entry['CaptureDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(entry['CaptureDate'], 16)))
-
-                    desc = entry['Description']
-                    entry['Description'] = desc.replace(TRIBUNE_CR, '')
 
                 data.append(entry)
         else:

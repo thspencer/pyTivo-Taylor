@@ -71,6 +71,30 @@ def basic(full_path):
 
     return metadata
 
+def from_container(xmldoc):
+    metadata = {}
+
+    keys = {'title': 'Title', 'episodeTitle': 'EpisodeTitle',
+            'description': 'Description', 'seriesId': 'SeriesId',
+            'episodeNumber': 'EpisodeNumber', 'tvRating': 'TvRating',
+            'displayMajorNumber': 'SourceChannel', 'callsign': 'SourceStation'}
+
+    details = xmldoc.getElementsByTagName('Details')[0]
+
+    for key in keys:
+        data = tag_data(details, keys[key])
+        if data:
+            if key == 'description':
+                data = data.replace(TRIBUNE_CR, '')
+            elif key == 'tvRating':
+                data = 'x' + data
+            elif key == 'displayMajorNumber':
+                if '-' in data:
+                    data, metadata['displayMinorNumber'] = data.split('-')
+            metadata[key] = data
+
+    return metadata
+
 def from_details(xmldoc):
     metadata = {}
 
@@ -81,6 +105,7 @@ def from_details(xmldoc):
              'title': 'program/title',
              'episodeTitle': 'program/episodeTitle',
              'episodeNumber': 'program/episodeNumber',
+             'seriesId': 'program/series/uniqueId',
              'seriesTitle': 'program/series/seriesTitle',
              'originalAirDate': 'program/originalAirDate',
              'isEpisode': 'program/isEpisode',
@@ -91,6 +116,8 @@ def from_details(xmldoc):
     for item in items:
         data = tag_data(showing, item)
         if data:
+            if item == 'description':
+                data = data.replace(TRIBUNE_CR, '')
             metadata[item] = data
 
     vItems = ['vActor', 'vChoreographer', 'vDirector',
@@ -114,10 +141,6 @@ def from_details(xmldoc):
     rating = _tag_value(showing, 'tvRating')
     if rating:
         metadata['tvRating'] = 'x' + rating[1]
-
-    if 'description' in metadata:
-        desc = metadata['description']
-        metadata['description'] = desc.replace(TRIBUNE_CR, '')
 
     return metadata
 
