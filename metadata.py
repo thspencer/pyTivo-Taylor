@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import subprocess
 from datetime import datetime
@@ -160,3 +162,16 @@ def from_tivo(full_path):
         metadata = {}
 
     return metadata
+
+if __name__ == '__main__':        
+    import sys
+    if len(sys.argv) > 1:
+        config.init([])
+        metadata = from_tivo(sys.argv[1])
+        for key in metadata:
+            value = metadata[key]
+            if type(value) == list:
+                for item in value:
+                    print '%s: %s' % (key, item.encode('utf8'))
+            else:
+                print '%s: %s' % (key, value.encode('utf8'))
