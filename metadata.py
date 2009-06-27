@@ -116,7 +116,7 @@ def from_details(xmldoc):
              'partIndex': 'partIndex'}
 
     for item in items:
-        data = tag_data(showing, item)
+        data = tag_data(showing, items[item])
         if data:
             if item == 'description':
                 data = data.replace(TRIBUNE_CR, '')
