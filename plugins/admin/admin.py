@@ -356,22 +356,23 @@ class Admin(Plugin):
                 return
 
         f = open(outfile, 'wb')
-        kilobytes = 0
+        length = 0
         start_time = time.time()
         try:
             try:
-                output = handle.read(1024000)
-                while status[url]['running'] and output:
-                    kilobytes += 1000
+                while status[url]['running']:
+                    output = handle.read(1024000)
+                    if not output:
+                        break
+                    length += len(output)
                     f.write(output)
                     now = time.time()
                     elapsed = now - start_time
                     if elapsed >= 5:
-                        status[url]['rate'] = int(kilobytes / elapsed)
-                        status[url]['size'] += (kilobytes * 1024)
-                        kilobytes = 0
+                        status[url]['rate'] = int(length / elapsed) / 1024
+                        status[url]['size'] += length
+                        length = 0
                         start_time = now
-                    output = handle.read(1024000)
                 if status[url]['running']:
                     status[url]['finished'] = True
             except Exception, msg:
