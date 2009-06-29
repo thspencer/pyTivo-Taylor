@@ -504,7 +504,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 ffmpeg_pram
 
-Default Setting: blank
+Default Setting: None
 Valid Entries: A valid ffmpeg command
 Required: No
 Skill: Very Advanced
@@ -572,7 +572,7 @@ Available In: Server
 
 tivo_username
 
-Default Setting: blank
+Default Setting: None
 Valid Entries: tivo.com username
 Required: No
 Skill: Basic
@@ -584,7 +584,7 @@ Available In: Server
 
 tivo_password
 
-Default Setting: blank
+Default Setting: None
 Valid Entries: tivo.com password
 Required: No
 Skill: Basic
@@ -608,7 +608,7 @@ Available In: Server
 
 tivo_mak
 
-Default Setting: blank
+Default Setting: None
 Valid Entries: Your Media Access Key
 Required: No
 Skill: Basic
@@ -619,6 +619,19 @@ tivodecode (pushing .TiVo files, transcoding HD .TiVo files to SD
 TiVos). If you don't plan to use these features, you don't need to set 
 this.
 Example Settings: 012345678
+Available In: Server
+
+togo_path
+
+Default Setting: None
+Valid Entries: System path or share name
+Required: No
+Skill: Basic
+Description: The path used to save programs downloaded via the ToGo 
+menu. It can be either a direct path, or the name of a share, in which 
+case pyTivo will use the path specified for the share. If you don't plan 
+to use the ToGo feature, you need not set this.
+Example Settings: My Videos, /home/user/Videos
 Available In: Server
 
 zeroconf
