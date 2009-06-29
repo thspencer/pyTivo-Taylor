@@ -276,7 +276,7 @@ class Admin(Plugin):
                             'Duration': 'Details/Duration',
                             'CaptureDate': 'Details/CaptureDate'}
                     for key in keys:
-                        value = tag_data(item, key)
+                        value = tag_data(item, keys[key])
                         if value:
                             entry[key] = value
 
