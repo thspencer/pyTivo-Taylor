@@ -18,7 +18,8 @@ class ZCListener:
         self.names = names
 
     def removeService(self, server, type, name):
-        self.names.remove(name)
+        if name in self.names:
+            self.names.remove(name)
 
     def addService(self, server, type, name):
         self.names.append(name)
