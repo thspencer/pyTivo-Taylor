@@ -440,12 +440,10 @@ class Admin(Plugin):
 
     def SaveNPL(self, handler, query):
         config.reset()
-        if 'tivo_mak' in query:
-            config.config.set('Server', 'tivo_mak', query['tivo_mak'][0])
-            config.config.remove_option(query['Container'][0], 'tivo_mak')
-        if 'togo_path' in query:
-            config.config.set('Server', 'togo_path', query['togo_path'][0])
-            config.config.remove_option(query['Container'][0], 'togo_path')
+        for option in ['tivo_mak', 'togo_path']:
+            if option in query:
+                config.config.set('Server', option, query[option][0])
+                config.config.remove_option(query['Container'][0], option)
         config.write()
 
         cname = query['Container'][0].split('/')[0]
