@@ -200,11 +200,15 @@ class Admin(Plugin):
         cname = query['Container'][0].split('/')[0]
         folder = ''
         tivo_mak = config.get_server('tivo_mak')
+        togo_path = config.get_server('togo_path')
         for name, data in config.getShares():
-            if cname == name:
-                togo_path = data.get('togo_path', '')
+            if togo_path == name:
+                togo_path = data.get('path')
+            elif cname == name:
                 if not tivo_mak:
                     tivo_mak = data.get('tivo_mak', '')
+                if not togo_path:
+                    togo_path = data.get('togo_path', '')
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
@@ -381,11 +385,15 @@ class Admin(Plugin):
         cname = query['Container'][0].split('/')[0]
         tivoIP = query['TiVo'][0]
         tivo_mak = config.get_server('tivo_mak')
+        togo_path = config.get_server('togo_path')
         for name, data in config.getShares():
-            if cname == name:
-                togo_path = data.get('togo_path', '')
+            if togo_path == name:
+                togo_path = data.get('path')
+            elif cname == name:
                 if not tivo_mak:
                     tivo_mak = data.get('tivo_mak', '')
+                if not togo_path:
+                    togo_path = data.get('togo_path', '')
         t = Template(REDIRECT_TEMPLATE)
         command = query['Redirect'][0]
         params = (command, quote(cname), tivoIP)
@@ -435,8 +443,8 @@ class Admin(Plugin):
             config.config.set('Server', 'tivo_mak', query['tivo_mak'][0])
             config.config.remove_option(query['Container'][0], 'tivo_mak')
         if 'togo_path' in query:
-            config.config.set(query['Container'][0], 'togo_path',
-                              query['togo_path'][0])
+            config.config.set('Server', 'togo_path', query['togo_path'][0])
+            config.config.remove_option(query['Container'][0], 'togo_path')
         config.write()
 
         cname = query['Container'][0].split('/')[0]
