@@ -322,17 +322,19 @@ class Admin(Plugin):
         handler.end_headers()
         handler.wfile.write(t)
 
-    def get_tivo_file(self, url, mak, tivoIP, outfile):
+    def get_tivo_file(self, url, mak, togo_path):
         # global status
         cj = cookielib.LWPCookieJar()
 
-        # remove the port from the URL to avoid authentication errors
         parse_url = urlparse(url)
-        newurl = 'http://%s%s?%s' % (parse_url[1].split(':')[0],
-                                     parse_url[2], parse_url[4])
-        r = urllib2.Request(newurl)
+
+        name = unquote(parse_url[2])[10:].split('.')
+        name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
+        outfile = os.path.join(togo_path, "".join(name))
+
+        r = urllib2.Request(url)
         auth_handler = urllib2.HTTPDigestAuthHandler()
-        auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', mak)
+        auth_handler.add_password('TiVo DVR', parse_url[1], 'tivo', mak)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
                                       auth_handler)
         urllib2.install_opener(opener)
@@ -400,17 +402,10 @@ class Admin(Plugin):
         params = (command, quote(cname), tivoIP)
         if tivo_mak and togo_path:
             theurl = query['Url'][0]
-            parse_url = urlparse(theurl)
-            name = unquote(parse_url[2])[10:].split('.')
-            name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
-            outfile = os.path.join(togo_path, "".join(name))
-
             status[theurl] = {'running': True, 'error': '', 'rate': '',
                               'size': 0, 'finished': False}
-
             thread.start_new_thread(Admin.get_tivo_file,
-                                    (self, theurl, tivo_mak, tivoIP, outfile))
-
+                                    (self, theurl, tivo_mak, togo_path))
             t.time = '3'
             t.text = TRANS_INIT % params
         else:
