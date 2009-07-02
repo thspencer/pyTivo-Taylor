@@ -203,9 +203,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         for section, settings in config.getShares():
             if 'type' in settings and settings['type'] == 'admin':
                 t.admin += ('<a href="/TiVoConnect?Command=Admin&Container=' +
-                            quote(section) +
-                            '">Web Configuration</a><br>' +
-                            '<a href="/TiVoConnect?Command=NPL&Container=' +
+                            quote(section) + '">Web Configuration</a><br>')
+            elif 'type' in settings and settings['type'] == 'togo':
+                t.admin += ('<a href="/TiVoConnect?Command=NPL&Container=' +
                             quote(section) + '">ToGo</a><br>')
         if t.admin == '':
             t.admin = ('<br><b>No Admin plugin installed in pyTivo.conf</b>' +
