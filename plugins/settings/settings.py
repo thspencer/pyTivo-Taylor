@@ -10,7 +10,7 @@ from plugin import EncodeUnicode, Plugin
 
 SCRIPTDIR = os.path.dirname(__file__)
 
-CLASS_NAME = 'Admin'
+CLASS_NAME = 'Settings'
 
 # Some error/status message templates
 
@@ -20,10 +20,10 @@ in effect. <br>
 The <a href="/TiVoConnect?Command=%s&Container=%s">previous</a> page 
 will reload in 3 seconds."""
 
-SETTINGS1 = """<h3>Your Settings have been saved.</h3>  <br>
+SETTINGS_MSG = """<h3>Your Settings have been saved.</h3>  <br>
 Your settings have been saved to the pyTivo.conf file. However you will 
 need to do a <b>Soft Reset</b> before these changes will take effect.<br>
-The <a href="/TiVoConnect?Command=Admin&Container=%s">Admin</a> page 
+The <a href="/TiVoConnect?Command=Settings&Container=%s">Settings</a> page 
 will reload in 10 seconds."""
 
 # Preload the templates
@@ -32,7 +32,7 @@ tsname = os.path.join(SCRIPTDIR, 'templates', 'settings.tmpl')
 REDIRECT_TEMPLATE = file(trname, 'rb').read()
 SETTINGS_TEMPLATE = file(tsname, 'rb').read()
 
-class Admin(Plugin):
+class Settings(Plugin):
     CONTENT_TYPE = 'text/html'
 
     def Reset(self, handler, query):
@@ -41,7 +41,7 @@ class Admin(Plugin):
         if 'last_page' in query:
             last_page = query['last_page'][0]
         else:
-            last_page = 'Admin'
+            last_page = 'Settings'
 
         cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
@@ -51,9 +51,9 @@ class Admin(Plugin):
         handler.send_response(200)
         handler.end_headers()
         handler.wfile.write(t)
-        logging.getLogger('pyTivo.admin').info('pyTivo has been soft reset.')
+        logging.getLogger('pyTivo.settings').info('pyTivo has been soft reset.')
 
-    def Admin(self, handler, query):
+    def Settings(self, handler, query):
         # Read config file new each time in case there was any outside edits
         config.reset()
 
@@ -63,7 +63,7 @@ class Admin(Plugin):
                     or section.startswith('Server')):
                 if (not (config.config.has_option(section, 'type')) or
                     config.config.get(section, 'type').lower() not in
-                    ['admin', 'togo']):
+                    ['settings', 'togo']):
                     shares_data.append((section,
                                         dict(config.config.items(section,
                                                                  raw=True))))
@@ -146,8 +146,8 @@ class Admin(Plugin):
         cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
         t.time = '10'
-        t.url = '/TiVoConnect?Command=Admin&Container=' + quote(cname)
-        t.text = SETTINGS1 % quote(cname)
+        t.url = '/TiVoConnect?Command=Settings&Container=' + quote(cname)
+        t.text = SETTINGS_MSG % quote(cname)
         handler.send_response(200)
         handler.end_headers()
         handler.wfile.write(t)

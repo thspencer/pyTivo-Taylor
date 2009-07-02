@@ -201,17 +201,17 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                        'info_page.tmpl'))
         t.admin = ''
         for section, settings in config.getShares():
-            if 'type' in settings and settings['type'] == 'admin':
-                t.admin += ('<a href="/TiVoConnect?Command=Admin&Container=' +
+            if 'type' in settings and settings['type'] == 'settings':
+                t.admin += ('<a href="/TiVoConnect?Command=Settings&Container=' +
                             quote(section) + '">Web Configuration</a><br>')
             elif 'type' in settings and settings['type'] == 'togo':
                 t.admin += ('<a href="/TiVoConnect?Command=NPL&Container=' +
                             quote(section) + '">ToGo</a><br>')
         if t.admin == '':
-            t.admin = ('<br><b>No Admin plugin installed in pyTivo.conf</b>' +
-                       '<br> If you wish to use the admin plugin add the ' +
+            t.admin = ('<br><b>No Settings plugin installed in pyTivo.conf</b>' +
+                       '<br> If you wish to use the settings plugin add the ' +
                        'following lines to pyTivo.conf<br><br>' +
-                       '[Admin]<br>type=admin')
+                       '[Settings]<br>type=settings')
 
         if (config.get_server('tivo_username') and
             config.get_server('tivo_password')):
