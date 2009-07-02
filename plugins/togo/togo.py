@@ -76,11 +76,6 @@ class ToGo(Plugin):
         for name, data in config.getShares():
             if togo_path == name:
                 togo_path = data.get('path')
-            elif cname == name:
-                if not tivo_mak:
-                    tivo_mak = data.get('tivo_mak', '')
-                if not togo_path:
-                    togo_path = data.get('togo_path', '')
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
@@ -251,11 +246,6 @@ class ToGo(Plugin):
         for name, data in config.getShares():
             if togo_path == name:
                 togo_path = data.get('path')
-            elif cname == name:
-                if not tivo_mak:
-                    tivo_mak = data.get('tivo_mak', '')
-                if not togo_path:
-                    togo_path = data.get('togo_path', '')
         t = Template(REDIRECT_TEMPLATE)
         command = query['Redirect'][0]
         params = (command, quote(cname), tivoIP)
@@ -297,7 +287,6 @@ class ToGo(Plugin):
         for option in ['tivo_mak', 'togo_path']:
             if option in query:
                 config.config.set('Server', option, query[option][0])
-                config.config.remove_option(query['Container'][0], option)
         config.write()
 
         cname = query['Container'][0].split('/')[0]
