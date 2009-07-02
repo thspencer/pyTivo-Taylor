@@ -32,12 +32,6 @@ in effect. <br>
 The <a href="/TiVoConnect?Command=%s&Container=%s">previous</a> page 
 will reload in 3 seconds."""
 
-SETTINGS2 = """<h3>Your Settings have been saved.</h3>  <br>
-Your settings have been saved to the pyTivo.conf file. pyTivo will now 
-do a <b>Soft Reset</b> to allow these changes to take effect.<br>
-The <a href="/TiVoConnect?last_page=NPL&Command=Reset&Container=%s">Reset</a> 
-will occur in 2 seconds."""
-
 TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
 Your selected transfer has been initiated.<br>
 The <a href="/TiVoConnect?Command=%s&Container=%s&TiVo=%s">ToGo</a> page 
@@ -278,23 +272,6 @@ class ToGo(Plugin):
         t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
                  quote(cname) + '&TiVo=' + tivoIP)
         t.text = TRANS_STOP % (command, quote(cname), tivoIP)
-        handler.send_response(200)
-        handler.end_headers()
-        handler.wfile.write(t)
-
-    def SaveNPL(self, handler, query):
-        config.reset()
-        for option in ['tivo_mak', 'togo_path']:
-            if option in query:
-                config.config.set('Server', option, query[option][0])
-        config.write()
-
-        cname = query['Container'][0].split('/')[0]
-        t = Template(REDIRECT_TEMPLATE)
-        t.time = '2'
-        t.url = ('/TiVoConnect?last_page=NPL&Command=Reset&Container=' +
-                 quote(cname))
-        t.text = SETTINGS2 % quote(cname)
         handler.send_response(200)
         handler.end_headers()
         handler.wfile.write(t)
