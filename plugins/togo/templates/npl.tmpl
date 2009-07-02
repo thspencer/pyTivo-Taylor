@@ -95,7 +95,9 @@
 					<small>#if 'description' in $row
                                         $row['description']
                                         #end if
+                                        #if 'displayMajorNumber' in $row and 'callsign' in $row
 					$row['displayMajorNumber'] $row['callsign']</small>
+                                        #end if
 				</td>
 				<td NOWRAP align="center">$row['SourceSize'] <br>
 				$row['Duration']
