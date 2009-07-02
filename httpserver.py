@@ -199,30 +199,28 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'info_page.tmpl'))
+        shares = dict(config.getShares())
         t.admin = ''
-        for section, settings in config.getShares():
-            if 'type' in settings and settings['type'] == 'settings':
-                t.admin += ('<a href="/TiVoConnect?Command=Settings&Container=' +
-                            quote(section) + '">Web Configuration</a><br>')
-            elif 'type' in settings and settings['type'] == 'togo':
-                t.admin += ('<a href="/TiVoConnect?Command=NPL&Container=' +
-                            quote(section) + '">ToGo</a><br>')
-        if t.admin == '':
-            t.admin = ('<br><b>No Settings plugin installed in pyTivo.conf</b>' +
-                       '<br> If you wish to use the settings plugin add the ' +
-                       'following lines to pyTivo.conf<br><br>' +
-                       '[Settings]<br>type=settings')
 
         if (config.get_server('tivo_username') and
             config.get_server('tivo_password')):
             t.shares = 'Push from video shares:<br/>'
-            for section, settings in config.getShares():
-                if settings.get('type') == 'video':
-                    t.shares += ('<a href="TiVoConnect?Command=' +
-                                 'QueryContainer&Container=' +
-                                 quote(section) + '">' + section + '</a><br/>')
         else:
             t.shares = ''
+
+        for section in shares:
+            plugin_type = shares[section].get('type')
+            if plugin_type == 'settings':
+                t.admin += ('<a href="/TiVoConnect?Command=Settings&' +
+                            'Container=' + quote(section) +
+                            '">Web Configuration</a><br>')
+            elif plugin_type == 'togo':
+                t.admin += ('<a href="/TiVoConnect?Command=NPL&' +
+                            'Container=' + quote(section) + '">ToGo</a><br>')
+            elif plugin_type == 'video' and t.shares:
+                t.shares += ('<a href="TiVoConnect?Command=' +
+                             'QueryContainer&Container=' +
+                             quote(section) + '">' + section + '</a><br/>')
 
         self.wfile.write(t)
 
