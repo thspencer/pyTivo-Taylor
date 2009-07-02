@@ -220,8 +220,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             'Container=' + quote(section) +
                             '">Web Configuration</a><br>')
             elif plugin_type == 'togo' and t.togo:
-                t.togo += ('<a href="/TiVoConnect?Command=NPL&' +
-                           'Container=' + quote(section) + '">ToGo</a><br>')
+                for tsn in config.tivos:
+                    if tsn:
+                        t.togo += ('<a href="/TiVoConnect?' +
+                            'Command=NPL&Container=' + quote(section) +  
+                            '&TiVo=' + config.tivos[tsn] + '">' + 
+                            config.tivo_names[tsn] + '</a><br/>')
             elif plugin_type == 'video' and t.shares:
                 t.shares += ('<a href="TiVoConnect?Command=' +
                              'QueryContainer&Container=' +

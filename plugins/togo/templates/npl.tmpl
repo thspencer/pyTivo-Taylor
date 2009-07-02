@@ -6,40 +6,18 @@
 </head>
 <body style="background-color: rgb(250, 250, 250);">
 
-#if $tivoIP != ''
-    #set $tname = $tivoIP
-    #for $tsn in $tivos
-        #if $tivoIP == $tivos[$tsn]
-            #set $tname = $tivo_names[$tsn]
-        #end if
-    #end for
+#set $tname = $tivoIP
+#for $tsn in $tivos
+    #if $tivoIP == $tivos[$tsn]
+        #set $tname = $tivo_names[$tsn]
+    #end if
+#end for
 <p align="center"><font size="6">pyTivo - ToGo - $tname</font></p>
-#else
-<p align="center"><font size="6">pyTivo - ToGo</font></p>
-#end if
 <table style="border: 1px solid rgb(220, 220, 220);background-color: rgb(255, 255, 255);text-align: left;" border="0" cellpadding="0" cellspacing="4">
   <tbody>
     <tr>
       <td>
-      <form method="get" action="/TiVoConnect">
-      <input type="hidden" name="Command" value="NPL">
-      <input type="hidden" name="Container" value="$(container)">
-      <select name="TiVo">
-	  #for $tsn in $tivos
-	  	  #if $tsn != ''
-	         <option value="$tivos[$tsn]">$tivo_names[$tsn]</option>
-	      #end if
-	  #end for
-      </select>
-	  &nbsp;<input value="View Now Playing List" type="submit">
-	  </form>
-	  </td>
-    </tr>
-    <tr>
-      <td>
       <div>
-      #if $tivoIP != ''
-          <!-- If TiVoIP is present then we should display a NPL -->
 		  #if $ItemStart > 0
 		        #set $Offset = -($ItemStart + 1)
 		        #if $Offset < -($shows_per_page+1)
@@ -141,40 +119,6 @@
 		     #set $Offset = $shows_per_page - 1
 		     <a href="/TiVoConnect?Command=NPL&Container=$quote($container)&TiVo=$tivoIP&AnchorItem=$FirstAnchor&AnchorOffset=$Offset&Folder=$folder">Next Page</a>
 		  #end if
-	  #else
-	  	  <!-- No TiVo IP Provided so display instructions -->
-	  	  
-	  	  <h2>Instructions</h2>
-	  	  
-	  	  <b>Required Settings:</b><br>
-		  In order to view the shows on your TiVo, pyTivo needs to know your Media Access Key.
-                  This is set by the "tivo_mak" keyword in your pyTivo.conf.
-		  This information is stored on your computer and is never passed outside of your network.<br><br>
-		  
-		  In order to download shows from your TiVo, pyTivo needs to know the destination directory to save the files to.
-                  This is set by the "togo_path" keyword in your pyTivo.conf.
-		  <br><br>
-		  
-		  <b>To View Your TiVo</b><br>
-		  Select the desired TiVo based on the TiVo Service Number and click "View Now Playing List"<br><br>
-		  
-		  <b>My TiVo is Not Listed</b><br>
-		  pyTivo builds a list of TiVos on the network based on the TiVos that contact pyTivo.  If pyTivo has been running less 
-		  than 5 minutes your TiVo may not have contacted pyTivo yet.  To force a connection open your Now Playing List on your 
-		  TiVo.  If your TiVo is still not listed in pyTivo - ToGo please confirm that your TiVo is able to connect to the pyTivo 
-		  server.<br><br>
-		  
-		  <b>To Download a Show</b><br>
-		  Find your desired show in the list and click Transfer Now.  The transfer will begin momentarily.  Note: TiVo can only 
-		  transfer 1 show at a time.<br><br>
-		  
-		  <b>I get an Error 503</b><br>
-		  TiVo can only tranfer one file at a time.  If you receive this error wait a few minutes and try the transfer again.<br><br>
-		  
-		  <b>What will the name of my transferred show be</b><br>
-		  The name will be the show title followed by a hyphen and a unique number.  This prevents accidental overwriting and may 
-		  allow for resuming transfers in the future (not yet supported).
-	  #end if
       </div>
       </td>
     </tr>
