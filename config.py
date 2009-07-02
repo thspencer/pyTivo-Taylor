@@ -170,8 +170,8 @@ def getShares(tsn=''):
         if tsnshares:
             shares = tsnshares
 
-    shares.extend([('settings', {'type': 'settings'}),
-                   ('togo', {'type': 'togo'})])
+    shares.extend([('Settings', {'type': 'settings'}),
+                   ('ToGo', {'type': 'togo'})])
     return shares
 
 def getDebug():
