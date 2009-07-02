@@ -202,9 +202,14 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         shares = dict(config.getShares())
         t.admin = ''
 
+        if config.get_server('tivo_mak') and config.get_server('togo_path'):
+            t.togo = '<br/>Pull from TiVos:<br/>'
+        else:
+            t.togo = ''
+
         if (config.get_server('tivo_username') and
             config.get_server('tivo_password')):
-            t.shares = 'Push from video shares:<br/>'
+            t.shares = '<br/>Push from video shares:<br/>'
         else:
             t.shares = ''
 
@@ -214,9 +219,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 t.admin += ('<a href="/TiVoConnect?Command=Settings&' +
                             'Container=' + quote(section) +
                             '">Web Configuration</a><br>')
-            elif plugin_type == 'togo':
-                t.admin += ('<a href="/TiVoConnect?Command=NPL&' +
-                            'Container=' + quote(section) + '">ToGo</a><br>')
+            elif plugin_type == 'togo' and t.togo:
+                t.togo += ('<a href="/TiVoConnect?Command=NPL&' +
+                           'Container=' + quote(section) + '">ToGo</a><br>')
             elif plugin_type == 'video' and t.shares:
                 t.shares += ('<a href="TiVoConnect?Command=' +
                              'QueryContainer&Container=' +
