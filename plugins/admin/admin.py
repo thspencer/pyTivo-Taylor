@@ -7,8 +7,8 @@ import sys
 import thread
 import time
 import urllib2
+import urlparse
 from urllib import unquote_plus, quote, unquote
-from urlparse import urlparse
 from xml.dom import minidom
 
 from Cheetah.Template import Template
@@ -326,7 +326,7 @@ class Admin(Plugin):
         # global status
         cj = cookielib.LWPCookieJar()
 
-        parse_url = urlparse(url)
+        parse_url = urlparse.urlparse(url)
 
         name = unquote(parse_url[2])[10:].split('.')
         name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
@@ -342,47 +342,34 @@ class Admin(Plugin):
         try:
             handle = urllib2.urlopen(r)
         except IOError, e:
-            # If we get "Too many transfers error" try a second time.  
-            # For some reason urllib2 does not properly close 
-            # connections when a transfer is canceled.
-            if e.code == 503:
-                try:
-                    handle = urllib2.urlopen(r)
-                except IOError, e:
-                    status[url]['running'] = False
-                    status[url]['error'] = e.code
-                    return
-            else:
-                status[url]['running'] = False
-                status[url]['error'] = e.code
-                return
+            status[url]['running'] = False
+            status[url]['error'] = e.code
+            return
 
         f = open(outfile, 'wb')
         length = 0
         start_time = time.time()
         try:
-            try:
-                while status[url]['running']:
-                    output = handle.read(1024000)
-                    if not output:
-                        break
-                    length += len(output)
-                    f.write(output)
-                    now = time.time()
-                    elapsed = now - start_time
-                    if elapsed >= 5:
-                        status[url]['rate'] = int(length / elapsed) / 1024
-                        status[url]['size'] += length
-                        length = 0
-                        start_time = now
-                if status[url]['running']:
-                    status[url]['finished'] = True
-            except Exception, msg:
-                logging.getLogger('pyTivo.admin').info(msg)
-        finally:
-            status[url]['running'] = False
-            handle.close()
-            f.close()
+            while status[url]['running']:
+                output = handle.read(1024000)
+                if not output:
+                    break
+                length += len(output)
+                f.write(output)
+                now = time.time()
+                elapsed = now - start_time
+                if elapsed >= 5:
+                    status[url]['rate'] = int(length / elapsed) / 1024
+                    status[url]['size'] += length
+                    length = 0
+                    start_time = now
+            if status[url]['running']:
+                status[url]['finished'] = True
+        except Exception, msg:
+            logging.getLogger('pyTivo.admin').info(msg)
+        status[url]['running'] = False
+        handle.close()
+        f.close()
 
     def ToGo(self, handler, query):
         cname = query['Container'][0].split('/')[0]
