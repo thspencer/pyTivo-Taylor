@@ -170,8 +170,11 @@ def getShares(tsn=''):
         if tsnshares:
             shares = tsnshares
 
-    shares.extend([('Settings', {'type': 'settings'}),
-                   ('ToGo', {'type': 'togo'})])
+    if get_server('nosettings', 'false').lower() in ['false', 'no', 'off']:
+        shares.append(('Settings', {'type': 'settings'}))
+    if get_server('tivo_mak') and get_server('togo_path'):    
+        shares.append(('ToGo', {'type': 'togo'}))
+
     return shares
 
 def getDebug():
