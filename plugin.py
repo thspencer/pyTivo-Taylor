@@ -103,7 +103,7 @@ class Plugin(object):
             handler.server.logger.warning('Anchor not found: ' + anchor)
 
         totalFiles = len(files)
-        index = 0
+        index = last_start
 
         if totalFiles and 'ItemCount' in query:
             count = int(query['ItemCount'][0])
@@ -141,23 +141,15 @@ class Plugin(object):
                 if 'AnchorOffset' in query:
                     index += int(query['AnchorOffset'][0])
 
-                #foward count
-                if count >= 0:
-                    files = files[index:index + count]
-                #backwards count
-                else:
-                    if index + count < 0:
-                        count = -index
-                    files = files[index + count:index]
-                    index += count
-
-            else:  # No AnchorItem
-
-                if count >= 0:
-                    files = files[:count]
-                else:
-                    index = count % len(files)
-                    files = files[count:]
+            #foward count
+            if count >= 0:
+                files = files[index:index + count]
+            #backwards count
+            else:
+                if index + count < 0:
+                    count = -index
+                files = files[index + count:index]
+                index += count
 
         return files, totalFiles, index
 
@@ -253,5 +245,6 @@ class Plugin(object):
         # Trim the list
         files, total, start = self.item_count(handler, query, cname, files,
                                               filelist.last_start)
-        filelist.last_start = start
+        if len(files) > 1:
+            filelist.last_start = start
         return files, total, start
