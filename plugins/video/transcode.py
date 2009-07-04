@@ -333,11 +333,12 @@ def select_aspect(inFile, tsn = ''):
     ratio = vInfo['vWidth'] * 100 / vInfo['vHeight']
     rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
 
-    if 'par2' in vInfo:
+    if vInfo.get('par2'):
         par2 = vInfo['par2']
-    elif 'par' in vInfo:
+    elif vInfo.get('par'):
         par2 = float(vInfo['par'])
     else:
+        # Assume PAR = 1.0
         par2 = 1.0
 
     ratio = int(par2 * ratio)
