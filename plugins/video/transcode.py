@@ -333,6 +333,14 @@ def select_aspect(inFile, tsn = ''):
     ratio = vInfo['vWidth'] * 100 / vInfo['vHeight']
     rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
 
+    if 'par2' in vInfo:
+        par2 = vInfo['par2']
+    elif 'par' in vInfo:
+        par2 = float(vInfo['par'])
+    else:
+        par2 = 1.0
+
+    ratio = int(par2 * ratio)
     debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
                   'millisecs=%s ratio=%s rheight=%s rwidth=%s ' +
                   'TIVO_HEIGHT=%s TIVO_WIDTH=%s') % (inFile,
@@ -340,8 +348,10 @@ def select_aspect(inFile, tsn = ''):
                   vInfo['vFps'], vInfo['millisecs'], ratio, rheight,
                   rwidth, TIVO_HEIGHT, TIVO_WIDTH))
 
-    multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH)
-    multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH)
+    multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH) / par2
+    multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH) / par2
+
+    debug('par2=%.3f mult4by3=%.3f' % (par2, multiplier4by3))
 
     if config.isHDtivo(tsn) and not optres:
         if config.getPixelAR(0) or vInfo['par']:
@@ -379,20 +389,22 @@ def select_aspect(inFile, tsn = ''):
                                 (59, 72), (59, 36), (59, 54)] or
           vInfo['dar1'] == '4:3'):
         debug('File is within 4:3 list.')
-        return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+        if int(par2 * 100) == 100:
+            return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
     elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), 
                                 (59, 27)] or vInfo['dar1'] == '16:9')
           and (aspect169 or config.get169Letterbox(tsn))):
         debug('File is within 16:9 list and 16:9 allowed.')
 
-        if config.get169Blacklist(tsn) or (aspect169 and 
-                                           config.get169Letterbox(tsn)):
-            return ['-aspect', '4:3', '-s', '%sx%s' %
-                    (TIVO_WIDTH, TIVO_HEIGHT)]
-        else:
-            return ['-aspect', '16:9', '-s', '%sx%s' %
-                    (TIVO_WIDTH, TIVO_HEIGHT)]
+        if int(par2 * 100) == 100:
+            if config.get169Blacklist(tsn) or (aspect169 and 
+                                               config.get169Letterbox(tsn)):
+                return ['-aspect', '4:3', '-s', '%sx%s' %
+                        (TIVO_WIDTH, TIVO_HEIGHT)]
+            else:
+                return ['-aspect', '16:9', '-s', '%sx%s' %
+                        (TIVO_WIDTH, TIVO_HEIGHT)]
     else:
         settings = []
 
