@@ -181,7 +181,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     GetPlugin(settings['type']).CONTENT_TYPE
                 tsncontainers[section] = settings
             except Exception, msg:
-                self.server.logger.error(section + ' - ' + msg)
+                self.server.logger.error(section + ' - ' + str(msg))
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'root_container.tmpl'),
                      filter=EncodeUnicode)
