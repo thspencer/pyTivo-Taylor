@@ -141,15 +141,10 @@ class Plugin(object):
                 if 'AnchorOffset' in query:
                     index += int(query['AnchorOffset'][0])
 
-            #foward count
-            if count >= 0:
-                files = files[index:index + count]
-            #backwards count
-            else:
-                if index + count < 0:
-                    count = -index
-                files = files[index + count:index]
-                index += count
+            if count < 0:
+                index = (index + count) % len(files)
+                count = -count
+            files = files[index:index + count]
 
         return files, totalFiles, index
 
