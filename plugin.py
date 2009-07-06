@@ -103,7 +103,7 @@ class Plugin(object):
             handler.server.logger.warning('Anchor not found: ' + anchor)
 
         totalFiles = len(files)
-        index = last_start
+        index = 0
 
         if totalFiles and 'ItemCount' in query:
             count = int(query['ItemCount'][0])
