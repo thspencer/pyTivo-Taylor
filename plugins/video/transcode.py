@@ -358,11 +358,11 @@ def select_aspect(inFile, tsn = ''):
         if config.getPixelAR(0) or vInfo['par']:
             if vInfo['par2'] == None:
                 if vInfo['par']:
-                    npar = float(vInfo['par'])
+                    npar = par2
                 else:
                     npar = config.getPixelAR(1)
             else:
-                npar = vInfo['par2']
+                npar = par2
 
             # adjust for pixel aspect ratio, if set, because TiVo 
             # expects square pixels
@@ -390,22 +390,20 @@ def select_aspect(inFile, tsn = ''):
                                 (59, 72), (59, 36), (59, 54)] or
           vInfo['dar1'] == '4:3'):
         debug('File is within 4:3 list.')
-        if int(par2 * 100) == 100:
-            return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+        return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
     elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), 
                                 (59, 27)] or vInfo['dar1'] == '16:9')
           and (aspect169 or config.get169Letterbox(tsn))):
         debug('File is within 16:9 list and 16:9 allowed.')
 
-        if int(par2 * 100) == 100:
-            if config.get169Blacklist(tsn) or (aspect169 and 
-                                               config.get169Letterbox(tsn)):
-                return ['-aspect', '4:3', '-s', '%sx%s' %
-                        (TIVO_WIDTH, TIVO_HEIGHT)]
-            else:
-                return ['-aspect', '16:9', '-s', '%sx%s' %
-                        (TIVO_WIDTH, TIVO_HEIGHT)]
+        if config.get169Blacklist(tsn) or (aspect169 and 
+                                           config.get169Letterbox(tsn)):
+            return ['-aspect', '4:3', '-s', '%sx%s' %
+                    (TIVO_WIDTH, TIVO_HEIGHT)]
+        else:
+            return ['-aspect', '16:9', '-s', '%sx%s' %
+                    (TIVO_WIDTH, TIVO_HEIGHT)]
     else:
         settings = []
 
