@@ -357,13 +357,13 @@ def select_aspect(inFile, tsn = ''):
             # expects square pixels
 
             if npar < 1.0:
-                return ['-s', str(vInfo['vWidth']) + 'x' + 
-                        str(int(math.ceil(vInfo['vHeight'] / npar)))]
+                return ['-s', '%dx%d' % (vInfo['vWidth'],
+                                         math.ceil(vInfo['vHeight'] / npar))]
             elif npar > 1.0:
                 # FFMPEG expects width to be a multiple of two
 
-                return ['-s', str(int(math.ceil(vInfo['vWidth'] * npar / 
-                        2.0) * 2)) + 'x' + str(vInfo['vHeight'])]
+                return ['-s', '%dx%d' % (math.ceil(vInfo['vWidth']*npar/2.0)*2,
+                                         vInfo['vHeight'])]
 
         if vInfo['vHeight'] <= TIVO_HEIGHT:
             # pass all resolutions to S3, except heights greater than 
