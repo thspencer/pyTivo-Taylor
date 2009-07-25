@@ -730,6 +730,8 @@ def video_info(inFile, cache=True):
     x = rezre.search(output)
     if x:
         vInfo['vFps'] = x.group(1)
+        if '.' not in vInfo['vFps']:
+            vInfo['vFps'] += '.00'
 
         # Allow override only if it is mpeg2 and frame rate was doubled 
         # to 59.94
