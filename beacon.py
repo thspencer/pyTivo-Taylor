@@ -82,10 +82,15 @@ class Beacon:
     def __init__(self):
         if config.get_zc():
             logger = logging.getLogger('pyTivo.beacon')
-            logger.info('Announcing shares...')
-            self.bd = ZCBroadcast(logger)
-            logger.info('Scanning for TiVos...')
-            self.bd.scan()
+            try:
+                logger.info('Announcing shares...')
+                self.bd = ZCBroadcast(logger)
+            except:
+                logger.error('Zeroconf failure')
+                self.bd = None
+            else:
+                logger.info('Scanning for TiVos...')
+                self.bd.scan()
         else:
             self.bd = None
 
