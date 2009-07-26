@@ -305,6 +305,40 @@ def select_format(tsn):
     fmt = 'vob'
     return '-f %s -' % fmt
 
+def pad_TB(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
+    endHeight = int(((TIVO_WIDTH * vInfo['vHeight']) /
+                      vInfo['vWidth']) * multiplier)
+    if endHeight % 2:
+        endHeight -= 1
+    if endHeight < TIVO_HEIGHT * 0.99:
+        topPadding = (TIVO_HEIGHT - endHeight) / 2
+        if topPadding % 2:
+            topPadding -= 1
+        bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
+        return ['-s', '%sx%s' % (TIVO_WIDTH, endHeight),
+                '-padtop', str(topPadding),
+                '-padbottom', str(bottomPadding)]
+    else: # if only very small amount of padding needed, then
+          # just stretch it
+        return ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+
+def pad_LR(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
+    endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) / 
+                   (vInfo['vHeight'] * multiplier))
+    if endWidth % 2:
+        endWidth -= 1
+    if endWidth < TIVO_WIDTH * 0.99:
+        leftPadding = (TIVO_WIDTH - endWidth) / 2
+        if leftPadding % 2:
+            leftPadding -= 1
+        rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
+        return ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT),
+                '-padleft', str(leftPadding),
+                '-padright', str(rightPadding)]
+    else: # if only very small amount of padding needed, then 
+          # just stretch it
+        return ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+
 def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
     TIVO_HEIGHT = config.getTivoHeight(tsn)
@@ -329,10 +363,6 @@ def select_aspect(inFile, tsn = ''):
         if optWidth < TIVO_WIDTH:
             TIVO_WIDTH = optWidth
 
-    d = gcd(vInfo['vHeight'], vInfo['vWidth'])
-    ratio = vInfo['vWidth'] * 100 / vInfo['vHeight']
-    rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
-
     if vInfo.get('par2'):
         par2 = vInfo['par2']
     elif vInfo.get('par'):
@@ -341,18 +371,10 @@ def select_aspect(inFile, tsn = ''):
         # Assume PAR = 1.0
         par2 = 1.0
 
-    ratio = int(par2 * ratio)
-    debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s ' +
-                  'millisecs=%s ratio=%s rheight=%s rwidth=%s ' +
-                  'TIVO_HEIGHT=%s TIVO_WIDTH=%s') % (inFile,
-                  vInfo['vCodec'], vInfo['vWidth'], vInfo['vHeight'],
-                  vInfo['vFps'], vInfo['millisecs'], ratio, rheight,
-                  rwidth, TIVO_HEIGHT, TIVO_WIDTH))
-
-    multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH) / par2
-    multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH) / par2
-
-    debug('par2=%.3f mult4by3=%.3f' % (par2, multiplier4by3))
+    debug(('File=%s vCodec=%s vWidth=%s vHeight=%s vFps=%s millisecs=%s ' +
+           'TIVO_HEIGHT=%s TIVO_WIDTH=%s') % (inFile, vInfo['vCodec'],
+          vInfo['vWidth'], vInfo['vHeight'], vInfo['vFps'],
+          vInfo['millisecs'], TIVO_HEIGHT, TIVO_WIDTH))
 
     if config.isHDtivo(tsn) and not optres:
         if config.getPixelAR(0) or vInfo['par']:
@@ -364,15 +386,13 @@ def select_aspect(inFile, tsn = ''):
             else:
                 npar = par2
 
-            # adjust for pixel aspect ratio, if set, because TiVo 
-            # expects square pixels
+            # adjust for pixel aspect ratio, if set
 
             if npar < 1.0:
                 return ['-s', '%dx%d' % (vInfo['vWidth'],
                                          math.ceil(vInfo['vHeight'] / npar))]
             elif npar > 1.0:
                 # FFMPEG expects width to be a multiple of two
-
                 return ['-s', '%dx%d' % (math.ceil(vInfo['vWidth']*npar/2.0)*2,
                                          vInfo['vHeight'])]
 
@@ -381,6 +401,10 @@ def select_aspect(inFile, tsn = ''):
             # conf height
             return []
         # else, resize video.
+
+    d = gcd(vInfo['vHeight'], vInfo['vWidth'])
+    rheight, rwidth = vInfo['vHeight'] / d, vInfo['vWidth'] / d
+    debug('rheight=%s rwidth=%s' % (rheight, rwidth))
 
     if (rwidth, rheight) in [(1, 1)] and vInfo['par1'] == '8:9':
         debug('File + PAR is within 4:3.')
@@ -399,13 +423,19 @@ def select_aspect(inFile, tsn = ''):
 
         if config.get169Blacklist(tsn) or (aspect169 and 
                                            config.get169Letterbox(tsn)):
-            return ['-aspect', '4:3', '-s', '%sx%s' %
-                    (TIVO_WIDTH, TIVO_HEIGHT)]
+            aspect = '4:3'
         else:
-            return ['-aspect', '16:9', '-s', '%sx%s' %
-                    (TIVO_WIDTH, TIVO_HEIGHT)]
+            aspect = '16:9'
+        return ['-aspect', aspect, '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+
     else:
-        settings = []
+        settings = ['-aspect']
+
+        multiplier16by9 = (16.0 * TIVO_HEIGHT) / (9.0 * TIVO_WIDTH) / par2
+        multiplier4by3  =  (4.0 * TIVO_HEIGHT) / (3.0 * TIVO_WIDTH) / par2
+        ratio = vInfo['vWidth'] * 100 * par2 / vInfo['vHeight']
+        debug('par2=%.3f ratio=%.3f mult4by3=%.3f' % (par2, ratio,
+                                                      multiplier4by3))
 
         # If video is wider than 4:3 add top and bottom padding
 
@@ -415,112 +445,49 @@ def select_aspect(inFile, tsn = ''):
             if aspect169 and ratio > 135: # If file would fall in 4:3 
                                           # assume it is supposed to be 4:3
 
-                if ratio > 177: # too short needs padding top and bottom
-                    endHeight = int(((TIVO_WIDTH * vInfo['vHeight']) /
-                                    vInfo['vWidth']) * multiplier16by9)
-                    settings.append('-aspect') 
-                    if (config.get169Blacklist(tsn) or
-                        config.get169Letterbox(tsn)):
-                        settings.append('4:3')
-                    else:
-                        settings.append('16:9')
-                    if endHeight % 2:
-                        endHeight -= 1
-                    if endHeight < TIVO_HEIGHT * 0.99:
-                        topPadding = (TIVO_HEIGHT - endHeight) / 2
-                        if topPadding % 2:
-                            topPadding -= 1
-                        bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
-                        settings += ['-s', '%sx%s' % (TIVO_WIDTH, endHeight),
-                                     '-padtop', str(topPadding),
-                                     '-padbottom', str(bottomPadding)]
-                    else:   # if only very small amount of padding 
-                            # needed, then just stretch it
-                        settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+                if (config.get169Blacklist(tsn) or
+                    config.get169Letterbox(tsn)):
+                    settings.append('4:3')
+                else:
+                    settings.append('16:9')
 
+                if ratio > 177: # too short needs padding top and bottom
+                    settings += pad_TB(TIVO_WIDTH, TIVO_HEIGHT,
+                                       multiplier16by9, vInfo)
                     debug(('16:9 aspect allowed, file is wider ' +
-                                  'than 16:9 padding top and bottom\n%s') %
-                                 ' '.join(settings))
+                           'than 16:9 padding top and bottom\n%s') %
+                          ' '.join(settings))
 
                 else: # too skinny needs padding on left and right.
-                    endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) / 
-                                   (vInfo['vHeight'] * multiplier16by9))
-                    settings.append('-aspect')
-                    if (config.get169Blacklist(tsn) or
-                        config.get169Letterbox(tsn)):
-                        settings.append('4:3')
-                    else:
-                        settings.append('16:9')
-                    if endWidth % 2:
-                        endWidth -= 1
-                    if endWidth < (TIVO_WIDTH - 10):
-                        leftPadding = (TIVO_WIDTH - endWidth) / 2
-                        if leftPadding % 2:
-                            leftPadding -= 1
-                        rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
-                        settings += ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT),
-                                     '-padleft', str(leftPadding),
-                                     '-padright', str(rightPadding)]
-                    else: # if only very small amount of padding needed, 
-                          # then just stretch it
-                        settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+                    settings += pad_LR(TIVO_WIDTH, TIVO_HEIGHT,
+                                       multiplier16by9, vInfo)
                     debug(('16:9 aspect allowed, file is narrower ' +
-                                  'than 16:9 padding left and right\n%s') %
-                                 ' '.join(settings))
+                           'than 16:9 padding left and right\n%s') %
+                          ' '.join(settings))
+
             else: # this is a 4:3 file or 16:9 output not allowed
-                multiplier = multiplier4by3
-                settings.append('-aspect')
                 if ratio > 135 and config.get169Letterbox(tsn):
                     settings.append('16:9')
                     multiplier = multiplier16by9
                 else:
                     settings.append('4:3')
-                endHeight = int(((TIVO_WIDTH * vInfo['vHeight']) / 
-                                 vInfo['vWidth']) * multiplier)
-                if endHeight % 2:
-                    endHeight -= 1
-                if endHeight < TIVO_HEIGHT * 0.99:
-                    topPadding = (TIVO_HEIGHT - endHeight) / 2
-                    if topPadding % 2:
-                        topPadding -= 1
-                    bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
-                    settings += ['-s', '%sx%s' % (TIVO_WIDTH, endHeight),
-                                 '-padtop', str(topPadding),
-                                 '-padbottom', str(bottomPadding)]
-                else:   # if only very small amount of padding needed, 
-                        # then just stretch it
-                    settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+                    multiplier = multiplier4by3
+                settings += pad_TB(TIVO_WIDTH, TIVO_HEIGHT,
+                                   multiplier, vInfo)
                 debug(('File is wider than 4:3 padding ' +
-                               'top and bottom\n%s') % ' '.join(settings))
-
-            return settings
+                       'top and bottom\n%s') % ' '.join(settings))
 
         # If video is taller than 4:3 add left and right padding, this 
         # is rare. All of these files will always be sent in an aspect 
         # ratio of 4:3 since they are so narrow.
 
         else:
-            endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) / 
-                           (vInfo['vHeight'] * multiplier4by3))
-            settings += ['-aspect', '4:3']
-            if endWidth % 2:
-                endWidth -= 1
-            if endWidth < (TIVO_WIDTH * 0.99):
-                leftPadding = (TIVO_WIDTH - endWidth) / 2
-                if leftPadding % 2:
-                    leftPadding -= 1
-                rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
-                settings += ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT),
-                             '-padleft', str(leftPadding),
-                             '-padright', str(rightPadding)]
-            else: # if only very small amount of padding needed, then 
-                  # just stretch it
-                settings += ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
-
+            settings.append('4:3')
+            settings += pad_LR(TIVO_WIDTH, TIVO_HEIGHT, multiplier4by3, vInfo)
             debug('File is taller than 4:3 padding left and right\n%s'
-                         % ' '.join(settings))
+                  % ' '.join(settings))
 
-            return settings
+        return settings
 
 def tivo_compatible_video(vInfo, tsn, mime=''):
     message = (True, '')
