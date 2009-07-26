@@ -656,8 +656,7 @@ def video_info(inFile, cache=True):
 
     # wait configured # of seconds: if ffmpeg is not back give up
     wait = config.getFFmpegWait()
-    debug(
-     'starting ffmpeg, will wait %s seconds for it to complete' % wait)
+    debug('starting ffmpeg, will wait %s seconds for it to complete' % wait)
     for i in xrange(wait * 20):
         time.sleep(.05)
         if not ffmpeg.poll() == None:
@@ -675,23 +674,25 @@ def video_info(inFile, cache=True):
     err_tmp.close()
     debug('ffmpeg output=%s' % output)
 
-    rezre = re.compile(r'Input #0, ([^,]+),')
-    x = rezre.search(output)
-    if x:
-        vInfo['container'] = x.group(1)
-    else:
-        vInfo['container'] = ''
-        vInfo['Supported'] = False
-        debug('failed at container')
+    attrs = {'container': r'Input #0, ([^,]+),',
+             'vCodec': r'.*Video: ([^,]+),.*',             # video codec
+             'aKbps': r'.*Audio: .+, (.+) (?:kb/s).*',     # audio bitrate
+             'aCodec': r'.*Audio: ([^,]+),.*',             # audio codec
+             'aFreq': r'.*Audio: .+, (.+) (?:Hz).*',       # audio frequency
+             'mapVideo': r'([0-9]+\.[0-9]+).*: Video:.*'}  # video mapping
 
-    rezre = re.compile(r'.*Video: ([^,]+),.*')
-    x = rezre.search(output)
-    if x:
-        vInfo['vCodec'] = x.group(1)
-    else:
-        vInfo['vCodec'] = ''
-        vInfo['Supported'] = False
-        debug('failed at vCodec')
+    for attr in attrs:
+        rezre = re.compile(attrs[attr])
+        x = rezre.search(output)
+        if x:
+            vInfo[attr] = x.group(1)
+        else:
+            if attr in ['container', 'vCodec']:
+                vInfo[attr] = ''
+                vInfo['Supported'] = False
+            else:
+                vInfo[attr] = None
+            debug('failed at ' + attr)
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
@@ -763,33 +764,6 @@ def video_info(inFile, cache=True):
             vInfo['kbps'] = None
             debug('failed at kbps')
 
-    # get audio bitrate of source for tivo compatibility test.
-    rezre = re.compile(r'.*Audio: .+, (.+) (?:kb/s).*')
-    x = rezre.search(output)
-    if x:
-        vInfo['aKbps'] = x.group(1)
-    else:
-        vInfo['aKbps'] = None
-        debug('failed at aKbps')
-
-    # get audio codec of source for tivo compatibility test.
-    rezre = re.compile(r'.*Audio: ([^,]+),.*')
-    x = rezre.search(output)
-    if x:
-        vInfo['aCodec'] = x.group(1)
-    else:
-        vInfo['aCodec'] = None
-        debug('failed at aCodec')
-
-    # get audio frequency of source for tivo compatibility test.
-    rezre = re.compile(r'.*Audio: .+, (.+) (?:Hz).*')
-    x = rezre.search(output)
-    if x:
-        vInfo['aFreq'] = x.group(1)
-    else:
-        vInfo['aFreq'] = None
-        debug('failed at aFreq')
-
     # get par.
     rezre = re.compile(r'.*Video: .+PAR ([0-9]+):([0-9]+) DAR [0-9:]+.*')
     x = rezre.search(output)
@@ -806,15 +780,6 @@ def video_info(inFile, cache=True):
         vInfo['dar1'] = x.group(1) + ':' + x.group(2)
     else:
         vInfo['dar1'] = None
-
-    # get Video Stream mapping.
-    rezre = re.compile(r'([0-9]+\.[0-9]+).*: Video:.*')
-    x = rezre.search(output)
-    if x:
-        vInfo['mapVideo'] = x.group(1)
-    else:
-        vInfo['mapVideo'] = None
-        debug('failed at mapVideo')
 
     # get Audio Stream mapping.
     rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:.*')
