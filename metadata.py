@@ -115,13 +115,16 @@ def from_moov(full_path):
 def from_text(full_path):
     metadata = {}
     path, name = os.path.split(full_path)
+    title, ext = os.path.splitext(name)
     for metafile in [os.path.join(path, 'default.txt'), full_path + '.txt',
-                     os.path.join(path, '.meta', name) + '.txt']:
+                     os.path.join(path, '.meta', name) + '.txt',
+                     os.path.join(path, title) + '.properties']:
         if os.path.exists(metafile):
+            sep = ':='[metafile.endswith('.properties')]
             for line in file(metafile):
-                if line.strip().startswith('#') or not ':' in line:
+                if line.strip().startswith('#') or not sep in line:
                     continue
-                key, value = [x.strip() for x in line.split(':', 1)]
+                key, value = [x.strip() for x in line.split(sep, 1)]
                 if key.startswith('v'):
                     if key in metadata:
                         metadata[key].append(value)
