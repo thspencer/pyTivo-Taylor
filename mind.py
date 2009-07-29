@@ -111,21 +111,26 @@ else:
 
             return requests
 
-        def completeDownloadRequest(self, request, mime='video/mpeg'):
-            if mime == 'video/mp4':
-                request['encodingType'] = 'avcL41MP4'
-            elif mime == 'video/bif':
-                request['encodingType'] = 'vc1ApL3'
+        def completeDownloadRequest(self, request, status, mime='video/mpeg'):
+            if status:
+                if mime == 'video/mp4':
+                    request['encodingType'] = 'avcL41MP4'
+                elif mime == 'video/bif':
+                    request['encodingType'] = 'vc1ApL3'
+                else:
+                    request['encodingType'] = 'mpeg2ProgramStream'
+                request['url'] += '?Format=' + mime
+                request['state'] = 'complete'
             else:
-                request['encodingType'] = 'mpeg2ProgramStream'
-            request['url'] += '?Format=' + mime
-            request['state'] = 'complete'
+                request['state'] = 'cancelled'
+                request['cancellationReason'] = 'programNotFoundOnSource'
             request['type'] = 'bodyOfferModify'
             request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S',
                                                   time.gmtime())
 
             offer_id, content_id = self.__bodyOfferModify(request)
-            self.__subscribe(offer_id, content_id, request['bodyId'][4:])
+            if status:
+                self.__subscribe(offer_id, content_id, request['bodyId'][4:])
 
         def getXMPPLoginInfo(self):
             # It looks like tivo only supports one pc per house
@@ -185,14 +190,10 @@ else:
             xml = self.__dict_request(data, 'bodyOfferModify&bodyId=' +
                                       data['bodyId'])
 
-            if xml.findtext('state') != 'complete':
-                raise Exception(ElementTree.tostring(xml))
-
             offer_id = xml.findtext('offerId')
             content_id = offer_id.replace('of','ct')
 
             return offer_id, content_id
-
 
         def __subscribe(self, offer_id, content_id, tsn):
             """Push the offer to the tivo"""

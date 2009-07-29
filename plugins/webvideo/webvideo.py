@@ -129,12 +129,13 @@ class WebVideo(Video):
                                      (data['bodyOfferId'].replace(':', '-'),
                                       data['url'].split('/')[-1]))
 
-            if self.downloadFile(data['url'], file_name):
+            status = self.downloadFile(data['url'], file_name)
+            mime = 'video/mpeg'
 
+            if status:
                 tsn = data['bodyId'][4:]
                 file_info = VideoDetails()
 
-                mime = 'video/mpeg'
                 if config.isHDtivo(tsn):
                     for m in ['video/mp4', 'video/bif']:
                         if tivo_compatible(file_name, tsn, m)[0]:
@@ -152,10 +153,10 @@ class WebVideo(Video):
                 data['duration'] = file_info['duration'] / 1000
                 data['size'] = file_info['size']
 
-                self.__logger.debug('Complete request: %s' % data)
+            self.__logger.debug('Complete request: %s' % data)
 
-                m = mind.getMind()
-                m.completeDownloadRequest(data, mime)
+            m = mind.getMind()
+            m.completeDownloadRequest(data, status, mime)
 
             self.in_progress_lock.acquire()
             try:
