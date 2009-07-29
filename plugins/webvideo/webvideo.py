@@ -129,33 +129,33 @@ class WebVideo(Video):
                                      (data['bodyOfferId'].replace(':', '-'),
                                       data['url'].split('/')[-1]))
 
-            self.downloadFile(data['url'], file_name)
+            if self.downloadFile(data['url'], file_name):
 
-            tsn = data['bodyId'][4:]
-            file_info = VideoDetails()
+                tsn = data['bodyId'][4:]
+                file_info = VideoDetails()
 
-            mime = 'video/mpeg'
-            if config.isHDtivo(tsn):
-                for m in ['video/mp4', 'video/bif']:
-                    if tivo_compatible(file_name, tsn, m)[0]:
-                        mime = m
-                        break
+                mime = 'video/mpeg'
+                if config.isHDtivo(tsn):
+                    for m in ['video/mp4', 'video/bif']:
+                        if tivo_compatible(file_name, tsn, m)[0]:
+                            mime = m
+                            break
 
-            file_info.update(self.metadata_full(file_name, tsn, mime))
+                file_info.update(self.metadata_full(file_name, tsn, mime))
 
-            ip = config.get_ip()
-            port = config.getPort()
+                ip = config.get_ip()
+                port = config.getPort()
 
-            data['url'] = ('http://%s:%s' % (ip, port) +
-                           urllib.quote('/%s/%s' % (share_name,
-                                        os.path.split(file_name)[-1])))
-            data['duration'] = file_info['duration'] / 1000
-            data['size'] = file_info['size']
+                data['url'] = ('http://%s:%s' % (ip, port) +
+                               urllib.quote('/%s/%s' % (share_name,
+                                            os.path.split(file_name)[-1])))
+                data['duration'] = file_info['duration'] / 1000
+                data['size'] = file_info['size']
 
-            self.__logger.debug('Complete request: %s' % data)
+                self.__logger.debug('Complete request: %s' % data)
 
-            m = mind.getMind()
-            m.completeDownloadRequest(data, mime)
+                m = mind.getMind()
+                m.completeDownloadRequest(data, mime)
 
             self.in_progress_lock.acquire()
             try:
@@ -176,11 +176,13 @@ class WebVideo(Video):
             infile = urllib2.urlopen(r)
         except urllib2.HTTPError, e:
             if not e.code == 416:
-                raise
+                self.__logger.error('Downloading %s: %d' % (url, e.code))
+                outfile.close()
+                return False
             infile = urllib2.urlopen(url)
             if int(infile.info()['Content-Length']) == size:
                 self.__logger.debug('File was already done. %s' % url)
-                return
+                return True
             else:
                 self.__logger.debug('File was not done but could not resume. %s'
                                     % url)
@@ -190,6 +192,7 @@ class WebVideo(Video):
         shutil.copyfileobj(infile, outfile, 8192)
 
         self.__logger.info('Done downloading %s to %s' % (url, file_path))
+        return True
 
     def send_file(self, handler, path, query):
         Video.send_file(self, handler, path, query)
