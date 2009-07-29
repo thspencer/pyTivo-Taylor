@@ -118,7 +118,7 @@ else:
                 request['encodingType'] = 'vc1ApL3'
             else:
                 request['encodingType'] = 'mpeg2ProgramStream'
-            request['url'] = url + '?Format=' + mime
+            request['url'] += '?Format=' + mime
             request['state'] = 'complete'
             request['type'] = 'bodyOfferModify'
             request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S',

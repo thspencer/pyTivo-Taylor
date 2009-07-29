@@ -131,13 +131,13 @@ class WebVideo(Video):
 
             self.downloadFile(data['url'], file_name)
 
-            tsn = data['bodyId']
+            tsn = data['bodyId'][4:]
             file_info = VideoDetails()
 
-            mime = ''
+            mime = 'video/mpeg'
             if config.isHDtivo(tsn):
                 for m in ['video/mp4', 'video/bif']:
-                    if tivo_compatible(file_path, tsn, m)[0]:
+                    if tivo_compatible(file_name, tsn, m)[0]:
                         mime = m
                         break
 
