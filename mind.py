@@ -123,7 +123,7 @@ else:
                 request['state'] = 'complete'
             else:
                 request['state'] = 'cancelled'
-                request['cancellationReason'] = 'programNotFoundOnSource'
+                request['cancellationReason'] = 'httpFileNotFound'
             request['type'] = 'bodyOfferModify'
             request['updateDate'] = time.strftime('%Y-%m-%d %H:%M%S',
                                                   time.gmtime())
