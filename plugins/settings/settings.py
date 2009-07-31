@@ -17,13 +17,13 @@ CLASS_NAME = 'Settings'
 RESET_MSG = """<h3>The pyTivo Server has been soft reset.</h3>  <br>
 pyTivo has reloaded the pyTivo.conf file and all changes should now be 
 in effect. <br>
-The <a href="/TiVoConnect?Command=%s&Container=%s">previous</a> page 
+The <a href="/TiVoConnect?Command=%s&amp;Container=%s">previous</a> page 
 will reload in 3 seconds."""
 
 SETTINGS_MSG = """<h3>Your Settings have been saved.</h3>  <br>
 Your settings have been saved to the pyTivo.conf file. However you will 
 need to do a <b>Soft Reset</b> before these changes will take effect.<br>
-The <a href="/TiVoConnect?Command=Settings&Container=%s">Settings</a> page 
+The <a href="/TiVoConnect?Command=Settings&amp;Container=%s">Settings</a> page 
 will reload in 10 seconds."""
 
 # Preload the templates
@@ -46,7 +46,8 @@ class Settings(Plugin):
         cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
         t.time = '3'
-        t.url = '/TiVoConnect?Command='+ last_page +'&Container=' + quote(cname)
+        t.url = ('/TiVoConnect?Command=' + last_page + '&amp;Container=' +
+                 quote(cname))
         t.text = RESET_MSG % (quote(last_page), quote(cname))
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
@@ -148,7 +149,7 @@ class Settings(Plugin):
         cname = query['Container'][0].split('/')[0]
         t = Template(REDIRECT_TEMPLATE)
         t.time = '10'
-        t.url = '/TiVoConnect?Command=Settings&Container=' + quote(cname)
+        t.url = '/TiVoConnect?Command=Settings&amp;Container=' + quote(cname)
         t.text = SETTINGS_MSG % quote(cname)
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')

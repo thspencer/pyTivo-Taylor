@@ -197,7 +197,7 @@ function saveNotify()
        vertical-align: top;">
       <div id="leftframe" style="position: relative; text-align: center; 
        $section_size">
-      <form name="select_section">Sections
+      <form name="select_section" action="NOTUSED">Sections
         <select name="section" size="7" 
          onclick="switchDiv(options[selectedIndex].value, 'set-');
          return true;">
@@ -215,16 +215,18 @@ function saveNotify()
         <input name="B4" value="Delete Section" type="button" 
          onclick="deleteSection(select_section.section.selectedIndex)">
         <input name="B5" value="Add Section" type="button" 
-         onclick="switchDiv('set-add', 'set-');return true;"></form>
+         onclick="switchDiv('set-add', 'set-');return true;">
+      </form>
 
       <hr>Administration
-      <form method="post">
+      <form action="NOTUSED">
         <p align="center"><input name="B1" id="B1" value="Save Changes" 
          type="button" onclick="showData(document.config); return true;">
         <input id="B2" name="B2" value="Soft Reset pyTivo" type="button" 
          onclick="resetpyTivo();"></p>
       </form>
 
+      </div>
       </td>
 
       <td style="vertical-align: top;">

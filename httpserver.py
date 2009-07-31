@@ -205,33 +205,33 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.admin = ''
 
         if config.get_server('tivo_mak') and config.get_server('togo_path'):
-            t.togo = '<br/>Pull from TiVos:<br/>'
+            t.togo = '<br>Pull from TiVos:<br>'
         else:
             t.togo = ''
 
         if (config.get_server('tivo_username') and
             config.get_server('tivo_password')):
-            t.shares = '<br/>Push from video shares:<br/>'
+            t.shares = '<br>Push from video shares:<br>'
         else:
             t.shares = ''
 
         for section in shares:
             plugin_type = shares[section].get('type')
             if plugin_type == 'settings':
-                t.admin += ('<a href="/TiVoConnect?Command=Settings&' +
+                t.admin += ('<a href="/TiVoConnect?Command=Settings&amp;' +
                             'Container=' + quote(section) +
                             '">Web Configuration</a><br>')
             elif plugin_type == 'togo' and t.togo:
                 for tsn in config.tivos:
                     if tsn:
                         t.togo += ('<a href="/TiVoConnect?' +
-                            'Command=NPL&Container=' + quote(section) +  
-                            '&TiVo=' + config.tivos[tsn] + '">' + 
-                            config.tivo_names[tsn] + '</a><br/>')
+                            'Command=NPL&amp;Container=' + quote(section) +  
+                            '&amp;TiVo=' + config.tivos[tsn] + '">' + 
+                            config.tivo_names[tsn] + '</a><br>')
             elif plugin_type == 'video' and t.shares:
                 t.shares += ('<a href="TiVoConnect?Command=' +
-                             'QueryContainer&Container=' +
-                             quote(section) + '">' + section + '</a><br/>')
+                             'QueryContainer&amp;Container=' +
+                             quote(section) + '">' + section + '</a><br>')
 
         self.wfile.write(t)
 
