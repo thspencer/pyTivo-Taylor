@@ -49,6 +49,7 @@ class Settings(Plugin):
         t.url = '/TiVoConnect?Command='+ last_page +'&Container=' + quote(cname)
         t.text = RESET_MSG % (quote(last_page), quote(cname))
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
         handler.wfile.write(t)
         logging.getLogger('pyTivo.settings').info('pyTivo has been soft reset.')
@@ -94,6 +95,7 @@ class Settings(Plugin):
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
         handler.wfile.write(t)
 
@@ -149,5 +151,6 @@ class Settings(Plugin):
         t.url = '/TiVoConnect?Command=Settings&Container=' + quote(cname)
         t.text = SETTINGS_MSG % quote(cname)
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
         handler.wfile.write(t)

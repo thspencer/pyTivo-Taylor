@@ -101,6 +101,7 @@ class ToGo(Plugin):
                     t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
                     t.text = UNABLE % (tivoIP, quote(cname))
                     handler.send_response(200)
+                    handler.send_header('Content-Type', 'text/html')
                     handler.end_headers()
                     handler.wfile.write(t)
                     return
@@ -257,6 +258,7 @@ class ToGo(Plugin):
         t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
                  quote(cname) + '&TiVo=' + tivoIP)
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
         handler.wfile.write(t)
 
@@ -273,5 +275,6 @@ class ToGo(Plugin):
                  quote(cname) + '&TiVo=' + tivoIP)
         t.text = TRANS_STOP % (command, quote(cname), tivoIP)
         handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
         handler.wfile.write(t)
