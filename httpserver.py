@@ -137,7 +137,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif (command == 'QueryFormats' and 'SourceFormat' in query and
                   query['SourceFormat'][0].startswith('video')):
                 self.send_response(200)
-                self.send_header('Content-type', 'text/html')
+                self.send_header('Content-type', 'text/xml')
                 self.end_headers()
                 self.wfile.write(VIDEO_FORMATS)
                 return
@@ -191,7 +191,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.escape = escape
         t.quote = quote
         self.send_response(200)
-        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-type', 'text/xml')
         self.end_headers()
         self.wfile.write(t)
 
