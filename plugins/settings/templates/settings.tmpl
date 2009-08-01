@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>pyTivo Web Configuration</title>
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
 
 function fillBlank()
 {
@@ -114,7 +114,7 @@ function saveNotify()
     #end if
     <td>$key:</td>
     <td>
-    <input size="20" id="$section.$key" name="$section.$key"
+    <input size="20" id="opts.$section.$key" name="opts.$section.$key"
     #if $key in $source
         value="$source[$key]"
     #else
@@ -128,7 +128,7 @@ function saveNotify()
 
 #def rows($section, $source_data, $source_known)
     <hr style="width: 100%; height: 2px;">
-    <table align="center">
+    <table>
     #set $i = 0
     #for $key in $source_known
         #set $i += 1
@@ -153,11 +153,9 @@ function saveNotify()
     <div id="add-$name-button" style="width: 330px; position: absolute; 
      left: 0px; top: 0px;">
     <br>
-    <center>
     <input type="button" value="Add Setting" 
      onclick="switchDiv('add-$name-field', 'add-$name-');
      return true;">
-    </center>
     </div>
     <div id="add-$name-field" style="position: absolute;
      left: 0px; top: 0px; visibility: hidden;">
@@ -171,7 +169,7 @@ function saveNotify()
     #for $x in ('setting', 'value')
         <td>
         <input size="16" type="text" onChange="saveNotify();"
-         id="$(section).new_$x" name="$(section).new__$x" value="">
+         id="opts.$(section).new_$x" name="opts.$(section).new__$x" value="">
         </td>
     #end for
     </tr>
@@ -184,9 +182,9 @@ function saveNotify()
 #set $settings_size = 'width: 350px; height: 100%; overflow: auto'
 #set $help_size = 'width: 350px; height: 100%; overflow: auto'
 
-<p align="center"><font size="6">pyTivo Web Configuration</font>
+<p style="text-align: center"><big><big><big>pyTivo Web 
+Configuration</big></big></big>
 <a href="javascript:switchDiv('help-Instructions', 'help-');">help</a></p>
-<center>
 <table style="border: 1px solid rgb(220, 220, 220); height: 85%;
  background-color: rgb(255, 255, 255); text-align: left; margin-left: auto;
  margin-right: auto;" border="0" cellpadding="0" cellspacing="4">
@@ -197,7 +195,7 @@ function saveNotify()
        vertical-align: top;">
       <div id="leftframe" style="position: relative; text-align: center; 
        $section_size">
-      <form name="select_section" action="NOTUSED">Sections
+      <form name="select_section" action="NOTUSED"><p>Sections
         <select name="section" size="7" 
          onclick="switchDiv(options[selectedIndex].value, 'set-');
          return true;">
@@ -216,11 +214,11 @@ function saveNotify()
          onclick="deleteSection(select_section.section.selectedIndex)">
         <input name="B5" value="Add Section" type="button" 
          onclick="switchDiv('set-add', 'set-');return true;">
-      </form>
+      </p></form>
 
       <hr>Administration
       <form action="NOTUSED">
-        <p align="center"><input name="B1" id="B1" value="Save Changes" 
+        <p><input name="B1" id="B1" value="Save Changes" 
          type="button" onclick="showData(document.config); return true;">
         <input id="B2" name="B2" value="Soft Reset pyTivo" type="button" 
          onclick="resetpyTivo();"></p>
@@ -234,7 +232,7 @@ function saveNotify()
       <div id="settings" style="$settings_size; position: relative;">
 
       <form name="config" method="POST" action="TiVoConnect" 
-       onsubmit="fillBlank(); showData(this);">
+       onsubmit="fillBlank(); showData(this);"><div>
 
       <input type="hidden" name="Command" value="UpdateSettings">
       <input type="hidden" name="Container" value="$container">
@@ -265,7 +263,8 @@ function saveNotify()
 #for $name, $data in $shares_data
 	#set $section_count += 1
 	#set $section_number = 'section-' + str($section_count)
-	<input type="hidden" name="$name" id="$name" value="$section_number">
+	<input type="hidden" name="opts.$name" id="opts.$name" 
+         value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
 	<div id="set-$name" style="text-align: center; position: absolute;
          $settings_size; left: 0px; top: 0px; visibility: hidden">
@@ -279,7 +278,8 @@ function saveNotify()
 #for $name, $data in $tivos_data
 	#set $section_count += 1
 	#set $section_number = 'section-' + str($section_count)
-	<input type="hidden" name="$name" id="$name" value="$section_number">
+	<input type="hidden" name="opts.$name" id="opts.$name" 
+         value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
 	<div id="set-$name" style="text-align: center; position: absolute;
          $settings_size; left: 0px; top: 0px; visibility: hidden">
@@ -298,7 +298,7 @@ function saveNotify()
 	<td> Section Name :</td><td> 
 	<input onChange="saveNotify();" type="text" size="20"
          name="new_Section" value=""
-         onfocus="switchDiv('help-Add a New Section', 'help-'); return true;">
+         onfocus="switchDiv('help-Add_a_New_Section', 'help-'); return true;">
 	</td></tr></table>
 	The new section name will be added to the pyTivo.conf file when 
         you click <b>Save Changes</b>.
@@ -312,7 +312,7 @@ function saveNotify()
         actually deleted until you click the <b>Save Changes</b> button.
 </div>
 <input type="hidden" id="Section_Map" name="Section_Map" value="$section_map">
-      </form>
+      </div></form>
 
       </div>
 
@@ -330,7 +330,7 @@ function saveNotify()
           #end if
           <div id="help-$setting" style="visibility: $vis; $help_size;
            position: absolute; left: 0px; top: 0px;">
-          <p align="center"><strong>$setting</strong></p>
+          <p style="text-align: center"><strong>$setting</strong></p>
           #for $line in $help_list[$setting]
               <p><strong>$(line.split(':', 1)[0]):</strong>
                $(line.split(':', 1)[1])</p>
@@ -345,6 +345,5 @@ function saveNotify()
     </tr>
 
 </table>
-</center>
 </body>
 </html>

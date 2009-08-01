@@ -52,7 +52,7 @@ the reset.
 Note: The only setting that will not take effect until a hard restart is 
 the Port setting.  Changing the Port setting requires a full restart.
 
-Add a New Section
+Add_a_New_Section
 
 Add the name of a new section: If you want to add a TiVo section, 
 remember it must start with "_tivo_". You must save your settings before 
