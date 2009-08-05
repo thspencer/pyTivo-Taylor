@@ -26,6 +26,10 @@ table#main {
     margin-left: auto;
     margin-right: auto
 }
+
+span#title {
+    font-size: xx-large
+}
 </style>
 <script type="text/javascript">
 
@@ -203,9 +207,10 @@ function saveNotify()
 #set $settings_size = 'width: 350px; height: 100%; overflow: auto'
 #set $help_size = 'width: 350px; height: 100%; overflow: auto'
 
-<p style="text-align: center"><big><big><big>pyTivo Web 
-Configuration</big></big></big>
-<a href="javascript:switchDiv('help-Instructions', 'help-');">help</a></p>
+<p style="text-align: center">
+<span id="title">pyTivo Web Configuration</span>
+<a href="javascript:switchDiv('help-Instructions', 'help-');">help</a>
+</p>
 <table id="main" border="0" cellpadding="0" cellspacing="4">
 
     <tr style="height: 100%">
