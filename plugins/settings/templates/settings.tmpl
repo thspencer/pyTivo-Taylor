@@ -1,8 +1,32 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>pyTivo Web Configuration</title>
+<style type="text/css">
+html, body {
+    margin: 0;
+    padding: 0;
+    border: none;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgb(250, 250, 250)
+}
+
+tr.row1 {
+    background-color: rgb(240, 240, 240)
+}
+
+table#main {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(220, 220, 220);
+    height: 85%;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto
+}
+</style>
 <script type="text/javascript">
 
 function fillBlank()
@@ -22,7 +46,7 @@ function switchDiv(pass, type)
     for (var i = 0; i < divs.length; i++) {
         if (divs[i].id.match(type)) {
             if (divs[i].id == pass) {
-                divs[i].style.visibility = ''
+                divs[i].style.visibility = 'visible'
             } else {
                 divs[i].style.visibility = 'hidden'
             }
@@ -104,14 +128,11 @@ function saveNotify()
 
 </script>
 </head>
-<body style="background-color: rgb(250, 250, 250)">
+<body>
 
 #def row($i, $key, $section, $source)
-    #if $i%2
-        <tr style="background-color: rgb(240, 240, 240)">
-    #else
-        <tr>
-    #end if
+    #set $j = $i%2
+    <tr class="row$(j)">
     <td>$key:</td>
     <td>
     <input size="20" id="opts.$section.$key" name="opts.$section.$key"
@@ -185,14 +206,12 @@ function saveNotify()
 <p style="text-align: center"><big><big><big>pyTivo Web 
 Configuration</big></big></big>
 <a href="javascript:switchDiv('help-Instructions', 'help-');">help</a></p>
-<table style="border: 1px solid rgb(220, 220, 220); height: 85%;
- background-color: rgb(255, 255, 255); text-align: left; margin-left: auto;
- margin-right: auto;" border="0" cellpadding="0" cellspacing="4">
+<table id="main" border="0" cellpadding="0" cellspacing="4">
 
-    <tr>
+    <tr style="height: 100%">
 
       <td style="border-right: 1px dotted rgb(153, 153, 153); 
-       vertical-align: top;">
+       vertical-align: top; overflow: hidden; height: 100%">
       <div id="leftframe" style="position: relative; text-align: center; 
        $section_size">
       <form name="select_section" action="NOTUSED"><p>Sections
@@ -227,12 +246,12 @@ Configuration</big></big></big>
       </div>
       </td>
 
-      <td style="vertical-align: top;">
+      <td style="vertical-align: top; height: 100%">
 
       <div id="settings" style="$settings_size; position: relative;">
 
       <form name="config" method="POST" action="TiVoConnect" 
-       onsubmit="fillBlank(); showData(this);"><div>
+       onsubmit="fillBlank(); showData(this);"><div style="height: 100%">
 
       <input type="hidden" name="Command" value="UpdateSettings">
       <input type="hidden" name="Container" value="$container">
@@ -319,7 +338,7 @@ Configuration</big></big></big>
       </td>
 
       <td style="border-left: 1px dotted rgb(153, 153, 153);
-       vertical-align: top;">
+       vertical-align: top; height: 100%">
       <div id="sidesections" style="$help_size; position: relative;">
       <!-- HELP SECTIONS -->
       #for $setting in $help_list
