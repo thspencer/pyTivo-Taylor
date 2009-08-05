@@ -133,7 +133,7 @@ function saveNotify()
 #def row($i, $key, $section, $source)
     #set $j = $i%2
     <tr class="row$(j)">
-    <td>$key:</td>
+    <td style="text-align: left">$key:</td>
     <td>
     <input size="20" id="opts.$section.$key" name="opts.$section.$key"
     #if $key in $source
@@ -149,7 +149,7 @@ function saveNotify()
 
 #def rows($section, $source_data, $source_known)
     <hr style="width: 100%; height: 2px;">
-    <table>
+    <table style="margin-left: auto; margin-right: auto">
     #set $i = 0
     #for $key in $source_known
         #set $i += 1
@@ -214,7 +214,7 @@ Configuration</big></big></big>
        vertical-align: top; overflow: hidden; height: 100%">
       <div id="leftframe" style="position: relative; text-align: center; 
        $section_size">
-      <form name="select_section" action="NOTUSED"><p>Sections
+      <form name="select_section" action="NOTUSED"><p>Sections<br>
         <select name="section" size="7" 
          onclick="switchDiv(options[selectedIndex].value, 'set-');
          return true;">
