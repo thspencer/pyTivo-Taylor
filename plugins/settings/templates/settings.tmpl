@@ -251,7 +251,7 @@ function saveNotify()
       <div id="leftframe" style="position: relative">
       <form name="select_section" action="NOTUSED"><p>Sections<br>
         <select name="section" size="7" 
-         onclick="switchDiv(options[selectedIndex].value, 'set-');
+         onchange="switchDiv(options[selectedIndex].value, 'set-');
          return true;">
         <option value="set-server">Global Server Settings</option>
         <option value="set-hd_tivos">HD TiVo Settings</option>
