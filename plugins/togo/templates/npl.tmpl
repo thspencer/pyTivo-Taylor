@@ -23,6 +23,11 @@ table#main {
     background-color: rgb(255, 255, 255)
 }
 
+td.unbreak {
+    white-space: nowrap;
+    text-align: center
+}
+
 </style>
 </head>
 <body>
@@ -61,25 +66,25 @@ table#main {
 			    ## This is a folder
 				<td></td>
 				<td><a href='/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;Folder=$(row["UniqueId"])&amp;TiVo=$tivoIP'>$row['Title'] </a></td>
-				<td NOWRAP align="center">$(row["TotalItems"]) Items</td>
-				<td NOWRAP align="center">$row["LastChangeDate"]</td>
+				<td class="unbreak">$(row["TotalItems"]) Items</td>
+				<td class="unbreak">$row["LastChangeDate"]</td>
 				<td></td>
 			  #else
 			    ## This is a show
 				#if 'Icon' in $row
 				    <!-- Display small table with color similar to TiVo colored circles -->
 					#if $row['Icon'] == 'urn:tivo:image:expires-soon-recording'
-						<td><table><tr><td height=18 width=8 bgcolor='yellow'> </td></tr></table></td>
+						<td><table><tr><td height="18" width="8" bgcolor="yellow"> </td></tr></table></td>
 					#else if $row['Icon'] == 'urn:tivo:image:expired-recording'
-						<td><table><tr><td height=18 width=8 bgcolor='yellow'><b> ! </b></td></tr></table></td>
+						<td><table><tr><td height="18" width="8" bgcolor="yellow"><b> ! </b></td></tr></table></td>
 					#else if $row['Icon'] == 'urn:tivo:image:save-until-i-delete-recording'
-						<td><table><tr><td height=18 width=8 bgcolor='green'></td></tr></table></td>				
+						<td><table><tr><td height="18" width="8" bgcolor="green"></td></tr></table></td>
 					#else
-						<td width=8></td>
+						<td width="8"></td>
 					#end if
 				#else
 				    ## No Icon listed in XML sheet
-					<td width=4></td>
+					<td width="4"></td>
 				#end if
 				<td width="*">
                                         #if 'episodeTitle' in $row
@@ -95,14 +100,14 @@ table#main {
                                         #end if
                                         </small>
 				</td>
-				<td NOWRAP align="center">$row['SourceSize'] <br>
+				<td class="unbreak">$row['SourceSize'] <br>
 				$row['Duration']
 				</td>
-				<td NOWRAP align="center">$row['CaptureDate']</td>
+				<td class="unbreak">$row['CaptureDate']</td>
 				#if 'CopyProtected' in $row and $row['CopyProtected'] == 'Yes'
 					<td>CopyProtected</td>
 				#else if 'Url' in $row
-					<td NOWRAP>
+					<td class="unbreak">
 					#if $row['Url'] in $status
 						#set $this_status = $status[$row['Url']]
 						#if $this_status['running'] and $this_status['rate'] != ""
