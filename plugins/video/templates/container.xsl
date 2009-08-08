@@ -29,7 +29,9 @@
             <xsl:value-of select="Details/Title"/>
            </a>
           </td>
-          <td><xsl:value-of select="Details/TotalItems"/> Items</td>
+          <td style="white-space: nowrap">
+           <xsl:value-of select="Details/TotalItems"/> Items
+          </td>
         </xsl:when>
         <xsl:otherwise>
           <td>
