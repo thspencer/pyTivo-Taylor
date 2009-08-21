@@ -87,9 +87,9 @@ function switchDiv(pass, type)
     for (var i = 0; i < divs.length; i++) {
         if (divs[i].id.match(type)) {
             if (divs[i].id == pass) {
-                divs[i].style.visibility = 'visible'
+                divs[i].style.display = 'block'
             } else {
-                divs[i].style.visibility = 'hidden'
+                divs[i].style.display = 'none'
             }
         }
     }
@@ -220,7 +220,7 @@ function saveNotify()
      return true;">
     </div>
     <div id="add-$name-field" style="position: absolute;
-     left: 0px; top: 0px; visibility: hidden;">
+     left: 0px; top: 0px; display: none;">
     <table style="width: 315px;">
     <tr>
     <td colspan="2" align="center" class="ulined">Add a Setting</td>
@@ -291,19 +291,19 @@ function saveNotify()
       <input type="hidden" name="Command" value="UpdateSettings">
       <input type="hidden" name="Container" value="$container">
 
-<div id="set-server" class="sett-sect" style="visibility: hidden">
+<div id="set-server" class="sett-sect" style="display: none">
 	<b>Global Server Settings</b><br>
         $rows('Server', $server_data, $server_known)
         $add_setting('server', 'Server')
 </div>
 
-<div id="set-hd_tivos" class="sett-sect" style="visibility: hidden">
+<div id="set-hd_tivos" class="sett-sect" style="display: none">
 	<b>HD TiVo Settings</b><br>
         $rows('_tivo_HD', $hd_tivos_data, $hd_tivos_known)
         $add_setting('hd_tivos', '_tivo_HD')
 </div>
 
-<div id="set-sd_tivos" class="sett-sect" style="visibility: hidden">
+<div id="set-sd_tivos" class="sett-sect" style="display: none">
 	<b>SD TiVo Settings</b><br>
         $rows('_tivo_SD', $sd_tivos_data, $sd_tivos_known)
         $add_setting('sd_tivos', '_tivo_SD')
@@ -317,7 +317,7 @@ function saveNotify()
 	<input type="hidden" name="opts.$name" id="opts.$name" 
          value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
-	<div id="set-$name" class="sett-sect" style="visibility: hidden">
+	<div id="set-$name" class="sett-sect" style="display: none">
 	[<input size="20" onChange="saveNotify();" id="$section_number" 
          name="$section_number" value="$name">]<br>
         $rows($section_number, $data, $shares_known)
@@ -331,14 +331,14 @@ function saveNotify()
 	<input type="hidden" name="opts.$name" id="opts.$name" 
          value="$section_number">
 	#set $section_map += $section_number + '|' + $name + ']'
-	<div id="set-$name" class="sett-sect" style="visibility: hidden">
+	<div id="set-$name" class="sett-sect" style="display: none">
 	[<input size="20" onChange="saveNotify();" id="$section_number" 
          name="$section_number" value="$name">]<br>
         $rows($section_number, $data, $tivos_known)
         $add_setting($name, $section_number)
 	</div>
 #end for
-<div id="set-add" class="sett-sect" style="visibility: hidden">
+<div id="set-add" class="sett-sect" style="display: none">
 	Add a New Section
 	<hr>
 	<table>
@@ -351,7 +351,7 @@ function saveNotify()
 	The new section name will be added to the pyTivo.conf file when 
         you click <b>Save Changes</b>.
 </div>
-<div id="set-delete" class="sett-sect" style="visibility: hidden">
+<div id="set-delete" class="sett-sect" style="display: none">
 	Delete a Section
 	<hr>
 	<br>
@@ -370,11 +370,11 @@ function saveNotify()
       <!-- HELP SECTIONS -->
       #for $setting in $help_list
           #if $setting == 'Instructions'
-              #set $vis = 'visible'
+              #set $vis = 'block'
           #else
-              #set $vis = 'hidden'
+              #set $vis = 'none'
           #end if
-          <div id="help-$setting" class="help-sect" style="visibility: $vis;">
+          <div id="help-$setting" class="help-sect" style="display: $vis;">
           <p style="text-align: center"><strong>$setting</strong></p>
           #for $line in $help_list[$setting]
               <p><strong>$(line.split(':', 1)[0]):</strong>
