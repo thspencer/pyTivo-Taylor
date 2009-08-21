@@ -67,6 +67,10 @@ div.add-button, div.add-field, div.sett-sect, div.help-sect {
     top: 0px
 }
 
+div.add-button {
+    width: 100%
+}
+
 div.add-field, div.sett-sect {
     display: none
 }
@@ -216,7 +220,7 @@ function saveNotify()
 
 #def add_setting($name, $section)
     <div style="width: 330px; position: relative;">
-    <div class="add-button" id="add-$name-button" style="width: 330px">
+    <div class="add-button" id="add-$name-button">
     <br>
     <input type="button" value="Add Setting" 
      onclick="switchDiv('add-$name-field', 'add-$name-');
