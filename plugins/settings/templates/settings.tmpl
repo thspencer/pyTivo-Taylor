@@ -61,13 +61,13 @@ div#leftframe, div.sett-sect {
     text-align: center
 }
 
-div.sett-sect, div.help-sect {
+div.add-button, div.add-field, div.sett-sect, div.help-sect {
     position: absolute;
     left: 0px;
     top: 0px
 }
 
-div.sett-sect {
+div.add-field, div.sett-sect {
     display: none
 }
 
@@ -216,15 +216,13 @@ function saveNotify()
 
 #def add_setting($name, $section)
     <div style="width: 330px; position: relative;">
-    <div id="add-$name-button" style="width: 330px; position: absolute; 
-     left: 0px; top: 0px">
+    <div class="add-button" id="add-$name-button" style="width: 330px">
     <br>
     <input type="button" value="Add Setting" 
      onclick="switchDiv('add-$name-field', 'add-$name-');
      return true;">
     </div>
-    <div id="add-$name-field" style="position: absolute;
-     left: 0px; top: 0px; display: none;">
+    <div class="add-field" id="add-$name-field">
     <table style="width: 315px;">
     <tr>
     <td colspan="2" align="center" class="ulined">Add a Setting</td>
