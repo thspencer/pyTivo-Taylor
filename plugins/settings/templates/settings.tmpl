@@ -105,7 +105,8 @@ function switchDiv(pass, type)
 
 function deleteSection(id)
 {
-    var name = select_section.section.options[id].text;
+    var ss = document.getElementById('ss');
+    var name = ss.section.options[id].text;
     if (name == 'Global Server Settings') {
         alert('Delete Error:\n\nSorry the Global Server Settings ' +
               'Section is required for pyTivo to run and cannot be deleted');
@@ -115,8 +116,8 @@ function deleteSection(id)
                          "' Section?")
     if (answer) {
         switchDiv('set-delete', 'set-');
-        select_section.section.options[id] = null;
-        var field = document.getElementById(name).value;
+        ss.section.options[id] = null;
+        var field = document.getElementById('opts.' + name).value;
         document.getElementById(field).value = 'Delete_Me';
         saveNotify();
         return true;
@@ -255,7 +256,7 @@ function saveNotify()
 
       <td class="panel">
       <div id="leftframe" style="position: relative">
-      <form name="select_section" action="NOTUSED"><p>Sections<br>
+      <form name="select_section" id="ss" action="NOTUSED"><p>Sections<br>
         <select name="section" size="7" 
          onchange="switchDiv(options[selectedIndex].value, 'set-');
          return true;">
