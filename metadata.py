@@ -121,7 +121,7 @@ def from_text(full_path):
                      os.path.join(path, '.meta', name) + '.txt']:
         if os.path.exists(metafile):
             sep = ':='[metafile.endswith('.properties')]
-            for line in file(metafile):
+            for line in file(metafile, 'U'):
                 if line.strip().startswith('#') or not sep in line:
                     continue
                 key, value = [x.strip() for x in line.split(sep, 1)]
