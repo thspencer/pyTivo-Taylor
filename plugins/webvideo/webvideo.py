@@ -167,7 +167,7 @@ class WebVideo(Video):
     def downloadFile(self, url, file_path):
         self.__logger.info('Downloading %s to %s' % (url, file_path))
 
-        outfile = open(file_path, 'awb')
+        outfile = open(file_path, 'ab')
         size = os.path.getsize(file_path)
         r = urllib2.Request(url)
         if size:
