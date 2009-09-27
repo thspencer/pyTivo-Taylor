@@ -125,6 +125,8 @@ def from_text(full_path):
                 if line.strip().startswith('#') or not sep in line:
                     continue
                 key, value = [x.strip() for x in line.split(sep, 1)]
+                if not key or not value:
+                    continue
                 if key.startswith('v'):
                     if key in metadata:
                         metadata[key].append(value)
