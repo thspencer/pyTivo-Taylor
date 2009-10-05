@@ -61,7 +61,7 @@ class ZCBroadcast:
         # Now get the addresses -- this is the slow part
         for name in names:
             info = self.rz.getServiceInfo(VIDS, name)
-            if 'TSN' in info.properties:
+            if info and 'TSN' in info.properties:
                 tsn = info.properties['TSN']
                 address = inet_ntoa(info.getAddress())
                 config.tivos[tsn] = address
