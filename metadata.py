@@ -2,8 +2,13 @@
 
 import os
 import subprocess
+import sys
 from datetime import datetime
 from xml.dom import minidom
+try:
+    import plistlib
+except:
+    pass
 
 import mutagen
 from lrucache import LRUCache
@@ -112,6 +117,23 @@ def from_moov(full_path):
     mp4_cache[full_path] = metadata
     return metadata
 
+def from_eyetv(full_path):
+    metadata = {}
+    base, ext = os.path.splitext(full_path)
+    eyetvr = base + '.eyetvr'
+    if os.path.exists(eyetvr):
+        eyetv = plistlib.readPlist(eyetvr)
+        if 'info' in eyetv:
+            info = eyetv['info']
+            if 'description' in info:
+                metadata['description'] = info['description']
+            if 'episode title' in info:
+                metadata['episodeTitle'] = info['episode title']
+                metadata['seriesTitle'] = info['recording title']
+            else:
+                metadata['title'] = info['recording title']
+    return metadata
+
 def from_text(full_path):
     metadata = {}
     path, name = os.path.split(full_path)
@@ -148,6 +170,8 @@ def basic(full_path):
                 'originalAirDate': originalAirDate.isoformat()}
     if ext.lower() in ['.mp4', '.m4v', '.mov']:
         metadata.update(from_moov(full_path))
+    if 'plistlib' in sys.modules and base_path.endswith('.eyetv'):
+        metadata.update(from_eyetv(full_path))
     metadata.update(from_text(full_path))
 
     return metadata
@@ -243,7 +267,6 @@ def from_tivo(full_path):
     return metadata
 
 if __name__ == '__main__':        
-    import sys
     if len(sys.argv) > 1:
         metadata = {}
         ext = os.path.splitext(sys.argv[1])[1].lower()
