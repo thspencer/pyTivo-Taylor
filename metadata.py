@@ -118,20 +118,40 @@ def from_moov(full_path):
     return metadata
 
 def from_eyetv(full_path):
+    ratings = {'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3',
+               'TVPG': 'x4', 'TV14': 'x5', 'TVMA': 'x6',
+               'G': 'G1', 'PG': 'P2', 'PG-13': 'P3',
+               'R': 'R4', 'NC-17': 'N6'}
+    keys = {'TITLE': 'title', 'SUBTITLE': 'episodeTitle',
+            'DESCRIPTION': 'description', 'YEAR': 'movieYear',
+            'EPISODENUM': 'episodeNumber'}
     metadata = {}
-    base, ext = os.path.splitext(full_path)
-    eyetvr = base + '.eyetvr'
-    if os.path.exists(eyetvr):
-        eyetv = plistlib.readPlist(eyetvr)
-        if 'info' in eyetv:
-            info = eyetv['info']
-            if 'description' in info:
-                metadata['description'] = info['description']
-            if 'episode title' in info:
-                metadata['episodeTitle'] = info['episode title']
-                metadata['seriesTitle'] = info['recording title']
-            else:
-                metadata['title'] = info['recording title']
+    path, name = os.path.split(full_path)
+    eyetvp = [x for x in os.listdir(path) if x.endswith('.eyetvp')][0]
+    eyetvp = os.path.join(path, eyetvp)
+    eyetv = plistlib.readPlist(eyetvp)
+    if 'epg info' in eyetv:
+        info = eyetv['epg info']
+        for key in keys:
+            if info[key]:
+                metadata[keys[key]] = info[key]
+        if info['SUBTITLE']:
+            metadata['seriesTitle'] = info['TITLE']
+        if info['ACTORS']:
+            metadata['vActor'] = [x.strip() for x in info['ACTORS'].split(',')]
+        if info['DIRECTOR']:
+            metadata['vDirector'] = [info['DIRECTOR']]
+        if info['TV_RATING']:
+            metadata['tvRating'] = ratings[info['TV_RATING']]
+        if info['STAR_RATING']:
+            metadata['starRating'] = 'x%d' % (len(info['STAR_RATING']) * 2 - 1)
+        mpaa = info['MPAA_RATING']
+        if mpaa and mpaa != 'NR':
+            metadata['mpaaRating'] = ratings[mpaa]
+        # movieYear must be set for the mpaa/star ratings to work
+        if (('mpaaRating' in metadata or 'starRating' in metadata) and
+            'movieYear' not in metadata):
+            metadata['movieYear'] = eyetv['info']['start'].year
     return metadata
 
 def from_text(full_path):
