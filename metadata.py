@@ -236,7 +236,8 @@ def from_details(xmldoc):
              'isEpisode': 'program/isEpisode',
              'movieYear': 'program/movieYear',
              'partCount': 'partCount',
-             'partIndex': 'partIndex'}
+             'partIndex': 'partIndex',
+             'time': 'time'}
 
     for item in items:
         data = tag_data(showing, items[item])
