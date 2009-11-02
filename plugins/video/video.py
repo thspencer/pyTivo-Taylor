@@ -198,6 +198,23 @@ class Video(Plugin):
             )
 
         now = datetime.utcnow()
+        if 'time' in data:
+            if data['time'].lower() == 'file':
+                mtime = os.stat(full_path).st_mtime
+                if (mtime < 0):
+                    mtime = 0
+                now = datetime.fromtimestamp(mtime)
+            elif data['time'].lower() == 'oad':
+                    now = datetime.strptime(data['originalAirDate'][:19],
+                                            '%Y-%m-%dT%H:%M:%S')
+            else:
+                try:
+                    now = datetime.strptime(data['time'][:19],
+                                            '%Y-%m-%dT%H:%M:%S')
+                except:
+                    logger.warning('Bad time format: ' + data['time'] +
+                                   ' , using current time')
+
         duration = self.__duration(full_path)
         duration_delta = timedelta(milliseconds = duration)
         min = duration_delta.seconds / 60
