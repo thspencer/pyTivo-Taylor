@@ -170,6 +170,8 @@ def getShares(tsn=''):
         if tsnshares:
             shares = tsnshares
 
+    shares.sort()
+
     if get_server('nosettings', 'false').lower() in ['false', 'no', 'off']:
         shares.append(('Settings', {'type': 'settings'}))
     if get_server('tivo_mak') and get_server('togo_path'):    
