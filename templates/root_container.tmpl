@@ -7,7 +7,7 @@
         <TotalItems>#echo len($containers) #</TotalItems>
     </Details>
 
-    #for $name, $details in $containers.items()
+    #for $name, $details in $containers
     <Item>
         <Details>
             <Title>$escape($name)</Title>

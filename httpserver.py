@@ -175,12 +175,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def root_container(self):
         tsn = self.headers.getheader('TiVo_TCD_ID', '')
         tsnshares = config.getShares(tsn)
-        tsncontainers = {}
+        tsncontainers = []
         for section, settings in tsnshares:
             try:
                 settings['content_type'] = \
                     GetPlugin(settings['type']).CONTENT_TYPE
-                tsncontainers[section] = settings
+                tsncontainers.append((section, settings))
             except Exception, msg:
                 self.server.logger.error(section + ' - ' + str(msg))
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
