@@ -20,6 +20,7 @@ TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
 
 tivo_cache = LRUCache(50)
 mp4_cache = LRUCache(50)
+dvrms_cache = LRUCache(50)
 
 def tag_data(element, tag):
     for name in tag.split('/'):
@@ -61,11 +62,19 @@ def from_moov(full_path):
         mp4_cache[full_path] = {}
         return {}
 
+    # The following 1-to-1 correspondence of atoms to pyTivo
+    # variables is TV-biased
+    keys = {'tvnn': 'callsign', 'tven': 'episodeNumber',
+            'tvsh': 'seriesTitle'}
+
+    # Possible TV values: TV-Y7 TV-Y TV-G TV-PG TV-14 TV-MA Unrated
+    # Possible MPAA values: G PG PG-13 R NC-17 Unrated
+    ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3',
+               'TV-PG': 'x4', 'TV-14': 'x5', 'TV-MA': 'x6',
+               'Unrated': 'x7', 'G': 'G1', 'PG': 'P2',
+               'PG-13': 'P3', 'R': 'R4', 'NC-17': 'N6'}
+
     for key, value in mp4meta.items():
-        # The following 1-to-1 correspondence of atoms to pyTivo
-        # variables is TV-biased
-        keys = {'tvnn': 'callsign', 'tven': 'episodeNumber',
-                'tvsh': 'seriesTitle'}
         if type(value) == list:
             value = value[0]
         if key == 'stik':
@@ -96,14 +105,8 @@ def from_moov(full_path):
             len_desc = len(value)
 
         # A common custom "reverse DNS format" tag
-        # Possible TV values: TV-Y7 TV-Y TV-G TV-PG TV-14 TV-MA Unrated
-        # Possible MPAA values: G PG PG-13 R NC-17 Unrated
         elif (key == '----:com.apple.iTunes:iTunEXTC' and
               ('us-tv' in value or 'mpaa' in value)):
-            ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3',
-                       'TV-PG': 'x4', 'TV-14': 'x5', 'TV-MA': 'x6',
-                       'Unrated': 'x7', 'G': 'G1', 'PG': 'P2',
-                       'PG-13': 'P3', 'R': 'R4', 'NC-17': 'N6'}
             rating = value.split("|")[1]
             if rating in ratings:
                 if 'us-tv' in value:
@@ -115,6 +118,47 @@ def from_moov(full_path):
         # embedded XML plist, with key '----' and rDNS 'iTunMOVI'. Ughh!
 
     mp4_cache[full_path] = metadata
+    return metadata
+
+def from_dvrms(full_path):
+    if full_path in dvrms_cache:
+        return dvrms_cache[full_path]
+
+    metadata = {}
+
+    try:
+        meta = mutagen.File(full_path)
+        assert(meta)
+    except:
+        dvrms_cache[full_path] = {}
+        return {}
+
+    keys = {'title': ['Title'],
+            'description': ['Description', 'WM/SubTitleDescription'],
+            'episodeTitle': ['WM/SubTitle'],
+            'callsign': ['WM/MediaStationCallSign'],
+            'displayMajorNumber': ['WM/MediaOriginalChannel'],
+            'genre': ['WM/Genre']}
+
+    for tagname in keys:
+        for tag in keys[tagname]:
+            try:
+                if tag in meta:
+                    value = str(meta[tag][0])
+                    if value:
+                        metadata[tagname] = value
+            except:
+                pass
+
+    if 'episodeTitle' in metadata and 'title' in metadata:
+        metadata['seriesTitle'] = metadata['title']
+    if 'genre' in metadata:
+        value = metadata['genre'].split(',')
+        metadata['vProgramGenre'] = value
+        metadata['vSeriesGenre'] = value
+        del metadata['genre']
+
+    dvrms_cache[full_path] = metadata
     return metadata
 
 def from_eyetv(full_path):
@@ -189,9 +233,12 @@ def basic(full_path):
 
     metadata = {'title': title,
                 'originalAirDate': originalAirDate.isoformat()}
-    if ext.lower() in ['.mp4', '.m4v', '.mov']:
+    ext = ext.lower()
+    if ext in ['.mp4', '.m4v', '.mov']:
         metadata.update(from_moov(full_path))
-    if 'plistlib' in sys.modules and base_path.endswith('.eyetv'):
+    elif ext in ['.dvr-ms', '.asf', '.wmv']:
+        metadata.update(from_dvrms(full_path))
+    elif 'plistlib' in sys.modules and base_path.endswith('.eyetv'):
         metadata.update(from_eyetv(full_path))
     metadata.update(from_text(full_path))
 
@@ -297,6 +344,8 @@ if __name__ == '__main__':
             metadata.update(from_tivo(sys.argv[1]))
         elif ext in ['.mp4', '.m4v', '.mov']:
             metadata.update(from_moov(sys.argv[1]))
+        elif ext in ['.dvr-ms', '.asf', '.wmv']:
+            metadata.update(from_dvrms(sys.argv[1]))
         for key in metadata:
             value = metadata[key]
             if type(value) == list:
