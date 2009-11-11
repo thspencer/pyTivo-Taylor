@@ -160,6 +160,7 @@ def from_text(full_path):
     title, ext = os.path.splitext(name)
     for metafile in [os.path.join(path, title) + '.properties',
                      os.path.join(path, 'default.txt'), full_path + '.txt',
+                     os.path.join(path, '.meta', 'default.txt'),
                      os.path.join(path, '.meta', name) + '.txt']:
         if os.path.exists(metafile):
             sep = ':='[metafile.endswith('.properties')]
