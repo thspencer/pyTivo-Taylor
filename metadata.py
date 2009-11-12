@@ -138,7 +138,12 @@ def from_dvrms(full_path):
             'episodeTitle': ['WM/SubTitle'],
             'callsign': ['WM/MediaStationCallSign'],
             'displayMajorNumber': ['WM/MediaOriginalChannel'],
-            'genre': ['WM/Genre']}
+            'originalAirDate': ['WM/MediaOriginalBroadcastDateTime'],
+            'rating': ['WM/ParentalRating'],
+            'credits': ['WM/MediaCredits'], 'genre': ['WM/Genre']}
+
+    ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3',
+               'TV-PG': 'x4', 'TV-14': 'x5', 'TV-MA': 'x6'}
 
     for tagname in keys:
         for tag in keys[tagname]:
@@ -157,6 +162,16 @@ def from_dvrms(full_path):
         metadata['vProgramGenre'] = value
         metadata['vSeriesGenre'] = value
         del metadata['genre']
+    if 'credits' in metadata:
+        value = [x.split('/') for x in metadata['credits'].split(';')]
+        metadata['vActor'] = value[0] + value[3]
+        metadata['vDirector'] = value[1]
+        del metadata['credits']
+    if 'rating' in metadata:
+        rating = metadata['rating']
+        if rating in ratings:
+            metadata['tvRating'] = ratings[rating]
+        del metadata['rating']
 
     dvrms_cache[full_path] = metadata
     return metadata
