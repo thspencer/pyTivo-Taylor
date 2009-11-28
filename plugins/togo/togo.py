@@ -26,12 +26,6 @@ function.<br>
 The <a href="%s">ToGo</a> page 
 will reload in 10 seconds."""
 
-RESET_MSG = """<h3>The pyTivo Server has been soft reset.</h3>  <br>
-pyTivo has reloaded the pyTivo.conf file and all changes should now be 
-in effect. <br>
-The <a href="%s">previous</a> page 
-will reload in 3 seconds."""
-
 TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
 Your selected transfer has been initiated.<br>
 The <a href="%s">ToGo</a> page 
