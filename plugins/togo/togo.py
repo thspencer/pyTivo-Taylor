@@ -99,7 +99,7 @@ class ToGo(Plugin):
                     t = Template(REDIRECT_TEMPLATE)
                     t.time = '20'
                     t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
-                    t.text = UNABLE % (tivoIP, quote(cname))
+                    t.text = UNABLE % t.url
                     handler.send_response(200)
                     handler.send_header('Content-Type', 'text/html')
                     handler.end_headers()
