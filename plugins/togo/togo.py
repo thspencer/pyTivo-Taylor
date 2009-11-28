@@ -23,30 +23,30 @@ CLASS_NAME = 'ToGo'
 MISSING = """<h3>Missing Data.</h3>  <br>
 You must set both "tivo_mak" and "togo_path" before using this 
 function.<br>
-The <a href="/TiVoConnect?Command=%s&Container=%s&TiVo=%s">ToGo</a> page 
+The <a href="%s">ToGo</a> page 
 will reload in 10 seconds."""
 
 RESET_MSG = """<h3>The pyTivo Server has been soft reset.</h3>  <br>
 pyTivo has reloaded the pyTivo.conf file and all changes should now be 
 in effect. <br>
-The <a href="/TiVoConnect?Command=%s&Container=%s">previous</a> page 
+The <a href="%s">previous</a> page 
 will reload in 3 seconds."""
 
 TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
 Your selected transfer has been initiated.<br>
-The <a href="/TiVoConnect?Command=%s&Container=%s&TiVo=%s">ToGo</a> page 
+The <a href="%s">ToGo</a> page 
 will reload in 3 seconds."""
 
 TRANS_STOP = """<h3>Transfer Stopped.</h3>  <br>
 Your transfer has been stopped.<br>
-The <a href="/TiVoConnect?Command=%s&Container=%s&TiVo=%s">ToGo</a> page 
+The <a href="%s">ToGo</a> page 
 will reload in 3 seconds."""
 
 UNABLE = """<h3>Unable to Connect to TiVo.</h3>  <br>
 pyTivo was unable to connect to the TiVo at %s</br>
 This most likely caused by an incorrect Media Access Key.  Please return 
 to the ToGo page and double check your Media Access Key.<br>
-The <a href="/TiVoConnect?Command=NPL&Container=%s">ToGo</a> page will
+The <a href="%s">ToGo</a> page will
 reload in 20 seconds."""
 
 # Preload the templates
@@ -179,6 +179,7 @@ class ToGo(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
+        t.my_url = handler.path
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
@@ -242,8 +243,8 @@ class ToGo(Plugin):
             if togo_path == name:
                 togo_path = data.get('path')
         t = Template(REDIRECT_TEMPLATE)
-        command = query['Redirect'][0]
-        params = (command, quote(cname), tivoIP)
+        t.url = query['Redirect'][0]
+        params = (t.url)
         if tivo_mak and togo_path:
             theurl = query['Url'][0]
             status[theurl] = {'running': True, 'error': '', 'rate': '',
@@ -255,8 +256,6 @@ class ToGo(Plugin):
         else:
             t.time = '10'
             t.text = MISSING % params
-        t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
-                 quote(cname) + '&TiVo=' + tivoIP)
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
@@ -268,12 +267,10 @@ class ToGo(Plugin):
 
         cname = query['Container'][0].split('/')[0]
         tivoIP = query['TiVo'][0]
-        command = query['Redirect'][0]
         t = Template(REDIRECT_TEMPLATE)
         t.time = '3'
-        t.url = ('/TiVoConnect?Command=' + command + '&Container=' +
-                 quote(cname) + '&TiVo=' + tivoIP)
-        t.text = TRANS_STOP % (command, quote(cname), tivoIP)
+        t.url = query['Redirect'][0]
+        t.text = TRANS_STOP % (t.url)
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()

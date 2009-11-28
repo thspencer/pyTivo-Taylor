@@ -113,21 +113,21 @@ td.unbreak {
 						#if $this_status['running'] and $this_status['rate'] != ""
                                                         #set $gb = '%.3f GB' % (float($this_status['size']) / (1024 ** 3))
 							Transfering - $this_status['rate'] KB/s<br>$gb
-							<a href="/TiVoConnect?Command=ToGoStop&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=NPL">Stop Transfer</a>
+							<a href="/TiVoConnect?Command=ToGoStop&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=$quote($my_url)">Stop Transfer</a>
 						#elif $this_status['running'] and $this_status['rate'] == ""
 							Initiating Transfer.<br>
 							Please Wait
 						#elif $this_status['error']
 							Error - $this_status['error']<br>
-							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=NPL">Try Transfer Again.</a>
+							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=$quote($my_url)">Try Transfer Again.</a>
 						#elif $this_status['finished']
 							Transfer Complete
 						#else
 							Transfer Stopped<br>
-							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=NPL">Try Transfer Again.</a>
+							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=$quote($my_url)">Try Transfer Again.</a>
 						#end if
 					#else
-						<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=NPL">Transfer This.</a>
+						<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP&amp;Redirect=$quote($my_url)">Transfer This.</a>
 					#end if
 					</td>
 				#else
