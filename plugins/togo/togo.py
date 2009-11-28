@@ -229,8 +229,6 @@ class ToGo(Plugin):
         f.close()
 
     def ToGo(self, handler, query):
-        cname = query['Container'][0].split('/')[0]
-        tivoIP = query['TiVo'][0]
         tivo_mak = config.get_server('tivo_mak')
         togo_path = config.get_server('togo_path')
         for name, data in config.getShares():
@@ -238,7 +236,6 @@ class ToGo(Plugin):
                 togo_path = data.get('path')
         t = Template(REDIRECT_TEMPLATE)
         t.url = query['Redirect'][0]
-        params = (t.url)
         if tivo_mak and togo_path:
             theurl = query['Url'][0]
             status[theurl] = {'running': True, 'error': '', 'rate': '',
@@ -246,10 +243,10 @@ class ToGo(Plugin):
             thread.start_new_thread(ToGo.get_tivo_file,
                                     (self, theurl, tivo_mak, togo_path))
             t.time = '3'
-            t.text = TRANS_INIT % params
+            t.text = TRANS_INIT % t.url
         else:
             t.time = '10'
-            t.text = MISSING % params
+            t.text = MISSING % t.url
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
@@ -259,12 +256,10 @@ class ToGo(Plugin):
         theurl = query['Url'][0]
         status[theurl]['running'] = False
 
-        cname = query['Container'][0].split('/')[0]
-        tivoIP = query['TiVo'][0]
         t = Template(REDIRECT_TEMPLATE)
         t.time = '3'
         t.url = query['Redirect'][0]
-        t.text = TRANS_STOP % (t.url)
+        t.text = TRANS_STOP % t.url
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
