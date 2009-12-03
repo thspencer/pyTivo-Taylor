@@ -27,11 +27,11 @@ if 'ElementTree' not in locals():
 else:
 
     class Mind:
-        def __init__(self, username, password):
+        def __init__(self, username, password, tsn):
             self.__logger = logging.getLogger('pyTivo.mind')
             self.__username = username
             self.__password = password
-            self.__mind = config.get_mind()
+            self.__mind = config.get_mind(tsn)
 
             cj = cookielib.CookieJar()
             cp = urllib2.HTTPCookieProcessor(cj)
@@ -299,4 +299,4 @@ def getMind(tsn=None):
     if not username or not password:
        raise Exception("tivo_username and tivo_password required")
 
-    return Mind(username, password)
+    return Mind(username, password, tsn)
