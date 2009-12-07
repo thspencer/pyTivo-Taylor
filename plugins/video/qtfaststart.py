@@ -49,8 +49,9 @@ import struct
 from optparse import OptionParser
 from StringIO import StringIO
 
-VERSION = "1.0"
+VERSION = "1.0b"
 CHUNK_SIZE = 512 * 1024
+SEEK_CUR = 1  # Not defined in Python 2.4, so we define it here -- WJM3
 
 count = 0
 
@@ -67,22 +68,22 @@ def get_index(datastream):
     """
         Return an index of top level atoms, their absolute byte-position in the
         file and their size in a dict:
-        
+
         index = {
             "ftyp": [0, 24],
             "moov": [25, 2658],
             "free": [2683, 8],
             ...
         }
-        
+
         The keys are not guaranteed to be in order, but can be put in order
         with a simple sort, e.g.
-        
+
             >>> keys = index.keys()
             >>> keys.sort(lambda x, y: cmp(index[x][0], index[y][0]))
     """
     index = {}
-    
+
     # Read atoms until we catch an error
     while(datastream):
         try:
@@ -90,14 +91,15 @@ def get_index(datastream):
         except:
             break
         index[atom_type] = [datastream.tell() - 8, atom_size]
-        datastream.seek(atom_size - 8, os.SEEK_CUR)
-    
+        datastream.seek(atom_size - 8, SEEK_CUR)
+
     # Make sure the atoms we need exist
     for key in ["ftyp", "moov", "mdat"]:
         if not index.has_key(key):
-            logger.debug( "%s atom not found, is this a valid MOV/MP4 file?" % key)
+            logger.debug("%s atom not found, is this a valid MOV/MP4 file?" %
+                         key)
             return [] 
-    
+
     return index
 
 def find_atoms(size, datastream):
@@ -105,14 +107,14 @@ def find_atoms(size, datastream):
         This function is a generator that will yield either "stco" or "co64"
         when either atom is found. datastream can be assumed to be 8 bytes
         into the stco or co64 atom when the value is yielded.
-        
+
         It is assumed that datastream will be at the end of the atom after
         the value has been yielded and processed.
-        
+
         size is the number of bytes to the end of the atom in the datastream.
     """
     stop = datastream.tell() + size
-    
+
     while datastream.tell() < stop:
         atom_size, atom_type = read_atom(datastream)
         if atom_type in ["trak", "mdia", "minf", "stbl"]:
@@ -123,7 +125,7 @@ def find_atoms(size, datastream):
             yield atom_type
         else:
             # Ignore this atom, seek to the end of it.
-            datastream.seek(atom_size - 8, os.SEEK_CUR)
+            datastream.seek(atom_size - 8, SEEK_CUR)
 
 def output(outfile, offset, data):
     global count
@@ -165,39 +167,39 @@ def fast_start(datastream, outfile, offset=0):
     for atom_type in find_atoms(moov_size - 8, moov):
         # Read either 32-bit or 64-bit offsets
         ctype, csize = atom_type == "stco" and ("L", 4) or ("Q", 8)
-        
+
         # Get number of entries
         version, entry_count = struct.unpack(">2L", moov.read(8))
-        
+
         logger.debug("Patching %s with %d entries" % (atom_type, entry_count))
-        
+
         # Read entries
         entries = struct.unpack(">" + ctype * entry_count,
                                 moov.read(csize * entry_count))
-        
+
         # Patch and write entries
-        moov.seek(-csize * entry_count, os.SEEK_CUR)
+        moov.seek(-csize * entry_count, SEEK_CUR)
         moov.write(struct.pack(">" + ctype * entry_count,
                                *[entry + moov_size for entry in entries]))
 
     # Write ftype
     datastream.seek(index["ftyp"][0])
     output(outfile, offset, datastream.read(index["ftyp"][1]))
-    
+
     # Write moov
     moov.seek(0)
     output(outfile, offset, moov.read())
-    
+
     # Write the rest
     atoms = [atom for atom in index.keys() if atom not in ["ftyp", "moov"]]
     atoms.sort(lambda x, y: cmp(index[x][0], index[y][0]))
     for atom in atoms:
         start, size = index[atom]
         datastream.seek(start)
-        
+
         # Write in chunks to not use too much memory
         for x in range(size / CHUNK_SIZE):
             output(outfile, offset, datastream.read(CHUNK_SIZE))
-            
+
         if size % CHUNK_SIZE:
             output(outfile, offset, datastream.read(size % CHUNK_SIZE))
