@@ -142,8 +142,8 @@ def from_dvrms(full_path):
             'rating': ['WM/ParentalRating'],
             'credits': ['WM/MediaCredits'], 'genre': ['WM/Genre']}
 
-    ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3',
-               'TV-PG': 'x4', 'TV-14': 'x5', 'TV-MA': 'x6'}
+    ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3', 'TV-PG': 'x4',
+               'TV-14': 'x5', 'TV-MA': 'x6', 'TV-NR': 'x7'}
 
     for tagname in keys:
         for tag in keys[tagname]:
@@ -177,8 +177,8 @@ def from_dvrms(full_path):
     return metadata
 
 def from_eyetv(full_path):
-    ratings = {'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3',
-               'TVPG': 'x4', 'TV14': 'x5', 'TVMA': 'x6',
+    ratings = {'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3', 'TVPG': 'x4',
+               'TV14': 'x5', 'TVMA': 'x6', 'TVNR': 'x7',
                'G': 'G1', 'PG': 'P2', 'PG-13': 'P3',
                'R': 'R4', 'NC-17': 'N6'}
     keys = {'TITLE': 'title', 'SUBTITLE': 'episodeTitle',
