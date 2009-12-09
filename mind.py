@@ -43,7 +43,8 @@ else:
                 self.__pcBodyStore('pyTivo', True)
 
         def pushVideo(self, tsn, url, description, duration, size,
-                      title, subtitle, source='', mime='video/mpeg'):
+                      title, subtitle, source='', mime='video/mpeg',
+                      tvrating=None):
             # It looks like tivo only supports one pc per house
             pc_body_id = self.__pcBodySearch()[0]
 
@@ -62,6 +63,11 @@ else:
                 'state': 'complete',
                 'title': title
             }
+
+            ratings = {'x1': 'y7', 'x2': 'y', 'x3': 'g', 'x4': 'pg',
+                       'x5': '14', 'x6': 'ma', 'x7': 'nr'}
+            if tvrating in ratings:
+                data['tvRating'] = ratings[tvrating]
 
             if mime == 'video/mp4':
                 data['encodingType'] = 'avcL41MP4'

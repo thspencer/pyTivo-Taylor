@@ -380,7 +380,8 @@ class Video(Plugin):
                     title = title,
                     subtitle = subtitle,
                     source = source,
-                    mime = mime)
+                    mime = mime,
+                    tvrating = file_info['tvRating'])
             except Exception, e:
                 handler.send_response(500)
                 handler.end_headers()
