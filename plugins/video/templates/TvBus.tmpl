@@ -99,7 +99,9 @@
       <displayMinorNumber>$video.displayMinorNumber</displayMinorNumber>
       <callsign>$escape($video.callsign)</callsign>
     </channel>
+    #if $video.tvRating
     <tvRating value="$video.tvRating[1]">$video.tvRating[0]</tvRating>
+    #end if
   </showing>
   <startTime>$video.startTime</startTime>
   <stopTime>$video.stopTime</stopTime>

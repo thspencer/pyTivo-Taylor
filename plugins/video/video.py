@@ -439,8 +439,7 @@ class VideoDetails(DictMixin):
             'displayMinorNumber' : '0',
             'isEpisode' : 'true',
             'colorCode' : ('COLOR', '4'),
-            'showType' : ('SERIES', '5'),
-            'tvRating' : ('NR', '7')
+            'showType' : ('SERIES', '5')
         }
         if key in defaults:
             return defaults[key]
