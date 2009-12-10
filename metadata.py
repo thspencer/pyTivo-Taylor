@@ -18,6 +18,20 @@ import config
 # Something to strip
 TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
 
+TV_RATINGS = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3', 'TV-PG': 'x4', 
+              'TV-14': 'x5', 'TV-MA': 'x6', 'TV-NR': 'x7',
+              'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3', 'TVPG': 'x4', 
+              'TV14': 'x5', 'TVMA': 'x6', 'TVNR': 'x7',
+              'Y7': 'x1', 'Y': 'x2', 'G': 'x3', 'PG': 'x4',
+              '14': 'x5', 'MA': 'x6', 'NR': 'x7', 'Unrated': 'x7'}
+
+MPAA_RATINGS = {'G': 'G1', 'PG': 'P2', 'PG-13': 'P3', 'PG13': 'P3',
+                'R': 'R4', 'NC-17': 'N6', 'NC17': 'N6'}
+
+STAR_RATINGS = {'1': 'x1', '1.5': 'x2', '2': 'x3', '2.5': 'x4',
+                '3': 'x5', '3.5': 'x6', '4': 'x7',
+                '*': 'x1', '**': 'x3', '***': 'x5', '****': 'x7'}
+
 tivo_cache = LRUCache(50)
 mp4_cache = LRUCache(50)
 dvrms_cache = LRUCache(50)
@@ -67,13 +81,6 @@ def from_moov(full_path):
     keys = {'tvnn': 'callsign', 'tven': 'episodeNumber',
             'tvsh': 'seriesTitle'}
 
-    # Possible TV values: TV-Y7 TV-Y TV-G TV-PG TV-14 TV-MA Unrated
-    # Possible MPAA values: G PG PG-13 R NC-17 Unrated
-    ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3',
-               'TV-PG': 'x4', 'TV-14': 'x5', 'TV-MA': 'x6',
-               'Unrated': 'x7', 'G': 'G1', 'PG': 'P2',
-               'PG-13': 'P3', 'R': 'R4', 'NC-17': 'N6'}
-
     for key, value in mp4meta.items():
         if type(value) == list:
             value = value[0]
@@ -108,11 +115,10 @@ def from_moov(full_path):
         elif (key == '----:com.apple.iTunes:iTunEXTC' and
               ('us-tv' in value or 'mpaa' in value)):
             rating = value.split("|")[1]
-            if rating in ratings:
-                if 'us-tv' in value:
-                    metadata['tvRating'] = ratings[rating]
-                elif 'mpaa' in value:
-                    metadata['mpaaRating'] = ratings[rating]
+            if rating in TV_RATINGS and 'us-tv' in value:
+                metadata['tvRating'] = TV_RATINGS[rating]
+            elif rating in MPAA_RATINGS and 'mpaa' in value:
+                metadata['mpaaRating'] = MPAA_RATINGS[rating]
 
         # Actors, directors, producers, AND screenwriters may be in a long
         # embedded XML plist, with key '----' and rDNS 'iTunMOVI'. Ughh!
@@ -142,9 +148,6 @@ def from_dvrms(full_path):
             'rating': ['WM/ParentalRating'],
             'credits': ['WM/MediaCredits'], 'genre': ['WM/Genre']}
 
-    ratings = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3', 'TV-PG': 'x4',
-               'TV-14': 'x5', 'TV-MA': 'x6', 'TV-NR': 'x7'}
-
     for tagname in keys:
         for tag in keys[tagname]:
             try:
@@ -169,18 +172,14 @@ def from_dvrms(full_path):
         del metadata['credits']
     if 'rating' in metadata:
         rating = metadata['rating']
-        if rating in ratings:
-            metadata['tvRating'] = ratings[rating]
+        if rating in TV_RATINGS:
+            metadata['tvRating'] = TV_RATINGS[rating]
         del metadata['rating']
 
     dvrms_cache[full_path] = metadata
     return metadata
 
 def from_eyetv(full_path):
-    ratings = {'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3', 'TVPG': 'x4',
-               'TV14': 'x5', 'TVMA': 'x6', 'TVNR': 'x7',
-               'G': 'G1', 'PG': 'P2', 'PG-13': 'P3',
-               'R': 'R4', 'NC-17': 'N6'}
     keys = {'TITLE': 'title', 'SUBTITLE': 'episodeTitle',
             'DESCRIPTION': 'description', 'YEAR': 'movieYear',
             'EPISODENUM': 'episodeNumber'}
@@ -200,13 +199,14 @@ def from_eyetv(full_path):
             metadata['vActor'] = [x.strip() for x in info['ACTORS'].split(',')]
         if info['DIRECTOR']:
             metadata['vDirector'] = [info['DIRECTOR']]
-        if info['TV_RATING']:
-            metadata['tvRating'] = ratings[info['TV_RATING']]
-        if info['STAR_RATING']:
-            metadata['starRating'] = 'x%d' % (len(info['STAR_RATING']) * 2 - 1)
-        mpaa = info['MPAA_RATING']
-        if mpaa and mpaa != 'NR':
-            metadata['mpaaRating'] = ratings[mpaa]
+
+        for ptag, etag, ratings in [('tvRating', 'TV_RATING', TV_RATINGS),
+                             ('mpaaRaating', 'MPAA_RATING', MPAA_RATINGS),
+                              ('starRating', 'STAR_RATING', STAR_RATINGS)]:
+           x = info[etag]
+           if x and x in ratings:
+               metadata[ptag] = ratings[x]
+
         # movieYear must be set for the mpaa/star ratings to work
         if (('mpaaRating' in metadata or 'starRating' in metadata) and
             'movieYear' not in metadata):
@@ -217,6 +217,7 @@ def from_text(full_path):
     metadata = {}
     path, name = os.path.split(full_path)
     title, ext = os.path.splitext(name)
+
     for metafile in [os.path.join(path, title) + '.properties',
                      os.path.join(path, 'default.txt'), full_path + '.txt',
                      os.path.join(path, '.meta', 'default.txt'),
@@ -236,6 +237,14 @@ def from_text(full_path):
                         metadata[key] = [value]
                 else:
                     metadata[key] = value
+
+    for rating, ratings in [('tvRating', TV_RATINGS),
+                            ('mpaaRaating', MPAA_RATINGS),
+                            ('starRating', STAR_RATINGS)]:
+        x = metadata.get(rating, '').upper()
+        if x in ratings:
+            metadata[rating] = ratings[x]
+
     return metadata
 
 def basic(full_path):
