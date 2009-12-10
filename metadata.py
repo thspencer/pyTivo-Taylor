@@ -201,7 +201,7 @@ def from_eyetv(full_path):
             metadata['vDirector'] = [info['DIRECTOR']]
 
         for ptag, etag, ratings in [('tvRating', 'TV_RATING', TV_RATINGS),
-                             ('mpaaRating', 'MPAA_RATING', MPAA_RATINGS),
+                              ('mpaaRating', 'MPAA_RATING', MPAA_RATINGS),
                               ('starRating', 'STAR_RATING', STAR_RATINGS)]:
            x = info[etag]
            if x and x in ratings:
