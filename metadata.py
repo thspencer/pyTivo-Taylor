@@ -23,10 +23,11 @@ TV_RATINGS = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3', 'TV-PG': 'x4',
               'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3', 'TVPG': 'x4', 
               'TV14': 'x5', 'TVMA': 'x6', 'TVNR': 'x7',
               'Y7': 'x1', 'Y': 'x2', 'G': 'x3', 'PG': 'x4',
-              '14': 'x5', 'MA': 'x6', 'NR': 'x7', 'Unrated': 'x7'}
+              '14': 'x5', 'MA': 'x6', 'NR': 'x7', 'UNRATED': 'x7'}
 
 MPAA_RATINGS = {'G': 'G1', 'PG': 'P2', 'PG-13': 'P3', 'PG13': 'P3',
-                'R': 'R4', 'NC-17': 'N6', 'NC17': 'N6'}
+                'R': 'R4', 'X': 'X5', 'NC-17': 'N6', 'NC17': 'N6',
+                'NR': 'N8', 'UNRATED': 'N8'}
 
 STAR_RATINGS = {'1': 'x1', '1.5': 'x2', '2': 'x3', '2.5': 'x4',
                 '3': 'x5', '3.5': 'x6', '4': 'x7',
@@ -114,7 +115,7 @@ def from_moov(full_path):
         # A common custom "reverse DNS format" tag
         elif (key == '----:com.apple.iTunes:iTunEXTC' and
               ('us-tv' in value or 'mpaa' in value)):
-            rating = value.split("|")[1]
+            rating = value.split("|")[1].upper()
             if rating in TV_RATINGS and 'us-tv' in value:
                 metadata['tvRating'] = TV_RATINGS[rating]
             elif rating in MPAA_RATINGS and 'mpaa' in value:
@@ -203,7 +204,7 @@ def from_eyetv(full_path):
         for ptag, etag, ratings in [('tvRating', 'TV_RATING', TV_RATINGS),
                               ('mpaaRating', 'MPAA_RATING', MPAA_RATINGS),
                               ('starRating', 'STAR_RATING', STAR_RATINGS)]:
-           x = info[etag]
+           x = info[etag].upper()
            if x and x in ratings:
                metadata[ptag] = ratings[x]
 
@@ -239,7 +240,7 @@ def from_text(full_path):
                     metadata[key] = value
 
     for rating, ratings in [('tvRating', TV_RATINGS),
-                            ('mpaaRaating', MPAA_RATINGS),
+                            ('mpaaRating', MPAA_RATINGS),
                             ('starRating', STAR_RATINGS)]:
         x = metadata.get(rating, '').upper()
         if x in ratings:
