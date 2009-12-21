@@ -180,6 +180,12 @@ class Video(Plugin):
         if full_path[-5:].lower() == '.tivo':
             data.update(metadata.from_tivo(full_path))
 
+        if 'episodeNumber' in data:
+            try:
+                int(data['episodeNumber'])
+            except:
+                data['episodeNumber'] = '0'
+
         if config.getDebug() and 'vHost' not in data:
             compatible, reason = transcode.tivo_compatible(full_path, tsn, mime)
             if compatible:
