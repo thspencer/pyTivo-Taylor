@@ -122,7 +122,15 @@ def from_moov(full_path):
                 metadata['mpaaRating'] = MPAA_RATINGS[rating]
 
         # Actors, directors, producers, AND screenwriters may be in a long
-        # embedded XML plist, with key '----' and rDNS 'iTunMOVI'. Ughh!
+        # embedded XML plist.
+        elif (key == '----:com.apple.iTunes:iTunMOVI' and
+              'plistlib' in sys.modules):
+            items = {'cast': 'vActor', 'directors': 'vDirector',
+                     'producers': 'vProducer', 'screenwriters': 'vWriter'}
+            data = plistlib.readPlistFromString(value)
+            for item in items:
+                if item in data:
+                    metadata[items[item]] = [x['name'] for x in data[item]]
 
     mp4_cache[full_path] = metadata
     return metadata
