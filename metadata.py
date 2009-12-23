@@ -33,6 +33,14 @@ STAR_RATINGS = {'1': 'x1', '1.5': 'x2', '2': 'x3', '2.5': 'x4',
                 '3': 'x5', '3.5': 'x6', '4': 'x7',
                 '*': 'x1', '**': 'x3', '***': 'x5', '****': 'x7'}
 
+HUMAN = {'mpaaRating': {'G1': 'G', 'P2': 'PG', 'P3': 'PG-13', 'R4': 'R',
+                        'X5': 'X', 'N6': 'NC-17', 'N8': 'Unrated'},
+         'tvRating': {'x1': 'TV-Y7', 'x2': 'TV-Y', 'x3': 'TV-G',
+                      'x4': 'TV-PG', 'x5': 'TV-14', 'x6': 'TV-MA',
+                      'x7': 'Unrated'},
+         'starRating': {'x1': '1', 'x2': '1.5', 'x3': '2', 'x4': '2.5',
+                        'x5': '3', 'x6': '3.5', 'x7': '4'}}
+
 tivo_cache = LRUCache(50)
 mp4_cache = LRUCache(50)
 dvrms_cache = LRUCache(50)
@@ -385,4 +393,7 @@ if __name__ == '__main__':
                 for item in value:
                     print '%s: %s' % (key, item.encode('utf8'))
             else:
-                print '%s: %s' % (key, value.encode('utf8'))
+                if key in HUMAN and value in HUMAN[key]:
+                    print '%s: %s' % (key, HUMAN[key][value])
+                else:
+                    print '%s: %s' % (key, value.encode('utf8'))
