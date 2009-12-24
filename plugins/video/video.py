@@ -209,7 +209,10 @@ class Video(Plugin):
                 mtime = os.stat(full_path).st_mtime
                 if (mtime < 0):
                     mtime = 0
-                now = datetime.fromtimestamp(mtime)
+                try:
+                    now = datetime.utcfromtimestamp(mtime)
+                except:
+                    logger.warning('Bad file time on ' + full_path)
             elif data['time'].lower() == 'oad':
                     now = datetime.strptime(data['originalAirDate'][:19],
                                             '%Y-%m-%dT%H:%M:%S')
@@ -259,7 +262,11 @@ class Video(Plugin):
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
         for f in files:
-            mtime = datetime.fromtimestamp(f.mdate)
+            try:
+                mtime = datetime.utcfromtimestamp(f.mdate)
+            except:
+                logger.warning('Bad file time on ' + full_path)
+                mtime = datetime.utcnow()
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
             video['name'] = os.path.split(f.name)[1]
