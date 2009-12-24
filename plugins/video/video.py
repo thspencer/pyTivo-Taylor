@@ -265,7 +265,7 @@ class Video(Plugin):
             try:
                 mtime = datetime.utcfromtimestamp(f.mdate)
             except:
-                logger.warning('Bad file time on ' + full_path)
+                logger.warning('Bad file time on ' + f.name)
                 mtime = datetime.utcnow()
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
