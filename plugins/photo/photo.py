@@ -281,7 +281,7 @@ class Photo(Plugin):
         def ImageFileFilter(f):
             goodexts = ('.jpg', '.gif', '.png', '.bmp', '.tif', '.xbm',
                         '.xpm', '.pgm', '.pbm', '.ppm', '.pcx', '.tga',
-                        '.fpx', '.ico', '.pcd', '.jpeg', '.tiff')
+                        '.fpx', '.ico', '.pcd', '.jpeg', '.tiff', '.nef')
             return os.path.splitext(f)[1].lower() in goodexts
 
         def media_data(f):
