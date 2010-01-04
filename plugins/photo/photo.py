@@ -35,9 +35,12 @@ from cStringIO import StringIO
 from xml.sax.saxutils import escape
 
 try:
-    import Image
+    from PIL import Image
 except ImportError:
-    print 'Photo Plugin Error: The Python Imaging Library is not installed'
+    try:
+        import Image
+    except ImportError:
+        print 'Photo Plugin Error: The Python Imaging Library is not installed'
 
 from Cheetah.Template import Template
 from lrucache import LRUCache
