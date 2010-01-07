@@ -185,8 +185,8 @@ def from_dvrms(full_path):
     if 'credits' in metadata:
         value = [x.split('/') for x in metadata['credits'].split(';')]
         if len(value) > 3:
-            metadata['vActor'] = value[0] + value[3]
-            metadata['vDirector'] = value[1]
+            metadata['vActor'] = [x for x in (value[0] + value[3]) if x]
+            metadata['vDirector'] = [x for x in value[1] if x]
         del metadata['credits']
     if 'rating' in metadata:
         rating = metadata['rating']
