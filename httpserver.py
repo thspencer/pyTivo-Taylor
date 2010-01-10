@@ -201,7 +201,6 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'info_page.tmpl'))
-        shares = dict(config.getShares())
         t.admin = ''
 
         if config.get_server('tivo_mak') and config.get_server('togo_path'):
@@ -215,8 +214,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         else:
             t.shares = ''
 
-        for section in shares:
-            plugin_type = shares[section].get('type')
+        for section, settings in config.getShares():
+            plugin_type = settings.get('type')
             if plugin_type == 'settings':
                 t.admin += ('<a href="/TiVoConnect?Command=Settings&amp;' +
                             'Container=' + quote(section) +
