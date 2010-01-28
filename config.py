@@ -171,8 +171,7 @@ def getShares(tsn=''):
             y = x.strip()
             if config.has_section(y):
                 tsnshares.append((y, dict(config.items(y))))
-        if tsnshares:
-            shares = tsnshares
+        shares = tsnshares
 
     shares.sort()
 
