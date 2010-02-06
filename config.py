@@ -218,10 +218,10 @@ def get_bin(fname):
         return config.get('Server', fname)
     else:
         global bin_paths
-        if fname in bin_paths:
-            return bin_paths[fname]
         if sys.platform == 'win32':
             fname += '.exe'
+        if fname in bin_paths:
+            return bin_paths[fname]
         for path in ([os.path.join(os.path.dirname(__file__), 'bin')] +
                      os.getenv('PATH').split(os.pathsep)):
             fpath = os.path.join(path, fname)
