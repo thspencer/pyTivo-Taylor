@@ -55,6 +55,8 @@ def init(argv):
 
 def reset():
     global config
+    global bin_paths
+    bin_paths = {}
     newconfig = ConfigParser.ConfigParser()
     newconfig.read(config_files)
     config = newconfig
@@ -215,24 +217,36 @@ def getPixelAR(ref):
 
 def get_bin(fname):
     global bin_paths
+
+    logger = logging.getLogger('pyTivo.config')
+
+    if fname in bin_paths:
+        logger.debug('Using %s' % fpath)
+        return bin_paths[fname]
+
     if config.has_option('Server', fname):
         fpath = config.get('Server', fname)
         if os.path.exists(fpath) and os.path.isfile(fpath):
+            logger.debug('Using %s' % fpath)
+            bin_paths[fname] = fpath
             return fpath
         else:
-            logger = logging.getLogger('pyTivo.config')
             logger.error('Bad %s path: %s' % (fname, fpath))
 
     if sys.platform == 'win32':
-        fname += '.exe'
-    if fname in bin_paths:
-        return bin_paths[fname]
+        fext = '.exe'
+    else:
+        fext = ''
+
     for path in ([os.path.join(os.path.dirname(__file__), 'bin')] +
                  os.getenv('PATH').split(os.pathsep)):
-        fpath = os.path.join(path, fname)
+        fpath = os.path.join(path, fname + fext)
         if os.path.exists(fpath) and os.path.isfile(fpath):
+            logger.debug('Using %s' % fpath)
             bin_paths[fname] = fpath
             return fpath
+
+    logger.warn('%s not found' % fname)
     return None
 
 def getFFmpegWait():
