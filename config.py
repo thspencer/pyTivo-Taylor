@@ -215,7 +215,13 @@ def getPixelAR(ref):
 
 def get_bin(fname):
     if config.has_option('Server', fname):
-        return config.get('Server', fname)
+        fpath = config.get('Server', fname)
+        if os.path.exists(fpath) and os.path.isfile(fpath):
+            return fpath
+        else:
+            logger = logging.getLogger('pyTivo.config')
+            logger.error('Bad %s path: %s' % (fname, fpath))
+            return None
     else:
         global bin_paths
         if sys.platform == 'win32':
