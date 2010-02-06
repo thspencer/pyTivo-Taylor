@@ -56,7 +56,7 @@ def init(argv):
 def reset():
     global config
     global bin_paths
-    bin_paths = {}
+    bin_paths.clear()
     newconfig = ConfigParser.ConfigParser()
     newconfig.read(config_files)
     config = newconfig
