@@ -2,6 +2,7 @@ import BaseHTTPServer
 import SocketServer
 import cgi
 import logging
+import mimetypes
 import os
 import re
 import socket
@@ -11,7 +12,7 @@ from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
 import config
-from plugin import GetPlugin, EncodeUnicode
+from plugin import GetPlugin, GetPluginPath, EncodeUnicode
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -19,6 +20,8 @@ VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
 <TiVoFormats><Format>
 <ContentType>video/x-tivo-mpeg</ContentType><Description/>
 </Format></TiVoFormats>"""
+
+RE_PLUGIN_CONTENT = re.compile(r'/plugin/([^/]+)/content/(.+)')
 
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
@@ -78,8 +81,52 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             path = self.path
             query = {}
 
+        regm = RE_PLUGIN_CONTENT.match(path)
+
         if path == '/TiVoConnect':
             self.handle_query(query, tsn)
+
+        # Handle general plugin content requests of the form
+        # /plugin/<plugin type>/content/<file>
+        elif regm != None:
+            try:
+                # Protect ourself from path exploits
+                file_bits = regm.group(2).split('/')
+                for bit in file_bits:
+                    if bit == '..':
+                        raise
+            
+                # Get the plugin path
+                plugin_path = GetPluginPath(regm.group(1))
+                
+                # Build up the actual path based on the plugin path
+                filen = os.path.join(plugin_path, 'content', *file_bits)
+
+                # If it's not a file, then just error out
+                if not os.path.isfile(filen):
+                    raise
+                
+                # Read in the full file    
+                handle = open(filen, 'rb')
+                try:
+                    text = handle.read()
+                    handle.close()
+                except:
+                    handle.close()
+                    raise
+                
+                # Send the header
+                self.send_response(200)
+                self.send_header('Content-type', mimetypes.guess_type(filen))
+                self.send_header('Content-length', os.path.getsize(filen))
+                self.end_headers()
+                
+                # Send the body of the file
+                self.wfile.write(text)
+            except:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write('File not found')
         else:
             ## Get File
             path = unquote_plus(path)
