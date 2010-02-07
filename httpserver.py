@@ -81,12 +81,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             path = self.path
             query = {}
 
-        regm = RE_PLUGIN_CONTENT.match(path)
-
         if path == '/TiVoConnect':
             self.handle_query(query, tsn)
-        elif regm != None:
-            self.handle_plugin_content(regm)
         else:
             ## Get File
             path = unquote_plus(path)
@@ -98,6 +94,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     plugin = GetPlugin(container['type'])
                     plugin.send_file(self, path, query)
                     return
+
+            regm = RE_PLUGIN_CONTENT.match(path)
+            if regm != None:
+                self.handle_plugin_content(regm)
 
             ## Not a file not a TiVo command
             self.infopage()
