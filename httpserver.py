@@ -189,8 +189,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 raise
                 
             # Send the header
+            mime = mimetypes.guess_type(filen)[0]
             self.send_response(200)
-            self.send_header('Content-type', mimetypes.guess_type(filen))
+            if mime:
+                self.send_header('Content-type', mime)
             self.send_header('Content-length', os.path.getsize(filen))
             self.end_headers()
                 
