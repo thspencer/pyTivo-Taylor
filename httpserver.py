@@ -86,46 +86,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if path == '/TiVoConnect':
             self.handle_query(query, tsn)
         elif regm != None:
-            # Handle general plugin content requests of the form
-            # /plugin/<plugin type>/content/<file>
-            try:
-                # Protect ourself from path exploits
-                file_bits = regm.group(2).split('/')
-                for bit in file_bits:
-                    if bit == '..':
-                        raise
-            
-                # Get the plugin path
-                plugin_path = GetPluginPath(regm.group(1))
-                
-                # Build up the actual path based on the plugin path
-                filen = os.path.join(plugin_path, 'content', *file_bits)
-
-                # If it's not a file, then just error out
-                if not os.path.isfile(filen):
-                    raise
-                
-                # Read in the full file    
-                handle = open(filen, 'rb')
-                try:
-                    text = handle.read()
-                    handle.close()
-                except:
-                    handle.close()
-                    raise
-                
-                # Send the header
-                self.send_response(200)
-                self.send_header('Content-type', mimetypes.guess_type(filen))
-                self.send_header('Content-length', os.path.getsize(filen))
-                self.end_headers()
-                
-                # Send the body of the file
-                self.wfile.write(text)
-            except:
-                self.send_response(404)
-                self.end_headers()
-                self.wfile.write('File not found')
+            self.handle_plugin_content(regm)
         else:
             ## Get File
             path = unquote_plus(path)
@@ -197,6 +158,48 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # If we made it here it means we couldn't match the request to
         # anything.
         self.unsupported(query)
+
+    def handle_plugin_content(self, regm):
+        # Handle general plugin content requests of the form
+        # /plugin/<plugin type>/content/<file>
+        try:
+            # Protect ourself from path exploits
+            file_bits = regm.group(2).split('/')
+            for bit in file_bits:
+                if bit == '..':
+                    raise
+            
+            # Get the plugin path
+            plugin_path = GetPluginPath(regm.group(1))
+                
+            # Build up the actual path based on the plugin path
+            filen = os.path.join(plugin_path, 'content', *file_bits)
+
+            # If it's not a file, then just error out
+            if not os.path.isfile(filen):
+                raise
+                
+            # Read in the full file    
+            handle = open(filen, 'rb')
+            try:
+                text = handle.read()
+                handle.close()
+            except:
+                handle.close()
+                raise
+                
+            # Send the header
+            self.send_response(200)
+            self.send_header('Content-type', mimetypes.guess_type(filen))
+            self.send_header('Content-length', os.path.getsize(filen))
+            self.end_headers()
+                
+            # Send the body of the file
+            self.wfile.write(text)
+        except:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write('File not found')
 
     def authorize(self, tsn=None):
         # if allowed_clients is empty, we are completely open
