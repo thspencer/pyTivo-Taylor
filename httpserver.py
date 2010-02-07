@@ -165,9 +165,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             # Protect ourself from path exploits
             file_bits = regm.group(2).split('/')
-            for bit in file_bits:
-                if bit == '..':
-                    raise
+            if '..' in file_bits:
+                raise
             
             # Get the plugin path
             plugin_path = GetPluginPath(regm.group(1))
