@@ -85,10 +85,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         if path == '/TiVoConnect':
             self.handle_query(query, tsn)
-
-        # Handle general plugin content requests of the form
-        # /plugin/<plugin type>/content/<file>
         elif regm != None:
+            # Handle general plugin content requests of the form
+            # /plugin/<plugin type>/content/<file>
             try:
                 # Protect ourself from path exploits
                 file_bits = regm.group(2).split('/')
