@@ -21,7 +21,7 @@ VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
 <ContentType>video/x-tivo-mpeg</ContentType><Description/>
 </Format></TiVoFormats>"""
 
-RE_PLUGIN_CONTENT = re.compile(r'/plugin/([^/]+)/content/(.+)')
+RE_PLUGIN_CONTENT = re.compile(r'/plugin/([^/]+)/(.+)')
 
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
@@ -161,7 +161,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def handle_plugin_content(self, regm):
         # Handle general plugin content requests of the form
-        # /plugin/<plugin type>/content/<file>
+        # /plugin/<plugin type>/<file>
         try:
             # Protect ourself from path exploits
             file_bits = regm.group(2).split('/')
