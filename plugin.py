@@ -30,14 +30,6 @@ def GetPlugin(name):
         'setting for your share.'
         return Error
 
-def GetPluginPath(name):
-    try:
-        module_name = '.'.join(['plugins', name, name])
-        module = __import__(module_name, globals(), locals(), name)
-        return getattr(module, 'SCRIPTDIR')
-    except ImportError:
-        return None
-
 class EncodeUnicode(Filter):
     def filter(self, val, **kw):
         """Encode Unicode strings, by default in UTF-8"""

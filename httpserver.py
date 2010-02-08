@@ -4,7 +4,6 @@ import cgi
 import logging
 import mimetypes
 import os
-import re
 import socket
 import time
 from urllib import unquote_plus, quote
@@ -12,7 +11,7 @@ from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
 import config
-from plugin import GetPlugin, GetPluginPath, EncodeUnicode
+from plugin import GetPlugin, EncodeUnicode
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -20,8 +19,6 @@ VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
 <TiVoFormats><Format>
 <ContentType>video/x-tivo-mpeg</ContentType><Description/>
 </Format></TiVoFormats>"""
-
-RE_PLUGIN_CONTENT = re.compile(r'/plugin/([^/]+)/(.+)')
 
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
@@ -85,22 +82,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.handle_query(query, tsn)
         else:
             ## Get File
-            path = unquote_plus(path)
-            basepath = path.split('/')[1]
-            for name, container in self.server.containers.items():
-                if basepath == name:
-                    path = os.path.join(os.path.normpath(container['path']),
-                                        os.path.normpath(path[len(name) + 2:]))
-                    plugin = GetPlugin(container['type'])
-                    plugin.send_file(self, path, query)
-                    return
-
-            regm = RE_PLUGIN_CONTENT.match(path)
-            if regm != None:
-                self.handle_plugin_content(regm)
-
-            ## Not a file not a TiVo command
-            self.infopage()
+            splitpath = [x for x in unquote_plus(path).split('/') if x]
+            if splitpath:
+                self.handle_file(query, splitpath)
+            else:
+                ## Not a file not a TiVo command
+                self.infopage()
 
     def do_POST(self):
         tsn = self.headers.getheader('TiVo_TCD_ID',
@@ -159,48 +146,45 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # anything.
         self.unsupported(query)
 
-    def handle_plugin_content(self, regm):
-        # Handle general plugin content requests of the form
-        # /plugin/<plugin type>/<file>
-        try:
-            # Protect ourself from path exploits
-            file_bits = regm.group(2).split('/')
-            if '..' in file_bits:
-                raise
-            
-            # Get the plugin path
-            plugin_path = GetPluginPath(regm.group(1))
-                
-            # Build up the actual path based on the plugin path
-            filen = os.path.join(plugin_path, 'content', *file_bits)
+    def handle_file(self, query, splitpath):
+        if '..' not in splitpath:    # Protect against path exploits
+            ## Pass it off to a plugin?
+            for name, container in self.server.containers.items():
+                if splitpath[0] == name:
+                    base = os.path.normpath(container['path'])
+                    path = os.path.join(base, *splitpath[1:])
+                    plugin = GetPlugin(container['type'])
+                    plugin.send_file(self, path, query)
+                    return
 
-            # If it's not a file, then just error out
-            if not os.path.isfile(filen):
-                raise
-                
-            # Read in the full file    
-            handle = open(filen, 'rb')
-            try:
-                text = handle.read()
-                handle.close()
-            except:
-                handle.close()
-                raise
-                
-            # Send the header
-            mime = mimetypes.guess_type(filen)[0]
-            self.send_response(200)
-            if mime:
-                self.send_header('Content-type', mime)
-            self.send_header('Content-length', os.path.getsize(filen))
-            self.end_headers()
-                
-            # Send the body of the file
-            self.wfile.write(text)
-        except:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write('File not found')
+            ## Serve it from a "content" directory?
+            base = os.path.join(SCRIPTDIR, *splitpath[:-1])
+            path = os.path.join(base, 'content', splitpath[-1])
+
+            if os.path.isfile(path):
+                # Read in the full file    
+                try:
+                    handle = open(path, 'rb')
+                    text = handle.read()
+                    handle.close()
+                except:
+                    self.send_error(404)
+                    return
+
+                # Send the header
+                mime = mimetypes.guess_type(path)[0]
+                self.send_response(200)
+                if mime:
+                    self.send_header('Content-type', mime)
+                self.send_header('Content-length', os.path.getsize(path))
+                self.end_headers()
+
+                # Send the body of the file
+                self.wfile.write(text)
+                return
+
+        ## Give up
+        self.send_error(404)
 
     def authorize(self, tsn=None):
         # if allowed_clients is empty, we are completely open
