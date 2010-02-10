@@ -221,14 +221,11 @@ def get_bin(fname):
     logger = logging.getLogger('pyTivo.config')
 
     if fname in bin_paths:
-        fpath = bin_paths[fname]
-        logger.debug('Using %s' % fpath)
-        return fpath
+        return bin_paths[fname]
 
     if config.has_option('Server', fname):
         fpath = config.get('Server', fname)
         if os.path.exists(fpath) and os.path.isfile(fpath):
-            logger.debug('Using %s' % fpath)
             bin_paths[fname] = fpath
             return fpath
         else:
@@ -243,7 +240,6 @@ def get_bin(fname):
                  os.getenv('PATH').split(os.pathsep)):
         fpath = os.path.join(path, fname + fext)
         if os.path.exists(fpath) and os.path.isfile(fpath):
-            logger.debug('Using %s' % fpath)
             bin_paths[fname] = fpath
             return fpath
 
