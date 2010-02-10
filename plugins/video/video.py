@@ -31,7 +31,6 @@ def tmpl(name):
 
 CONTAINER_TEMPLATE = tmpl('container.tmpl')
 TVBUS_TEMPLATE = tmpl('TvBus.tmpl')
-XSL_TEMPLATE = tmpl('container.xsl')
 
 extfile = os.path.join(SCRIPTDIR, 'video.ext')
 try:
@@ -325,12 +324,6 @@ class Video(Plugin):
         handler.send_header('Content-Type', 'text/xml')
         handler.end_headers()
         handler.wfile.write(t)
-
-    def XSL(self, handler, query):
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/xml')
-        handler.end_headers()
-        handler.wfile.write(XSL_TEMPLATE)
 
     def Push(self, handler, query):
         tsn = query['tsn'][0]
