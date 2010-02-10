@@ -1,0 +1,21 @@
+body {
+    background-color: rgb(250, 250, 250)
+}
+
+tr.row1 {
+    background-color: rgb(240, 240, 240)
+}
+
+span#title {
+    font-size: xx-large
+}
+
+table#main {
+    border: 1px solid rgb(220, 220, 220);
+    background-color: rgb(255, 255, 255)
+}
+
+td.unbreak {
+    white-space: nowrap;
+    text-align: center
+}
