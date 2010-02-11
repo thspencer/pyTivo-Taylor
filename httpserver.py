@@ -4,6 +4,7 @@ import cgi
 import logging
 import mimetypes
 import os
+import shutil
 import socket
 import time
 from urllib import unquote_plus, quote
@@ -162,11 +163,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             path = os.path.join(base, 'content', splitpath[-1])
 
             if os.path.isfile(path):
-                # Read in the full file    
                 try:
                     handle = open(path, 'rb')
-                    text = handle.read()
-                    handle.close()
                 except:
                     self.send_error(404)
                     return
@@ -180,7 +178,11 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.end_headers()
 
                 # Send the body of the file
-                self.wfile.write(text)
+                try:
+                    shutil.copyfileobj(handle, self.wfile)
+                except:
+                    pass
+                handle.close()
                 return
 
         ## Give up
