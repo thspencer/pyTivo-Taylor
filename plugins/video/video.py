@@ -395,8 +395,11 @@ class Video(Plugin):
                 raise
 
         referer = handler.headers.getheader('Referer')
-        handler.send_response(302)
-        handler.send_header('Location', referer)
+        if referer:
+            handler.send_response(302)
+            handler.send_header('Location', referer)
+        else:
+            handler.send_response(200)
         handler.end_headers()
 
     def readip(self):
