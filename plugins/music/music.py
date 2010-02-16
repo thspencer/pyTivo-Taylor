@@ -204,7 +204,10 @@ class Music(Plugin):
                     for tag in ([tagname] + TAGNAMES[tagname]):
                         try:
                             if tag in d:
-                                return d[tag][0]
+                                value = d[tag][0]
+                                if type(value) not in [str, unicode]:
+                                    value = str(value)
+                                return value
                         except:
                             pass
                     return ''

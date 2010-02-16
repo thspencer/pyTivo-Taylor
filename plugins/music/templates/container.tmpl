@@ -9,6 +9,7 @@
         <TotalItems>$total</TotalItems>
     </Details>
     #for $file in $files
+    #set $title = '.'.join(file['name'].split('.')[:-1])
     #if $file['is_dir']
     <Item>
         <Details>
@@ -25,7 +26,7 @@
     #elif $file['is_playlist']
     <Item>
         <Details>
-            <Title>#echo '.'.join(file['name'].split('.')[:-1]) #</Title>
+            <Title>$escape($title)</Title>
             <ContentType>x-tivo-container/playlist</ContentType>
         </Details>
         <Links>
@@ -39,14 +40,17 @@
     <Item>
         <Details>
             #if not 'Title' in $file
-            <Title>#echo '.'.join(file['name'].split('.')[:-1]) #</Title>
+            <Title>$escape($title)</Title>
             #end if
             <ContentType>audio/mpeg</ContentType>
-            #for $key in ('Title', 'Duration', 'ArtistName', 'SongTitle', 'AlbumTitle', 'AlbumYear', 'MusicGenre')
+            #for $key in ('Title', 'ArtistName', 'SongTitle', 'AlbumTitle', 'AlbumYear', 'MusicGenre')
             #if $key in $file and $file[$key]
-            <$key>$file[$key]</$key>
+            <$key>$escape($file[$key])</$key>
             #end if
-            #end for            
+            #end for
+            #if 'Duration' in $file
+            <Duration>$file['Duration']</Duration>
+            #end if
         </Details>
         <Links>
             <Content>
