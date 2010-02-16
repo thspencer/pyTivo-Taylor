@@ -195,32 +195,33 @@ class Music(Plugin):
                     # Otherwise, let mutagen figure it out
                     audioFile = mutagen.File(fname)
 
-                # Pull the length from the FileType, if present
-                if audioFile.info.length > 0:
-                    item['Duration'] = int(audioFile.info.length * 1000)
+                if audioFile:
+                    # Pull the length from the FileType, if present
+                    if audioFile.info.length > 0:
+                        item['Duration'] = int(audioFile.info.length * 1000)
 
-                # Grab our other tags, if present
-                def get_tag(tagname, d):
-                    for tag in ([tagname] + TAGNAMES[tagname]):
-                        try:
-                            if tag in d:
-                                value = d[tag][0]
-                                if type(value) not in [str, unicode]:
-                                    value = str(value)
-                                return value
-                        except:
-                            pass
-                    return ''
+                    # Grab our other tags, if present
+                    def get_tag(tagname, d):
+                        for tag in ([tagname] + TAGNAMES[tagname]):
+                            try:
+                                if tag in d:
+                                    value = d[tag][0]
+                                    if type(value) not in [str, unicode]:
+                                        value = str(value)
+                                    return value
+                            except:
+                                pass
+                        return ''
 
-                artist = get_tag('artist', audioFile)
-                title = get_tag('title', audioFile)
-                if artist == 'Various Artists' and '/' in title:
-                    artist, title = [x.strip() for x in title.split('/')]
-                item['ArtistName'] = artist
-                item['SongTitle'] = title
-                item['AlbumTitle'] = get_tag('album', audioFile)
-                item['AlbumYear'] = get_tag('date', audioFile)
-                item['MusicGenre'] = get_tag('genre', audioFile)
+                    artist = get_tag('artist', audioFile)
+                    title = get_tag('title', audioFile)
+                    if artist == 'Various Artists' and '/' in title:
+                        artist, title = [x.strip() for x in title.split('/')]
+                    item['ArtistName'] = artist
+                    item['SongTitle'] = title
+                    item['AlbumTitle'] = get_tag('album', audioFile)
+                    item['AlbumYear'] = get_tag('date', audioFile)
+                    item['MusicGenre'] = get_tag('genre', audioFile)
             except Exception, msg:
                 print msg
 
