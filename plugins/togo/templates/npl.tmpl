@@ -14,7 +14,7 @@
         #set $tname = $tivo_names[$tsn]
     #end if
 #end for
-<p style="text-align: center"><span id="title">pyTivo - ToGo - $tname</span></p>
+<p style="text-align: center"><span id="title">pyTivo - ToGo - $escape($tname)</span></p>
 <table id="main" border="0" cellpadding="0" cellspacing="4">
     <tr>
       <td>
@@ -69,12 +69,12 @@
 				#end if
 				<td width="*">
                                         #if 'episodeTitle' in $row
-					<b>$row['title']: $row['episodeTitle']</b><br>
+					<b>$escape($row['title']): $escape($row['episodeTitle'])</b><br>
                                         #else
-					<b>$row['title']</b><br>
+					<b>$escape($row['title'])</b><br>
                                         #end if
 					<small>#if 'description' in $row
-                                        $row['description']
+                                        $escape($row['description'])
                                         #end if
                                         #if 'displayMajorNumber' in $row and 'callsign' in $row
 					$row['displayMajorNumber'] $row['callsign']

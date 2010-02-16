@@ -4,12 +4,12 @@
     <Tivos>
         #for $tivo in $tivo_names
             #if $tivo and $tivo in $tivos
-                <Tivo>$tivo_names[$tivo]</Tivo>
+                <Tivo>$escape($tivo_names[$tivo])</Tivo>
             #end if
         #end for
         #for $tivo in $tivo_names
             #if $tivo and not $tivo in $tivos
-                <Tivo>$tivo_names[$tivo]</Tivo>
+                <Tivo>escape($tivo_names[$tivo])</Tivo>
             #end if
         #end for
     </Tivos>
