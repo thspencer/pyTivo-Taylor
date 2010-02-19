@@ -94,7 +94,7 @@
 						#if $this_status['running'] and $this_status['rate'] != ""
                                                         #set $gb = '%.3f GB' % (float($this_status['size']) / (1024 ** 3))
 							Transfering - $this_status['rate'] KB/s<br>$gb
-							<a href="/TiVoConnect?Command=ToGoStop&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Stop Transfer</a>
+							<a href="/TiVoConnect?Command=ToGoStop&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])">Stop Transfer</a>
 						#elif $this_status['running'] and $this_status['rate'] == ""
 							Initiating Transfer<br>
 							Please Wait
@@ -103,6 +103,8 @@
 							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Try Transfer Again</a>
 						#elif $this_status['finished']
 							Transfer Complete
+                                                #elif $this_status['queued']
+                                                        Queued
 						#else
 							Transfer Stopped<br>
 							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Try Transfer Again</a>

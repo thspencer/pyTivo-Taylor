@@ -52,6 +52,7 @@ NPL_TEMPLATE = file(tnname, 'rb').read()
 
 status = {} # Global variable to control download threads
 tivo_cache = {} # Cache of TiVo NPL
+queue = {} # Recordings to download -- list per TiVo
 
 class ToGo(Plugin):
     CONTENT_TYPE = 'text/html'
@@ -182,6 +183,7 @@ class ToGo(Plugin):
 
     def get_tivo_file(self, url, mak, togo_path):
         # global status
+        status[url].update({'running': True, 'queued': False})
         cj = cookielib.LWPCookieJar()
 
         parse_url = urlparse.urlparse(url)
@@ -229,6 +231,13 @@ class ToGo(Plugin):
         handle.close()
         f.close()
 
+    def process_queue(self, tivoIP, mak, togo_path):
+        while queue[tivoIP]:
+            url = queue[tivoIP][0]
+            self.get_tivo_file(url, mak, togo_path)
+            queue[tivoIP].pop(0)
+        del queue[tivoIP]
+
     def ToGo(self, handler, query):
         tivo_mak = config.get_server('tivo_mak')
         togo_path = config.get_server('togo_path')
@@ -239,10 +248,15 @@ class ToGo(Plugin):
         t.url = handler.headers.getheader('Referer')
         if tivo_mak and togo_path:
             theurl = query['Url'][0]
-            status[theurl] = {'running': True, 'error': '', 'rate': '',
-                              'size': 0, 'finished': False}
-            thread.start_new_thread(ToGo.get_tivo_file,
-                                    (self, theurl, tivo_mak, togo_path))
+            tivoIP = query['TiVo'][0]
+            status[theurl] = {'running': False, 'error': '', 'rate': '',
+                              'queued': True, 'size': 0, 'finished': False}
+            if tivoIP in queue:
+                queue[tivoIP].append(theurl)
+            else:
+                queue[tivoIP] = [theurl]
+                thread.start_new_thread(ToGo.process_queue,
+                                        (self, tivoIP, tivo_mak, togo_path))
             t.time = '3'
             t.text = TRANS_INIT % t.url
         else:
