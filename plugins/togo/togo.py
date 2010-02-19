@@ -175,7 +175,6 @@ class ToGo(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
-        t.my_url = handler.path
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
@@ -237,7 +236,7 @@ class ToGo(Plugin):
             if togo_path == name:
                 togo_path = data.get('path')
         t = Template(REDIRECT_TEMPLATE)
-        t.url = query['Redirect'][0]
+        t.url = handler.headers.getheader('Referer')
         if tivo_mak and togo_path:
             theurl = query['Url'][0]
             status[theurl] = {'running': True, 'error': '', 'rate': '',
@@ -260,7 +259,7 @@ class ToGo(Plugin):
 
         t = Template(REDIRECT_TEMPLATE)
         t.time = '3'
-        t.url = query['Redirect'][0]
+        t.url = handler.headers.getheader('Referer')
         t.text = TRANS_STOP % t.url
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
