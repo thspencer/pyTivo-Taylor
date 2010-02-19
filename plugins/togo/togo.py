@@ -229,9 +229,11 @@ class ToGo(Plugin):
                 status[url]['finished'] = True
         except Exception, msg:
             logging.getLogger('pyTivo.togo').info(msg)
-        status[url]['running'] = False
         handle.close()
         f.close()
+        if not status[url]['running']:
+            os.remove(outfile)
+        status[url]['running'] = False
 
     def process_queue(self, tivoIP, mak, togo_path):
         while queue[tivoIP]:
