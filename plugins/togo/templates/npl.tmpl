@@ -104,7 +104,8 @@
 						#elif $this_status['finished']
 							Transfer Complete
                                                 #elif $this_status['queued']
-                                                        Queued: $queue.index($row['Url'])
+                                                        Queued: $queue.index($row['Url'])<br>
+							<a href="/TiVoConnect?Command=Unqueue&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Unqueue</a>
 						#else
 							Transfer Stopped<br>
 							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Try Transfer Again</a>

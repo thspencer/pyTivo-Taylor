@@ -37,6 +37,11 @@ Your transfer has been stopped.<br>
 The <a href="%s">ToGo</a> page 
 will reload in 3 seconds."""
 
+UNQUEUE = """<h3>Removed from Queue.</h3>  <br>
+The recording has been removed from the queue.<br>
+The <a href="%s">ToGo</a> page 
+will reload in 2 seconds."""
+
 UNABLE = """<h3>Unable to Connect to TiVo.</h3>  <br>
 pyTivo was unable to connect to the TiVo at %s</br>
 This most likely caused by an incorrect Media Access Key.  Please return 
@@ -279,6 +284,21 @@ class ToGo(Plugin):
         t.time = '3'
         t.url = handler.headers.getheader('Referer')
         t.text = TRANS_STOP % t.url
+        handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
+        handler.end_headers()
+        handler.wfile.write(t)
+
+    def Unqueue(self, handler, query):
+        theurl = query['Url'][0]
+        tivoIP = query['TiVo'][0]
+        del status[theurl]
+        queue[tivoIP].remove(theurl)
+
+        t = Template(REDIRECT_TEMPLATE)
+        t.time = '2'
+        t.url = handler.headers.getheader('Referer')
+        t.text = UNQUEUE % t.url
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
         handler.end_headers()
