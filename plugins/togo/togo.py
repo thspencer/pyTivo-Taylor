@@ -163,6 +163,8 @@ class ToGo(Plugin):
         t.quote = quote
         t.folder = folder
         t.status = status
+        if tivoIP in queue:
+            t.queue = queue[tivoIP]
         t.tivo_mak = tivo_mak
         t.togo_path = togo_path
         t.tivos = config.tivos
