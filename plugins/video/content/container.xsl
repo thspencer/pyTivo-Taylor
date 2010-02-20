@@ -3,19 +3,21 @@
  <xsl:template match="TiVoContainer">
   <xsl:variable name="tivos" select="Tivos"/>
   <html>
-   <body style="background-color: rgb(250, 250, 250);">
+   <head>
+   <link rel="stylesheet" type="text/css" href="/main.css"/>
+   </head>
+   <body>
    <form action="/TiVoConnect" method="POST">
-    <p align="center"><font size="6">
+    <p style="text-align: center"><span id="title">
     <xsl:value-of select="Details/Title"/>
-    </font></p>
-    <table style="border: 1px solid rgb(220, 220, 220);background-color: 
-     rgb(255, 255, 255);text-align: left;" border="0" cellpadding="0" 
+    </span></p>
+    <table id="main" style="text-align: left;" border="0" cellpadding="0" 
      cellspacing="4" width="100%">
       <xsl:for-each select="Item">
        <tr>
        <xsl:if test="position() mod 2 = 1">
-        <xsl:attribute name="style">
-         <xsl:value-of select="'background-color: rgb(240, 240, 240);'"/>
+        <xsl:attribute name="class">
+         <xsl:value-of select="'row1'"/>
         </xsl:attribute>
        </xsl:if>
        <xsl:choose>
