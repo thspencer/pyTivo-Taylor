@@ -26,6 +26,7 @@ Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html>
 <head></head> <body bgcolor="#FFFFFF"> %s </body> </html>"""
 
 RELOAD = '<p>The <a href="%s">page</a> will reload in %d seconds.</p>'
+UNSUP = '<h3>Unsupported Command</h3> <p>Query:</p> <ul>%s</ul>'
 
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
@@ -277,13 +278,14 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(t)
 
     def unsupported(self, query):
+        message = UNSUP % '\n'.join(['<li>%s: %s</li>' % (key, value)
+                                     for key, value in query.items()])
+        text = BASE_HTML % message
         self.send_response(404)
-        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-Type', 'text/html')
+        self.send_header('Content-Length', len(text))
         self.end_headers()
-        t = Template(file=os.path.join(SCRIPTDIR, 'templates',
-                                       'unsupported.tmpl'))
-        t.query = query
-        self.wfile.write(t)
+        self.wfile.write(text)
 
     def redir(self, message, seconds=2):
         url = self.headers.getheader('Referer')
@@ -292,6 +294,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         text = BASE_HTML % message
         self.send_response(200)
         self.send_header('Content-Type', 'text/html')
+        self.send_header('Content-Length', len(text))
         if url:
             self.send_header('Refresh', '%d; url=%s' % (seconds, url))
         self.end_headers()
