@@ -21,29 +21,25 @@ CLASS_NAME = 'ToGo'
 
 # Some error/status message templates
 
-RELOAD = """%s
-The <a href="%s">ToGo</a> page will
-reload in %d seconds."""
+RELOAD = """%s <p>The <a href="%s">page</a> will reload in %d 
+seconds.</p>"""
 
-MISSING = """<h3>Missing Data.</h3>  <br>
-You must set both "tivo_mak" and "togo_path" before using this 
-function.<br>"""
+MISSING = """<h3>Missing Data</h3> <p>You must set both "tivo_mak" and 
+"togo_path" before using this function.</p>"""
 
-TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
-Your selected transfer has been initiated.<br>"""
+TRANS_INIT = """<h3>Transfer Initiated</h3> <p>Your selected transfer 
+has been initiated.</p>"""
 
-TRANS_STOP = """<h3>Transfer Stopped.</h3>  <br>
-Your transfer has been stopped.<br>"""
+TRANS_STOP = """<h3>Transfer Stopped</h3> <p>Your transfer has been 
+stopped.</p>"""
 
-UNQUEUE = """<h3>Removed from Queue.</h3>  <br>
-The recording has been removed from the queue.<br>"""
+UNQUEUE = """<h3>Removed from Queue</h3> <p>The recording has been 
+removed from the queue.</p>"""
 
-UNABLE = """<h3>Unable to Connect to TiVo.</h3>  <br>
-pyTivo was unable to connect to the TiVo at %s</br>
-This most likely caused by an incorrect Media Access Key.  Please return 
-to the ToGo page and double check your Media Access Key.<br>
-The <a href="%s">ToGo</a> page will
-reload in 20 seconds."""
+UNABLE = """<h3>Unable to Connect to TiVo</h3> <p>pyTivo was unable to 
+connect to the TiVo at %s.</p> <p>This is most likely caused by an 
+incorrect Media Access Key. Please return to the Web Configuration page 
+and double check your <b>tivo_mak</b> setting.</p>"""
 
 # Preload the templates
 trname = os.path.join(SCRIPTDIR, 'templates', 'redirect.tmpl')
@@ -93,14 +89,7 @@ class ToGo(Plugin):
                 try:
                     page = urllib2.urlopen(r)
                 except IOError, e:
-                    t = Template(REDIRECT_TEMPLATE)
-                    t.time = '20'
-                    t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
-                    t.text = UNABLE % (tivoIP, t.url)
-                    handler.send_response(200)
-                    handler.send_header('Content-Type', 'text/html')
-                    handler.end_headers()
-                    handler.wfile.write(t)
+                    self.redir(handler, UNABLE % tivoIP, 10)
                     return
                 tivo_cache[theurl] = {'thepage': minidom.parse(page),
                                       'thepage_time': time.time()}
