@@ -30,6 +30,9 @@ MISSING = """<h3>Missing Data</h3> <p>You must set both "tivo_mak" and
 TRANS_INIT = """<h3>Transfer Initiated</h3> <p>Your selected transfer 
 has been initiated.</p>"""
 
+TRANS_QUEUE = """<h3>Transfer Queued</h3> <p>Your selected transfer 
+has been queued.</p>"""
+
 TRANS_STOP = """<h3>Transfer Stopped</h3> <p>Your transfer has been 
 stopped.</p>"""
 
@@ -255,11 +258,12 @@ class ToGo(Plugin):
                               'queued': True, 'size': 0, 'finished': False}
             if tivoIP in queue:
                 queue[tivoIP].append(theurl)
+                message = TRANS_QUEUE
             else:
                 queue[tivoIP] = [theurl]
                 thread.start_new_thread(ToGo.process_queue,
                                         (self, tivoIP, tivo_mak, togo_path))
-            message = TRANS_INIT
+                message = TRANS_INIT
         else:
             message = MISSING
         self.redir(handler, message)
