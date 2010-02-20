@@ -278,7 +278,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(t)
 
     def unsupported(self, query):
-        message = UNSUP % '\n'.join(['<li>%s: %s</li>' % (key, value)
+        message = UNSUP % '\n'.join(['<li>%s: %s</li>' % (escape(key),
+                                                          escape(repr(value)))
                                      for key, value in query.items()])
         text = BASE_HTML % message
         self.send_response(404)
@@ -290,7 +291,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def redir(self, message, seconds=2):
         url = self.headers.getheader('Referer')
         if url:
-            message += RELOAD % (url, seconds)
+            message += RELOAD % (escape(url), seconds)
         text = BASE_HTML % message
         self.send_response(200)
         self.send_header('Content-Type', 'text/html')
