@@ -21,8 +21,10 @@ CLASS_NAME = 'ToGo'
 
 # Some error/status message templates
 
-RELOAD = """%s <p>The <a href="%s">page</a> will reload in %d 
-seconds.</p>"""
+REDIRECT_TEMPLATE = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 
+Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> 
+<head></head> <body bgcolor="#FFFFFF"> %s <p>The <a href="%s">page</a> 
+will reload in %d seconds.</p> </body> </html>"""
 
 MISSING = """<h3>Missing Data</h3> <p>You must set both "tivo_mak" and 
 "togo_path" before using this function.</p>"""
@@ -45,9 +47,7 @@ incorrect Media Access Key. Please return to the Web Configuration page
 and double check your <b>tivo_mak</b> setting.</p>"""
 
 # Preload the templates
-trname = os.path.join(SCRIPTDIR, 'templates', 'redirect.tmpl')
 tnname = os.path.join(SCRIPTDIR, 'templates', 'npl.tmpl')
-REDIRECT_TEMPLATE = file(trname, 'rb').read()
 NPL_TEMPLATE = file(tnname, 'rb').read()
 
 status = {} # Global variable to control download threads
@@ -236,14 +236,13 @@ class ToGo(Plugin):
         del queue[tivoIP]
 
     def redir(self, handler, message, seconds=2):
-        t = Template(REDIRECT_TEMPLATE)
-        t.time = seconds
-        t.url = handler.headers.getheader('Referer')
-        t.text = RELOAD % (message, t.url, t.time)
+        url = handler.headers.getheader('Referer')
+        text = REDIRECT_TEMPLATE % (message, url, seconds)
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html')
+        handler.send_header('Refresh', '%d; url=%s' % (seconds, url))
         handler.end_headers()
-        handler.wfile.write(t)
+        handler.wfile.write(text)
 
     def ToGo(self, handler, query):
         tivo_mak = config.get_server('tivo_mak')
