@@ -21,26 +21,22 @@ CLASS_NAME = 'ToGo'
 
 # Some error/status message templates
 
+RELOAD = """%s
+The <a href="%s">ToGo</a> page will
+reload in %d seconds."""
+
 MISSING = """<h3>Missing Data.</h3>  <br>
 You must set both "tivo_mak" and "togo_path" before using this 
-function.<br>
-The <a href="%s">ToGo</a> page 
-will reload in 10 seconds."""
+function.<br>"""
 
 TRANS_INIT = """<h3>Transfer Initiated.</h3>  <br>
-Your selected transfer has been initiated.<br>
-The <a href="%s">ToGo</a> page 
-will reload in 3 seconds."""
+Your selected transfer has been initiated.<br>"""
 
 TRANS_STOP = """<h3>Transfer Stopped.</h3>  <br>
-Your transfer has been stopped.<br>
-The <a href="%s">ToGo</a> page 
-will reload in 3 seconds."""
+Your transfer has been stopped.<br>"""
 
 UNQUEUE = """<h3>Removed from Queue.</h3>  <br>
-The recording has been removed from the queue.<br>
-The <a href="%s">ToGo</a> page 
-will reload in 2 seconds."""
+The recording has been removed from the queue.<br>"""
 
 UNABLE = """<h3>Unable to Connect to TiVo.</h3>  <br>
 pyTivo was unable to connect to the TiVo at %s</br>
@@ -100,7 +96,7 @@ class ToGo(Plugin):
                     t = Template(REDIRECT_TEMPLATE)
                     t.time = '20'
                     t.url = '/TiVoConnect?Command=NPL&Container=' + quote(cname)
-                    t.text = UNABLE % t.url
+                    t.text = UNABLE % (tivoIP, t.url)
                     handler.send_response(200)
                     handler.send_header('Content-Type', 'text/html')
                     handler.end_headers()
@@ -247,14 +243,22 @@ class ToGo(Plugin):
             queue[tivoIP].pop(0)
         del queue[tivoIP]
 
+    def redir(self, handler, message, seconds=2):
+        t = Template(REDIRECT_TEMPLATE)
+        t.time = seconds
+        t.url = handler.headers.getheader('Referer')
+        t.text = RELOAD % (message, t.url, t.time)
+        handler.send_response(200)
+        handler.send_header('Content-Type', 'text/html')
+        handler.end_headers()
+        handler.wfile.write(t)
+
     def ToGo(self, handler, query):
         tivo_mak = config.get_server('tivo_mak')
         togo_path = config.get_server('togo_path')
         for name, data in config.getShares():
             if togo_path == name:
                 togo_path = data.get('path')
-        t = Template(REDIRECT_TEMPLATE)
-        t.url = handler.headers.getheader('Referer')
         if tivo_mak and togo_path:
             theurl = query['Url'][0]
             tivoIP = query['TiVo'][0]
@@ -266,40 +270,19 @@ class ToGo(Plugin):
                 queue[tivoIP] = [theurl]
                 thread.start_new_thread(ToGo.process_queue,
                                         (self, tivoIP, tivo_mak, togo_path))
-            t.time = '3'
-            t.text = TRANS_INIT % t.url
+            message = TRANS_INIT
         else:
-            t.time = '10'
-            t.text = MISSING % t.url
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html')
-        handler.end_headers()
-        handler.wfile.write(t)
+            message = MISSING
+        self.redir(handler, message)
 
     def ToGoStop(self, handler, query):
         theurl = query['Url'][0]
         status[theurl]['running'] = False
-
-        t = Template(REDIRECT_TEMPLATE)
-        t.time = '3'
-        t.url = handler.headers.getheader('Referer')
-        t.text = TRANS_STOP % t.url
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html')
-        handler.end_headers()
-        handler.wfile.write(t)
+        self.redir(handler, TRANS_STOP)
 
     def Unqueue(self, handler, query):
         theurl = query['Url'][0]
         tivoIP = query['TiVo'][0]
         del status[theurl]
         queue[tivoIP].remove(theurl)
-
-        t = Template(REDIRECT_TEMPLATE)
-        t.time = '2'
-        t.url = handler.headers.getheader('Referer')
-        t.text = UNQUEUE % t.url
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html')
-        handler.end_headers()
-        handler.wfile.write(t)
+        self.redir(handler, UNQUEUE)
