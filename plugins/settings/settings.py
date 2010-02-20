@@ -14,11 +14,8 @@ CLASS_NAME = 'Settings'
 
 # Some error/status message templates
 
-RESET_MSG = """<h3>The pyTivo Server has been soft reset.</h3>  <br>
-pyTivo has reloaded the pyTivo.conf file and all changes should now be 
-in effect. <br>
-The <a href="/TiVoConnect?Command=%s&amp;Container=%s">previous</a> page 
-will reload in 3 seconds."""
+RESET_MSG = """<h3>Soft Reset</h3> <p>pyTivo has reloaded the 
+pyTivo.conf file and all changes should now be in effect.</p>"""
 
 SETTINGS_MSG = """<h3>Your Settings have been saved.</h3>  <br>
 Your settings have been saved to the pyTivo.conf file. However you will 
@@ -38,21 +35,7 @@ class Settings(Plugin):
     def Reset(self, handler, query):
         config.reset()
         handler.server.reset()
-        if 'last_page' in query:
-            last_page = query['last_page'][0]
-        else:
-            last_page = 'Settings'
-
-        cname = query['Container'][0].split('/')[0]
-        t = Template(REDIRECT_TEMPLATE)
-        t.time = '3'
-        t.url = ('/TiVoConnect?Command=' + last_page + '&amp;Container=' +
-                 quote(cname))
-        t.text = RESET_MSG % (quote(last_page), quote(cname))
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html')
-        handler.end_headers()
-        handler.wfile.write(t)
+        handler.redir(RESET_MSG, 3)
         logging.getLogger('pyTivo.settings').info('pyTivo has been soft reset.')
 
     def Settings(self, handler, query):

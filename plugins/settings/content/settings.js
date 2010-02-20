@@ -49,8 +49,7 @@ function resetpyTivo()
     var answer = confirm("Are you sure you wish to reset the pyTivo " +
                          "Server? Any unsaved changes will be lost!")
     if (answer) {
-        window.location =
-            "/TiVoConnect?Command=Reset&amp;Container=$quote($container)"
+        window.location = "/TiVoConnect?Command=Reset&Container=Settings"
     }
 }
 
