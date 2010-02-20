@@ -21,6 +21,11 @@ VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
 <ContentType>video/x-tivo-mpeg</ContentType><Description/>
 </Format></TiVoFormats>"""
 
+REDIRECT_TEMPLATE = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 
+Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> 
+<head></head> <body bgcolor="#FFFFFF"> %s <p>The <a href="%s">page</a> 
+will reload in %d seconds.</p> </body> </html>"""
+
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     containers = {}
 
@@ -278,3 +283,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                        'unsupported.tmpl'))
         t.query = query
         self.wfile.write(t)
+
+    def redir(self, message, seconds=2):
+        url = self.headers.getheader('Referer')
+        text = REDIRECT_TEMPLATE % (message, url, seconds)
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html')
+        self.send_header('Refresh', '%d; url=%s' % (seconds, url))
+        self.end_headers()
+        self.wfile.write(text)
