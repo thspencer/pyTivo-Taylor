@@ -25,6 +25,8 @@ SCRIPTDIR = os.path.dirname(__file__)
 
 CLASS_NAME = 'Video'
 
+PUSHED = '<h3>Queued for Push</h3> <p>%s</p>'
+
 # Preload the templates
 def tmpl(name):
     return file(os.path.join(SCRIPTDIR, 'templates', name), 'rb').read()
@@ -347,7 +349,8 @@ class Video(Plugin):
  
         path = self.get_local_base_path(handler, query)
 
-        for f in query.get('File', []):
+        files = query.get('File', [])
+        for f in files:
             file_path = path + os.path.normpath(f)
 
             file_info = VideoDetails()
@@ -394,13 +397,7 @@ class Video(Plugin):
                 handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
                 raise
 
-        referer = handler.headers.getheader('Referer')
-        if referer:
-            handler.send_response(302)
-            handler.send_header('Location', referer)
-        else:
-            handler.send_response(200)
-        handler.end_headers()
+        handler.redir(PUSHED % '<br>'.join(files), 5)
 
     def readip(self):
         """ returns your external IP address by querying dyndns.org """
