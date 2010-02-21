@@ -23,3 +23,7 @@ td.unbreak {
     white-space: nowrap;
     text-align: center
 }
+
+img {
+    border: 0
+}

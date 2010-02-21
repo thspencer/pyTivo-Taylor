@@ -30,7 +30,7 @@
 		  #if $folder != ''
 		  	## We are in a subfolder, offer the option to return to NPL
 			<tr>
-				<td><img src="/back.png"></td>
+				<td><img src="/back.png" alt=""></td>
 				<td colspan=4><a href="/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;TiVo=$tivoIP">Back to Now Playing List</a></td>
 			</tr>
 		  #end if
@@ -43,7 +43,7 @@
                           <tr class="row$(j)">
 			  #if $row['ContentType'] == 'x-tivo-container/folder'
 			    ## This is a folder
-				<td><image src="/folder.png" border=0></td>
+				<td><img src="/folder.png" alt=""></td>
 				<td><a href='/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;Folder=$(row["UniqueId"])&amp;TiVo=$tivoIP'>$row['Title'] </a></td>
 				<td class="unbreak">$(row["TotalItems"]) Items</td>
 				<td class="unbreak">$row["LastChangeDate"]</td>
@@ -53,13 +53,13 @@
 				#if 'Icon' in $row
 				    <!-- Display icons similar to TiVo colored circles -->
 					#if $row['Icon'] == 'urn:tivo:image:expires-soon-recording'
-						<td><image src="/soon.png" border=0></td>
+						<td><img src="/soon.png" alt=""></td>
 					#else if $row['Icon'] == 'urn:tivo:image:expired-recording'
-						<td><image src="/expired.png" border=0></td>
+						<td><img src="/expired.png" alt=""></td>
 					#else if $row['Icon'] == 'urn:tivo:image:save-until-i-delete-recording'
-						<td><image src="/kuid.png" border=0></td>
+						<td><img src="/kuid.png" alt=""></td>
 					#else if $row['Icon'] == 'urn:tivo:image:in-progress-recording'
-						<td><image src="/recording.png" border=0></td>
+						<td><img src="/recording.png" alt=""></td>
 					#else
 						<td width="8"></td>
 					#end if
