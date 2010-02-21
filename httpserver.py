@@ -21,9 +21,9 @@ VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
 <ContentType>video/x-tivo-mpeg</ContentType><Description/>
 </Format></TiVoFormats>"""
 
-BASE_HTML = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 
-Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> 
-<head></head> <body bgcolor="#FFFFFF"> %s </body> </html>"""
+BASE_HTML = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html> <head><title>pyTivo</title></head> <body> %s </body> </html>"""
 
 RELOAD = '<p>The <a href="%s">page</a> will reload in %d seconds.</p>'
 UNSUP = '<h3>Unsupported Command</h3> <p>Query:</p> <ul>%s</ul>'
