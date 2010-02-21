@@ -8,7 +8,7 @@
    </head>
    <body>
    <form action="/TiVoConnect" method="POST">
-    <p style="text-align: center"><span id="title">
+    <p id="titlep"><span id="title">
     <xsl:value-of select="Details/Title"/>
     </span></p>
     <table id="main" style="text-align: left;" border="0" cellpadding="0" 

@@ -2,7 +2,11 @@ body {
     background-color: rgb(250, 250, 250)
 }
 
-span#title {
+#titlep {
+    text-align: center
+}
+
+#title {
     font-size: xx-large
 }
 
