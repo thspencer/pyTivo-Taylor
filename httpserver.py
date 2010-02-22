@@ -240,7 +240,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def infopage(self):
         self.send_response(200)
-        self.send_header('Content-type', 'text/html')
+        self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'info_page.tmpl'))
@@ -283,7 +283,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                      for key, value in query.items()])
         text = BASE_HTML % message
         self.send_response(404)
-        self.send_header('Content-Type', 'text/html')
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', len(text))
         self.end_headers()
         self.wfile.write(text)
@@ -294,7 +294,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             message += RELOAD % (escape(url), seconds)
         text = BASE_HTML % message
         self.send_response(200)
-        self.send_header('Content-Type', 'text/html')
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', len(text))
         if url:
             self.send_header('Refresh', '%d; url=%s' % (seconds, url))

@@ -167,7 +167,7 @@ class ToGo(Plugin):
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
         handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html')
+        handler.send_header('Content-Type', 'text/html; charset=utf-8')
         handler.end_headers()
         handler.wfile.write(t)
 

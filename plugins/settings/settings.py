@@ -75,7 +75,7 @@ class Settings(Plugin):
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
         handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html')
+        handler.send_header('Content-Type', 'text/html; charset=utf-8')
         handler.end_headers()
         handler.wfile.write(t)
 
