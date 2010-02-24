@@ -15,6 +15,8 @@ import config
 from metadata import tag_data, from_container
 from plugin import EncodeUnicode, Plugin
 
+logger = logging.getLogger('pyTivo.togo')
+
 SCRIPTDIR = os.path.dirname(__file__)
 
 CLASS_NAME = 'ToGo'
@@ -171,7 +173,7 @@ class ToGo(Plugin):
         handler.end_headers()
         handler.wfile.write(t)
 
-    def get_tivo_file(self, url, mak, togo_path):
+    def get_tivo_file(self, tivoIP, url, mak, togo_path):
         # global status
         status[url].update({'running': True, 'queued': False})
         cj = cookielib.LWPCookieJar()
@@ -196,9 +198,16 @@ class ToGo(Plugin):
             status[url]['error'] = e.code
             return
 
+        tivos_by_ip = dict([(value, key)
+                            for key, value in config.tivos.items()])
+        tivo_name = config.tivo_names[tivos_by_ip[tivoIP]]
+
+        logger.info('[%s] Start getting "%s" from %s' %
+                    (time.strftime('%d/%b/%Y %T'), outfile, tivo_name))
         f = open(outfile, 'wb')
         length = 0
         start_time = time.time()
+        last_interval = start_time
         try:
             while status[url]['running']:
                 output = handle.read(1024000)
@@ -207,26 +216,35 @@ class ToGo(Plugin):
                 length += len(output)
                 f.write(output)
                 now = time.time()
-                elapsed = now - start_time
+                elapsed = now - last_interval
                 if elapsed >= 5:
                     status[url]['rate'] = int(length / elapsed) / 1024
                     status[url]['size'] += length
                     length = 0
-                    start_time = now
+                    last_interval = now
             if status[url]['running']:
                 status[url]['finished'] = True
         except Exception, msg:
-            logging.getLogger('pyTivo.togo').info(msg)
+            logger.info(msg)
         handle.close()
         f.close()
-        if not status[url]['running']:
+        if status[url]['running']:
+            elapsed = now - start_time
+            size = status[url]['size']
+            rate = int(size / elapsed) / 1024
+            logger.info('[%s] Done getting "%s" from %s, %d bytes, %.2f KBps' %
+                        (time.strftime('%d/%b/%Y %T'), outfile,
+                         tivo_name, size, rate))
+        else:
             os.remove(outfile)
+            logger.info('[%s] Transfer of "%s" from %s aborted' %
+                        (time.strftime('%d/%b/%Y %T'), outfile, tivo_name))
         status[url]['running'] = False
 
     def process_queue(self, tivoIP, mak, togo_path):
         while queue[tivoIP]:
             url = queue[tivoIP][0]
-            self.get_tivo_file(url, mak, togo_path)
+            self.get_tivo_file(tivoIP, url, mak, togo_path)
             queue[tivoIP].pop(0)
         del queue[tivoIP]
 

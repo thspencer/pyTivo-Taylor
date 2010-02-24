@@ -60,6 +60,7 @@ class Video(Plugin):
     def send_file(self, handler, path, query):
         mime = 'video/mpeg'
         tsn = handler.headers.getheader('tsn', '')
+        tivo_name = config.tivo_names.get(tsn, tsn)
 
         is_tivo_file = (path[-5:].lower() == '.tivo')
 
@@ -97,9 +98,11 @@ class Video(Plugin):
             handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
 
+        logger.info('[%s] Start sending "%s" to %s' %
+                    (time.strftime('%d/%b/%Y %T'), path, tivo_name))
         if valid:
             if compatible:
-                logger.debug('%s is tivo compatible' % path)
+                logger.debug('"%s" is tivo compatible' % path)
                 f = open(path, 'rb')
                 try:
                     if mime == 'video/mp4':
@@ -116,7 +119,7 @@ class Video(Plugin):
                     logger.info(msg)
                 f.close()
             else:
-                logger.debug('%s is not tivo compatible' % path)
+                logger.debug('"%s" is not tivo compatible' % path)
                 if offset:
                     transcode.resume_transfer(path, handler.wfile, offset)
                 else:
@@ -127,7 +130,8 @@ class Video(Plugin):
             handler.wfile.flush()
         except Exception, msg:
             logger.info(msg)
-        logger.debug("Finished outputing video")
+        logger.info('[%s] Done sending "%s" to %s' %
+                    (time.strftime('%d/%b/%Y %T'), path, tivo_name))
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
