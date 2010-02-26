@@ -171,7 +171,7 @@ def transfer_blocks(inFile, outFile):
             break
 
 def reap_process(inFile):
-    if inFile in ffmpeg_procs:
+    if ffmpeg_procs and inFile in ffmpeg_procs:
         proc = ffmpeg_procs[inFile]
         if proc['last_read'] + TIMEOUT < time.time():
             del ffmpeg_procs[inFile]
