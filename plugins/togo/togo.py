@@ -203,7 +203,7 @@ class ToGo(Plugin):
         tivo_name = config.tivo_names[tivos_by_ip[tivoIP]]
 
         logger.info('[%s] Start getting "%s" from %s' %
-                    (time.strftime('%d/%b/%Y %T'), outfile, tivo_name))
+                    (time.strftime('%d/%b/%Y %H:%M:%S'), outfile, tivo_name))
         f = open(outfile, 'wb')
         length = 0
         start_time = time.time()
@@ -233,12 +233,13 @@ class ToGo(Plugin):
             size = status[url]['size']
             rate = int(size / elapsed) / 1024
             logger.info('[%s] Done getting "%s" from %s, %d bytes, %.2f KBps' %
-                        (time.strftime('%d/%b/%Y %T'), outfile,
+                        (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name, size, rate))
         else:
             os.remove(outfile)
             logger.info('[%s] Transfer of "%s" from %s aborted' %
-                        (time.strftime('%d/%b/%Y %T'), outfile, tivo_name))
+                        (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
+                         tivo_name))
         status[url]['running'] = False
 
     def process_queue(self, tivoIP, mak, togo_path):

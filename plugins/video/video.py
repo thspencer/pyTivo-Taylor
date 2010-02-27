@@ -99,7 +99,7 @@ class Video(Plugin):
         handler.end_headers()
 
         logger.info('[%s] Start sending "%s" to %s' %
-                    (time.strftime('%d/%b/%Y %T'), path, tivo_name))
+                    (time.strftime('%d/%b/%Y %H:%M:%S'), path, tivo_name))
         if valid:
             if compatible:
                 logger.debug('"%s" is tivo compatible' % path)
@@ -131,7 +131,7 @@ class Video(Plugin):
         except Exception, msg:
             logger.info(msg)
         logger.info('[%s] Done sending "%s" to %s' %
-                    (time.strftime('%d/%b/%Y %T'), path, tivo_name))
+                    (time.strftime('%d/%b/%Y %H:%M:%S'), path, tivo_name))
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
