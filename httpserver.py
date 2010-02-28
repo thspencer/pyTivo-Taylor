@@ -296,6 +296,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', len(text))
+        self.send_header('Expires', '0')
         if url:
             self.send_header('Refresh', '%d; url=%s' % (seconds, url))
         self.end_headers()
