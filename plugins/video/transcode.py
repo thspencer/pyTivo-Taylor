@@ -72,11 +72,14 @@ def transcode(isQuery, inFile, outFile, tsn=''):
 
     ffmpeg_path = config.get_bin('ffmpeg')
     cmd_string = config.getFFmpegTemplate(tsn) % settings
+    fname = unicode(inFile, 'utf-8')
+    if mswindows:
+        fname = fname.encode('iso8859-1')
 
     if inFile[-5:].lower() == '.tivo':
         tivodecode_path = config.get_bin('tivodecode')
         tivo_mak = config.get_server('tivo_mak')
-        tcmd = [tivodecode_path, '-m', tivo_mak, inFile]
+        tcmd = [tivodecode_path, '-m', tivo_mak, fname]
         tivodecode = subprocess.Popen(tcmd, stdout=subprocess.PIPE,
                                       bufsize=(512 * 1024))
         if tivo_compatible(inFile, tsn)[0]:
@@ -88,7 +91,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
                                       stdout=subprocess.PIPE,
                                       bufsize=(512 * 1024))
     else:
-        cmd = [ffmpeg_path, '-i', inFile] + cmd_string.split()
+        cmd = [ffmpeg_path, '-i', fname] + cmd_string.split()
         ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
                                   stdout=subprocess.PIPE)
 
@@ -630,7 +633,8 @@ def tivo_compatible(inFile, tsn='', mime=''):
 
 def video_info(inFile, cache=True):
     vInfo = dict()
-    mtime = os.stat(inFile).st_mtime
+    fname = unicode(inFile, 'utf-8')
+    mtime = os.stat(fname).st_mtime
     if cache:
         if inFile in info_cache and info_cache[inFile][0] == mtime:
             debug('CACHE HIT! %s' % inFile)
@@ -648,7 +652,9 @@ def video_info(inFile, cache=True):
             info_cache[inFile] = (mtime, vInfo)
         return vInfo
 
-    cmd = [ffmpeg_path, '-i', inFile]
+    if mswindows:
+        fname = fname.encode('iso8859-1')
+    cmd = [ffmpeg_path, '-i', fname]
     # Windows and other OS buffer 4096 and ffmpeg can output more than that.
     err_tmp = tempfile.TemporaryFile()
     ffmpeg = subprocess.Popen(cmd, stderr=err_tmp, stdout=subprocess.PIPE,
@@ -820,7 +826,10 @@ def video_info(inFile, cache=True):
 def audio_check(inFile, tsn):
     cmd_string = ('-y -vcodec mpeg2video -r 29.97 -b 1000k -acodec copy ' +
                   select_audiolang(inFile, tsn) + ' -t 00:00:01 -f vob -')
-    cmd = [config.get_bin('ffmpeg'), '-i', inFile] + cmd_string.split()
+    fname = unicode(inFile, 'utf-8')
+    if mswindows:
+        fname = fname.encode('iso8859-1')
+    cmd = [config.get_bin('ffmpeg'), '-i', fname] + cmd_string.split()
     ffmpeg = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     fd, testname = tempfile.mkstemp()
     testfile = os.fdopen(fd, 'wb')

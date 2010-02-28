@@ -50,7 +50,7 @@ class Video(Plugin):
             transcode.supported_format(full_path)
 
     def video_file_filter(self, full_path, type=None):
-        if os.path.isdir(full_path):
+        if os.path.isdir(unicode(full_path, 'utf-8')):
             return True
         if extensions:
             return os.path.splitext(full_path)[1].lower() in extensions
@@ -88,22 +88,23 @@ class Video(Plugin):
             valid = ((compatible and offset < os.stat(path).st_size) or
                      (not compatible and transcode.is_resumable(path, offset)))
 
+        fname = unicode(path, 'utf-8')
         handler.send_response(206)
         handler.send_header('Content-Type', mime)
         handler.send_header('Connection', 'close')
         if compatible:
             handler.send_header('Content-Length',
-                                os.stat(path).st_size - offset)
+                                os.stat(fname).st_size - offset)
         else:
             handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
 
         logger.info('[%s] Start sending "%s" to %s' %
-                    (time.strftime('%d/%b/%Y %H:%M:%S'), path, tivo_name))
+                    (time.strftime('%d/%b/%Y %H:%M:%S'), fname, tivo_name))
         if valid:
             if compatible:
-                logger.debug('"%s" is tivo compatible' % path)
-                f = open(path, 'rb')
+                logger.debug('"%s" is tivo compatible' % fname)
+                f = open(fname, 'rb')
                 try:
                     if mime == 'video/mp4':
                         qtfaststart.fast_start(f, handler.wfile, offset)
@@ -119,7 +120,7 @@ class Video(Plugin):
                     logger.info(msg)
                 f.close()
             else:
-                logger.debug('"%s" is not tivo compatible' % path)
+                logger.debug('"%s" is not tivo compatible' % fname)
                 if offset:
                     transcode.resume_transfer(path, handler.wfile, offset)
                 else:
@@ -131,7 +132,7 @@ class Video(Plugin):
         except Exception, msg:
             logger.info(msg)
         logger.info('[%s] Done sending "%s" to %s' %
-                    (time.strftime('%d/%b/%Y %H:%M:%S'), path, tivo_name))
+                    (time.strftime('%d/%b/%Y %H:%M:%S'), fname, tivo_name))
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
@@ -139,17 +140,19 @@ class Video(Plugin):
     def __total_items(self, full_path):
         count = 0
         try:
+            full_path = unicode(full_path, 'utf-8')
             for f in os.listdir(full_path):
                 if f.startswith('.'):
                     continue
                 f = os.path.join(full_path, f)
+                f2 = f.encode('utf-8')
                 if os.path.isdir(f):
                     count += 1
                 elif extensions:
-                    if os.path.splitext(f)[1].lower() in extensions:
+                    if os.path.splitext(f2)[1].lower() in extensions:
                         count += 1
-                elif f in transcode.info_cache:
-                    if transcode.supported_format(f):
+                elif f2 in transcode.info_cache:
+                    if transcode.supported_format(f2):
                         count += 1
         except:
             pass
@@ -159,7 +162,7 @@ class Video(Plugin):
         # Size is estimated by taking audio and video bit rate adding 2%
 
         if transcode.tivo_compatible(full_path, tsn, mime)[0]:
-            return int(os.stat(full_path).st_size)
+            return int(os.stat(unicode(full_path, 'utf-8')).st_size)
         else:
             # Must be re-encoded
             if config.get_tsn('audio_codec', tsn) == None:
@@ -211,7 +214,7 @@ class Video(Plugin):
         now = datetime.utcnow()
         if 'time' in data:
             if data['time'].lower() == 'file':
-                mtime = os.stat(full_path).st_mtime
+                mtime = os.stat(unicode(full_path, 'utf-8')).st_mtime
                 if (mtime < 0):
                     mtime = 0
                 try:
@@ -270,7 +273,7 @@ class Video(Plugin):
             try:
                 mtime = datetime.utcfromtimestamp(f.mdate)
             except:
-                logger.warning('Bad file time on ' + f.name)
+                logger.warning('Bad file time on ' + unicode(f.name, 'utf-8'))
                 mtime = datetime.utcnow()
             video = VideoDetails()
             video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))

@@ -71,7 +71,7 @@ class Plugin(object):
     def send_file(self, handler, path, query):
         handler.send_response(200)
         handler.end_headers()
-        f = open(path, 'rb')
+        f = open(unicode(path, 'utf-8'), 'rb')
         shutil.copyfileobj(f, handler.wfile)
         f.close()
 
@@ -154,7 +154,7 @@ class Plugin(object):
             def __init__(self, name, isdir):
                 self.name = name
                 self.isdir = isdir
-                st = os.stat(name)
+                st = os.stat(unicode(name, 'utf-8'))
                 self.mdate = int(st.st_mtime)
 
         class SortList:
@@ -166,12 +166,14 @@ class Plugin(object):
 
         def build_recursive_list(path, recurse=True):
             files = []
+            path = unicode(path, 'utf-8')
             try:
                 for f in os.listdir(path):
                     if f.startswith('.'):
                         continue
                     f = os.path.join(path, f)
                     isdir = os.path.isdir(f)
+                    f = f.encode('utf-8')
                     if recurse and isdir:
                         files.extend(build_recursive_list(f))
                     else:
@@ -196,7 +198,7 @@ class Plugin(object):
             if path in rc and rc.mtime(path) + 300 >= time.time():
                 filelist = rc[path]
         else:
-            updated = os.stat(path)[8]
+            updated = os.stat(unicode(path, 'utf-8'))[8]
             if path in dc and dc.mtime(path) >= updated:
                 filelist = dc[path]
             for p in rc:

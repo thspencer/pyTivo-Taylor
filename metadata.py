@@ -45,6 +45,8 @@ tivo_cache = LRUCache(50)
 mp4_cache = LRUCache(50)
 dvrms_cache = LRUCache(50)
 
+mswindows = (sys.platform == "win32")
+
 def tag_data(element, tag):
     for name in tag.split('/'):
         new_element = element.getElementsByTagName(name)
@@ -79,7 +81,7 @@ def from_moov(full_path):
     len_desc = 0
 
     try:
-        mp4meta = mutagen.File(full_path)
+        mp4meta = mutagen.File(unicode(full_path, 'utf-8'))
         assert(mp4meta)
     except:
         mp4_cache[full_path] = {}
@@ -150,7 +152,7 @@ def from_dvrms(full_path):
     metadata = {}
 
     try:
-        meta = mutagen.File(full_path)
+        meta = mutagen.File(unicode(full_path, 'utf-8'))
         assert(meta)
     except:
         dvrms_cache[full_path] = {}
@@ -202,7 +204,7 @@ def from_eyetv(full_path):
             'DESCRIPTION': 'description', 'YEAR': 'movieYear',
             'EPISODENUM': 'episodeNumber'}
     metadata = {}
-    path, name = os.path.split(full_path)
+    path, name = os.path.split(unicode(full_path, 'utf-8'))
     eyetvp = [x for x in os.listdir(path) if x.endswith('.eyetvp')][0]
     eyetvp = os.path.join(path, eyetvp)
     eyetv = plistlib.readPlist(eyetvp)
@@ -233,7 +235,7 @@ def from_eyetv(full_path):
 
 def from_text(full_path):
     metadata = {}
-    path, name = os.path.split(full_path)
+    path, name = os.path.split(unicode(full_path, 'utf-8'))
     title, ext = os.path.splitext(name)
 
     for metafile in [os.path.join(path, title) + '.properties',
@@ -268,7 +270,7 @@ def from_text(full_path):
 def basic(full_path):
     base_path, name = os.path.split(full_path)
     title, ext = os.path.splitext(name)
-    mtime = os.stat(full_path).st_mtime
+    mtime = os.stat(unicode(full_path, 'utf-8')).st_mtime
     if (mtime < 0):
         mtime = 0
     originalAirDate = datetime.fromtimestamp(mtime)
@@ -367,7 +369,10 @@ def from_tivo(full_path):
     tdcat_path = config.get_bin('tdcat')
     tivo_mak = config.get_server('tivo_mak')
     if tdcat_path and tivo_mak:
-        tcmd = [tdcat_path, '-m', tivo_mak, '-2', full_path]
+        fname = unicode(full_path, 'utf-8')
+        if mswindows:
+            fname = fname.encode('iso8859-1')
+        tcmd = [tdcat_path, '-m', tivo_mak, '-2', fname]
         tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
         xmldoc = minidom.parse(tdcat.stdout)
         metadata = from_details(xmldoc)
@@ -377,24 +382,36 @@ def from_tivo(full_path):
 
     return metadata
 
+def force_utf8(text):
+    if type(text) == str:
+        try:
+            text = text.decode('utf8')
+        except:
+            if sys.platform == 'darwin':
+                text = text.decode('macroman')
+            else:
+                text = text.decode('iso8859-1')
+    return text.encode('utf-8')
+
 if __name__ == '__main__':        
     if len(sys.argv) > 1:
         metadata = {}
-        ext = os.path.splitext(sys.argv[1])[1].lower()
+        fname = force_utf8(sys.argv[1])
+        ext = os.path.splitext(fname)[1].lower()
         if ext == '.tivo':
             config.init([])
-            metadata.update(from_tivo(sys.argv[1]))
+            metadata.update(from_tivo(fname))
         elif ext in ['.mp4', '.m4v', '.mov']:
-            metadata.update(from_moov(sys.argv[1]))
+            metadata.update(from_moov(fname))
         elif ext in ['.dvr-ms', '.asf', '.wmv']:
-            metadata.update(from_dvrms(sys.argv[1]))
+            metadata.update(from_dvrms(fname))
         for key in metadata:
             value = metadata[key]
             if type(value) == list:
                 for item in value:
-                    print '%s: %s' % (key, item.encode('utf8'))
+                    print '%s: %s' % (key, item.encode('utf-8'))
             else:
                 if key in HUMAN and value in HUMAN[key]:
                     print '%s: %s' % (key, HUMAN[key][value])
                 else:
-                    print '%s: %s' % (key, value.encode('utf8'))
+                    print '%s: %s' % (key, value.encode('utf-8'))
