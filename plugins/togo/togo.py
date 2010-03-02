@@ -26,17 +26,14 @@ CLASS_NAME = 'ToGo'
 MISSING = """<h3>Missing Data</h3> <p>You must set both "tivo_mak" and 
 "togo_path" before using this function.</p>"""
 
-TRANS_INIT = """<h3>Transfer Initiated</h3> <p>Your selected transfer 
-has been initiated.</p>"""
+TRANS_QUEUE = """<h3>Queued for Transfer</h3> <p>%s</p> <p>queued for 
+transfer to:</p> <p>%s</p>"""
 
-TRANS_QUEUE = """<h3>Transfer Queued</h3> <p>Your selected transfer 
-has been queued.</p>"""
+TRANS_STOP = """<h3>Transfer Stopped</h3> <p>Your transfer of:</p> 
+<p>%s</p> <p>has been stopped.</p>"""
 
-TRANS_STOP = """<h3>Transfer Stopped</h3> <p>Your transfer has been 
-stopped.</p>"""
-
-UNQUEUE = """<h3>Removed from Queue</h3> <p>The recording has been 
-removed from the queue.</p>"""
+UNQUEUE = """<h3>Removed from Queue</h3> <p>%s</p> <p>has been removed 
+from the queue.</p>"""
 
 UNABLE = """<h3>Unable to Connect to TiVo</h3> <p>pyTivo was unable to 
 connect to the TiVo at %s.</p> <p>This is most likely caused by an 
@@ -263,24 +260,29 @@ class ToGo(Plugin):
                               'queued': True, 'size': 0, 'finished': False}
             if tivoIP in queue:
                 queue[tivoIP].append(theurl)
-                message = TRANS_QUEUE
             else:
                 queue[tivoIP] = [theurl]
                 thread.start_new_thread(ToGo.process_queue,
                                         (self, tivoIP, tivo_mak, togo_path))
-                message = TRANS_INIT
+            message = TRANS_QUEUE % (unquote(theurl), togo_path)
+            logger.info('[%s] Queued "%s" for transfer to %s' %
+                        (time.strftime('%d/%b/%Y %H:%M:%S'),
+                         unquote(theurl), togo_path))
         else:
             message = MISSING
-        handler.redir(message)
+        handler.redir(message, 5)
 
     def ToGoStop(self, handler, query):
         theurl = query['Url'][0]
         status[theurl]['running'] = False
-        handler.redir(TRANS_STOP)
+        handler.redir(TRANS_STOP % unquote(theurl))
 
     def Unqueue(self, handler, query):
         theurl = query['Url'][0]
         tivoIP = query['TiVo'][0]
         del status[theurl]
         queue[tivoIP].remove(theurl)
-        handler.redir(UNQUEUE)
+        logger.info('[%s] Removed "%s" from queue' %
+                    (time.strftime('%d/%b/%Y %H:%M:%S'),
+                     unquote(theurl)))
+        handler.redir(UNQUEUE % unquote(theurl))
