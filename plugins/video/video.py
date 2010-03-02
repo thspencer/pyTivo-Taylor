@@ -25,7 +25,7 @@ SCRIPTDIR = os.path.dirname(__file__)
 
 CLASS_NAME = 'Video'
 
-PUSHED = '<h3>Queued for Push</h3> <p>%s</p>'
+PUSHED = '<h3>Queued for Push to %s</h3> <p>%s</p>'
 
 # Preload the templates
 def tmpl(name):
@@ -353,6 +353,7 @@ class Video(Plugin):
             if config.tivo_names[key] == tsn:
                 tsn = key
                 break
+        tivo_name = config.tivo_names.get(tsn, tsn)
 
         container = quote(query['Container'][0].split('/')[0])
         ip = config.get_ip()
@@ -397,7 +398,6 @@ class Video(Plugin):
                 source = title
 
             subtitle = file_info['episodeTitle']
-            logger.debug('Pushing ' + url)
             try:
                 m = mind.getMind(tsn)
                 m.pushVideo(
@@ -417,7 +417,11 @@ class Video(Plugin):
                 handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
                 raise
 
-        handler.redir(PUSHED % '<br>'.join(files), 5)
+            logger.info('[%s] Queued "%s" for Push to %s' %
+                        (time.strftime('%d/%b/%Y %H:%M:%S'),
+                         file_path, tivo_name))
+
+        handler.redir(PUSHED % (tivo_name, '<br>'.join(files)), 5)
 
     def readip(self):
         """ returns your external IP address by querying dyndns.org """
