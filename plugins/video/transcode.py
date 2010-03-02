@@ -102,7 +102,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
     ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0, 
                             'last_read': time.time(), 'blocks': []}
     reap_process(inFile)
-    transfer_blocks(inFile, outFile)
+    return transfer_blocks(inFile, outFile)
 
 def is_resumable(inFile, offset):
     if inFile in ffmpeg_procs:
@@ -117,6 +117,8 @@ def is_resumable(inFile, offset):
 def resume_transfer(inFile, outFile, offset):
     proc = ffmpeg_procs[inFile]
     offset -= proc['start']
+    count = 0
+
     try:
         for block in proc['blocks']:
             length = len(block)
@@ -126,19 +128,22 @@ def resume_transfer(inFile, outFile, offset):
                 outFile.write('%x\r\n' % len(block))
                 outFile.write(block)
                 outFile.write('\r\n')
+                count += len(block)
             offset -= length
         outFile.flush()
     except Exception, msg:
         logger.info(msg)
-        return
+        return count
+
     proc['start'] = proc['end']
     proc['blocks'] = []
 
-    transfer_blocks(inFile, outFile)
+    return count + transfer_blocks(inFile, outFile)
 
 def transfer_blocks(inFile, outFile):
     proc = ffmpeg_procs[inFile]
     blocks = proc['blocks']
+    count = 0
 
     while True:
         try:
@@ -169,9 +174,12 @@ def transfer_blocks(inFile, outFile):
             outFile.write('%x\r\n' % len(block))
             outFile.write(block)
             outFile.write('\r\n')
+            count += len(block)
         except Exception, msg:
             logger.info(msg)
             break
+
+    return count
 
 def reap_process(inFile):
     if ffmpeg_procs and inFile in ffmpeg_procs:

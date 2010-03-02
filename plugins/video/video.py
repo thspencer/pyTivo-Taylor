@@ -101,13 +101,17 @@ class Video(Plugin):
 
         logger.info('[%s] Start sending "%s" to %s' %
                     (time.strftime('%d/%b/%Y %H:%M:%S'), fname, tivo_name))
+        start = time.time()
+        count = 0
+
         if valid:
             if compatible:
                 logger.debug('"%s" is tivo compatible' % fname)
                 f = open(fname, 'rb')
                 try:
                     if mime == 'video/mp4':
-                        qtfaststart.fast_start(f, handler.wfile, offset)
+                        count = qtfaststart.fast_start(f, handler.wfile,
+                                                       offset)
                     else:
                         if offset:
                             f.seek(offset)
@@ -116,23 +120,30 @@ class Video(Plugin):
                             if not block:
                                 break
                             handler.wfile.write(block)
+                            count += len(block)
                 except Exception, msg:
                     logger.info(msg)
                 f.close()
             else:
                 logger.debug('"%s" is not tivo compatible' % fname)
                 if offset:
-                    transcode.resume_transfer(path, handler.wfile, offset)
+                    count = transcode.resume_transfer(path, handler.wfile, 
+                                                      offset)
                 else:
-                    transcode.transcode(False, path, handler.wfile, tsn)
+                    count = transcode.transcode(False, path,
+                                                handler.wfile, tsn)
         try:
             if not compatible:
                  handler.wfile.write('0\r\n\r\n')
             handler.wfile.flush()
         except Exception, msg:
             logger.info(msg)
-        logger.info('[%s] Done sending "%s" to %s' %
-                    (time.strftime('%d/%b/%Y %H:%M:%S'), fname, tivo_name))
+
+        elapsed = time.time() - start
+        rate = int(count / elapsed) / 1024
+        logger.info('[%s] Done sending "%s" to %s, %d bytes, %.2f KBps' %
+                    (time.strftime('%d/%b/%Y %H:%M:%S'), fname, 
+                     tivo_name, count, rate))
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']

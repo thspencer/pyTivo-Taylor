@@ -155,8 +155,8 @@ def fast_start(datastream, outfile, offset=0):
             block = datastream.read(CHUNK_SIZE)
             if not block:
                 break
-            outfile.write(block)
-        return
+            output(outfile, 0, block)
+        return count
 
     # Read and fix moov
     datastream.seek(index["moov"][0])
@@ -203,3 +203,5 @@ def fast_start(datastream, outfile, offset=0):
 
         if size % CHUNK_SIZE:
             output(outfile, offset, datastream.read(size % CHUNK_SIZE))
+
+    return count - offset
