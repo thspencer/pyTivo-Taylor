@@ -65,7 +65,9 @@ class ZCBroadcast:
                 tsn = info.properties['TSN']
                 address = inet_ntoa(info.getAddress())
                 config.tivos[tsn] = address
-                config.tivo_names[tsn] = name.replace('.' + VIDS, '')
+                name = name.replace('.' + VIDS, '')
+                self.logger.info(name)
+                config.tivo_names[tsn] = name
 
     def shutdown(self):
         self.logger.info('Unregistering: %s' % ' '.join(self.share_names))
