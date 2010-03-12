@@ -52,6 +52,8 @@ def init(argv):
                     tivo_names[tsn] = config.get(section, 'name')
                 else:
                     tivo_names[tsn] = tsn
+                if config.has_option(section, 'address'):
+                    tivos[tsn] = config.get(section, 'address')
 
 def reset():
     global config
