@@ -156,6 +156,7 @@ class Plugin(object):
                 self.isdir = isdir
                 st = os.stat(unicode(name, 'utf-8'))
                 self.mdate = int(st.st_mtime)
+                self.size = st.st_size
 
         class SortList:
             def __init__(self, files):

@@ -310,6 +310,9 @@ class Video(Plugin):
                     video['valid'] = True
                     video.update(metadata.basic(f.name))
 
+                video['textSize'] = ( '%.3f GB' %
+                    (float(f.size) / (1024 ** 3)) )
+
             videos.append(video)
 
         t = Template(CONTAINER_TEMPLATE, filter=EncodeUnicode)
