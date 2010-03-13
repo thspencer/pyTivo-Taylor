@@ -6,11 +6,14 @@
   <xsl:variable name="tivos" select="Tivos"/>
   <html>
    <head>
+   <title>pyTivo - Push -
+    <xsl:value-of select="Details/Title"/>
+   </title>
    <link rel="stylesheet" type="text/css" href="/main.css"/>
    </head>
    <body>
    <form action="/TiVoConnect" method="POST">
-    <p id="titlep"><span id="title">
+    <p id="titlep"><span id="title">pyTivo - Push -
     <xsl:value-of select="Details/Title"/>
     </span></p>
     <table id="main" style="text-align: left;" border="0" cellpadding="0" 
