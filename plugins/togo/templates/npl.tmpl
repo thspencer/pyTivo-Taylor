@@ -1,18 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-<title>pyTivo - ToGo</title>
-<link rel="stylesheet" type="text/css" href="/main.css">
-</head>
-<body>
-
 #set $tname = $tivoIP
 #for $tsn in $tivos
     #if $tivoIP == $tivos[$tsn]
         #set $tname = $tivo_names[$tsn]
     #end if
 #end for
+<head>
+<title>pyTivo - ToGo - $escape($tname)</title>
+<link rel="stylesheet" type="text/css" href="/main.css">
+</head>
+<body>
+
 <p id="titlep"><span id="title">pyTivo - ToGo - $escape($tname)</span></p>
 <table id="main" border="0" cellpadding="0" cellspacing="4">
     <tr>
