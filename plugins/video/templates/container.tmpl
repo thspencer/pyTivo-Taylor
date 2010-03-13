@@ -38,6 +38,9 @@
                 <Url>/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)</Url>
                 <ContentType>x-tivo-container/folder</ContentType>
             </Content>
+            <Push>
+                <Date>$video.textDate</Date>
+            </Push>
         </Links>
     </Item>
     #else
@@ -79,6 +82,7 @@
             <Push>
                 <Container>$escape($container)</Container>
                 <File>$escape($video.part_path)</File>
+                <Date>$video.textDate</Date>
             </Push>
         </Links>
     </Item>

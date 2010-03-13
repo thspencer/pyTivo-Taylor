@@ -37,6 +37,7 @@
           <td style="white-space: nowrap">
            <xsl:value-of select="Details/TotalItems"/> Items
           </td>
+          <td class="unbreak"><xsl:value-of select="Links/Push/Date"/></td>
         </xsl:when>
         <xsl:otherwise>
           <td>
@@ -62,6 +63,7 @@
            </xsl:if>
           </td>
           <td/>
+          <td class="unbreak"><xsl:value-of select="Links/Push/Date"/></td>
         </xsl:otherwise>
        </xsl:choose>
        </tr>

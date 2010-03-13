@@ -281,13 +281,16 @@ class Video(Plugin):
         videos = []
         local_base_path = self.get_local_base_path(handler, query)
         for f in files:
+            video = VideoDetails()
+            mtime = f.mdate
             try:
-                mtime = datetime.utcfromtimestamp(f.mdate)
+                ltime = time.localtime(mtime)
             except:
                 logger.warning('Bad file time on ' + unicode(f.name, 'utf-8'))
-                mtime = datetime.utcnow()
-            video = VideoDetails()
-            video['captureDate'] = hex(int(time.mktime(mtime.timetuple())))
+                mtime = int(time.time())
+                ltime = time.localtime(mtime)
+            video['captureDate'] = hex(mtime)
+            video['textDate'] = time.strftime('%b %d, %Y', ltime)
             video['name'] = os.path.split(f.name)[1]
             video['path'] = f.name
             video['part_path'] = f.name.replace(local_base_path, '', 1)
