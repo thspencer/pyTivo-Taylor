@@ -25,6 +25,7 @@
        <xsl:choose>
         <xsl:when test="Details/ContentType = 'x-container/folder'">
           <td/>
+          <td><img src="/folder.png" alt="" /></td>
           <td width="100%">
            <a>
             <xsl:attribute name="href">
@@ -45,6 +46,7 @@
             </xsl:attribute>
            </input>
           </td>
+          <td/>
           <td width="100%">
            <b>
            <xsl:value-of select="Details/Title"/>
