@@ -256,20 +256,21 @@ class ToGo(Plugin):
             if togo_path == name:
                 togo_path = data.get('path')
         if tivo_mak and togo_path:
-            theurl = query['Url'][0]
             tivoIP = query['TiVo'][0]
-            status[theurl] = {'running': False, 'error': '', 'rate': '',
-                              'queued': True, 'size': 0, 'finished': False}
-            if tivoIP in queue:
-                queue[tivoIP].append(theurl)
-            else:
-                queue[tivoIP] = [theurl]
-                thread.start_new_thread(ToGo.process_queue,
-                                        (self, tivoIP, tivo_mak, togo_path))
-            message = TRANS_QUEUE % (unquote(theurl), togo_path)
-            logger.info('[%s] Queued "%s" for transfer to %s' %
-                        (time.strftime('%d/%b/%Y %H:%M:%S'),
-                         unquote(theurl), togo_path))
+            for theurl in query['Url']:
+                status[theurl] = {'running': False, 'error': '', 'rate': '',
+                                  'queued': True, 'size': 0, 'finished': False}
+                if tivoIP in queue:
+                    queue[tivoIP].append(theurl)
+                else:
+                    queue[tivoIP] = [theurl]
+                    thread.start_new_thread(ToGo.process_queue,
+                                            (self, tivoIP, tivo_mak, togo_path))
+                logger.info('[%s] Queued "%s" for transfer to %s' %
+                            (time.strftime('%d/%b/%Y %H:%M:%S'),
+                             unquote(theurl), togo_path))
+            urls = '<br>'.join([unquote(x) for x in query['Url']])
+            message = TRANS_QUEUE % (urls, togo_path)
         else:
             message = MISSING
         handler.redir(message, 5)
