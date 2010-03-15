@@ -51,7 +51,7 @@
 			  #else
 			    ## This is a show
 				<td>
-				#if 'Url' in $row and $row['Url'] not in $status and not ('CopyProtected' in $row and $row['CopyProtected'] == 'Yes')
+				#if 'Url' in $row and $row['Url'] not in $status and not ('CopyProtected' in $row and $row['CopyProtected'] == 'Yes') and not ('Icon' in $row and $row['Icon'] == 'urn:tivo:image:in-progress-recording')
 					<input type="checkbox" name="Url" value="$row['Url']"/>
 				#end if
 				</td>
