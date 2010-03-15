@@ -49,7 +49,9 @@
 				<td></td>
 			  #else
 			    ## This is a show
-				#if 'Icon' in $row
+				#if 'CopyProtected' in $row and $row['CopyProtected'] == 'Yes'
+					<td><img src="/nocopy.png" alt=""></td>
+				#elif 'Icon' in $row
 				    <!-- Display icons similar to TiVo colored circles -->
 					#if $row['Icon'] == 'urn:tivo:image:expires-soon-recording'
 						<td><img src="/soon.png" alt=""></td>
