@@ -85,16 +85,10 @@
                                         #end if
                                         #if 'displayMajorNumber' in $row and 'callsign' in $row
 					$row['displayMajorNumber'] $row['callsign']
-                                        #end if
-                                        </small>
-				</td>
-				<td class="unbreak">$row['SourceSize'] <br>
-				$row['Duration']
-				</td>
-				<td class="unbreak">$row['CaptureDate']</td>
-				#if 'Url' in $row
-					<td class="unbreak">
-					#if $row['Url'] in $status
+					#end if
+					</small>
+					#if 'Url' in $row and row['Url'] in $status
+						<p>
 						#set $this_status = $status[$row['Url']]
 						#if $this_status['running'] and $this_status['rate'] != ""
                                                         #set $gb = '%.3f GB' % (float($this_status['size']) / (1024 ** 3))
@@ -112,12 +106,13 @@
                                                         Queued: $queue.index($row['Url'])<br>
 							<a href="/TiVoConnect?Command=Unqueue&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Unqueue</a>
 						#end if
+						</p>
 					#end if
-					</td>
-				#else
-				    ## No URL was in links url in XML
-					<td></td>
-				#end if
+				</td>
+				<td class="unbreak">$row['SourceSize'] <br>
+				$row['Duration']
+				</td>
+				<td class="unbreak">$row['CaptureDate']</td>
 			  #end if
 			  </tr>
 		  #end for
