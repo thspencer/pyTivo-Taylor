@@ -169,6 +169,7 @@ class ToGo(Plugin):
         t.shows_per_page = shows_per_page
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html; charset=utf-8')
+        handler.send_header('Refresh', '300')
         handler.send_header('Expires', '0')
         handler.end_headers()
         handler.wfile.write(t)
