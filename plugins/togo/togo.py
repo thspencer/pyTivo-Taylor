@@ -110,9 +110,11 @@ class ToGo(Plugin):
                 if entry['ContentType'] == 'x-tivo-container/folder':
                     entry['Title'] = tag_data(item, 'Title')
                     entry['TotalItems'] = tag_data(item, 'TotalItems')
-                    lc = int(tag_data(item, 'LastChangeDate'), 16)
+                    lc = tag_data(item, 'LastCaptureDate')
+                    if not lc:
+                        lc = tag_data(item, 'LastChangeDate')
                     entry['LastChangeDate'] = time.strftime('%b %d, %Y',
-                                                            time.localtime(lc))
+                        time.localtime(int(lc, 16)))
                 else:
                     entry.update(from_container(item))
                     keys = {'Icon': 'Links/CustomIcon/Url',
