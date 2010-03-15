@@ -14,6 +14,18 @@ tr.row1 {
     background-color: rgb(240, 240, 240)
 }
 
+.transferring {
+    background-color: rgb(127, 255, 127)
+}
+
+.queued {
+    background-color: rgb(255, 255, 127)
+}
+
+.failed {
+    background-color: rgb(255, 127, 127)
+}
+
 #main {
     border: 1px solid rgb(220, 220, 220);
     background-color: rgb(255, 255, 255)

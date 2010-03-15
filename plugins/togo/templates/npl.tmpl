@@ -39,7 +39,7 @@
 		  #for $row in $data
 			  #set $i += 1
                           #set $j = $i%2
-                          <tr class="row$(j)">
+			  <tr class="row$(j)">
 			  #if $row['ContentType'] == 'x-tivo-container/folder'
 			    ## This is a folder
 				<td></td>
@@ -88,25 +88,33 @@
 					#end if
 					</small>
 					#if 'Url' in $row and row['Url'] in $status
-						<p>
 						#set $this_status = $status[$row['Url']]
 						#if $this_status['running'] and $this_status['rate'] != ""
+							<div class="transferring">
                                                         #set $gb = '%.3f GB' % (float($this_status['size']) / (1024 ** 3))
 							Transfering - $this_status['rate'] KB/s<br>$gb
 							<a href="/TiVoConnect?Command=ToGoStop&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])">Stop Transfer</a>
+							</div>
 						#elif $this_status['running'] and $this_status['rate'] == ""
+							<div class="transferring">
 							Initiating Transfer<br>
 							Please Wait
+							</div>
 						#elif $this_status['error']
+							<div class="error">
 							Error - $this_status['error']<br>
 							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Try Transfer Again</a>
+							</div>
 						#elif $this_status['finished']
+							<div>
 							Transfer Complete
+							</div>
                                                 #elif $this_status['queued']
+							<div class="queued">
                                                         Queued: $queue.index($row['Url'])<br>
 							<a href="/TiVoConnect?Command=Unqueue&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Unqueue</a>
+							</div>
 						#end if
-						</p>
 					#end if
 				</td>
 				<td class="unbreak">$row['SourceSize'] <br>
