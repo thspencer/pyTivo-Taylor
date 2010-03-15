@@ -235,12 +235,13 @@ class ToGo(Plugin):
             logger.info('[%s] Done getting "%s" from %s, %d bytes, %.2f KBps' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name, size, rate))
+            status[url]['running'] = False
         else:
             os.remove(outfile)
             logger.info('[%s] Transfer of "%s" from %s aborted' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name))
-        status[url]['running'] = False
+            del status[url]
 
     def process_queue(self, tivoIP, mak, togo_path):
         while queue[tivoIP]:

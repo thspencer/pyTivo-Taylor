@@ -51,7 +51,7 @@
 			  #else
 			    ## This is a show
 				<td>
-				#if 'Url' in $row and $row['Url'] not in $status
+				#if 'Url' in $row and $row['Url'] not in $status and not ('CopyProtected' in $row and $row['CopyProtected'] == 'Yes')
 					<input type="checkbox" name="Url" value="$row['Url']"/>
 				#end if
 				</td>
@@ -92,9 +92,7 @@
 				$row['Duration']
 				</td>
 				<td class="unbreak">$row['CaptureDate']</td>
-				#if 'CopyProtected' in $row and $row['CopyProtected'] == 'Yes'
-					<td class="unbreak">Copy&nbsp;Protected</td>
-				#else if 'Url' in $row
+				#if 'Url' in $row
 					<td class="unbreak">
 					#if $row['Url'] in $status
 						#set $this_status = $status[$row['Url']]
@@ -113,12 +111,7 @@
                                                 #elif $this_status['queued']
                                                         Queued: $queue.index($row['Url'])<br>
 							<a href="/TiVoConnect?Command=Unqueue&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Unqueue</a>
-						#else
-							Transfer Stopped<br>
-							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Try Transfer Again</a>
 						#end if
-					#else
-						<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Transfer This</a>
 					#end if
 					</td>
 				#else
