@@ -12,10 +12,11 @@ from xml.sax.saxutils import escape
 from Cheetah.Template import Template
 
 import config
-from metadata import tag_data, from_container
+import metadata
 from plugin import EncodeUnicode, Plugin
 
 logger = logging.getLogger('pyTivo.togo')
+tag_data = metadata.tag_data
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -115,7 +116,7 @@ class ToGo(Plugin):
                     entry['LastChangeDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(lc, 16)))
                 else:
-                    basic_data = from_container(item)
+                    basic_data = metadata.from_container(item)
                     entry.update(basic_data)
                     keys = {'Icon': 'Links/CustomIcon/Url',
                             'Url': 'Links/Content/Url',
@@ -187,7 +188,9 @@ class ToGo(Plugin):
         outfile = os.path.join(togo_path, "".join(name))
 
         if status[url]['save']:
-            print basic_meta[url]
+            metafile = open(outfile + '.txt', 'w')
+            metadata.dump(metafile, basic_meta[url])
+            metafile.close()
 
         r = urllib2.Request(url)
         auth_handler = urllib2.HTTPDigestAuthHandler()
@@ -243,6 +246,8 @@ class ToGo(Plugin):
             status[url]['running'] = False
         else:
             os.remove(outfile)
+            if status[url]['save']:
+                os.remove(outfile + '.txt')
             logger.info('[%s] Transfer of "%s" from %s aborted' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name))
