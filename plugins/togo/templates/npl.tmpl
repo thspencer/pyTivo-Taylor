@@ -52,7 +52,7 @@
 			    ## This is a show
 				<td>
 				#if 'Url' in $row and $row['Url'] not in $status and not ('CopyProtected' in $row and $row['CopyProtected'] == 'Yes') and not ('Icon' in $row and $row['Icon'] == 'urn:tivo:image:in-progress-recording')
-					<input type="checkbox" name="Url" value="$row['Url']"/>
+					<input type="checkbox" name="Url" value="$escape($row['Url'])">
 				#end if
 				</td>
 				#if 'CopyProtected' in $row and $row['CopyProtected'] == 'Yes'
@@ -134,10 +134,16 @@
     </tr>
 </table>
 <p>
- <input type="hidden" name="Command" value="ToGo"/>
- <input type="hidden" name="Container" value="$container"/>
- <input type="hidden" name="TiVo" value="$tivoIP"/>
- <input value="Transfer Selected" type="submit"/>
+ <input type="hidden" name="Command" value="ToGo">
+ <input type="hidden" name="Container" value="$container">
+ <input type="hidden" name="TiVo" value="$tivoIP">
+#if $has_tivodecode
+ <input type="checkbox" name="decode">Decrypt with tivodecode<br>
+#end if
+ <input type="checkbox" name="save">Save metadata to .txt<br>
+</p>
+<p>
+ <input value="Transfer Selected" type="submit">
 </p>
 </form>
 </body>

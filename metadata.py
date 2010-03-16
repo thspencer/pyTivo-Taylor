@@ -393,6 +393,18 @@ def force_utf8(text):
                 text = text.decode('iso8859-1')
     return text.encode('utf-8')
 
+def dump(output, metadata):
+    for key in metadata:
+        value = metadata[key]
+        if type(value) == list:
+            for item in value:
+                output.write('%s: %s\n' % (key, item.encode('utf-8')))
+        else:
+            if key in HUMAN and value in HUMAN[key]:
+                output.write('%s: %s\n' % (key, HUMAN[key][value]))
+            else:
+                output.write('%s: %s\n' % (key, value.encode('utf-8')))
+
 if __name__ == '__main__':        
     if len(sys.argv) > 1:
         metadata = {}
@@ -405,13 +417,4 @@ if __name__ == '__main__':
             metadata.update(from_moov(fname))
         elif ext in ['.dvr-ms', '.asf', '.wmv']:
             metadata.update(from_dvrms(fname))
-        for key in metadata:
-            value = metadata[key]
-            if type(value) == list:
-                for item in value:
-                    print '%s: %s' % (key, item.encode('utf-8'))
-            else:
-                if key in HUMAN and value in HUMAN[key]:
-                    print '%s: %s' % (key, HUMAN[key][value])
-                else:
-                    print '%s: %s' % (key, value.encode('utf-8'))
+        dump(sys.stdout, metadata)

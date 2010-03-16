@@ -47,19 +47,18 @@ NPL_TEMPLATE = file(tnname, 'rb').read()
 status = {} # Global variable to control download threads
 tivo_cache = {} # Cache of TiVo NPL
 queue = {} # Recordings to download -- list per TiVo
+basic_meta = {} # Data from NPL, parsed, indexed by progam URL
 
 class ToGo(Plugin):
     CONTENT_TYPE = 'text/html'
 
     def NPL(self, handler, query):
+        global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
         cname = query['Container'][0].split('/')[0]
         folder = ''
         tivo_mak = config.get_server('tivo_mak')
-        togo_path = config.get_server('togo_path')
-        for name, data in config.getShares():
-            if togo_path == name:
-                togo_path = data.get('path')
+        has_tivodecode = bool(config.get_bin('tivodecode'))
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
@@ -116,7 +115,8 @@ class ToGo(Plugin):
                     entry['LastChangeDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(lc, 16)))
                 else:
-                    entry.update(from_container(item))
+                    basic_data = from_container(item)
+                    entry.update(basic_data)
                     keys = {'Icon': 'Links/CustomIcon/Url',
                             'Url': 'Links/Content/Url',
                             'SourceSize': 'Details/SourceSize',
@@ -137,6 +137,8 @@ class ToGo(Plugin):
                     entry['CaptureDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(entry['CaptureDate'], 16)))
 
+                    basic_meta[entry['Url']] = basic_data
+
                 data.append(entry)
         else:
             data = []
@@ -154,8 +156,7 @@ class ToGo(Plugin):
         t.status = status
         if tivoIP in queue:
             t.queue = queue[tivoIP]
-        t.tivo_mak = tivo_mak
-        t.togo_path = togo_path
+        t.has_tivodecode = has_tivodecode
         t.tivos = config.tivos
         t.tivo_names = config.tivo_names
         t.tivoIP = tivoIP
@@ -184,6 +185,9 @@ class ToGo(Plugin):
         name = unquote(parse_url[2])[10:].split('.')
         name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
         outfile = os.path.join(togo_path, "".join(name))
+
+        if status[url]['save']:
+            print basic_meta[url]
 
         r = urllib2.Request(url)
         auth_handler = urllib2.HTTPDigestAuthHandler()
@@ -259,9 +263,13 @@ class ToGo(Plugin):
                 togo_path = data.get('path')
         if tivo_mak and togo_path:
             tivoIP = query['TiVo'][0]
-            for theurl in query['Url']:
+            urls = query.get('Url', [])
+            decode = 'decode' in query
+            save = 'save' in query
+            for theurl in urls:
                 status[theurl] = {'running': False, 'error': '', 'rate': '',
-                                  'queued': True, 'size': 0, 'finished': False}
+                                  'queued': True, 'size': 0, 'finished': False,
+                                  'decode': decode, 'save': save}
                 if tivoIP in queue:
                     queue[tivoIP].append(theurl)
                 else:
@@ -271,8 +279,8 @@ class ToGo(Plugin):
                 logger.info('[%s] Queued "%s" for transfer to %s' %
                             (time.strftime('%d/%b/%Y %H:%M:%S'),
                              unquote(theurl), togo_path))
-            urls = '<br>'.join([unquote(x) for x in query['Url']])
-            message = TRANS_QUEUE % (urls, togo_path)
+            urlstring = '<br>'.join([unquote(x) for x in urls])
+            message = TRANS_QUEUE % (urlstring, togo_path)
         else:
             message = MISSING
         handler.redir(message, 5)
