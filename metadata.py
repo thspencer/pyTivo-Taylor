@@ -312,9 +312,10 @@ def from_container(xmldoc):
 
     return metadata
 
-def from_details(xmldoc):
+def from_details(xml):
     metadata = {}
 
+    xmldoc = minidom.parse(xml)
     showing = xmldoc.getElementsByTagName('showing')[0]
     program = showing.getElementsByTagName('program')[0]
 
@@ -374,8 +375,7 @@ def from_tivo(full_path):
             fname = fname.encode('iso8859-1')
         tcmd = [tdcat_path, '-m', tivo_mak, '-2', fname]
         tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
-        xmldoc = minidom.parse(tdcat.stdout)
-        metadata = from_details(xmldoc)
+        metadata = from_details(tdcat.stdout)
         tivo_cache[full_path] = metadata
     else:
         metadata = {}

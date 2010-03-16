@@ -184,21 +184,32 @@ class ToGo(Plugin):
         parse_url = urlparse.urlparse(url)
 
         name = unquote(parse_url[2])[10:].split('.')
-        name.insert(-1," - " + unquote(parse_url[4]).split("id=")[1] + ".")
-        outfile = os.path.join(togo_path, "".join(name))
+        id = unquote(parse_url[4]).split('id=')[1]
+        name.insert(-1, ' - ' + id + '.')
+        outfile = os.path.join(togo_path, ''.join(name))
 
-        if status[url]['save']:
-            metafile = open(outfile + '.txt', 'w')
-            metadata.dump(metafile, basic_meta[url])
-            metafile.close()
-
-        r = urllib2.Request(url)
         auth_handler = urllib2.HTTPDigestAuthHandler()
+        auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', mak)
         auth_handler.add_password('TiVo DVR', parse_url[1], 'tivo', mak)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
                                       auth_handler)
         urllib2.install_opener(opener)
 
+        if status[url]['save']:
+            meta = basic_meta[url]
+            details_url = 'https://%s/TiVoVideoDetails?id=%s' % (tivoIP, id)
+            r = urllib2.Request(details_url)
+            try:
+                handle = urllib2.urlopen(r)
+                meta.update(metadata.from_details(handle))
+                handle.close()
+            except:
+                pass
+            metafile = open(outfile + '.txt', 'w')
+            metadata.dump(metafile, meta)
+            metafile.close()
+
+        r = urllib2.Request(url)
         try:
             handle = urllib2.urlopen(r)
         except IOError, e:
