@@ -1,6 +1,7 @@
 import cookielib
 import logging
 import os
+import subprocess
 import thread
 import time
 import urllib2
@@ -186,6 +187,8 @@ class ToGo(Plugin):
         name = unquote(parse_url[2])[10:].split('.')
         id = unquote(parse_url[4]).split('id=')[1]
         name.insert(-1, ' - ' + id + '.')
+        if status[url]['decode']:
+            name[-1] = 'mpg'
         outfile = os.path.join(togo_path, ''.join(name))
 
         auth_handler = urllib2.HTTPDigestAuthHandler()
@@ -223,7 +226,15 @@ class ToGo(Plugin):
 
         logger.info('[%s] Start getting "%s" from %s' %
                     (time.strftime('%d/%b/%Y %H:%M:%S'), outfile, tivo_name))
-        f = open(outfile, 'wb')
+
+        if status[url]['decode']:
+            tivodecode_path = config.get_bin('tivodecode')
+            tcmd = [tivodecode_path, '-m', mak, '-o', outfile, '-']
+            tivodecode = subprocess.Popen(tcmd, stdin=subprocess.PIPE,
+                                          bufsize=(512 * 1024))
+            f = tivodecode.stdin
+        else:
+            f = open(outfile, 'wb')
         length = 0
         start_time = time.time()
         last_interval = start_time
