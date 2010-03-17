@@ -258,6 +258,7 @@ class ToGo(Plugin):
             logger.info(msg)
         handle.close()
         f.close()
+        status[url]['size'] += length
         if status[url]['running']:
             elapsed = now - start_time
             size = status[url]['size']
