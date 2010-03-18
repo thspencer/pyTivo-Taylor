@@ -117,8 +117,6 @@ class ToGo(Plugin):
                     entry['LastChangeDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(lc, 16)))
                 else:
-                    basic_data = metadata.from_container(item)
-                    entry.update(basic_data)
                     keys = {'Icon': 'Links/CustomIcon/Url',
                             'Url': 'Links/Content/Url',
                             'SourceSize': 'Details/SourceSize',
@@ -139,7 +137,13 @@ class ToGo(Plugin):
                     entry['CaptureDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(entry['CaptureDate'], 16)))
 
-                    basic_meta[entry['Url']] = basic_data
+                    url = entry['Url']
+                    if url in basic_meta:
+                        entry.update(basic_meta[url])
+                    else:
+                        basic_data = metadata.from_container(item)
+                        entry.update(basic_data)
+                        basic_meta[url] = basic_data
 
                 data.append(entry)
         else:
