@@ -51,6 +51,11 @@ tivo_cache = {} # Cache of TiVo NPL
 queue = {} # Recordings to download -- list per TiVo
 basic_meta = {} # Data from NPL, parsed, indexed by progam URL
 
+auth_handler = urllib2.HTTPDigestAuthHandler()
+cj = cookielib.LWPCookieJar()
+tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), 
+                                   auth_handler)
+
 class ToGo(Plugin):
     CONTENT_TYPE = 'text/html'
 
@@ -75,17 +80,12 @@ class ToGo(Plugin):
             if 'AnchorOffset' in query:
                 theurl += '&AnchorOffset=' + query['AnchorOffset'][0]
 
-            r = urllib2.Request(theurl)
-            auth_handler = urllib2.HTTPDigestAuthHandler()
-            auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', tivo_mak)
-            opener = urllib2.build_opener(auth_handler)
-            urllib2.install_opener(opener)
-
             if (theurl not in tivo_cache or
                 (time.time() - tivo_cache[theurl]['thepage_time']) >= 60):
                 # if page is not cached or old then retreive it
+                auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', tivo_mak)
                 try:
-                    page = urllib2.urlopen(r)
+                    page = tivo_opener.open(theurl)
                 except IOError, e:
                     handler.redir(UNABLE % tivoIP, 10)
                     return
@@ -180,7 +180,6 @@ class ToGo(Plugin):
     def get_tivo_file(self, tivoIP, url, mak, togo_path):
         # global status
         status[url].update({'running': True, 'queued': False})
-        cj = cookielib.LWPCookieJar()
 
         parse_url = urlparse.urlparse(url)
 
@@ -191,19 +190,11 @@ class ToGo(Plugin):
             name[-1] = 'mpg'
         outfile = os.path.join(togo_path, ''.join(name))
 
-        auth_handler = urllib2.HTTPDigestAuthHandler()
-        auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', mak)
-        auth_handler.add_password('TiVo DVR', parse_url[1], 'tivo', mak)
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
-                                      auth_handler)
-        urllib2.install_opener(opener)
-
         if status[url]['save']:
             meta = basic_meta[url]
             details_url = 'https://%s/TiVoVideoDetails?id=%s' % (tivoIP, id)
-            r = urllib2.Request(details_url)
             try:
-                handle = urllib2.urlopen(r)
+                handle = tivo_opener.open(details_url)
                 meta.update(metadata.from_details(handle))
                 handle.close()
             except:
@@ -212,9 +203,9 @@ class ToGo(Plugin):
             metadata.dump(metafile, meta)
             metafile.close()
 
-        r = urllib2.Request(url)
+        auth_handler.add_password('TiVo DVR', parse_url[1], 'tivo', mak)
         try:
-            handle = urllib2.urlopen(r)
+            handle = tivo_opener.open(url)
         except IOError, e:
             status[url]['running'] = False
             status[url]['error'] = e.code
