@@ -69,6 +69,9 @@ class ToGo(Plugin):
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
+            tivos_by_ip = dict([(value, key)
+                                for key, value in config.tivos.items()])
+            tivo_name = config.tivo_names[tivos_by_ip[tivoIP]]
             theurl = ('https://' + tivoIP +
                       '/TiVoConnect?Command=QueryContainer&ItemCount=' +
                       str(shows_per_page) + '&Container=/NowPlaying')
@@ -163,8 +166,7 @@ class ToGo(Plugin):
         if tivoIP in queue:
             t.queue = queue[tivoIP]
         t.has_tivodecode = has_tivodecode
-        t.tivos = config.tivos
-        t.tivo_names = config.tivo_names
+        t.tname = tivo_name
         t.tivoIP = tivoIP
         t.container = cname
         t.data = data

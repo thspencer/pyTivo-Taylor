@@ -1,12 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-#set $tname = $tivoIP
-#for $tsn in $tivos
-    #if $tivoIP == $tivos[$tsn]
-        #set $tname = $tivo_names[$tsn]
-    #end if
-#end for
 <head>
 <title>pyTivo - ToGo - $escape($tname)</title>
 <link rel="stylesheet" type="text/css" href="/main.css">
@@ -55,25 +49,22 @@
 					<input type="checkbox" name="Url" value="$escape($row['Url'])">
 				#end if
 				</td>
+				<td>
 				#if 'CopyProtected' in $row and $row['CopyProtected'] == 'Yes'
-					<td><img src="/nocopy.png" alt=""></td>
+					<img src="/nocopy.png" alt="">
 				#elif 'Icon' in $row
 				    <!-- Display icons similar to TiVo colored circles -->
 					#if $row['Icon'] == 'urn:tivo:image:expires-soon-recording'
-						<td><img src="/soon.png" alt=""></td>
+						<img src="/soon.png" alt="">
 					#else if $row['Icon'] == 'urn:tivo:image:expired-recording'
-						<td><img src="/expired.png" alt=""></td>
+						<img src="/expired.png" alt="">
 					#else if $row['Icon'] == 'urn:tivo:image:save-until-i-delete-recording'
-						<td><img src="/kuid.png" alt=""></td>
+						<img src="/kuid.png" alt="">
 					#else if $row['Icon'] == 'urn:tivo:image:in-progress-recording'
-						<td><img src="/recording.png" alt=""></td>
-					#else
-						<td></td>
+						<img src="/recording.png" alt="">
 					#end if
-				#else
-				    ## No Icon listed in XML sheet
-					<td></td>
 				#end if
+				</td>
 				<td>
                                         #if 'episodeTitle' in $row
 					<b>$escape($row['title']): $escape($row['episodeTitle'])</b><br>
