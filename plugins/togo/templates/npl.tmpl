@@ -92,7 +92,7 @@
 						#if $this_status['running'] and $this_status['rate'] != ""
 							<div class="transferring">
                                                         #set $gb = '%.3f GB' % (float($this_status['size']) / (1024 ** 3))
-							Transfering - $this_status['rate'] KB/s<br>$gb
+							Transfering - $this_status['rate']<br>$gb
 							<a href="/TiVoConnect?Command=ToGoStop&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])">Stop Transfer</a>
 							</div>
 						#elif $this_status['running'] and $this_status['rate'] == ""

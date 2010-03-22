@@ -243,7 +243,8 @@ class ToGo(Plugin):
                 now = time.time()
                 elapsed = now - last_interval
                 if elapsed >= 5:
-                    status[url]['rate'] = int(length / elapsed) / 1024
+                    status[url]['rate'] = '%.2f Mb/s' % (length * 8.0 / 
+                        (elapsed * 1024 * 1024))
                     status[url]['size'] += length
                     length = 0
                     last_interval = now
@@ -257,8 +258,8 @@ class ToGo(Plugin):
         if status[url]['running']:
             elapsed = now - start_time
             size = status[url]['size']
-            rate = int(size / elapsed) / 1024
-            logger.info('[%s] Done getting "%s" from %s, %d bytes, %.2f KBps' %
+            rate = size * 8.0 / (elapsed * 1024 * 1024)
+            logger.info('[%s] Done getting "%s" from %s, %d bytes, %.2f Mb/s' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name, size, rate))
             status[url]['running'] = False
