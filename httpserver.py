@@ -292,7 +292,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         url = self.headers.getheader('Referer')
         if url:
             message += RELOAD % (escape(url), seconds)
-        text = BASE_HTML % message
+        text = (BASE_HTML % message).encode('utf-8')
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.send_header('Content-Length', len(text))

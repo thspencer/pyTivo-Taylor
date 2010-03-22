@@ -425,8 +425,9 @@ class Video(Plugin):
 
             logger.info('[%s] Queued "%s" for Push to %s' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'),
-                         file_path, tivo_name))
+                         unicode(file_path, 'utf-8'), tivo_name))
 
+        files = [unicode(f, 'utf-8') for f in files]
         handler.redir(PUSHED % (tivo_name, '<br>'.join(files)), 5)
 
     def readip(self):
