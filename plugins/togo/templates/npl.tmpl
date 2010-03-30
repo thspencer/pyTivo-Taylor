@@ -45,7 +45,7 @@
 			  #else
 			    ## This is a show
 				<td>
-				#if 'Url' in $row and $row['Url'] not in $status and not ('CopyProtected' in $row and $row['CopyProtected'] == 'Yes') and not ('Icon' in $row and $row['Icon'] == 'urn:tivo:image:in-progress-recording')
+				#if 'Url' in $row and not ($row['Url'] in $status and ($status[$row['Url']]['running'] or $status[$row['Url']]['queued'])) and not ('CopyProtected' in $row and $row['CopyProtected'] == 'Yes') and not ('Icon' in $row and $row['Icon'] == 'urn:tivo:image:in-progress-recording')
 					<input type="checkbox" name="Url" value="$escape($row['Url'])">
 				#end if
 				</td>
@@ -94,7 +94,6 @@
 						#elif $this_status['error']
 							<div class="failed">
 							Error - $this_status['error']<br>
-							<a href="/TiVoConnect?Command=ToGo&amp;Container=$quote($container)&amp;Url=$quote($row['Url'])&amp;TiVo=$tivoIP">Try Transfer Again</a>
 							</div>
 						#elif $this_status['finished']
 							<div>
