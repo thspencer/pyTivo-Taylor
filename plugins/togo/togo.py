@@ -292,6 +292,7 @@ class ToGo(Plugin):
 
     def process_queue(self, tivoIP, mak, togo_path):
         while queue[tivoIP]:
+            time.sleep(5)
             url = queue[tivoIP][0]
             self.get_tivo_file(tivoIP, url, mak, togo_path)
             queue[tivoIP].pop(0)
