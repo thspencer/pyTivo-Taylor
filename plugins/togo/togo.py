@@ -59,6 +59,22 @@ tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj),
 class ToGo(Plugin):
     CONTENT_TYPE = 'text/html'
 
+    def tivo_open(self, url):
+        # Loop just in case we get a server busy message
+        while True:
+            try:
+                # Open the URL using our authentication/cookie opener
+                return tivo_opener.open(url)
+
+            # Do a retry if the TiVo responds that the server is busy
+            except urllib2.HTTPError, e:
+                if e.code == 503:
+                    time.sleep(5)
+                    continue
+
+                # Throw the error otherwise
+                raise
+
     def NPL(self, handler, query):
         global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
@@ -88,7 +104,7 @@ class ToGo(Plugin):
                 # if page is not cached or old then retreive it
                 auth_handler.add_password('TiVo DVR', tivoIP, 'tivo', tivo_mak)
                 try:
-                    page = tivo_opener.open(theurl)
+                    page = self.tivo_open(theurl)
                 except IOError, e:
                     handler.redir(UNABLE % tivoIP, 10)
                     return
@@ -200,7 +216,7 @@ class ToGo(Plugin):
             meta = basic_meta[url]
             details_url = 'https://%s/TiVoVideoDetails?id=%s' % (tivoIP, id)
             try:
-                handle = tivo_opener.open(details_url)
+                handle = self.tivo_open(details_url)
                 meta.update(metadata.from_details(handle))
                 handle.close()
             except:
@@ -211,7 +227,7 @@ class ToGo(Plugin):
 
         auth_handler.add_password('TiVo DVR', parse_url[1], 'tivo', mak)
         try:
-            handle = tivo_opener.open(url)
+            handle = self.tivo_open(url)
         except IOError, e:
             status[url]['running'] = False
             status[url]['error'] = e.code
