@@ -41,6 +41,8 @@ HUMAN = {'mpaaRating': {'G1': 'G', 'P2': 'PG', 'P3': 'PG-13', 'R4': 'R',
          'starRating': {'x1': '1', 'x2': '1.5', 'x3': '2', 'x4': '2.5',
                         'x5': '3', 'x6': '3.5', 'x7': '4'}}
 
+BOM = '\xef\xbb\xbf'
+
 tivo_cache = LRUCache(50)
 mp4_cache = LRUCache(50)
 dvrms_cache = LRUCache(50)
@@ -245,6 +247,8 @@ def from_text(full_path):
         if os.path.exists(metafile):
             sep = ':='[metafile.endswith('.properties')]
             for line in file(metafile, 'U'):
+                if line.startswith(BOM):
+                    line = line[3:]
                 if line.strip().startswith('#') or not sep in line:
                     continue
                 key, value = [x.strip() for x in line.split(sep, 1)]
