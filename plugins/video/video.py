@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from xml.sax.saxutils import escape
 
 from Cheetah.Template import Template
+from lrucache import LRUCache
 
 import config
 import metadata
@@ -44,6 +45,8 @@ except:
 class Video(Plugin):
 
     CONTENT_TYPE = 'x-container/tivo-videos'
+
+    tvbus_cache = LRUCache(1)
 
     def pre_cache(self, full_path):
         if Video.video_file_filter(self, full_path):
@@ -333,25 +336,37 @@ class Video(Plugin):
         handler.end_headers()
         handler.wfile.write(t)
 
+    def get_details_xml(self, tsn, file_path):
+        if (tsn, file_path) in self.tvbus_cache:
+            details = self.tvbus_cache[(tsn, file_path)]
+        else:
+            file_info = VideoDetails()
+            file_info['valid'] = transcode.supported_format(file_path)
+            if file_info['valid']:
+                file_info.update(self.metadata_full(file_path, tsn))
+
+            t = Template(TVBUS_TEMPLATE, filter=EncodeUnicode)
+            t.video = file_info
+            t.escape = escape
+            details = str(t)
+            self.tvbus_cache[(tsn, file_path)] = details
+        return details
+
     def TVBusQuery(self, handler, query):
         tsn = handler.headers.getheader('tsn', '')
         f = query['File'][0]
         path = self.get_local_path(handler, query)
         file_path = path + os.path.normpath(f)
 
-        file_info = VideoDetails()
-        file_info['valid'] = transcode.supported_format(file_path)
-        if file_info['valid']:
-            file_info.update(self.metadata_full(file_path, tsn))
+        details = self.get_details_xml(tsn, file_path)
 
-        t = Template(TVBUS_TEMPLATE, filter=EncodeUnicode)
-        t.video = file_info
-        t.escape = escape
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/xml')
+        handler.send_header('Content-Length', len(details))
+        handler.send_header('Connection', 'close')
         handler.send_header('Expires', '0')
         handler.end_headers()
-        handler.wfile.write(t)
+        handler.wfile.write(details)
 
     def Push(self, handler, query):
         tsn = query['tsn'][0]
