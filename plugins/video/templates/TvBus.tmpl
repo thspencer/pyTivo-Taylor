@@ -78,6 +78,9 @@
             #end for
         </vSeriesGenre>
         <seriesTitle>$escape($video.seriesTitle)</seriesTitle>
+        #if $video.seriesId
+        <uniqueId>$video.seriesId</uniqueId>
+        #end if
       </series>
       <showType value="$video.showType[1]">$video.showType[0]</showType>
       #if $video.starRating
