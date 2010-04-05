@@ -2,6 +2,7 @@ import cgi
 import logging
 import os
 import re
+import struct
 import time
 import traceback
 import urllib
@@ -351,6 +352,19 @@ class Video(Plugin):
             details = str(t)
             self.tvbus_cache[(tsn, file_path)] = details
         return details
+
+    def tivo_header(self, tsn, path, flag=13):
+        details = self.get_details_xml(tsn, path)
+        ld = len(details)
+        chunklen = ld * 2 + 44
+        padding = 2048 - chunklen % 1024
+
+        return ''.join(['TiVo', struct.pack('>HHHLH', 4, flag, 0, 
+                                            padding + chunklen, 2),
+                        struct.pack('>LLHH', ld + 16, ld, 1, 0),
+                        details, '\0' * 4,
+                        struct.pack('>LLHH', ld + 19, ld, 2, 0),
+                        details, '\0' * padding])
 
     def TVBusQuery(self, handler, query):
         tsn = handler.headers.getheader('tsn', '')
