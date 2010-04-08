@@ -36,12 +36,19 @@ def tmpl(name):
 CONTAINER_TEMPLATE = tmpl('container.tmpl')
 TVBUS_TEMPLATE = tmpl('TvBus.tmpl')
 
-extfile = os.path.join(SCRIPTDIR, 'video.ext')
+EXTENSIONS = """.tivo .mpg .avi .wmv .mov .flv .vob .mp4 .m4v .mkv .ts 
+.tp .trp .3g2 .3gp .3gp2 .3gpp .amv .asf .avs .bik .bix .box .bsf .dat 
+.dif .divx .dmb .dpg .dv .dvr-ms .evo .eye .flc .fli .flx .gvi .ivf .m1v 
+.m21 .m2t .m2ts .m2v .m2p .m4e .mjp .mjpeg .mod .moov .movie .mp21 .mpe 
+.mpeg .mpv .mpv2 .mqv .mts .mvb .nsv .nuv .nut .ogm .qt .rm .rmvb .rts 
+.scm .smv .ssm .svi .vdo .vfw .vid .viv .vivo .vp6 .vp7 .vro .wm .wmd 
+.yuv""".split()
+
+use_extensions = True
 try:
     assert(config.get_bin('ffmpeg'))
-    extensions = file(extfile).read().split()
 except:
-    extensions = None
+    use_extensions = False
 
 class Video(Plugin):
 
@@ -56,8 +63,8 @@ class Video(Plugin):
     def video_file_filter(self, full_path, type=None):
         if os.path.isdir(unicode(full_path, 'utf-8')):
             return True
-        if extensions:
-            return os.path.splitext(full_path)[1].lower() in extensions
+        if use_extensions:
+            return os.path.splitext(full_path)[1].lower() in EXTENSIONS
         else:
             return transcode.supported_format(full_path)
 
@@ -163,8 +170,8 @@ class Video(Plugin):
                 f2 = f.encode('utf-8')
                 if os.path.isdir(f):
                     count += 1
-                elif extensions:
-                    if os.path.splitext(f2)[1].lower() in extensions:
+                elif use_extensions:
+                    if os.path.splitext(f2)[1].lower() in EXTENSIONS:
                         count += 1
                 elif f2 in transcode.info_cache:
                     if transcode.supported_format(f2):
