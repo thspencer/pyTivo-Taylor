@@ -212,9 +212,10 @@ class Video(Plugin):
 
         if 'episodeNumber' in data:
             try:
-                int(data['episodeNumber'])
+                ep = int(data['episodeNumber'])
             except:
-                data['episodeNumber'] = '0'
+                ep = 0
+            data['episodeNumber'] = str(ep)
 
         if config.getDebug() and 'vHost' not in data:
             compatible, reason = transcode.tivo_compatible(full_path, tsn, mime)
