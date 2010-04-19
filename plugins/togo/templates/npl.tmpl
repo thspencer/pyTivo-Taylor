@@ -66,18 +66,18 @@
 				#end if
 				</td>
 				<td>
-                                        #if 'episodeTitle' in $row
-					<b>$escape($row['title']): $escape($row['episodeTitle'])</b><br>
+					#if 'episodeTitle' in $row
+					<span class="progtitle">$escape($row['title']): $escape($row['episodeTitle'])</span>
                                         #else
-					<b>$escape($row['title'])</b><br>
+					<span class="progtitle">$escape($row['title'])</span>
                                         #end if
-					<small>#if 'description' in $row
+					<span class="progdesc">#if 'description' in $row
                                         $escape($row['description'])
                                         #end if
                                         #if 'displayMajorNumber' in $row and 'callsign' in $row
 					$row['displayMajorNumber'] $row['callsign']
 					#end if
-					</small>
+					</span>
 					#if 'Url' in $row and row['Url'] in $status
 						#set $this_status = $status[$row['Url']]
 						#if $this_status['running'] and $this_status['rate'] != ""

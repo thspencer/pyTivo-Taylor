@@ -10,8 +10,21 @@ body {
     font-size: xx-large
 }
 
+tr.row0 {
+    background-color: rgb(255, 255, 255)
+}
+
 tr.row1 {
     background-color: rgb(240, 240, 240)
+}
+
+.progtitle {
+    font-weight: bold;
+    display: block
+}
+
+.progdesc {
+    font-size: small
 }
 
 .transferring {

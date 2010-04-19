@@ -20,11 +20,18 @@
      cellspacing="4" width="100%">
       <xsl:for-each select="Item">
        <tr>
-       <xsl:if test="position() mod 2 = 1">
-        <xsl:attribute name="class">
-         <xsl:value-of select="'row1'"/>
-        </xsl:attribute>
-       </xsl:if>
+       <xsl:choose>
+        <xsl:when test="position() mod 2 = 1">
+         <xsl:attribute name="class">
+          <xsl:value-of select="'row1'"/>
+         </xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+         <xsl:attribute name="class">
+          <xsl:value-of select="'row0'"/>
+         </xsl:attribute>
+        </xsl:otherwise>
+       </xsl:choose>
        <xsl:choose>
         <xsl:when test="Details/ContentType = 'x-container/folder'">
           <td/>
@@ -52,17 +59,18 @@
           </td>
           <td/>
           <td width="100%">
-           <b>
+           <span class="progtitle">
            <xsl:value-of select="Details/Title"/>
            <xsl:if test="Details/EpisodeTitle != ''">
             <xsl:if test="Details/EpisodeTitle != Details/Title">
              : <xsl:value-of select="Details/EpisodeTitle"/>
             </xsl:if>
            </xsl:if>
-           </b>
+           </span>
            <xsl:if test="Details/Description != ''">
-            <br/>
-            <small><xsl:value-of select="Details/Description"/></small>
+            <span class="progdesc">
+            <xsl:value-of select="Details/Description"/>
+            </span>
            </xsl:if>
           </td>
           <td class="unbreak">
