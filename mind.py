@@ -39,14 +39,11 @@ else:
 
             self.__login()
 
-            if not self.__pcBodySearch():
-                self.__pcBodyStore('pyTivo', True)
-
         def pushVideo(self, tsn, url, description, duration, size,
                       title, subtitle, source='', mime='video/mpeg',
                       tvrating=None):
             # It looks like tivo only supports one pc per house
-            pc_body_id = self.__pcBodySearch()[0]
+            pc_body_id = self.__pcBodySearch()
 
             if not source:
                 source = title
@@ -101,7 +98,7 @@ else:
             ]
 
             # It looks like tivo only supports one pc per house
-            pc_body_id = self.__pcBodySearch()[0]
+            pc_body_id = self.__pcBodySearch()
 
             requests = []
             offer_list = self.__bodyOfferSchedule(pc_body_id)
@@ -140,7 +137,7 @@ else:
 
         def getXMPPLoginInfo(self):
             # It looks like tivo only supports one pc per house
-            pc_body_id = self.__pcBodySearch()[0]
+            pc_body_id = self.__pcBodySearch()
 
             xml = self.__bodyXmppInfoGet(pc_body_id)
 
@@ -226,8 +223,12 @@ else:
             """Find PCS"""
 
             xml = self.__dict_request({}, 'pcBodySearch')
+            id = xml.findtext('.//pcBodyId')
+            if not id:
+                xml = self.__pcBodyStore('pyTivo', True)
+                id = xml.findtext('.//pcBodyId')
 
-            return [id.text for id in xml.findall('pcBody/pcBodyId')]
+            return id
 
         def __collectionIdSearch(self, url):
             """Find collection ids"""
