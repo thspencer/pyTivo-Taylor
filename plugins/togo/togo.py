@@ -274,9 +274,11 @@ class ToGo(Plugin):
         f.close()
         status[url]['size'] += length
         if status[url]['running']:
-            elapsed = now - start_time
+            mega_elapsed = (now - start_time) * 1024 * 1024
+            if mega_elapsed < 1:
+                mega_elapsed = 1
             size = status[url]['size']
-            rate = size * 8.0 / (elapsed * 1024 * 1024)
+            rate = size * 8.0 / mega_elapsed
             logger.info('[%s] Done getting "%s" from %s, %d bytes, %.2f Mb/s' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'), outfile,
                          tivo_name, size, rate))

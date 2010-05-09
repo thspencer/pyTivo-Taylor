@@ -150,8 +150,10 @@ class Video(Plugin):
         except Exception, msg:
             logger.info(msg)
 
-        elapsed = time.time() - start
-        rate = count * 8.0 / (elapsed * 1024 * 1024)
+        mega_elapsed = (time.time() - start) * 1024 * 1024
+        if mega_elapsed < 1:
+            mega_elapsed = 1
+        rate = count * 8.0 / mega_elapsed
         logger.info('[%s] Done sending "%s" to %s, %d bytes, %.2f Mb/s' %
                     (time.strftime('%d/%b/%Y %H:%M:%S'), fname, 
                      tivo_name, count, rate))
