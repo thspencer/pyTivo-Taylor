@@ -547,14 +547,15 @@ Available In: Tivos
 
 shares
 
-Default Setting: Blank, which is equivalent to allow all shares on this TiVo.
+Default Setting: None (allow all shares on this TiVo).
 Valid Entries: The names of any shares in your pyTivo.conf file, in a
 comma-separated list.
 Required: No
 Skill: Easy
-Description: Only the shares listed in this setting will be visible on
-this TiVo. Will ignore invalid shares. If no valid shares are listed or
-the setting does not exist, all shares will be visible on this TiVo.
+Description: Only the shares listed in this setting will be visible on 
+this TiVo. Will ignore invalid shares. If no valid shares are listed, no 
+shares will be visible on this TiVo. If the "shares" line is not 
+present, all shares are visible.
 Example Settings: Movies, Kids Stuff
 Available In: Tivos
 
