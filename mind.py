@@ -66,12 +66,8 @@ else:
             if tvrating in ratings:
                 data['tvRating'] = ratings[tvrating]
 
-            if mime == 'video/mp4':
-                data['encodingType'] = 'avcL41MP4'
-            elif mime == 'video/bif':
-                data['encodingType'] = 'vc1ApL3'
-            else:
-                data['encodingType'] = 'mpeg2ProgramStream'
+            mtypes = {'video/mp4': 'avcL41MP4', 'video/bif': 'vc1ApL3'}
+            data['encodingType'] = mtypes.get(mime, 'mpeg2ProgramStream')
 
             data['url'] = url + '?Format=' + mime
 
@@ -116,12 +112,8 @@ else:
 
         def completeDownloadRequest(self, request, status, mime='video/mpeg'):
             if status:
-                if mime == 'video/mp4':
-                    request['encodingType'] = 'avcL41MP4'
-                elif mime == 'video/bif':
-                    request['encodingType'] = 'vc1ApL3'
-                else:
-                    request['encodingType'] = 'mpeg2ProgramStream'
+                mtypes = {'video/mp4': 'avcL41MP4', 'video/bif': 'vc1ApL3'}
+                request['encodingType'] = mtypes.get(mime, 'mpeg2ProgramStream')
                 request['url'] += '?Format=' + mime
                 request['state'] = 'complete'
             else:
