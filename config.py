@@ -1,9 +1,3 @@
-import sys
-
-if sys.version_info[0] != 2 or sys.version_info[1] < 4:
-    print ('ERROR: pyTivo requires Python >= 2.4, < 3.0.\n')
-    sys.exit(1)
-
 import ConfigParser
 import getopt
 import logging
@@ -13,6 +7,7 @@ import re
 import random
 import socket
 import string
+import sys
 from ConfigParser import NoOptionError
 
 guid = ''.join([random.choice(string.letters) for i in range(10)])
