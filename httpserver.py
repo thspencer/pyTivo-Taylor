@@ -243,7 +243,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
-                                       'info_page.tmpl'))
+                                       'info_page.tmpl'),
+                     filter=EncodeUnicode)
         t.admin = ''
 
         if config.get_server('tivo_mak') and config.get_server('togo_path'):

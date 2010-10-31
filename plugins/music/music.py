@@ -351,7 +351,7 @@ class Music(Plugin):
                 if line:
                     if line.startswith('#EXTINF:'):
                         try:
-                            duration, title = line[8:].split(',')
+                            duration, title = line[8:].split(',', 1)
                             duration = int(duration)
                         except ValueError:
                             duration = 0
@@ -407,11 +407,11 @@ class Music(Plugin):
                     if recurse and isdir:
                         files.extend(build_recursive_list(f))
                     else:
-                       fd = FileData(f, isdir)
-                       if recurse and fd.isplay:
-                           files.extend(self.parse_playlist(f, recurse))
-                       elif isdir or filterFunction(f, file_type):
-                           files.append(fd)
+                        fd = FileData(f, isdir)
+                        if recurse and fd.isplay:
+                            files.extend(self.parse_playlist(f, recurse))
+                        elif isdir or filterFunction(f, file_type):
+                            files.append(fd)
             except:
                 pass
             return files
