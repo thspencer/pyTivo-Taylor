@@ -16,6 +16,7 @@
     <p id="titlep"><span id="title">pyTivo - Push -
     <xsl:value-of select="Details/Title"/>
     </span></p>
+	<p><a href="/">Home</a></p>
 	<script language="JavaScript">
 	<![CDATA[
 	<!--
@@ -39,6 +40,29 @@
 		<td>Size</td>
 		<td>Capture Date</td>
 	   </tr>
+       <tr id="parentLinkRow" style="display: none;">
+        <td><img src="/back.png" alt="" /></td>
+        <td width="100%" colspan="4">
+        <a id="parentLink" href="">Up to Parent Folder</a>
+        </td>
+       </tr>
+		<SCRIPT LANGUAGE="JavaScript">
+	   	<![CDATA[
+		<!--
+		var sGet = window.location.search
+		var re = new RegExp("([\?|&]Container=)(.*)/[^&]+", "g");
+		var m = re.exec(sGet);
+		if (m != null) {
+			var re = new RegExp("([\?|&]Container=)(.*)/[^&]+", "g");
+			sGet = sGet.replace(re, "$1$2");
+
+			//Show up to parent folder link if we are in a subfolder
+			document.getElementById('parentLink').href = sGet;
+			document.getElementById('parentLinkRow').style.display = '';
+		}
+		//-->
+		]]>
+		</SCRIPT>
       <xsl:for-each select="Item">
        <tr>
        <xsl:choose>
