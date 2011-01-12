@@ -18,6 +18,12 @@ tr.row1 {
     background-color: rgb(240, 240, 240)
 }
 
+tr.header {
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: center
+}
+
 .progtitle {
     font-weight: bold;
     display: block

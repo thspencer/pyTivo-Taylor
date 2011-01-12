@@ -16,8 +16,29 @@
     <p id="titlep"><span id="title">pyTivo - Push -
     <xsl:value-of select="Details/Title"/>
     </span></p>
+	<script language="JavaScript">
+	<![CDATA[
+	<!--
+	function toggle(source) {
+		var checkboxes = document.getElementsByName('File');
+		for (var i = 0; i < checkboxes.length; i++) {
+			if (typeof(checkboxes[i].checked) != "undefined") {
+				checkboxes[i].checked = source.checked;
+				}
+		}
+	}
+	//-->
+	]]>
+	</script>
     <table id="main" style="text-align: left;" border="0" cellpadding="0" 
      cellspacing="4" width="100%">
+	   <tr class="header">
+		<td><input type="checkbox" name="selectAll" OnClick="toggle(this)" Title="Select All" /></td>
+		<td></td>
+		<td>Title</td>
+		<td>Size</td>
+		<td>Capture Date</td>
+	   </tr>
       <xsl:for-each select="Item">
        <tr>
        <xsl:choose>
