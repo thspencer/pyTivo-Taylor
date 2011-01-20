@@ -225,7 +225,7 @@ class ToGo(Plugin):
             metadata.dump(metafile, meta)
             metafile.close()
 
-        auth_handler.add_password('TiVo DVR', parse_url[1], 'tivo', mak)
+        auth_handler.add_password('TiVo DVR', url, 'tivo', mak)
         try:
             handle = self.tivo_open(url)
         except IOError, e:
