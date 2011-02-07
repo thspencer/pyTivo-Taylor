@@ -147,6 +147,11 @@ function toggle(source) {
  <input type="checkbox" name="decode">Decrypt with tivodecode<br>
 #end if
  <input type="checkbox" name="save">Save metadata to .txt<br>
+#if $togo_mpegts == 'default'
+ <input type="checkbox" checked name="ts_format">Transfer as mpeg-ts<br>
+#elif $togo_mpegts == 'enabled'
+ <input type="checkbox" name="ts_format">Transfer as mpeg-ts<br>
+#end if
 </p>
 <p>
  <input value="Transfer Selected" type="submit">
