@@ -1,33 +1,42 @@
-import logging
-
-logger = logging.getLogger('pyTivo.video.qt-faststart')
 """
     Quicktime/MP4 Fast Start
     ------------------------
     Enable streaming and pseudo-streaming of Quicktime and MP4 files by
     moving metadata and offset information to the front of the file.
-    
+
     This program is based on qt-faststart.c from the ffmpeg project, which is
     released into the public domain, as well as ISO 14496-12:2005 (the official
     spec for MP4), which can be obtained from the ISO or found online.
-    
+
     The goals of this project are to run anywhere without compilation (in
     particular, many Windows and Mac OS X users have trouble getting
     qt-faststart.c compiled), to run about as fast as the C version, to be more
     user friendly, and to use less actual lines of code doing so.
-    
+
     Features
     --------
-    
+
         * Works everywhere Python can be installed
         * Handles both 32-bit (stco) and 64-bit (co64) atoms
         * Handles any file where the mdat atom is before the moov atom
         * Preserves the order of other atoms
         * Can replace the original file (if given no output file)
-    
+
+    History
+    -------
+     * 2010-02-21: Add support for final mdat atom with zero size, patch by
+                   Dmitry Simakov <basilio AT j-vista DOT ru>, version bump
+                   to 1.4.
+     * 2009-11-05: Add --sample option. Version bump to 1.3.
+     * 2009-03-13: Update to be more library-friendly by using logging module,
+                   rename fast_start => process, version bump to 1.2
+     * 2008-10-04: Bug fixes, support multiple atoms of the same type, 
+                   version bump to 1.1
+     * 2008-09-02: Initial release
+
     License
     -------
-    Copyright (C) 2008  Daniel G. Taylor <dan@programmer-art.org>
+    Copyright (C) 2008 - 2009  Daniel G. Taylor <dan@programmer-art.org>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,17 +52,21 @@ logger = logging.getLogger('pyTivo.video.qt-faststart')
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
+import logging
 import struct
 
-from optparse import OptionParser
 from StringIO import StringIO
 
-VERSION = "1.0b"
-CHUNK_SIZE = 512 * 1024
+VERSION = "1.4wjm3"
+CHUNK_SIZE = 8192
 SEEK_CUR = 1  # Not defined in Python 2.4, so we define it here -- WJM3
 
+log = logging.getLogger('pyTivo.video.qt-faststart')
+
 count = 0
+
+class FastStartException(Exception):
+    pass
 
 def read_atom(datastream):
     """
@@ -61,44 +74,54 @@ def read_atom(datastream):
         in bytes (including the 8 bytes already read) and type is a "fourcc"
         like "ftyp" or "moov".
     """
-    values = struct.unpack(">L4c", datastream.read(8))
-    return values[0], "".join(values[1:])
+    return struct.unpack(">L4s", datastream.read(8))
 
 def get_index(datastream):
     """
         Return an index of top level atoms, their absolute byte-position in the
-        file and their size in a dict:
+        file and their size in a list:
 
-        index = {
-            "ftyp": [0, 24],
-            "moov": [25, 2658],
-            "free": [2683, 8],
+        index = [
+            ("ftyp", 0, 24),
+            ("moov", 25, 2658),
+            ("free", 2683, 8),
             ...
-        }
+        ]
 
-        The keys are not guaranteed to be in order, but can be put in order
-        with a simple sort, e.g.
-
-            >>> keys = index.keys()
-            >>> keys.sort(lambda x, y: cmp(index[x][0], index[y][0]))
+        The tuple elements will be in the order that they appear in the file.
     """
-    index = {}
+    index = []
+
+    log.debug("Getting index of top level atoms...")
 
     # Read atoms until we catch an error
     while(datastream):
         try:
+            skip = 8
             atom_size, atom_type = read_atom(datastream)
+            if atom_size == 1:
+                atom_size = struct.unpack(">Q", datastream.read(8))[0]
+                skip = 16
+            log.debug("%s: %s" % (atom_type, atom_size))
         except:
             break
-        index[atom_type] = [datastream.tell() - 8, atom_size]
-        datastream.seek(atom_size - 8, SEEK_CUR)
+
+        index.append((atom_type, datastream.tell() - skip, atom_size))
+
+        if atom_size == 0:
+            # Some files may end in mdat with no size set, which generally
+            # means to seek to the end of the file. We can just stop indexing
+            # as no more entries will be found!
+            break
+
+        datastream.seek(atom_size - skip, SEEK_CUR)
 
     # Make sure the atoms we need exist
-    for key in ["ftyp", "moov", "mdat"]:
-        if not index.has_key(key):
-            logger.debug("%s atom not found, is this a valid MOV/MP4 file?" %
-                         key)
-            return [] 
+    top_level_atoms = set([item[0] for item in index])
+    for key in ["moov", "mdat"]:
+        if key not in top_level_atoms:
+            log.error("%s atom not found, is this a valid MOV/MP4 file?" % key)
+            raise FastStartException()
 
     return index
 
@@ -116,7 +139,12 @@ def find_atoms(size, datastream):
     stop = datastream.tell() + size
 
     while datastream.tell() < stop:
-        atom_size, atom_type = read_atom(datastream)
+        try:
+            atom_size, atom_type = read_atom(datastream)
+        except:
+            log.exception("Error reading next atom!")
+            raise FastStartException()
+
         if atom_type in ["trak", "mdia", "minf", "stbl"]:
             # Known ancestor atom of stco or co64, search within it!
             for atype in find_atoms(atom_size - 8, datastream):
@@ -127,16 +155,16 @@ def find_atoms(size, datastream):
             # Ignore this atom, seek to the end of it.
             datastream.seek(atom_size - 8, SEEK_CUR)
 
-def output(outfile, offset, data):
+def output(outfile, skip, data):
     global count
     length = len(data)
-    if count + length > offset:
-        if offset > count:
-            data = data[offset - count:]
+    if count + length > skip:
+        if skip > count:
+            data = data[skip - count:]
         outfile.write(data)
     count += length
 
-def fast_start(datastream, outfile, offset=0):
+def process(datastream, outfile, skip=0):
     """
         Convert a Quicktime/MP4 file for streaming by moving the metadata to
         the front of the file. This method writes a new file.
@@ -144,26 +172,50 @@ def fast_start(datastream, outfile, offset=0):
 
     global count
     count = 0
-    
+
     # Get the top level atom index
     index = get_index(datastream)
+
+    mdat_pos = 999999
+    free_size = 0
+
     # Make sure moov occurs AFTER mdat, otherwise no need to run!
-    if len(index) == 0 or index["moov"][0] < index["mdat"][0]:
-        logger.debug('mp4 already streamable -- copying')
-        datastream.seek(offset)
-        while True:
-            block = datastream.read(CHUNK_SIZE)
-            if not block:
-                break
-            output(outfile, 0, block)
-        return count
+    for atom, pos, size in index:
+        # The atoms are guaranteed to exist from get_index above!
+        if atom == "moov":
+            moov_pos = pos
+            moov_size = size
+        elif atom == "mdat":
+            mdat_pos = pos
+        elif atom == "free" and pos < mdat_pos:
+            # This free atom is before the mdat!
+            free_size += size
+            log.info("Removing free atom at %d (%d bytes)" % (pos, size))
+
+    # Offset to shift positions
+    offset = moov_size - free_size
+
+    if moov_pos < mdat_pos:
+        # moov appears to be in the proper place, don't shift by moov size
+        offset -= moov_size
+        if not free_size:
+            # No free atoms and moov is correct, we are done!
+            log.debug('mp4 already streamable -- copying')
+            datastream.seek(skip)
+            while True:
+                block = datastream.read(CHUNK_SIZE)
+                if not block:
+                    break
+                output(outfile, 0, block)
+            return count
 
     # Read and fix moov
-    datastream.seek(index["moov"][0])
-    moov_size = index["moov"][1]
+    datastream.seek(moov_pos)
     moov = StringIO(datastream.read(moov_size))
 
+    # Ignore moov identifier and size, start reading children
     moov.seek(8)
+
     for atom_type in find_atoms(moov_size - 8, moov):
         # Read either 32-bit or 64-bit offsets
         ctype, csize = atom_type == "stco" and ("L", 4) or ("Q", 8)
@@ -171,7 +223,7 @@ def fast_start(datastream, outfile, offset=0):
         # Get number of entries
         version, entry_count = struct.unpack(">2L", moov.read(8))
 
-        logger.debug("Patching %s with %d entries" % (atom_type, entry_count))
+        log.info("Patching %s with %d entries" % (atom_type, entry_count))
 
         # Read entries
         entries = struct.unpack(">" + ctype * entry_count,
@@ -180,28 +232,31 @@ def fast_start(datastream, outfile, offset=0):
         # Patch and write entries
         moov.seek(-csize * entry_count, SEEK_CUR)
         moov.write(struct.pack(">" + ctype * entry_count,
-                               *[entry + moov_size for entry in entries]))
+                               *[entry + offset for entry in entries]))
+
+    log.info("Writing output...")
 
     # Write ftype
-    datastream.seek(index["ftyp"][0])
-    output(outfile, offset, datastream.read(index["ftyp"][1]))
+    for atom, pos, size in index:
+        if atom == "ftyp":
+            datastream.seek(pos)
+            output(outfile, skip, datastream.read(size))
 
     # Write moov
     moov.seek(0)
-    output(outfile, offset, moov.read())
+    output(outfile, skip, moov.read())
 
     # Write the rest
-    atoms = [atom for atom in index.keys() if atom not in ["ftyp", "moov"]]
-    atoms.sort(lambda x, y: cmp(index[x][0], index[y][0]))
-    for atom in atoms:
-        start, size = index[atom]
-        datastream.seek(start)
+    written = 0
+    atoms = [item for item in index if item[0] not in ["ftyp", "moov", "free"]]
+    for atom, pos, size in atoms:
+        datastream.seek(pos)
 
         # Write in chunks to not use too much memory
         for x in range(size / CHUNK_SIZE):
-            output(outfile, offset, datastream.read(CHUNK_SIZE))
+            output(outfile, skip, datastream.read(CHUNK_SIZE))
 
         if size % CHUNK_SIZE:
-            output(outfile, offset, datastream.read(size % CHUNK_SIZE))
+            output(outfile, skip, datastream.read(size % CHUNK_SIZE))
 
-    return count - offset
+    return count - skip
