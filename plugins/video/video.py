@@ -122,8 +122,7 @@ class Video(Plugin):
                 f = open(fname, 'rb')
                 try:
                     if mime == 'video/mp4':
-                        count = qtfaststart.fast_start(f, handler.wfile,
-                                                       offset)
+                        count = qtfaststart.process(f, handler.wfile, offset)
                     else:
                         if offset:
                             f.seek(offset)
