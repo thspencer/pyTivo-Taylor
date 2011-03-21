@@ -247,7 +247,6 @@ def process(datastream, outfile, skip=0):
     output(outfile, skip, moov.read())
 
     # Write the rest
-    written = 0
     atoms = [item for item in index if item[0] not in ["ftyp", "moov", "free"]]
     for atom, pos, size in atoms:
         datastream.seek(pos)
