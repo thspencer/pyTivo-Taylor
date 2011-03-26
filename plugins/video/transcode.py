@@ -609,6 +609,35 @@ def tivo_compatible_container(vInfo, mime=''):
 
     return message
 
+def mp4_remuxable(inFile, tsn=''):
+    vInfo = video_info(inFile)
+    return (tivo_compatible_video(vInfo, tsn, 'video/mp4')[0] and
+            tivo_compatible_audio(vInfo, inFile, tsn, 'video/mp4')[0])
+
+def mp4_remux(inFile, basename):
+    outFile = inFile + '.pyTivo-temp'
+    newname = basename + '.pyTivo-temp'
+    if os.path.exists(outFile):
+        return None  # ugh!
+
+    ffmpeg_path = config.get_bin('ffmpeg')
+    fname = unicode(inFile, 'utf-8')
+    oname = unicode(outFile, 'utf-8')
+    if mswindows:
+        fname = fname.encode('iso8859-1')
+        oname = oname.encode('iso8859-1')
+
+    cmd = [ffmpeg_path, '-i', fname, '-vcodec', 'copy', '-acodec',
+           'copy', '-f', 'mp4', oname]
+    ffmpeg = subprocess.Popen(cmd)
+    debug('remuxing ' + inFile + ' to ' + outFile)
+    if ffmpeg.wait():
+        debug('error during remuxing')
+        os.remove(outFile)
+        return None
+
+    return newname
+
 def tivo_compatible(inFile, tsn='', mime=''):
     vInfo = video_info(inFile)
 

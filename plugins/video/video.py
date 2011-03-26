@@ -157,6 +157,9 @@ class Video(Plugin):
                     (time.strftime('%d/%b/%Y %H:%M:%S'), fname, 
                      tivo_name, count, rate))
 
+        if fname.endswith('.pyTivo-temp'):
+            os.remove(fname)
+
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
 
@@ -427,6 +430,12 @@ class Video(Plugin):
                     if transcode.tivo_compatible(file_path, tsn, m)[0]:
                         mime = m
                         break
+                if (mime == 'video/mpeg' and
+                    transcode.mp4_remuxable(file_path, tsn)):
+                    new_path = transcode.mp4_remux(file_path, f)
+                    if new_path:
+                        mime = 'video/mp4'
+                        f = new_path
 
             if file_info['valid']:
                 file_info.update(self.metadata_full(file_path, tsn, mime))
