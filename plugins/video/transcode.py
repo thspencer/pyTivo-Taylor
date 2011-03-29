@@ -505,7 +505,7 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
     while True:
         codec = vInfo['vCodec']
         if mime == 'video/mp4':
-            if codec != 'h264':
+            if not codec.startswith('h264'):
                 message = (False, 'vCodec %s not compatible' % codec)
 
             break
