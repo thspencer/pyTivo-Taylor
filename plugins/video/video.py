@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import struct
+import thread
 import time
 import traceback
 import urllib
@@ -50,6 +51,8 @@ try:
     assert(config.get_bin('ffmpeg'))
 except:
     use_extensions = False
+
+queue = []  # Recordings to push
 
 class Video(Plugin):
 
@@ -403,6 +406,60 @@ class Video(Plugin):
         handler.end_headers()
         handler.wfile.write(details)
 
+    def push_one_file(self, f):
+        file_info = VideoDetails()
+        file_info['valid'] = transcode.supported_format(f['path'])
+
+        mime = 'video/mpeg'
+        if config.isHDtivo(f['tsn']):
+            for m in ['video/mp4', 'video/bif']:
+                if transcode.tivo_compatible(f['path'], f['tsn'], m)[0]:
+                    mime = m
+                    break
+
+            if (mime == 'video/mpeg' and
+                transcode.mp4_remuxable(f['path'], f['tsn'])):
+                new_path = transcode.mp4_remux(f['path'], f['name'])
+                if new_path:
+                    mime = 'video/mp4'
+                    f['name'] = new_path
+
+        if file_info['valid']:
+            file_info.update(self.metadata_full(f['path'], f['tsn'], mime))
+
+        url = f['url'] + quote(f['name'])
+
+        title = file_info['seriesTitle']
+        if not title:
+            title = file_info['title']
+
+        source = file_info['seriesId']
+        if not source:
+            source = title
+
+        subtitle = file_info['episodeTitle']
+        try:
+            m = mind.getMind(f['tsn'])
+            m.pushVideo(
+                tsn = f['tsn'],
+                url = url,
+                description = file_info['description'],
+                duration = file_info['duration'] / 1000,
+                size = file_info['size'],
+                title = title,
+                subtitle = subtitle,
+                source = source,
+                mime = mime,
+                tvrating = file_info['tvRating'])
+        except Exception, msg:
+            logger.error(msg)
+
+    def process_queue(self):
+        while queue:
+            time.sleep(5)
+            item = queue.pop(0)
+            self.push_one_file(item)
+
     def Push(self, handler, query):
         tsn = query['tsn'][0]
         for key in config.tivo_names:
@@ -415,69 +472,24 @@ class Video(Plugin):
         ip = config.get_ip()
         port = config.getPort()
 
-        baseurl = 'http://%s:%s' % (ip, port)
+        baseurl = 'http://%s:%s/%s' % (ip, port, container)
         if config.getIsExternal(tsn):
             exturl = config.get_server('externalurl')
             if exturl:
                 baseurl = exturl
             else:
                 ip = self.readip()
-                baseurl = 'http://%s:%s' % (ip, port)
+                baseurl = 'http://%s:%s/%s' % (ip, port, container)
  
         path = self.get_local_base_path(handler, query)
 
         files = query.get('File', [])
         for f in files:
             file_path = path + os.path.normpath(f)
-
-            file_info = VideoDetails()
-            file_info['valid'] = transcode.supported_format(file_path)
-
-            mime = 'video/mpeg'
-            if config.isHDtivo(tsn):
-                for m in ['video/mp4', 'video/bif']:
-                    if transcode.tivo_compatible(file_path, tsn, m)[0]:
-                        mime = m
-                        break
-                if (mime == 'video/mpeg' and
-                    transcode.mp4_remuxable(file_path, tsn)):
-                    new_path = transcode.mp4_remux(file_path, f)
-                    if new_path:
-                        mime = 'video/mp4'
-                        f = new_path
-
-            if file_info['valid']:
-                file_info.update(self.metadata_full(file_path, tsn, mime))
-
-            url = baseurl + '/%s%s' % (container, quote(f))
-
-            title = file_info['seriesTitle']
-            if not title:
-                title = file_info['title']
-
-            source = file_info['seriesId']
-            if not source:
-                source = title
-
-            subtitle = file_info['episodeTitle']
-            try:
-                m = mind.getMind(tsn)
-                m.pushVideo(
-                    tsn = tsn,
-                    url = url,
-                    description = file_info['description'],
-                    duration = file_info['duration'] / 1000,
-                    size = file_info['size'],
-                    title = title,
-                    subtitle = subtitle,
-                    source = source,
-                    mime = mime,
-                    tvrating = file_info['tvRating'])
-            except Exception, e:
-                handler.send_response(500)
-                handler.end_headers()
-                handler.wfile.write('%s\n\n%s' % (e, traceback.format_exc() ))
-                raise
+            queue.append({'path': file_path, 'name': f, 'tsn': tsn,
+                          'url': baseurl})
+            if len(queue) == 1:
+                thread.start_new_thread(Video.process_queue, (self,))
 
             logger.info('[%s] Queued "%s" for Push to %s' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'),
