@@ -537,7 +537,7 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
     while True:
         codec = vInfo['vCodec']
         if mime == 'video/mp4':
-            if not codec.startswith('h264'):
+            if codec != 'h264':
                 message = (False, 'vCodec %s not compatible' % codec)
 
             break
@@ -751,7 +751,7 @@ def video_info(inFile, cache=True):
     debug('ffmpeg output=%s' % output)
 
     attrs = {'container': r'Input #0, ([^,]+),',
-             'vCodec': r'.*Video: ([^,]+),.*',             # video codec
+             'vCodec': r'Video: ([^, ]+)',             # video codec
              'aKbps': r'.*Audio: .+, (.+) (?:kb/s).*',     # audio bitrate
              'aCodec': r'.*Audio: ([^,]+),.*',             # audio codec
              'aFreq': r'.*Audio: .+, (.+) (?:Hz).*',       # audio frequency
