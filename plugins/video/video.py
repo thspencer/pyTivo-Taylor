@@ -33,6 +33,7 @@ PUSHED = '<h3>Queued for Push to %s</h3> <p>%s</p>'
 def tmpl(name):
     return file(os.path.join(SCRIPTDIR, 'templates', name), 'rb').read()
 
+CONTAINER_TEMPLATE_MOBILE = tmpl('container_mob.tmpl')
 CONTAINER_TEMPLATE = tmpl('container.tmpl')
 TVBUS_TEMPLATE = tmpl('TvBus.tmpl')
 
@@ -278,6 +279,7 @@ class Video(Plugin):
         tsn = handler.headers.getheader('tsn', '')
         subcname = query['Container'][0]
         cname = subcname.split('/')[0]
+        useragent = handler.headers.getheader('User-Agent', '')
 
         if (not cname in handler.server.containers or
             not self.get_local_path(handler, query)):
@@ -329,7 +331,11 @@ class Video(Plugin):
 
             videos.append(video)
 
-        t = Template(CONTAINER_TEMPLATE, filter=EncodeUnicode)
+        logger.debug('mobileagent: %d useragent: %s' % (useragent.lower().find('mobile'), useragent.lower()))
+        if useragent.lower().find('mobile') > 0:
+            t = Template(CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
+        else:
+            t = Template(CONTAINER_TEMPLATE, filter=EncodeUnicode)
         t.container = cname
         t.name = subcname
         t.total = total
@@ -342,7 +348,10 @@ class Video(Plugin):
         t.tivos = config.tivos
         t.tivo_names = config.tivo_names
         handler.send_response(200)
-        handler.send_header('Content-Type', 'text/xml')
+        if useragent.lower().find('mobile') > 0:
+            handler.send_header('Content-Type', 'text/html; charset=utf-8')
+        else:
+            handler.send_header('Content-Type', 'text/xml')
         handler.send_header('Expires', '0')
         handler.end_headers()
         handler.wfile.write(t)
