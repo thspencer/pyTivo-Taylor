@@ -239,10 +239,16 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(t)
 
     def infopage(self):
+        useragent = self.headers.getheader('User-Agent', '')
         self.send_response(200)
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
-        t = Template(file=os.path.join(SCRIPTDIR, 'templates',
+        if useragent.lower().find('mobile') > 0:
+            t = Template(file=os.path.join(SCRIPTDIR, 'templates',
+                                       'info_page_mob.tmpl'),
+                     filter=EncodeUnicode)
+        else:
+            t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'info_page.tmpl'),
                      filter=EncodeUnicode)
         t.admin = ''

@@ -1,0 +1,47 @@
+html body {
+	background-image:url('/pinstripes.png');
+	padding:0;
+	margin: 0;
+	font-family: Gill, Helvetica, sans-serif;
+	font-size: 20px;
+    }
+#title {
+    margin: 0;
+    padding: 10px;
+	text-align: center;
+	font-weight: bold;
+    line-height: 20px;
+    text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+    color: #FFFFFF;
+    background: url(iPhoneToolbar.png) #7388a5 repeat-x;
+    border-bottom: 1px solid #3f4e63;
+}
+div {
+	margin-left:auto;
+	margin-right:auto;
+	width: 270px;
+	margin-bottom:10px;
+	padding-left: 20px;
+	background-color:white;
+	background: url(bkgd.png);
+	font-size: 18px;
+	font-weight: bold;
+	color: #919191;
+	line-height: 40px;
+	border: 1px solid #adadad;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+		}
+a:link    {
+	color:black;
+	text-decoration:none;}
+a:visited {
+	color:black;
+	text-decoration:none;}
+a:hover   {
+	color:black;
+	text-decoration:none;}
+
+
+
+

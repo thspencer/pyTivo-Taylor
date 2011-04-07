@@ -43,8 +43,11 @@ incorrect Media Access Key. Please return to the Web Configuration page
 and double check your <b>tivo_mak</b> setting.</p>"""
 
 # Preload the templates
-tnname = os.path.join(SCRIPTDIR, 'templates', 'npl.tmpl')
-NPL_TEMPLATE = file(tnname, 'rb').read()
+def tmpl(name):
+    return file(os.path.join(SCRIPTDIR, 'templates', name), 'rb').read()
+
+CONTAINER_TEMPLATE_MOBILE = tmpl('npl_mob.tmpl')
+CONTAINER_TEMPLATE = tmpl('npl.tmpl')
 
 status = {} # Global variable to control download threads
 tivo_cache = {} # Cache of TiVo NPL
@@ -83,6 +86,7 @@ class ToGo(Plugin):
         tivo_mak = config.get_server('tivo_mak')
         has_tivodecode = bool(config.get_bin('tivodecode'))
         togo_mpegts = config.get_server('togo_mpegts').lower()
+        useragent = handler.headers.getheader('User-Agent', '')
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
@@ -175,7 +179,11 @@ class ToGo(Plugin):
             FirstAnchor = ''
 
         cname = query['Container'][0].split('/')[0]
-        t = Template(NPL_TEMPLATE, filter=EncodeUnicode)
+        
+        if useragent.lower().find('mobile') > 0:
+            t = Template(CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
+        else:
+            t = Template(CONTAINER_TEMPLATE, filter=EncodeUnicode)
         t.escape = escape
         t.quote = quote
         t.folder = folder

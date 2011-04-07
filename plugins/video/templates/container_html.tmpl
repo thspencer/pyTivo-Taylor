@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>pyTivo - Push - $escape($name)</title>
+<link rel="stylesheet" type="text/css" href="/main.css">
+</head>
+<body>
+<form action="/TiVoConnect" method="POST">
+<p id="titlep"><span id="title">pyTivo - Push - $escape($name)</span></p>
+<p><a href="/">Home</a></p>
+<script language="JavaScript">
+<!--
+function toggle(source) {
+	var checkboxes = document.getElementsByName('File');
+	for (var i = 0; i < checkboxes.length; i++) {
+		if (typeof(checkboxes[i].checked) != "undefined") {
+			checkboxes[i].checked = source.checked;
+			}
+	}
+}
+-->
+</script>
+<table id="main" border="0" cellpadding="0" cellspacing="4">
+  ## Header Row
+	<tr class="header">
+		<td><input type="checkbox" name="selectAll" onClick="toggle(this)" Title="Select All" /></td>
+		<td></td>
+		<td>Title</td>
+		<td>Size</td>
+		<td>Capture Date</td>
+	</tr>
+    #set $parent = ''
+    #set $folders = $name.split("/")
+    #set $current_folder = $folders.pop()
+    #set $parent = '/'.join($folders)
+    #if $parent != ''
+    <tr id="parentLinkRow">
+        <td><img src="/back.png" alt="" /></td>
+        <td width="100%" colspan="4">
+        <a id="parentLink" href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($parent)'>Up to Parent Folder</a>
+        </td>
+    </tr>
+    #end if
+  #set $i = 0
+  ## i variable is used to alternate colors of row
+  ## loop through passed data printing row for each show or folder
+  #for $video in $videos
+	  #set $i += 1
+	  #set $j = $i%2
+	  <tr class="row$(j)">
+	  #if $video.is_dir
+	    ## This is a folder
+		<td></td>
+        <td><img src="/folder.png" alt=""></td>
+		<td class="progmain"><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)'>$video.title </a></td>
+		<td class="unbreak">$video.total_items Items</td>
+		<td class="unbreak">$video.textDate</td>
+	  #else
+	    ## This is a show
+		<td>
+            <input type="checkbox" name="File" value="$escape($video.part_path)">
+		</td>
+        <td></td>
+		<td class="progmain">
+			#if $video.episodeTitle
+			<span class="progtitle">$escape($video.title): $escape($video.episodeTitle)</span>
+			#else
+			<span class="progtitle">$escape($video.title)</span>
+			#end if
+			<span class="progdesc">
+            #if $video.description
+			$escape($video.description)
+			#end if
+			#if $video.displayMajorNumbe and $video.callsign
+			$video.displayMajorNumber $video.callsign
+			#end if
+			</span>
+		</td>
+		<td class="unbreak">$video.textSize
+		</td>
+		<td class="unbreak">$video.textDate</td>
+	  #end if
+	  </tr>
+  #end for
+</table>
+<p>
+      <input type="hidden" name="Command" value="Push">
+      <input type="hidden" name="Container" value="$escape($name)">
+        <select name="tsn">
+        #for $tivo in $tivo_names
+            #if $tivo and $tivo in $tivos
+                <option>$escape($tivo_names[$tivo])</option>
+            #end if
+        #end for
+        #for $tivo in $tivo_names
+            #if $tivo and not $tivo in $tivos
+                <option>$escape($tivo_names[$tivo])</option>
+            #end if
+        #end for
+        </select>
+      <input value="Send to TiVo" type="submit">
+</p>
+</form>
+</body>
+</html>

@@ -1,0 +1,143 @@
+html body {
+	width: 100%;
+	padding:0;
+	margin: 0;
+	font-family: Gill, Helvetica, sans-serif;
+	}
+table {
+	border-collapse:collapse;
+	border: 1px solid black;
+	width: 100%;
+	}
+	
+table, td {
+	border: 1px solid #E0E0E0;
+	border-left: hidden;
+	border-right: hidden;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	}
+#title {
+    margin: 0;
+    padding: 10px;
+	line-height: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+    color: #FFFFFF;
+	background: url(iPhoneToolbar.png) #7388a5 repeat-x;
+    }
+#header  td{
+	font-size: 16px;
+	font-weight: bold;
+	text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
+	padding: 5px 0 5px 15px;
+	background-color: #B1B5C0;
+	color: #FFFFFF;
+	border: 1px solid black;
+	}
+#pushmenu {
+	position: absolute;
+	top: 8px;
+	right:10px;
+	}
+	
+#ColA 	{
+    font-size: 16px;
+	font-weight: bold;
+	overflow: hidden;
+	padding-left: 15px;
+	padding-right: 15px;
+	color:black;
+	text-decoration:none;
+    }
+#ColB	{
+	text-align: center;
+	width: 22px;
+	}
+#ColC	{
+	text-align: center;
+	padding-right: 10px;
+	width: 22px
+	}
+#ColA1	{
+	padding-left: 15px;
+	}
+#truncate {
+	overflow: hidden;
+	height: 20px;
+	}
+	
+#count {
+	width:18px;
+	margin-left:3px;
+	background-color:#919191;
+	border: 2px solid #919191;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	text-align: center;
+	font-size: 14px;
+    color: white;
+	}
+.progtitle {
+	display: block;
+    font-weight: bold;
+	font-size: 16px;
+	vertical-align: text-top;
+    }
+
+.date {
+	float:right;
+	padding-right:20px;
+	padding-top: 4px;
+	font-weight: bold;
+	vertical-align: text-top;
+	font-size: 12px;
+	color: blue;
+	}
+.rectxt {
+	font-size: 14px;
+	font-weight: normal;
+	color:#919191;
+	}
+.recdate{
+	font-size: 14px;
+	font-weight: normal;
+	color:#919191;
+	}
+	
+.progdesc {
+	display: block;
+    font-size: 16px;
+	font-weight: normal;
+	text-align: justify;
+	}
+	
+a:link    {
+	color:black;
+	text-decoration:none;}
+a:visited {
+	color:black;
+	text-decoration:none;}
+a:hover   {
+	color:blue;
+	text-decoration:none;}
+
+.transferring {
+    background-color: rgb(127, 255, 127)
+}
+
+.queued {
+    background-color: rgb(255, 255, 127)
+}
+
+.failed {
+    background-color: rgb(255, 127, 127)
+}
+
+td.unbreak {
+    white-space: nowrap;
+    text-align: center
+}
+
+
