@@ -1,18 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<?xml-stylesheet type="text/xsl" href="/plugins/video/container.xsl"?>
 <TiVoContainer>
-    <Tivos>
-        #for $tivo in $tivo_names
-            #if $tivo and $tivo in $tivos
-                <Tivo>$escape($tivo_names[$tivo])</Tivo>
-            #end if
-        #end for
-        #for $tivo in $tivo_names
-            #if $tivo and not $tivo in $tivos
-                <Tivo>$escape($tivo_names[$tivo])</Tivo>
-            #end if
-        #end for
-    </Tivos>
     <ItemStart>$start</ItemStart>
     <ItemCount>#echo len($videos) #</ItemCount>
     <Details>
@@ -38,9 +25,6 @@
                 <Url>/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)</Url>
                 <ContentType>x-tivo-container/folder</ContentType>
             </Content>
-            <Push>
-                <Date>$video.textDate</Date>
-            </Push>
         </Links>
     </Item>
     #else
@@ -79,12 +63,6 @@
                 <AcceptsParams>No</AcceptsParams>
                 <Url>/TiVoConnect?Command=TVBusQuery&amp;Container=$quote($container)&amp;File=$quote($video.part_path)</Url>
             </TiVoVideoDetails>
-            <Push>
-                <Container>$escape($container)</Container>
-                <File>$escape($video.part_path)</File>
-                <Date>$video.textDate</Date>
-                <Size>$video.textSize</Size>
-            </Push>
         </Links>
     </Item>
     #end if

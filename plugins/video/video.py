@@ -34,7 +34,8 @@ PUSHED = '<h3>Queued for Push to %s</h3> <p>%s</p>'
 def tmpl(name):
     return file(os.path.join(SCRIPTDIR, 'templates', name), 'rb').read()
 
-CONTAINER_TEMPLATE = tmpl('container.tmpl')
+HTML_CONTAINER_TEMPLATE = tmpl('container_html.tmpl')
+XML_CONTAINER_TEMPLATE = tmpl('container_xml.tmpl')
 TVBUS_TEMPLATE = tmpl('TvBus.tmpl')
 
 EXTENSIONS = """.tivo .mpg .avi .wmv .mov .flv .vob .mp4 .m4v .mkv .ts 
@@ -334,7 +335,10 @@ class Video(Plugin):
 
             videos.append(video)
 
-        t = Template(CONTAINER_TEMPLATE, filter=EncodeUnicode)
+        if tsn:
+            t = Template(XML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
+        else:
+            t = Template(HTML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
         t.container = cname
         t.name = subcname
         t.total = total
@@ -347,7 +351,10 @@ class Video(Plugin):
         t.tivos = config.tivos
         t.tivo_names = config.tivo_names
         handler.send_response(200)
-        handler.send_header('Content-Type', 'text/xml')
+        if tsn:
+            handler.send_header('Content-Type', 'text/xml')
+        else:
+            handler.send_header('Content-Type', 'text/html; charset=utf-8')
         handler.send_header('Expires', '0')
         handler.end_headers()
         handler.wfile.write(t)

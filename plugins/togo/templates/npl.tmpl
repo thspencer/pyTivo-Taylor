@@ -36,7 +36,7 @@
 	    ## This is a folder
 		<td></td>
 		<td><img src="/folder.png" alt=""></td>
-		<td><a href='/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;Folder=$(row["UniqueId"])&amp;TiVo=$tivoIP'>$row['Title'] </a></td>
+		<td class="progmain"><a href='/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;Folder=$(row["UniqueId"])&amp;TiVo=$tivoIP'>$row['Title'] </a></td>
 		<td class="unbreak">$(row["TotalItems"]) Items</td>
 		<td class="unbreak">$row["LastChangeDate"]</td>
 	  #else
@@ -62,7 +62,7 @@
 			#end if
 		#end if
 		</td>
-		<td>
+		<td class="progmain">
 			#if 'episodeTitle' in $row
 			<span class="progtitle">$escape($row['title']): $escape($row['episodeTitle'])</span>
 			#else
