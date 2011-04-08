@@ -27,6 +27,9 @@ table, td {
     color: #FFFFFF;
 	background: url(iPhoneToolbar.png) #7388a5 repeat-x;
     }
+#titleA {
+	color:#FFFFFF;
+	text-decoration:none;}
 #header  td{
 	font-size: 16px;
 	font-weight: bold;
@@ -34,12 +37,18 @@ table, td {
 	padding: 5px 0 5px 15px;
 	background-color: #B1B5C0;
 	color: #FFFFFF;
-	border: 1px solid black;
+	border-bottom:1px solid #000; 
+	border-top:1px solid #000;
 	}
+#headerA {
+	color:#FFFFFF;
+	text-decoration:none;}
 #pushmenu {
 	position: absolute;
 	top: 8px;
 	right:10px;
+	color:#FFFFFF;
+	text-decoration:none;
 	}
 	
 #ColA 	{
@@ -50,6 +59,7 @@ table, td {
 	padding-right: 15px;
 	color:black;
 	text-decoration:none;
+	max-width:100px;
     }
 #ColB	{
 	text-align: center;

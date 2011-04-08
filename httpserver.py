@@ -254,13 +254,13 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.admin = ''
 
         if config.get_server('tivo_mak') and config.get_server('togo_path'):
-            t.togo = '<br>Pull from TiVos:<br>'
+            t.togo = 'Pull from TiVos:<br>'
         else:
             t.togo = ''
 
         if (config.get_server('tivo_username') and
             config.get_server('tivo_password')):
-            t.shares = '<br>Push from video shares:<br>'
+            t.shares = 'Push from video shares:<br>'
         else:
             t.shares = ''
 

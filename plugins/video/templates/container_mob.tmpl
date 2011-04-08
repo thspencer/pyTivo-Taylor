@@ -8,8 +8,34 @@
 </head>
 <body>
 <form action="/TiVoConnect" method="POST">
-<p id="title">pyTivo - Push - $escape($name)</p>
+<script language="JavaScript">
+<!--
+function toggle(source) {
+	var checkboxes = document.getElementsByName('File');
+	for (var i = 0; i < checkboxes.length; i++) {
+		if (typeof(checkboxes[i].checked) != "undefined") {
+			checkboxes[i].checked = source.checked;
+			}
+	}
+}
+-->
+</script>
+<p id="title"><a id="titleA" href="/">pyTiVo</a></p>
 <table id="main">
+    #set $parent = ''
+    #set $folders = $name.split("/")
+    #set $current_folder = $folders.pop()
+    #set $parent = '/'.join($folders)
+    <tr id="header">
+    <td colspan="2">
+    #if $parent != ''
+    <a id="headerA" href="/TiVoConnect?Command=QueryContainer&amp;Container=$escape($parent)">$escape($name)</a>
+    #else
+    $escape($name)
+    #end if
+    </td>
+    <td><input type="checkbox" name="selectAll" onClick="toggle(this)" Title="Select All" /></td>
+    </tr>
   #set $i = 0
   ## i variable is used to alternate colors of row
   ## loop through passed data printing row for each show or folder
@@ -20,11 +46,11 @@
 	  #if $video.is_dir
 	    ## This is a folder
 		<td id="ColA"><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)'>$video.title </a></td>
-        <td id="ColB">$video.total_items Items</td>
+        <td id="ColB"><div id="count">$video.total_items</div></td>
 		<td id="ColC"><img src="/iphonearrow.png" alt="" /></td>
 	  #else
 	    ## This is a show
-		<td id="ColA1">
+		<td id="ColA">
            	#if $video.episodeTitle
 			<span class="progtitle">$video.title: $video.episodeTitle</span>
 			#else

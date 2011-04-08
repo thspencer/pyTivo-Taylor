@@ -2,14 +2,36 @@
 "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<title>pyTivo - $escape($tname)</title>
+<title>pyTiVo - $escape($tname)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
 <link rel="stylesheet" type="text/css" href="/main_mob.css">
 </head>
 <body>
 <form action="/TiVoConnect" method="POST">
-<p id="title">pyTiVo - $escape($tname)</p>
+<script language="JavaScript">
+<!--
+function toggle(source) {
+	var checkboxes = document.getElementsByName('Url');
+	for (var i = 0; i < checkboxes.length; i++) {
+		if (typeof(checkboxes[i].checked) != "undefined") {
+			checkboxes[i].checked = source.checked;
+			}
+	}
+}
+-->
+</script>
+<p id="title"><a id="titleA" href="/">pyTiVo</a></p>
 <table id="main">
+    <tr id="header">
+        <td colspan="2">
+        #if $folder != ''
+        <a id="headerA" href="/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;TiVo=$tivoIP">$escape($tname)</a>
+        #else
+        $escape($tname)
+        #end if
+        </td>
+        <td><input type="checkbox" name="selectAll" onClick="toggle(this)" Title="Select All" /></td>
+    </tr>
   #if $ItemStart > 0
 	<tr><td colspan="3">
 	#set $Offset = -($ItemStart + 1)
@@ -113,13 +135,19 @@
  <input type="hidden" name="Command" value="ToGo">
  <input type="hidden" name="Container" value="$container">
  <input type="hidden" name="TiVo" value="$tivoIP">
-#if $has_tivodecode
- <input type="checkbox" name="decode">Decrypt with tivodecode<br>
+ <input type="checkbox" name="save">Metadata<br>
+#if $togo_mpegts == 'default'
+ <input type="checkbox" checked name="ts_format">Transfer as mpeg-ts<br>
+#elif $togo_mpegts == 'enabled'
+ <input type="checkbox" name="ts_format">Transfer as mpeg-ts<br>
 #end if
- <input type="checkbox" name="save">Metadata
-
- <input style="font-size:16px" value="Transfer" type="submit">
 </p>
+<div id="pushmenu">
+#if $has_tivodecode
+ <input type="checkbox" name="decode">Decrypt
+#end if
+ <input style="font-size:16px" value="Transfer" type="submit">
+</div>
 </form>
 </body>
 </html>
