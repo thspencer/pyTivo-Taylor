@@ -31,7 +31,7 @@ function toggle(source) {
     #if $parent != ''
     <a id="headerA" href="/TiVoConnect?Command=QueryContainer&amp;Container=$escape($parent)">$escape($name)</a>
     #else
-    $escape($name)
+    <div id="headerA">$escape($name)</div>
     #end if
     </td>
     <td><input type="checkbox" name="selectAll" onClick="toggle(this)" Title="Select All" /></td>

@@ -34,7 +34,7 @@ table, td {
 	font-size: 16px;
 	font-weight: bold;
 	text-shadow: rgba(0, 0, 0, 0.6) 0px -1px 0;
-	padding: 5px 0 5px 15px;
+	padding: 5px 0px 5px 0px;
 	background-color: #B1B5C0;
 	color: #FFFFFF;
 	border-bottom:1px solid #000; 
@@ -42,7 +42,9 @@ table, td {
 	}
 #headerA {
 	color:#FFFFFF;
-	text-decoration:none;}
+	text-decoration:none;
+	margin-left:15px;
+}
 #pushmenu {
 	position: absolute;
 	top: 8px;
@@ -66,7 +68,7 @@ table, td {
 	width: 22px;
 	}
 #ColC	{
-	text-align: center;
+	text-align: left;
 	padding-right: 10px;
 	width: 22px
 	}

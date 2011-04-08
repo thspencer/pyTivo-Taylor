@@ -27,7 +27,7 @@ function toggle(source) {
         #if $folder != ''
         <a id="headerA" href="/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;TiVo=$tivoIP">$escape($tname)</a>
         #else
-        $escape($tname)
+        <div id="headerA">$escape($tname)</div>
         #end if
         </td>
         <td><input type="checkbox" name="selectAll" onClick="toggle(this)" Title="Select All" /></td>
