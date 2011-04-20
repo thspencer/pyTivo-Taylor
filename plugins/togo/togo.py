@@ -85,7 +85,7 @@ class ToGo(Plugin):
         folder = ''
         tivo_mak = config.get_server('tivo_mak')
         has_tivodecode = bool(config.get_bin('tivodecode'))
-        togo_mpegts = config.get_server('togo_mpegts').lower()
+        togo_mpegts = config.get_server('togo_mpegts', 'False').lower()
         useragent = handler.headers.getheader('User-Agent', '')
 
         if 'TiVo' in query:
