@@ -186,9 +186,12 @@ else:
                                       data['bodyId'])
 
             offer_id = xml.findtext('offerId')
-            content_id = offer_id.replace('of','ct')
+            if offer_id:
+                content_id = offer_id.replace('of','ct')
 
-            return offer_id, content_id
+                return offer_id, content_id
+            else:
+                raise Exception(ElementTree.tostring(xml))
 
         def __subscribe(self, offer_id, content_id, tsn):
             """Push the offer to the tivo"""
