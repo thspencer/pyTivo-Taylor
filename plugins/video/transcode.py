@@ -252,14 +252,29 @@ def select_audiolang(inFile, tsn):
     audio_lang = config.get_tsn('audio_lang', tsn)
     if audio_lang != None and vInfo['mapVideo'] != None:
         stream = vInfo['mapAudio'][0][0]
-        langmatch = []
+        langmatch_curr = []
+        langmatch_prev = vInfo['mapAudio'][:]
         for lang in audio_lang.replace(' ','').lower().split(','):
-            for s, l in vInfo['mapAudio']:
-                if lang in s + l.replace(' ','').lower():
-                    langmatch.append(s)
+            for s, l, data in langmatch_prev:
+                if lang in s + (l+data).replace(' ','').lower():
+                    langmatch_curr.append((s, l, data))
                     stream = s
-                    break
-            if langmatch: break
+            #if only 1 item matched we're done
+            if len(langmatch_curr) == 1:
+                del langmatch_prev[:]
+                break
+            #if more than 1 item matched copy the curr area to the prev array
+            #we only need to look at the new shorter list from now on
+            elif len(langmatch_curr) > 1:
+                del langmatch_prev[:]
+                langmatch_prev = langmatch_curr[:]
+                del langmatch_curr[:]
+            #if nothing matched we'll keep the prev array and clear the curr array
+            else:
+                del langmatch_curr[:]
+        #if we drop out of the loop with more than 1 item default to the first item
+        if len(langmatch_prev) > 1:
+            stream = langmatch_prev[0][0]
         if stream is not '':
             return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
     return ''
@@ -858,7 +873,7 @@ def video_info(inFile, cache=True):
         vInfo['dar1'] = None
 
     # get Audio Stream mapping.
-    rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:.*')
+    rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:(.*)')
     x = rezre.search(output)
     amap = []
     if x:
