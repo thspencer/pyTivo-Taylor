@@ -250,14 +250,15 @@ def select_audioch(tsn):
 def select_audiolang(inFile, tsn):
     vInfo = video_info(inFile)
     audio_lang = config.get_tsn('audio_lang', tsn)
+    debug('audio_lang: %s' % audio_lang)
     if audio_lang != None and vInfo['mapVideo'] != None:
         stream = vInfo['mapAudio'][0][0]
         langmatch_curr = []
         langmatch_prev = vInfo['mapAudio'][:]
         for lang in audio_lang.replace(' ','').lower().split(','):
-            for s, l, data in langmatch_prev:
-                if lang in s + (l+data).replace(' ','').lower():
-                    langmatch_curr.append((s, l, data))
+            for s, l in langmatch_prev:
+                if lang in s + (l).replace(' ','').lower():
+                    langmatch_curr.append((s, l))
                     stream = s
             #if only 1 item matched we're done
             if len(langmatch_curr) == 1:
@@ -276,7 +277,9 @@ def select_audiolang(inFile, tsn):
         if len(langmatch_prev) > 1:
             stream = langmatch_prev[0][0]
         if stream is not '':
+            debug('selected audio stream: %s' % stream)
             return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
+    debug('selected audio stream: %s' % '')
     return ''
 
 def select_videofps(inFile, tsn):
@@ -878,7 +881,7 @@ def video_info(inFile, cache=True):
     amap = []
     if x:
         for x in rezre.finditer(output):
-            amap.append(x.groups())
+            amap.append((x.group(1), x.group(2)+x.group(3)))
     else:
         amap.append(('', ''))
         debug('failed at mapAudio')
