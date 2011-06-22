@@ -43,8 +43,8 @@ EXTENSIONS = """.tivo .mpg .avi .wmv .mov .flv .vob .mp4 .m4v .mkv .ts
 .dif .divx .dmb .dpg .dv .dvr-ms .evo .eye .flc .fli .flx .gvi .ivf .m1v 
 .m21 .m2t .m2ts .m2v .m2p .m4e .mjp .mjpeg .mod .moov .movie .mp21 .mpe 
 .mpeg .mpv .mpv2 .mqv .mts .mvb .nsv .nuv .nut .ogm .qt .rm .rmvb .rts 
-.scm .smv .ssm .svi .vdo .vfw .vid .viv .vivo .vp6 .vp7 .vro .wm .wmd 
-.yuv""".split()
+.scm .smv .ssm .svi .vdo .vfw .vid .viv .vivo .vp6 .vp7 .vro .webm .wm
+.wmd .yuv""".split()
 
 use_extensions = True
 try:
