@@ -237,7 +237,8 @@ def from_eyetv(full_path):
 
 def from_text(full_path):
     metadata = {}
-    path, name = os.path.split(unicode(full_path, 'utf-8'))
+    full_path = unicode(full_path, 'utf-8')
+    path, name = os.path.split(full_path)
     title, ext = os.path.splitext(name)
 
     for metafile in [os.path.join(path, title) + '.properties',
