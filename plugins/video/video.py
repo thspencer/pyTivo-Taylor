@@ -79,7 +79,7 @@ class Pushable(object):
 
             if (mime == 'video/mpeg' and
                 transcode.mp4_remuxable(f['path'], f['tsn'])):
-                new_path = transcode.mp4_remux(f['path'], f['name'])
+                new_path = transcode.mp4_remux(f['path'], f['name'], f['tsn'])
                 if new_path:
                     mime = 'video/mp4'
                     f['name'] = new_path

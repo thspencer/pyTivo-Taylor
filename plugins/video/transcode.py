@@ -627,7 +627,12 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
             if codec not in ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
                              'ac3', 'liba52'):
                 message = (False, 'aCodec %s not compatible' % codec)
-
+                break
+            audio_lang = config.get_tsn('audio_lang', tsn)
+            if audio_lang:
+                if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
+                    message = (False, '%s preferred audio track exists' % 
+                                      audio_lang)
             break
 
         if mime == 'video/bif':
@@ -677,10 +682,9 @@ def tivo_compatible_container(vInfo, inFile, mime=''):
 
 def mp4_remuxable(inFile, tsn=''):
     vInfo = video_info(inFile)
-    return (tivo_compatible_video(vInfo, tsn, 'video/mp4')[0] and
-            tivo_compatible_audio(vInfo, inFile, tsn, 'video/mp4')[0])
+    return tivo_compatible_video(vInfo, tsn, 'video/mp4')[0]
 
-def mp4_remux(inFile, basename):
+def mp4_remux(inFile, basename, tsn=''):
     outFile = inFile + '.pyTivo-temp'
     newname = basename + '.pyTivo-temp'
     if os.path.exists(outFile):
@@ -693,8 +697,26 @@ def mp4_remux(inFile, basename):
         fname = fname.encode('iso8859-1')
         oname = oname.encode('iso8859-1')
 
-    cmd = [ffmpeg_path, '-i', fname, '-vcodec', 'copy', '-acodec',
-           'copy', '-f', 'mp4', oname]
+    settings = {'video_codec': '-vcodec copy',
+            'video_br': select_videobr(inFile, tsn),
+            'video_fps': select_videofps(inFile, tsn),
+            'max_video_br': select_maxvideobr(tsn),
+            'buff_size': select_buffsize(tsn),
+            'aspect_ratio': ' '.join(select_aspect(inFile, tsn)),
+            'audio_br': select_audiobr(tsn),
+            'audio_fr': select_audiofr(inFile, tsn),
+            'audio_ch': select_audioch(tsn),
+            'audio_codec': select_audiocodec(True, inFile, tsn),
+            'audio_lang': select_audiolang(inFile, tsn),
+            'ffmpeg_pram': select_ffmpegprams(tsn),
+            'format': '-f mp4'}
+
+    cmd_string = config.getFFmpegTemplate(tsn) % settings
+    cmd = [ffmpeg_path, '-i', fname] + cmd_string.split() + [oname]
+
+    debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
+    debug(' '.join(cmd))
+
     ffmpeg = subprocess.Popen(cmd)
     debug('remuxing ' + inFile + ' to ' + outFile)
     if ffmpeg.wait():
