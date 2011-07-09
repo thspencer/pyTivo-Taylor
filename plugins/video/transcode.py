@@ -213,16 +213,25 @@ def select_audiocodec(isQuery, inFile, tsn=''):
     if not codec:
         # Default, compatible with all TiVo's
         codec = 'ac3'
-        if vInfo['aCodec'] in ('ac3', 'liba52', 'mp2'):
+        if vInfo['aCodec'] in ('libfaad', 'ac3', 'liba52', 'mp2'):
             aKbps = vInfo['aKbps']
+            aCh = vInfo['aCh']
             if aKbps == None:
                 if not isQuery:
-                    aKbps = audio_check(inFile, tsn)
+                    vInfoQuery = audio_check(inFile, tsn)
+                    if vInfoQuery == None:
+                        aKbps = None
+                        aCh = None
+                    else:
+                        aKbps = vInfoQuery['aKbps']
+                        aCh = vInfoQuery['aCh']
                 else:
                     codec = 'TBD'
             if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
+            if vInfo['aCodec'] == 'libfaad' and aCh != 2:
+                codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
     if ((codec == 'copy' and codectype == 'mpeg2video' and not copy_flag) or
@@ -691,7 +700,7 @@ def mp4_remux(inFile, basename, tsn=''):
             'audio_br': select_audiobr(tsn),
             'audio_fr': select_audiofr(inFile, tsn),
             'audio_ch': select_audioch(tsn),
-            'audio_codec': select_audiocodec(True, inFile, tsn),
+            'audio_codec': select_audiocodec(False, inFile, tsn),
             'audio_lang': select_audiolang(inFile, tsn),
             'ffmpeg_pram': select_ffmpegprams(tsn),
             'format': '-f mp4'}
@@ -809,6 +818,19 @@ def video_info(inFile, cache=True):
             else:
                 vInfo[attr] = None
             debug('failed at ' + attr)
+
+    rezre = re.compile(r'.*Audio: .+, (?:(\d+)(?:(?:\.(\d))?(?: channels)?)|stereo),.*')
+    x = rezre.search(output)
+    if x:
+        if x.group(1) == 'stereo':
+            vInfo['aCh'] = 2
+        elif x.group(2):
+            vInfo['aCh'] = int(x.group(1)) + int(x.group(2))
+        else:
+            vInfo['aCh'] = int(x.group(1))
+    else:
+        vInfo['aCh'] = ''
+        debug('failed at aCh')
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
@@ -948,12 +970,12 @@ def audio_check(inFile, tsn):
     except:
         kill(ffmpeg)
         testfile.close()
-        aKbps = None
+        vInfo = None
     else:
         testfile.close()
-        aKbps = video_info(testname, False)['aKbps']
+        vInfo = video_info(testname, False)
     os.remove(testname)
-    return aKbps
+    return vInfo
 
 def supported_format(inFile):
     if video_info(inFile)['Supported']:
