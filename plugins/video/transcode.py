@@ -206,7 +206,7 @@ def cleanup(inFile):
     reapers[inFile].cancel()
     del reapers[inFile]
 
-def select_audiocodec(isQuery, inFile, tsn=''):
+def select_audiocodec(isQuery, inFile, tsn='', mime=''):
     if inFile[-5:].lower() == '.tivo':
         return '-acodec copy'
     vInfo = video_info(inFile)
@@ -215,7 +215,13 @@ def select_audiocodec(isQuery, inFile, tsn=''):
     if not codec:
         # Default, compatible with all TiVo's
         codec = 'ac3'
-        if vInfo['aCodec'] in ('libfaad', 'ac3', 'liba52', 'mp2'):
+        if mime == 'video/mp4':
+            compatiblecodecs = ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
+                             'ac3', 'liba52')
+        else:
+            compatiblecodecs = ('ac3', 'liba52', 'mp2')
+
+        if vInfo['aCodec'] not in compatiblecodecs:
             aKbps = vInfo['aKbps']
             aCh = vInfo['aCh']
             if aKbps == None:
@@ -232,7 +238,7 @@ def select_audiocodec(isQuery, inFile, tsn=''):
             if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
-            if vInfo['aCodec'] == 'libfaad' and aCh != 2:
+            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and aCh > 2:
                 codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
@@ -637,6 +643,9 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
                              'ac3', 'liba52'):
                 message = (False, 'aCodec %s not compatible' % codec)
                 break
+            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and vInfo['aCh'] > 2:
+                message = (False, 'aCodec %s is only supported with 2 or less channels, the track has %d channels' % (codec, vInfo['aCh']))
+                break
             audio_lang = config.get_tsn('audio_lang', tsn)
             if audio_lang:
                 if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
@@ -715,7 +724,7 @@ def mp4_remux(inFile, basename, tsn=''):
             'audio_br': select_audiobr(tsn),
             'audio_fr': select_audiofr(inFile, tsn),
             'audio_ch': select_audioch(tsn),
-            'audio_codec': select_audiocodec(False, inFile, tsn),
+            'audio_codec': select_audiocodec(False, inFile, tsn, 'video/mp4'),
             'audio_lang': select_audiolang(inFile, tsn),
             'ffmpeg_pram': select_ffmpegprams(tsn),
             'format': '-f mp4'}
