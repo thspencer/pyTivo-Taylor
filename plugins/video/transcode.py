@@ -844,15 +844,18 @@ def video_info(inFile, cache=True):
                 vInfo[attr] = None
             debug('failed at ' + attr)
 
-    rezre = re.compile(r'.*Audio: .+, (?:(\d+)(?:(?:\.(\d))?(?: channels)?)|stereo),.*')
+    rezre = re.compile(r'.*Audio: .+, (?:(\d+)(?:(?:\.(\d))?(?: channels)?)|(stereo)),.*')
     x = rezre.search(output)
     if x:
-        if x.group(1) == 'stereo':
+        if x.group(3) and x.group(3) == 'stereo':
             vInfo['aCh'] = 2
         elif x.group(2):
             vInfo['aCh'] = int(x.group(1)) + int(x.group(2))
-        else:
+        elif x.group(1):
             vInfo['aCh'] = int(x.group(1))
+        else:
+            vInfo['aCh'] = ''
+            debug('failed at aCh')
     else:
         vInfo['aCh'] = ''
         debug('failed at aCh')
