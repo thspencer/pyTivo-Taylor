@@ -413,6 +413,13 @@ class Video(Plugin):
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(f['path'])
 
+        temp_share = config.get_server('temp_share', '')
+        temp_share_path = ''
+        if temp_share:
+            for name, data in config.getShares():
+                if temp_share == name:
+                    temp_share_path = data.get('path')
+
         mime = 'video/mpeg'
         if config.isHDtivo(f['tsn']):
             for m in ['video/mp4', 'video/bif']:
@@ -422,13 +429,19 @@ class Video(Plugin):
 
             if (mime == 'video/mpeg' and
                 transcode.mp4_remuxable(f['path'], f['tsn'])):
-                new_path = transcode.mp4_remux(f['path'], f['name'], f['tsn'])
+                new_path = transcode.mp4_remux(f['path'], f['name'], f['tsn'], temp_share_path)
                 if new_path:
                     mime = 'video/mp4'
                     f['name'] = new_path
 
         if file_info['valid']:
             file_info.update(self.metadata_full(f['path'], f['tsn'], mime))
+
+        if temp_share_path:
+            ip = config.get_ip()
+            port = config.getPort()
+            container = quote(temp_share) + '/'
+            f['url'] = 'http://%s:%s/%s' % (ip, port, container)
 
         url = f['url'] + quote(f['name'])
 
