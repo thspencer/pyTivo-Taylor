@@ -663,3 +663,31 @@ be available! You'll have to remove it from pyTivo.conf with a text
 editor.
 Example Settings: True/False
 Available In: Server
+
+temp_share
+
+Default Setting: None
+Valid Entries: Share name
+Required: No
+Skill: Moderate
+Description: Sets a temporarily share to store your media content 
+that is being remuxed before being sent to your TiVo.  If content exists 
+on network share, setting this to a local share on the computer running 
+pyTivo will significantly speed up the process. If not set or share is not 
+valid pyTivo will use the original path of your media content for temporary storage. 
+Example Settings: Videos, Movies, TV Shows, etc.
+Available In: Server
+
+togo_mpegts
+
+Default Setting: False
+Valid Entries: True/False/Default
+Required: No
+Skill: Moderate
+Description: For Tivos that support mpeg-ts transfer. This will enable at tick box on 
+the togo screen, when this tick box is ticked pyTivo will transfer files in mpeg-ts format instead 
+of the default mpeg-ps. This is necessary if your video content contains h264 encoding. 
+True = display tick box. False = do not display tick box. Default = display tick box and 
+default to having it ticked.
+Example Settings: True/False/Default
+Available In: Server
