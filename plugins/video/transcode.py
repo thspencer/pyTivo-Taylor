@@ -219,7 +219,7 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
         else:
             compatiblecodecs = ('ac3', 'liba52', 'mp2')
 
-        if vInfo['aCodec'] not in compatiblecodecs:
+        if vInfo['aCodec'] in compatiblecodecs:
             aKbps = vInfo['aKbps']
             aCh = vInfo['aCh']
             if aKbps == None:
@@ -232,11 +232,11 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
                         aKbps = vInfoQuery['aKbps']
                         aCh = vInfoQuery['aCh']
                 else:
-                    codec = 'TBD'
+                    codec = 'TBA'
             if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
-            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and aCh > 2:
+            if vInfo['aCodec'] != 'ac3' and aCh > 2:
                 codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
