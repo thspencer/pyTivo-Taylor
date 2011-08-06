@@ -433,15 +433,14 @@ class Video(Plugin):
                 if new_path:
                     mime = 'video/mp4'
                     f['name'] = new_path
+                    if temp_share_path:
+                        ip = config.get_ip()
+                        port = config.getPort()
+                        container = quote(temp_share) + '/'
+                        f['url'] = 'http://%s:%s/%s' % (ip, port, container)
 
         if file_info['valid']:
             file_info.update(self.metadata_full(f['path'], f['tsn'], mime))
-
-        if temp_share_path:
-            ip = config.get_ip()
-            port = config.getPort()
-            container = quote(temp_share) + '/'
-            f['url'] = 'http://%s:%s/%s' % (ip, port, container)
 
         url = f['url'] + quote(f['name'])
 
