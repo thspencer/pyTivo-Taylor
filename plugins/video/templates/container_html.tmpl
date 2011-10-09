@@ -26,9 +26,9 @@ function toggle(source) {
 	<tr class="header">
 		<td><input type="checkbox" name="selectAll" onClick="toggle(this)" Title="Select All" /></td>
 		<td></td>
-		<td>Title</td>
+		<td><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)&SortOrder=Normal'>Title</a></td>
 		<td>Size</td>
-		<td>Capture Date</td>
+		<td><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)&SortOrder=!CaptureDate'>Capture Date</a></td>
 	</tr>
     #set $parent = ''
     #set $folders = $name.split("/")
