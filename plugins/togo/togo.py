@@ -264,6 +264,7 @@ class ToGo(Plugin):
         length = 0
         start_time = time.time()
         last_interval = start_time
+        now = start_time
         try:
             while status[url]['running']:
                 output = handle.read(1024000)
@@ -282,6 +283,7 @@ class ToGo(Plugin):
             if status[url]['running']:
                 status[url]['finished'] = True
         except Exception, msg:
+            status[url]['running'] = False
             logger.info(msg)
         handle.close()
         f.close()
