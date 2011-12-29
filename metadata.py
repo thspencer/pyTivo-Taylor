@@ -18,28 +18,26 @@ import config
 # Something to strip
 TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
 
-TV_RATINGS = {'TV-Y7': 'x1', 'TV-Y': 'x2', 'TV-G': 'x3', 'TV-PG': 'x4', 
-              'TV-14': 'x5', 'TV-MA': 'x6', 'TV-NR': 'x7',
-              'TVY7': 'x1', 'TVY': 'x2', 'TVG': 'x3', 'TVPG': 'x4', 
-              'TV14': 'x5', 'TVMA': 'x6', 'TVNR': 'x7',
-              'Y7': 'x1', 'Y': 'x2', 'G': 'x3', 'PG': 'x4',
-              '14': 'x5', 'MA': 'x6', 'NR': 'x7', 'UNRATED': 'x7'}
+TV_RATINGS = {'TV-Y7': 1, 'TV-Y': 2, 'TV-G': 3, 'TV-PG': 4, 'TV-14': 5,
+              'TV-MA': 6, 'TV-NR': 7, 'TVY7': 1, 'TVY': 2, 'TVG': 3,
+              'TVPG': 4, 'TV14': 5, 'TVMA': 6, 'TVNR': 7, 'Y7': 1,
+              'Y': 2, 'G': 3, 'PG': 4, '14': 5, 'MA': 6, 'NR': 7,
+              'UNRATED': 7, 'X1': 1, 'X2': 2, 'X3': 3, 'X4': 4, 'X5': 5,
+              'X6': 6, 'X7': 7}
 
-MPAA_RATINGS = {'G': 'G1', 'PG': 'P2', 'PG-13': 'P3', 'PG13': 'P3',
-                'R': 'R4', 'X': 'X5', 'NC-17': 'N6', 'NC17': 'N6',
-                'NR': 'N8', 'UNRATED': 'N8'}
+MPAA_RATINGS = {'G': 1, 'PG': 2, 'PG-13': 3, 'PG13': 3, 'R': 4, 'X': 5,
+                'NC-17': 6, 'NC17': 6, 'NR': 8, 'UNRATED': 8, 'G1': 1,
+                'P2': 2, 'P3': 3, 'R4': 4, 'X5': 5, 'N6': 6, 'N8': 8}
 
-STAR_RATINGS = {'1': 'x1', '1.5': 'x2', '2': 'x3', '2.5': 'x4',
-                '3': 'x5', '3.5': 'x6', '4': 'x7',
-                '*': 'x1', '**': 'x3', '***': 'x5', '****': 'x7'}
+STAR_RATINGS = {'1': 1, '1.5': 2, '2': 3, '2.5': 4, '3': 5, '3.5': 6,
+                '4': 7, '*': 1, '**': 3, '***': 5, '****': 7}
 
-HUMAN = {'mpaaRating': {'G1': 'G', 'P2': 'PG', 'P3': 'PG-13', 'R4': 'R',
-                        'X5': 'X', 'N6': 'NC-17', 'N8': 'Unrated'},
-         'tvRating': {'x1': 'TV-Y7', 'x2': 'TV-Y', 'x3': 'TV-G',
-                      'x4': 'TV-PG', 'x5': 'TV-14', 'x6': 'TV-MA',
-                      'x7': 'Unrated'},
-         'starRating': {'x1': '1', 'x2': '1.5', 'x3': '2', 'x4': '2.5',
-                        'x5': '3', 'x6': '3.5', 'x7': '4'}}
+HUMAN = {'mpaaRating': {1: 'G', 2: 'PG', 3: 'PG-13', 4: 'R', 5: 'X',
+                        6: 'NC-17', 8: 'NR'},
+         'tvRating': {1: 'Y7', 2: 'Y', 3: 'G', 4: 'PG', 5: '14',
+                      6: 'MA', 7: 'NR'},
+         'starRating': {1: '1', 2: '1.5', 3: '2', 4: '2.5', 5: '3',
+                        6: '3.5', 7: '4'}}
 
 BOM = '\xef\xbb\xbf'
 
@@ -48,6 +46,15 @@ mp4_cache = LRUCache(50)
 dvrms_cache = LRUCache(50)
 
 mswindows = (sys.platform == "win32")
+
+def get_mpaa(rating):
+    return HUMAN['mpaaRating'].get(rating, 'NR')
+
+def get_tv(rating):
+    return HUMAN['tvRating'].get(rating, 'NR')
+
+def get_stars(rating):
+    return HUMAN['starRating'].get(rating, '')
 
 def tag_data(element, tag):
     for name in tag.split('/'):
@@ -72,8 +79,7 @@ def _tag_value(element, tag):
     item = element.getElementsByTagName(tag)
     if item:
         value = item[0].attributes['value'].value
-        name = item[0].firstChild.data
-        return name[0] + value[0]
+        return int(value[0])
 
 def from_moov(full_path):
     if full_path in mp4_cache:
@@ -309,7 +315,7 @@ def from_container(xmldoc):
             if key == 'description':
                 data = data.replace(TRIBUNE_CR, '')
             elif key == 'tvRating':
-                data = 'x' + data
+                data = int(data)
             elif key == 'displayMajorNumber':
                 if '-' in data:
                     data, metadata['displayMinorNumber'] = data.split('-')
@@ -357,14 +363,15 @@ def from_details(xml):
     if sb:
         metadata['showingBits'] = sb[0].attributes['value'].value
 
-    for tag in ['starRating', 'mpaaRating', 'colorCode']:
+    #for tag in ['starRating', 'mpaaRating', 'colorCode']:
+    for tag in ['starRating', 'mpaaRating']:
         value = _tag_value(program, tag)
         if value:
             metadata[tag] = value
 
     rating = _tag_value(showing, 'tvRating')
     if rating:
-        metadata['tvRating'] = 'x' + rating[1]
+        metadata['tvRating'] = rating
 
     return metadata
 
