@@ -371,6 +371,9 @@ class Video(Plugin):
             t = Template(TVBUS_TEMPLATE, filter=EncodeUnicode)
             t.video = file_info
             t.escape = escape
+            t.get_tv = metadata.get_tv
+            t.get_mpaa = metadata.get_mpaa
+            t.get_stars = metadata.get_stars
             details = str(t)
             self.tvbus_cache[(tsn, file_path)] = details
         return details

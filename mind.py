@@ -7,6 +7,7 @@ import urllib
 import warnings
 
 import config
+import metadata
 
 try:
     import xml.etree.ElementTree as ElementTree
@@ -61,10 +62,9 @@ else:
                 'title': title
             }
 
-            ratings = {'x1': 'y7', 'x2': 'y', 'x3': 'g', 'x4': 'pg',
-                       'x5': '14', 'x6': 'ma', 'x7': 'nr'}
-            if tvrating in ratings:
-                data['tvRating'] = ratings[tvrating]
+            rating = metadata.get_tv(tvrating)
+            if rating:
+                data['tvRating'] = rating.lower()
 
             mtypes = {'video/mp4': 'avcL41MP4', 'video/bif': 'vc1ApL3'}
             data['encodingType'] = mtypes.get(mime, 'mpeg2ProgramStream')
