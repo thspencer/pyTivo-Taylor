@@ -293,6 +293,7 @@ class Video(Plugin):
         container = handler.server.containers[cname]
         precache = container.get('precache', 'False').lower() == 'true'
         force_alpha = container.get('force_alpha', 'False').lower() == 'true'
+        use_html = query.get('Format', [''])[0].lower() == 'text/html'
 
         files, total, start = self.get_files(handler, query,
                                              self.video_file_filter,
@@ -335,7 +336,7 @@ class Video(Plugin):
 
             videos.append(video)
 
-        if tsn:
+        if not use_html:
             t = Template(XML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
         else:
             t = Template(HTML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
@@ -351,7 +352,7 @@ class Video(Plugin):
         t.tivos = config.tivos
         t.tivo_names = config.tivo_names
         handler.send_response(200)
-        if tsn:
+        if not use_html:
             handler.send_header('Content-Type', 'text/xml')
         else:
             handler.send_header('Content-Type', 'text/html; charset=utf-8')
