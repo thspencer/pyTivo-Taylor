@@ -208,7 +208,7 @@ def getDebug():
     try:
         return config.getboolean('Server', 'debug')
     except NoOptionError, ValueError:
-        return False
+        return True
 
 def getOptres(tsn=None):
     if tsn and config.has_section('_tivo_' + tsn):

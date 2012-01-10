@@ -132,7 +132,7 @@ Available In: Server
 
 debug
 
-Default Setting: False
+Default Setting: True
 Valid Entries: True/False
 Required: No
 Skill: Advanced
