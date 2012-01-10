@@ -5,6 +5,8 @@
 # you get pyTivo up and running.  You can access the tool by pointing your
 # browser to http://localhost:9032/
 
+#Read the pyTivo support wiki for additional help at http://pytivo.sourceforge.net
+
 [Server]
 port=9032
 
