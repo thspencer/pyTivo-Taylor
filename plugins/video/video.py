@@ -164,6 +164,7 @@ class Video(Plugin):
 
         if fname.endswith('.pyTivo-temp'):
             os.remove(fname)
+	    debug(fname + ' has been removed')
 
     def __duration(self, full_path):
         return transcode.video_info(full_path)['millisecs']
