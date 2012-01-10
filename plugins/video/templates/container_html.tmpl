@@ -53,7 +53,7 @@ function toggle(source) {
 	    ## This is a folder
 		<td></td>
         <td><img src="/folder.png" alt=""></td>
-		<td class="progmain"><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)'>$video.title </a></td>
+		<td class="progmain"><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)&amp;Format=text/html'>$video.title </a></td>
 		<td class="unbreak">$video.total_items Items</td>
 		<td class="unbreak">$video.textDate</td>
 	  #else

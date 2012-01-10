@@ -281,7 +281,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     and t.shares:
                 t.shares += ('<a href="TiVoConnect?Command=' +
                              'QueryContainer&amp;Container=' +
-                             quote(section) + '">' + section + '</a><br>')
+                             quote(section) + '&Format=text/html">' +
+                             section + '</a><br>')
 
         self.wfile.write(t)
 
