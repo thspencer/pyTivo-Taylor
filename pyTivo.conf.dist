@@ -10,6 +10,7 @@
 [Server]
 port=9032
 
+# FFmpeg is a required tool but downloaded separately.  See pyTivo wiki for help.
 # Full path to ffmpeg including filename
 # For windows: ffmpeg=c:\Program Files\pyTivo\bin\ffmpeg.exe
 # For linux:   ffmpeg=/usr/bin/ffmpeg
