@@ -71,6 +71,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
                 'audio_codec': select_audiocodec(isQuery, inFile, tsn),
                 'audio_lang': select_audiolang(inFile, tsn),
                 'ffmpeg_pram': select_ffmpegprams(tsn),
+                'ffmpeg_threads': select_ffmpegthreads(),
                 'format': select_format(tsn)}
 
     if isQuery:
@@ -344,6 +345,9 @@ def select_maxvideobr(tsn):
 
 def select_buffsize(tsn):
     return '-bufsize ' + config.getBuffSize(tsn)
+
+def select_ffmpegthreads():
+    return '-threads ' + str(config.getFFmpegThreads())
 
 def select_ffmpegprams(tsn):
     params = config.getFFmpegPrams(tsn)
