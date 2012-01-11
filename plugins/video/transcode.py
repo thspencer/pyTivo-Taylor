@@ -726,11 +726,13 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
     debug(' '.join(cmd))
 
     ffmpeg = subprocess.Popen(cmd)
+
     debug('remuxing ' + inFile + ' to ' + outFile)
+
     if ffmpeg.wait():
         os.remove(outFile)
-        debug('error during remuxing' + outFile + ' removed')
-	return None
+        debug('FFmpeg error, temp file has been removed: ' + outFile)
+        return None
 
     return newname
 
