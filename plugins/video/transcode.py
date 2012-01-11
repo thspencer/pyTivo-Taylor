@@ -696,6 +696,7 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
         outFile = os.path.join(temp_share_path, newname)
 
     if os.path.exists(outFile):
+        debug('File already exists.  Performing full transcode instead')
         return None  # ugh!
 
     ffmpeg_path = config.get_bin('ffmpeg')
