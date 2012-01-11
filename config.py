@@ -281,6 +281,21 @@ def getFFmpegTemplate(tsn):
             %(audio_fr)s %(audio_ch)s %(audio_codec)s %(audio_lang)s \
             %(ffmpeg_pram)s %(format)s'
 
+def getFFmpegThreads():
+    if config.has_option('Server', 'ffmpeg_threads'):
+       #older FFmpeg builds have history of crashing if threads < 1
+       try:
+          threads = max(int(float(config.get('Server', 'ffmpeg_threads'))), 1)
+       except ValueError:
+          return 1
+
+       #threads max is 16
+       if threads <= 16:
+          return threads
+
+    #If option invalid or not specified, ffmpeg_threads should default to 1
+    return 1
+
 def getFFmpegPrams(tsn):
     return get_tsn('ffmpeg_pram', tsn, True)
 

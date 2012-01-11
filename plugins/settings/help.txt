@@ -502,6 +502,16 @@ sections.
 Example Settings: True, False
 Available In: Tivos, HD_tivos, SD_tivos
 
+ffmpeg_threads
+
+Default Setting: None
+Valid Entries: Any number up to 16 that represents the number of CPU threads FFmpeg has access to.
+Required: No
+Skill: Very Advanced
+Description:  Using multiple threads with FFmpeg if your CPU has them can speed up transcoding time.  Using a setting of '2' for a dual core CPU may show increased transcoding speeds of 10% or more.  If you have a dual core CPU with hyperthreading then the setting might be '4'.   There is a diminishing return for this setting so make sure to set this to no more than the amount of threads your CPU is capable of handling.  After a certain point the TiVo is the limiting speed factor.
+Example Settings: Any number from 1 to 16
+Available In: Server
+
 ffmpeg_pram
 
 Default Setting: None
@@ -509,10 +519,8 @@ Valid Entries: A valid ffmpeg command
 Required: No
 Skill: Very Advanced
 Description: This allows you to append additional raw ffmpeg commands to
-the ffmpeg template. For example, you would enter '-threads 2' here if
-you have multiple processors and want ffmpeg to use both processors to
-speed up transcoding.
-Example Settings: -threads 2
+the ffmpeg template.
+Example Settings: A valid FFmpeg command
 Available In: Server, Tivos, HD_tivos, SD_tivos
 
 ffmpeg_tmpl
