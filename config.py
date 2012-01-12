@@ -287,14 +287,14 @@ def getFFmpegThreads():
        try:
           threads = max(int(float(config.get('Server', 'ffmpeg_threads'))), 1)
        except ValueError:
-          return 1
+          return ('1')
 
        #threads max is 16
        if threads <= 16:
-          return threads
+          return str(threads)
 
     #If option invalid or not specified, ffmpeg_threads should default to 1
-    return 1
+    return ('1')
 
 def getFFmpegPrams(tsn):
     return get_tsn('ffmpeg_pram', tsn, True)

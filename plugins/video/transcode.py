@@ -347,7 +347,7 @@ def select_buffsize(tsn):
     return '-bufsize ' + config.getBuffSize(tsn)
 
 def select_ffmpegthreads():
-    return '-threads ' + str(config.getFFmpegThreads())
+    return '-threads ' + config.getFFmpegThreads()
 
 def select_ffmpegprams(tsn):
     params = config.getFFmpegPrams(tsn)
