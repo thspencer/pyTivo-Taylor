@@ -722,6 +722,7 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
             'audio_codec': select_audiocodec(False, inFile, tsn, 'video/mp4'),
             'audio_lang': select_audiolang(inFile, tsn),
             'ffmpeg_pram': select_ffmpegprams(tsn),
+            'ffmpeg_threads': select_ffmpegthreads(),
             'format': '-f mp4'}
 
     cmd_string = config.getFFmpegTemplate(tsn) % settings
