@@ -425,7 +425,10 @@ class Video(Plugin):
             for name, data in config.getShares():
                 if temp_share == name:
                     temp_share_path = data.get('path')
-
+                    remux_path = temp_share_path
+        else:
+            remux_path = os.path.dirname(f['path'])
+            
         mime = 'video/mpeg'
         if config.isHDtivo(f['tsn']):
             for m in ['video/mp4', 'video/bif']:
@@ -434,7 +437,8 @@ class Video(Plugin):
                     break
 
             if (mime == 'video/mpeg' and
-                transcode.mp4_remuxable(f['path'], f['tsn'])):
+                transcode.mp4_remuxable(f['path'], f['tsn']) and config.get_freeSpace(remux_path, f['path'])):
+
                 new_path = transcode.mp4_remux(f['path'], f['name'], f['tsn'], temp_share_path)
                 if new_path:
                     mime = 'video/mp4'

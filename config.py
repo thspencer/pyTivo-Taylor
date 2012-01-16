@@ -408,6 +408,29 @@ def get_tsn(name, tsn=None, raw=False):
 def get_random():
     return ''.join([random.choice(string.digits) for i in range(3)])
 
+def get_freeSpace(share, inFile):
+    logger = logging.getLogger('pyTivo.config')
+
+    # checks free space of given output path
+    if sys.platform=="win32":
+        import ctypes
+        freeSize = ctypes.c_ulonglong(0)
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(share), None, None, ctypes.pointer(freeSize))
+        freeSize = freeSize.value
+        
+    else:
+        s = os.statvfs(share)
+        freeSize = s.f_bavail * s.f_frsize
+        
+    temp_fileSize = os.stat(inFile).st_size
+    
+    # checks if enough free space exists on drive for temp file (plus padding)
+    if freeSize < temp_fileSize*1.1:
+       logger.error('Not enough disk space to remux')
+       return False
+
+    return True
+
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216
 # Algorithm: http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/eval.c
