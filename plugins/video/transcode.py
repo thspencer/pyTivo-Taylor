@@ -638,7 +638,7 @@ def tivo_compatible_container(vInfo, inFile, mime=''):
     if ((mime == 'video/mp4' and
          (container != 'mov' or inFile.endswith('.mov'))) or
         (mime == 'video/bif' and container != 'asf') or
-        (mime in ['video/mpeg', ''] and
+        (mime in ['video/x-tivo-mpeg', 'video/mpeg', ''] and
          (container != 'mpeg' or vInfo['vCodec'] == 'mpeg1video'))):
         message = (False, 'container %s not compatible' % container)
 
