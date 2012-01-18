@@ -78,7 +78,6 @@ def transcode(isQuery, inFile, outFile, tsn=''):
         return settings
 
     ffmpeg_path = config.get_bin('ffmpeg')
-    ffmpeg_threads = config.getFFmpegThreads()
     cmd_string = config.getFFmpegTemplate(tsn) % settings
     fname = unicode(inFile, 'utf-8')
     if mswindows:
@@ -94,12 +93,12 @@ def transcode(isQuery, inFile, outFile, tsn=''):
             cmd = ''
             ffmpeg = tivodecode
         else:
-            cmd = [ffmpeg_path, '-threads ', ffmpeg_threads, '-i', '-'] + cmd_string.split()
+            cmd = [ffmpeg_path] + select_ffmpegthreads().split() + ['-i', '-'] + cmd_string.split()
             ffmpeg = subprocess.Popen(cmd, stdin=tivodecode.stdout,
                                       stdout=subprocess.PIPE,
                                       bufsize=(512 * 1024))
     else:
-        cmd = [ffmpeg_path, '-threads', ffmpeg_threads, '-i', fname] + cmd_string.split()
+        cmd = [ffmpeg_path] + select_ffmpegthreads().split() + ['-i', fname] + cmd_string.split()
         ffmpeg = subprocess.Popen(cmd, bufsize=(512 * 1024),
                                   stdout=subprocess.PIPE)
 
@@ -348,7 +347,12 @@ def select_buffsize(tsn):
     return '-bufsize ' + config.getBuffSize(tsn)
 
 def select_ffmpegthreads():
-    return '-threads ' + config.getFFmpegThreads()
+    threads = config.getFFmpegThreads()
+
+    if not threads:
+        return ''
+
+    return '-threads ' + threads
 
 def select_ffmpegprams(tsn):
     params = config.getFFmpegPrams(tsn)
@@ -727,11 +731,10 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
             'ffmpeg_threads': select_ffmpegthreads(),
             'format': '-f mp4'}
 
-    ffmpeg_threads = config.getFFmpegThreads()
-
     cmd_string = config.getFFmpegTemplate(tsn) % settings
-    cmd = [ffmpeg_path, '-threads', ffmpeg_threads, '-i', fname] + cmd_string.split() + [oname]
 
+    cmd = [ffmpeg_path] + select_ffmpegthreads().split() + ['-i', fname] + cmd_string.split() + [oname]
+   
     debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
     debug(' '.join(cmd))
 

@@ -283,18 +283,24 @@ def getFFmpegTemplate(tsn):
 
 def getFFmpegThreads():
     if config.has_option('Server', 'ffmpeg_threads'):
-       #older FFmpeg builds have history of crashing if threads < 1
-       try:
-          threads = max(int(float(config.get('Server', 'ffmpeg_threads'))), 1)
-       except ValueError:
-          return ('1')
+        logger = logging.getLogger('pyTivo.config')
+        try:
+            threads = config.get('Server', 'ffmpeg_threads')
+            #older FFmpeg builds have history of crashing if threads < 1
+            #threads max is 16
+            if 1 <= int(threads) <= 16:
+                    return threads
 
-       #threads max is 16
-       if threads <= 16:
-          return str(threads)
+            else:
+                logger.debug(threads + ' is an invalid ffmpeg_threads setting, must be between 1 and 16, using default')
+                return None
 
-    #If option invalid or not specified, ffmpeg_threads should default to 1
-    return ('1')
+        except ValueError:
+            logger.debug(threads + ' is an invalid ffmpeg_threads setting, using defaults')
+            return None
+
+    else:
+        return None
 
 def getFFmpegPrams(tsn):
     return get_tsn('ffmpeg_pram', tsn, True)
