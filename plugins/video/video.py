@@ -74,14 +74,11 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def send_file(self, handler, path, query):
-        mime = 'video/mpeg'
+        mime = 'video/x-tivo-mpeg'
         tsn = handler.headers.getheader('tsn', '')
         tivo_name = config.tivo_names.get(tsn, tsn)
 
         is_tivo_file = (path[-5:].lower() == '.tivo')
-
-        if is_tivo_file and transcode.tivo_compatible(path, tsn, mime)[0]:
-            mime = 'video/x-tivo-mpeg'
 
         if 'Format' in query:
             mime = query['Format'][0]
