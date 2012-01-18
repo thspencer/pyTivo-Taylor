@@ -100,7 +100,8 @@ class Video(Plugin):
             valid = ((compatible and offset < os.stat(path).st_size) or
                      (not compatible and transcode.is_resumable(path, offset)))
 
-        faking = (mime == 'video/x-tivo-mpeg' and not is_tivo_file)
+        faking = (mime == 'video/x-tivo-mpeg' and
+                  not (is_tivo_file and compatible))
         fname = unicode(path, 'utf-8')
         thead = ''
         if faking:
