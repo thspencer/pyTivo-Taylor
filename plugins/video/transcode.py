@@ -58,7 +58,7 @@ def debug(msg):
                 msg = msg.decode('iso8859-1')
     logger.debug(msg)
 
-def transcode(isQuery, inFile, outFile, tsn=''):
+def transcode(isQuery, inFile, outFile, tsn='', thead=None):
     settings = {'video_codec': select_videocodec(inFile, tsn),
                 'video_br': select_videobr(inFile, tsn),
                 'video_fps': select_videofps(inFile, tsn),
@@ -108,8 +108,10 @@ def transcode(isQuery, inFile, outFile, tsn=''):
 
     ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0, 
                             'last_read': time.time(), 'blocks': []}
+    if thead:
+        ffmpeg_procs[inFile]['blocks'].append(thead)
     reap_process(inFile)
-    return transfer_blocks(inFile, outFile)
+    return resume_transfer(inFile, outFile, 0)
 
 def is_resumable(inFile, offset):
     if inFile in ffmpeg_procs:

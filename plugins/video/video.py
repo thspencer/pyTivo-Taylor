@@ -104,9 +104,13 @@ class Video(Plugin):
             valid = ((compatible and offset < os.stat(path).st_size) or
                      (not compatible and transcode.is_resumable(path, offset)))
 
+        faking = (mime == 'video/x-tivo-mpeg' and not is_tivo_file)
         fname = unicode(path, 'utf-8')
+        thead = ''
+        if faking:
+            thead = self.tivo_header(tsn, fname)
         if compatible:
-            size = os.stat(fname).st_size
+            size = os.stat(fname).st_size + len(thead)
             handler.send_response(200)
             handler.send_header('Content-Length', size - offset)
             handler.send_header('Content-Range', 'bytes %d-%d/%d' % 
@@ -125,6 +129,8 @@ class Video(Plugin):
 
         if valid:
             if compatible:
+                if faking and not offset:
+                    handler.wfile.write(thead)
                 logger.debug('"%s" is tivo compatible' % fname)
                 f = open(fname, 'rb')
                 try:
@@ -132,6 +138,7 @@ class Video(Plugin):
                         count = qtfaststart.process(f, handler.wfile, offset)
                     else:
                         if offset:
+                            offset -= len(thead)
                             f.seek(offset)
                         while True:
                             block = f.read(512 * 1024)
@@ -149,7 +156,7 @@ class Video(Plugin):
                                                       offset)
                 else:
                     count = transcode.transcode(False, path,
-                                                handler.wfile, tsn)
+                                                handler.wfile, tsn, thead)
         try:
             if not compatible:
                  handler.wfile.write('0\r\n\r\n')
