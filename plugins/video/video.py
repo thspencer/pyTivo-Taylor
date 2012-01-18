@@ -105,14 +105,17 @@ class Video(Plugin):
                      (not compatible and transcode.is_resumable(path, offset)))
 
         fname = unicode(path, 'utf-8')
-        handler.send_response(206)
+        if compatible:
+            size = os.stat(fname).st_size
+            handler.send_response(200)
+            handler.send_header('Content-Length', size - offset)
+            handler.send_header('Content-Range', 'bytes %d-%d/%d' % 
+                                (offset, size - offset - 1, size))
+        else:
+            handler.send_response(206)
+            handler.send_header('Transfer-Encoding', 'chunked')
         handler.send_header('Content-Type', mime)
         handler.send_header('Connection', 'close')
-        if compatible:
-            handler.send_header('Content-Length',
-                                os.stat(fname).st_size - offset)
-        else:
-            handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
 
         logger.info('[%s] Start sending "%s" to %s' %
