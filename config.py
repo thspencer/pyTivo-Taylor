@@ -269,6 +269,9 @@ def getFFmpegPrams(tsn):
 def isHDtivo(tsn):  # tsn's of High Definition Tivo's
     return bool(tsn and tsn[0] >= '6' and tsn[:3] != '649')
 
+def hasTStivo(tsn):  # tsn's of Tivos that support transport streams
+    return bool(tsn and (tsn[0] >= '7' or tsn.startswith('663')))
+
 def getValidWidths():
     return [1920, 1440, 1280, 720, 704, 544, 480, 352]
 

@@ -31,11 +31,11 @@
     <Item>
         <Details>
             <Title>$escape($video.title)</Title>
-            <ContentType>video/x-tivo-mpeg</ContentType>
+            <ContentType>$video.mime</ContentType>
             #if not $video.valid
             <CopyProtected>Yes</CopyProtected>
             #end if
-            <SourceFormat>video/x-ms-wmv</SourceFormat>
+            <SourceFormat>$video.mime</SourceFormat>
             <SourceSize>$video.size</SourceSize>
             <Duration>$video.duration</Duration>
             #if $video.isEpisode != 'false' and $video.episodeTitle
@@ -49,7 +49,7 @@
         </Details>
         <Links>
             <Content>
-                <ContentType>video/x-tivo-mpeg</ContentType>
+                <ContentType>$video.mime</ContentType>
                     <Url>/$quote($container)$quote($video.part_path)</Url>
                 </Content>
                 <CustomIcon>

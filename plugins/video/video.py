@@ -100,12 +100,12 @@ class Video(Plugin):
             valid = ((compatible and offset < os.stat(path).st_size) or
                      (not compatible and transcode.is_resumable(path, offset)))
 
-        faking = (mime == 'video/x-tivo-mpeg' and
+        faking = (mime in ['video/x-tivo-mpeg-ts', 'video/x-tivo-mpeg'] and
                   not (is_tivo_file and compatible))
         fname = unicode(path, 'utf-8')
         thead = ''
         if faking:
-            thead = self.tivo_header(tsn, fname)
+            thead = self.tivo_header(tsn, fname, mime)
         if compatible:
             size = os.stat(fname).st_size + len(thead)
             handler.send_response(200)
@@ -152,8 +152,8 @@ class Video(Plugin):
                     count = transcode.resume_transfer(path, handler.wfile, 
                                                       offset)
                 else:
-                    count = transcode.transcode(False, path,
-                                                handler.wfile, tsn, thead)
+                    count = transcode.transcode(False, path, handler.wfile,
+                                                tsn, mime, thead)
         try:
             if not compatible:
                  handler.wfile.write('0\r\n\r\n')
@@ -239,7 +239,7 @@ class Video(Plugin):
                 transcode_options = {}
             else:
                 transcode_options = transcode.transcode(True, full_path,
-                                                        '', tsn)
+                                                        '', tsn, mime)
             data['vHost'] = (
                 ['TRANSCODE=%s, %s' % (['YES', 'NO'][compatible], reason)] +
                 ['SOURCE INFO: '] +
@@ -339,6 +339,11 @@ class Video(Plugin):
                     video['valid'] = True
                     video.update(metadata.basic(f.name))
 
+                if config.hasTStivo(tsn):
+                    video['mime'] = 'video/x-tivo-mpeg-ts'
+                else:
+                    video['mime'] = 'video/x-tivo-mpeg'
+
                 video['textSize'] = ( '%.3f GB' %
                     (float(f.size) / (1024 ** 3)) )
 
@@ -387,7 +392,11 @@ class Video(Plugin):
             self.tvbus_cache[(tsn, file_path)] = details
         return details
 
-    def tivo_header(self, tsn, path, flag=13):
+    def tivo_header(self, tsn, path, mime):
+        if mime == 'video/x-tivo-mpeg-ts':
+            flag = 45
+        else:
+            flag = 13
         details = self.get_details_xml(tsn, path)
         ld = len(details)
         chunklen = ld * 2 + 44
