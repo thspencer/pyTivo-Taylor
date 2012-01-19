@@ -68,7 +68,6 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wbufsize = 0x10000
         self.server_version = 'pyTivo/1.0'
         self.sys_version = ''
-        self.protocol_version = 'HTTP/1.1'
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
             client_address, server)
 
