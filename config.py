@@ -309,6 +309,10 @@ def isHDtivo(tsn):  # tsn's of High Definition Tivo's
     return bool(tsn and tsn[0] >= '6' and tsn[:3] != '649')
 
 def hasTStivo(tsn):  # tsn's of Tivos that support transport streams
+    try:
+        return config.getboolean('Server', 'ts')
+    except NoOptionError, ValueError:
+        return False
     return bool(tsn and (tsn[0] >= '7' or tsn.startswith('663')))
 
 def getValidWidths():
