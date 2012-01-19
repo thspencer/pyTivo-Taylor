@@ -58,7 +58,7 @@ def debug(msg):
                 msg = msg.decode('iso8859-1')
     logger.debug(msg)
 
-def transcode(isQuery, inFile, outFile, tsn='', thead=None):
+def transcode(isQuery, inFile, outFile, tsn='', mime='', thead=''):
     settings = {'video_codec': select_videocodec(inFile, tsn),
                 'video_br': select_videobr(inFile, tsn),
                 'video_fps': select_videofps(inFile, tsn),
@@ -72,7 +72,7 @@ def transcode(isQuery, inFile, outFile, tsn='', thead=None):
                 'audio_lang': select_audiolang(inFile, tsn),
                 'ffmpeg_pram': select_ffmpegprams(tsn),
                 'ffmpeg_threads': select_ffmpegthreads(),
-                'format': select_format(tsn)}
+                'format': select_format(tsn, mime)}
 
     if isQuery:
         return settings
@@ -362,8 +362,11 @@ def select_ffmpegprams(tsn):
         params = ''
     return params
 
-def select_format(tsn):
-    fmt = 'vob'
+def select_format(tsn, mime):
+    if mime == 'video/x-tivo-mpeg-ts':
+        fmt = 'mpegts'
+    else:
+        fmt = 'vob'
     return '-f %s -' % fmt
 
 def pad_check():
@@ -663,6 +666,10 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
         if inFile[-5:].lower() == '.tivo':
             break
 
+        if mime == 'video/x-tivo-mpeg-ts' and codec not in ('ac3', 'liba52'):
+            message = (False, 'aCodec %s not compatible' % codec)
+            break
+
         if codec not in ('ac3', 'liba52', 'mp2'):
             message = (False, 'aCodec %s not compatible' % codec)
             break
@@ -688,6 +695,7 @@ def tivo_compatible_container(vInfo, inFile, mime=''):
     if ((mime == 'video/mp4' and
          (container != 'mov' or inFile.endswith('.mov'))) or
         (mime == 'video/bif' and container != 'asf') or
+        (mime == 'video/x-tivo-mpeg-ts' and container != 'mpegts') or
         (mime in ['video/x-tivo-mpeg', 'video/mpeg', ''] and
          (container != 'mpeg' or vInfo['vCodec'] == 'mpeg1video'))):
         message = (False, 'container %s not compatible' % container)

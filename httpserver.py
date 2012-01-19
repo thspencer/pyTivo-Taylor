@@ -17,9 +17,15 @@ from plugin import GetPlugin, EncodeUnicode
 SCRIPTDIR = os.path.dirname(__file__)
 
 VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
-<TiVoFormats><Format>
-<ContentType>video/x-tivo-mpeg</ContentType><Description/>
-</Format></TiVoFormats>"""
+<TiVoFormats>
+<Format><ContentType>video/x-tivo-mpeg</ContentType><Description/></Format>
+</TiVoFormats>"""
+
+VIDEO_FORMATS_TS = """<?xml version="1.0" encoding="utf-8"?>
+<TiVoFormats>
+<Format><ContentType>video/x-tivo-mpeg</ContentType><Description/></Format>
+<Format><ContentType>video/x-tivo-mpeg-ts</ContentType><Description/></Format>
+</TiVoFormats>"""
 
 BASE_HTML = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
@@ -148,7 +154,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/xml')
                 self.end_headers()
-                self.wfile.write(VIDEO_FORMATS)
+                if config.hasTStivo(tsn):
+                    self.wfile.write(VIDEO_FORMATS_TS)
+                else:
+                    self.wfile.write(VIDEO_FORMATS)
                 return
 
             elif command == 'FlushServer':
