@@ -305,7 +305,8 @@ def from_container(xmldoc):
     keys = {'title': 'Title', 'episodeTitle': 'EpisodeTitle',
             'description': 'Description', 'seriesId': 'SeriesId',
             'episodeNumber': 'EpisodeNumber', 'tvRating': 'TvRating',
-            'displayMajorNumber': 'SourceChannel', 'callsign': 'SourceStation'}
+            'displayMajorNumber': 'SourceChannel', 'callsign': 'SourceStation',
+            'showingBits': 'ShowingBits', 'mpaaRating': 'MpaaRating'}
 
     details = xmldoc.getElementsByTagName('Details')[0]
 
