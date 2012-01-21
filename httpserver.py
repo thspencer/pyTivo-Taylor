@@ -60,8 +60,12 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
 class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         self.wbufsize = 0x10000
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
-            client_address, server)
+        try:
+            BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
+                client_address, server)
+        except Exception, msg:
+            self.logger = logging.getLogger('pyTivo')
+            self.logger.error(msg)
 
     def address_string(self):
         host, port = self.client_address[:2]
