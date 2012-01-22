@@ -67,7 +67,7 @@ def transcode(isQuery, inFile, outFile, tsn=''):
                 'aspect_ratio': ' '.join(select_aspect(inFile, tsn)),
                 'audio_br': select_audiobr(tsn),
                 'audio_fr': select_audiofr(inFile, tsn),
-                'audio_ch': select_audioch(tsn),
+                'audio_ch': select_audioch(inFile, tsn),
                 'audio_codec': select_audiocodec(isQuery, inFile, tsn),
                 'audio_lang': select_audiolang(inFile, tsn),
                 'ffmpeg_pram': select_ffmpegprams(tsn),
@@ -257,10 +257,15 @@ def select_audiofr(inFile, tsn):
         freq = audio_fr
     return '-ar ' + freq
 
-def select_audioch(tsn):
+def select_audioch(inFile, tsn):
     ch = config.get_tsn('audio_ch', tsn)
+    vInfo = video_info(inFile)
     if ch:
         return '-ac ' + ch
+    #AC-3 max channels is 5.1
+    if vInfo['aCh'] != 'N/A' and vInfo['aCh'] > 6:
+        debug('Too many audio channels for AC-3, using 5.1 instead')
+        return '-ac ' + '6'
     return ''
 
 def select_audiolang(inFile, tsn):
@@ -725,7 +730,7 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
             'aspect_ratio': ' '.join(select_aspect(inFile, tsn)),
             'audio_br': select_audiobr(tsn),
             'audio_fr': select_audiofr(inFile, tsn),
-            'audio_ch': select_audioch(tsn),
+            'audio_ch': select_audioch(inFile, tsn),
             'audio_codec': select_audiocodec(False, inFile, tsn, 'video/mp4'),
             'audio_lang': select_audiolang(inFile, tsn),
             'ffmpeg_pram': select_ffmpegprams(tsn),
@@ -862,10 +867,8 @@ def video_info(inFile, cache=True):
             vInfo['aCh'] = int(x.group(1))
         else:
             vInfo['aCh'] = 'N/A'
-            debug('failed at aCh')
     else:
         vInfo['aCh'] = 'N/A'
-        debug('failed at aCh')
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
