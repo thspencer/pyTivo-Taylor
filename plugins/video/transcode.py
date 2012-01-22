@@ -237,7 +237,7 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
             if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
-            if vInfo['aCodec'] != 'ac3' and aCh == 'N/A' or aCh > 2:
+            if vInfo['aCodec'] != 'ac3' and (aCh == 'N/A' or aCh > 2):
                 codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
@@ -642,9 +642,10 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
                              'ac3', 'liba52'):
                 message = (False, 'aCodec %s not compatible' % codec)
                 break
-            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and vInfo['aCh'] == 'N/A' or vInfo['aCh'] > 2:
+            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and (vInfo['aCh'] == 'N/A' or vInfo['aCh'] > 2):
                 message = (False, 'aCodec %s is only supported with 2 or less channels, the track has %s channels' % (codec, vInfo['aCh']))
                 break
+            
             audio_lang = config.get_tsn('audio_lang', tsn)
             if audio_lang:
                 if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
