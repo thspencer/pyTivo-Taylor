@@ -29,7 +29,7 @@ function toggle(source) {
     <tr id="header">
     <td colspan="2">
     #if $parent != ''
-    <a id="headerA" href="/TiVoConnect?Command=QueryContainer&amp;Container=$escape($parent)">$escape($name)</a>
+    <a id="headerA" href="/TiVoConnect?Command=QueryContainer&amp;Container=$escape($parent)&amp;Format=text/html">$escape($name)</a>
     #else
     <div id="headerA">$escape($name)</div>
     #end if
