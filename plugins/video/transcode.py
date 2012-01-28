@@ -225,7 +225,11 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
             aKbps = vInfo['aKbps']
             aCh = vInfo['aCh']
             if aKbps == None:
-                if not isQuery:
+                if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac'):
+                    #along with the channel check below this should pass any AAC audio 
+                    #that has undefined 'aKbps' and is <= 2 channels.  Should be TiVo compatible.
+                    codec = 'copy'
+                elif not isQuery:
                     vInfoQuery = audio_check(inFile, tsn)
                     if vInfoQuery == None:
                         aKbps = None
