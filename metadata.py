@@ -169,7 +169,9 @@ def from_mscore(rawmeta):
         for tag in keys[tagname]:
             try:
                 if tag in rawmeta:
-                    value = str(rawmeta[tag][0])
+                    value = rawmeta[tag][0]
+                    if type(value) not in (str, unicode):
+                        value = str(value)
                     if value:
                         metadata[tagname] = value
             except:
