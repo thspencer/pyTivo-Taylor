@@ -44,7 +44,7 @@ EXTENSIONS = """.tivo .mpg .avi .wmv .mov .flv .f4v .vob .mp4 .m4v .mkv
 .m1v .m21 .m2t .m2ts .m2v .m2p .m4e .mjp .mjpeg .mod .moov .movie .mp21
 .mpe .mpeg .mpv .mpv2 .mqv .mts .mvb .nsv .nuv .nut .ogm .qt .rm .rmvb
 .rts .scm .smv .ssm .svi .vdo .vfw .vid .viv .vivo .vp6 .vp7 .vro .webm
-.wm .wmd .yuv""".split()
+.wm .wmd .wtv .yuv""".split()
 
 use_extensions = True
 try:
@@ -226,6 +226,8 @@ class Video(Plugin):
         data.update(metadata.basic(full_path))
         if full_path[-5:].lower() == '.tivo':
             data.update(metadata.from_tivo(full_path))
+        if full_path[-4:].lower() == '.wtv':
+            data.update(metadata.from_mscore(vInfo['rawmeta']))
 
         if 'episodeNumber' in data:
             try:
