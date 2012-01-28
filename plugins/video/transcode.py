@@ -1000,6 +1000,13 @@ def video_info(inFile, cache=True):
                     flag = False
                 else:
                     key, value = [x.strip() for x in line.split(':', 1)]
+                    try:
+                        value = decode(value, 'utf-8')
+                    except:
+                        if sys.platform == 'darwin':
+                            value = value.decode('macroman')
+                        else:
+                            value = value.decode('iso8859-1')
                     rawmeta[key] = [value]
 
     vInfo['rawmeta'] = rawmeta
