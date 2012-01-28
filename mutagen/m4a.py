@@ -1,4 +1,4 @@
-# Copyright 2006 Joe Wreschnig <piman@sacredchao.net>
+# Copyright 2006 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -52,15 +52,18 @@ class M4ACover(str):
     """A cover artwork.
     
     Attributes:
-    format -- format of the image (either FORMAT_JPEG or FORMAT_PNG)
+    imageformat -- format of the image (either FORMAT_JPEG or FORMAT_PNG)
     """
     FORMAT_JPEG = 0x0D
     FORMAT_PNG = 0x0E
 
-    def __new__(cls, data, format=None):
+    def __new__(cls, data, imageformat=None):
         self = str.__new__(cls, data)
-        if format is None: format= M4ACover.FORMAT_JPEG
-        self.format = format
+        if imageformat is None: imageformat = M4ACover.FORMAT_JPEG
+        self.imageformat = imageformat
+        try: self.format
+        except AttributeError:
+            self.format = imageformat
         return self
 
 class Atom(object):
@@ -207,7 +210,9 @@ class M4ATags(DictProxy, Metadata):
             parse = self.__atoms.get(atom.name, (M4ATags.__parse_text,))[0]
             parse(self, atom, data)
 
-    def __key_sort((key1, v1), (key2, v2)):
+    def __key_sort(item1, item2):
+        (key1, v1) = item1
+        (key2, v2) = item2
         # iTunes always writes the tags in order of "relevance", try
         # to copy it as closely as possible.
         order = ["\xa9nam", "\xa9ART", "\xa9wrt", "\xa9alb",
@@ -235,7 +240,7 @@ class M4ATags(DictProxy, Metadata):
         data = Atom.render("ilst", "".join(values))
 
         # Find the old atoms.
-        fileobj = file(filename, "rb+")
+        fileobj = open(filename, "rb+")
         try:
             atoms = Atoms(fileobj)
 
@@ -372,17 +377,17 @@ class M4ATags(DictProxy, Metadata):
         return self.__render_data(key, 0x15, chr(bool(value)))
 
     def __parse_cover(self, atom, data):
-        length, name, format = struct.unpack(">I4sI", data[:12])
+        length, name, imageformat = struct.unpack(">I4sI", data[:12])
         if name != "data":
             raise M4AMetadataError(
                 "unexpected atom %r inside 'covr'" % name)
-        if format not in (M4ACover.FORMAT_JPEG, M4ACover.FORMAT_PNG):
-            format = M4ACover.FORMAT_JPEG
-        self[atom.name]= M4ACover(data[16:length], format)
+        if imageformat not in (M4ACover.FORMAT_JPEG, M4ACover.FORMAT_PNG):
+            imageformat = M4ACover.FORMAT_JPEG
+        self[atom.name]= M4ACover(data[16:length], imageformat)
     def __render_cover(self, key, value):
-        try: format = value.format
-        except AttributeError: format = M4ACover.FORMAT_JPEG
-        data = Atom.render("data", struct.pack(">2I", format, 0) + value)
+        try: imageformat = value.imageformat
+        except AttributeError: imageformat = M4ACover.FORMAT_JPEG
+        data = Atom.render("data", struct.pack(">2I", imageformat, 0) + value)
         return Atom.render(key, data)
 
     def __parse_text(self, atom, data):
@@ -436,12 +441,12 @@ class M4AInfo(object):
         data = fileobj.read(mdhd.length)
         if ord(data[8]) == 0:
             offset = 20
-            format = ">2I"
+            fmt = ">2I"
         else:
             offset = 28
-            format = ">IQ"
-        end = offset + struct.calcsize(format)
-        unit, length = struct.unpack(format, data[offset:end])
+            fmt = ">IQ"
+        end = offset + struct.calcsize(fmt)
+        unit, length = struct.unpack(fmt, data[offset:end])
         self.length = float(length) / unit
 
         try:
@@ -468,7 +473,7 @@ class M4A(FileType):
 
     def load(self, filename):
         self.filename = filename
-        fileobj = file(filename, "rb")
+        fileobj = open(filename, "rb")
         try:
             atoms = Atoms(fileobj)
             try: self.info = M4AInfo(atoms, fileobj)

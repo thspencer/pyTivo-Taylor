@@ -1,4 +1,4 @@
-# Copyright 2006 Joe Wreschnig <piman@sacredchao.net>
+# Copyright 2006 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -113,6 +113,8 @@ class OggPage(object):
             return (self.write() == other.write())
         except AttributeError:
             return False
+
+    __hash__ = object.__hash__
 
     def __repr__(self):
         attrs = ['version', 'position', 'serial', 'sequence', 'offset',
@@ -435,7 +437,7 @@ class OggFileType(FileType):
         """Load file information from a filename."""
 
         self.filename = filename
-        fileobj = file(filename, "rb")
+        fileobj = open(filename, "rb")
         try:
             try:
                 self.info = self._Info(fileobj)
@@ -470,7 +472,7 @@ class OggFileType(FileType):
             filename = self.filename
 
         self.tags.clear()
-        fileobj = file(filename, "rb+")
+        fileobj = open(filename, "rb+")
         try:
             try: self.tags._inject(fileobj)
             except error, e:
@@ -487,7 +489,7 @@ class OggFileType(FileType):
         """
         if filename is None:
             filename = self.filename
-        fileobj = file(filename, "rb+")
+        fileobj = open(filename, "rb+")
         try:
             try: self.tags._inject(fileobj)
             except error, e:
