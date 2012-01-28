@@ -727,7 +727,8 @@ def video_info(inFile, cache=True):
         if os.path.splitext(inFile)[1].lower() not in ['.mpg', '.mpeg',
                                                        '.vob', '.tivo']:
             vInfo['Supported'] = False
-        vInfo.update({'millisecs': 0, 'vWidth': 704, 'vHeight': 480})
+        vInfo.update({'millisecs': 0, 'vWidth': 704, 'vHeight': 480,
+                      'rawmeta': {}})
         if cache:
             info_cache[inFile] = (mtime, vInfo)
         return vInfo
@@ -880,6 +881,24 @@ def video_info(inFile, cache=True):
     vInfo['mapAudio'] = amap
 
     vInfo['par'] = None
+
+    # get Metadata dump (newer ffmpeg).
+    lines = output.split('\n')
+    rawmeta = {}
+    flag = False
+
+    for line in lines:
+        if line.startswith('  Metadata:'):
+            flag = True
+        else:
+            if flag:
+                if line.startswith('  Duration:'):
+                    flag = False
+                else:
+                    key, value = [x.strip() for x in line.split(':', 1)]
+                    rawmeta[key] = [value]
+
+    vInfo['rawmeta'] = rawmeta
 
     data = metadata.from_text(inFile)
     for key in data:
