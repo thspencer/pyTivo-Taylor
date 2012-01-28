@@ -74,14 +74,11 @@ class Video(Plugin):
             return transcode.supported_format(full_path)
 
     def send_file(self, handler, path, query):
-        mime = 'video/mpeg'
+        mime = 'video/x-tivo-mpeg'
         tsn = handler.headers.getheader('tsn', '')
         tivo_name = config.tivo_names.get(tsn, tsn)
 
         is_tivo_file = (path[-5:].lower() == '.tivo')
-
-        if is_tivo_file and transcode.tivo_compatible(path, tsn, mime)[0]:
-            mime = 'video/x-tivo-mpeg'
 
         if 'Format' in query:
             mime = query['Format'][0]
@@ -104,15 +101,24 @@ class Video(Plugin):
             valid = ((compatible and offset < os.stat(path).st_size) or
                      (not compatible and transcode.is_resumable(path, offset)))
 
+        #faking = (mime in ['video/x-tivo-mpeg-ts', 'video/x-tivo-mpeg'] and
+        faking = (mime == 'video/x-tivo-mpeg' and
+                  not (is_tivo_file and compatible))
         fname = unicode(path, 'utf-8')
-        handler.send_response(206)
+        thead = ''
+        if faking:
+            thead = self.tivo_header(tsn, fname, mime)
+        if compatible:
+            size = os.stat(fname).st_size + len(thead)
+            handler.send_response(200)
+            handler.send_header('Content-Length', size - offset)
+            handler.send_header('Content-Range', 'bytes %d-%d/%d' % 
+                                (offset, size - offset - 1, size))
+        else:
+            handler.send_response(206)
+            handler.send_header('Transfer-Encoding', 'chunked')
         handler.send_header('Content-Type', mime)
         handler.send_header('Connection', 'close')
-        if compatible:
-            handler.send_header('Content-Length',
-                                os.stat(fname).st_size - offset)
-        else:
-            handler.send_header('Transfer-Encoding', 'chunked')
         handler.end_headers()
 
         logger.info('[%s] Start sending "%s" to %s' %
@@ -122,6 +128,8 @@ class Video(Plugin):
 
         if valid:
             if compatible:
+                if faking and not offset:
+                    handler.wfile.write(thead)
                 logger.debug('"%s" is tivo compatible' % fname)
                 f = open(fname, 'rb')
                 try:
@@ -129,6 +137,7 @@ class Video(Plugin):
                         count = qtfaststart.process(f, handler.wfile, offset)
                     else:
                         if offset:
+                            offset -= len(thead)
                             f.seek(offset)
                         while True:
                             block = f.read(512 * 1024)
@@ -145,8 +154,8 @@ class Video(Plugin):
                     count = transcode.resume_transfer(path, handler.wfile, 
                                                       offset)
                 else:
-                    count = transcode.transcode(False, path,
-                                                handler.wfile, tsn)
+                    count = transcode.transcode(False, path, handler.wfile,
+                                                tsn, mime, thead)
         try:
             if not compatible:
                  handler.wfile.write('0\r\n\r\n')
@@ -233,7 +242,7 @@ class Video(Plugin):
                 transcode_options = {}
             else:
                 transcode_options = transcode.transcode(True, full_path,
-                                                        '', tsn)
+                                                        '', tsn, mime)
             data['vHost'] = (
                 ['TRANSCODE=%s, %s' % (['YES', 'NO'][compatible], reason)] +
                 ['SOURCE INFO: '] +
@@ -334,6 +343,11 @@ class Video(Plugin):
                     video['valid'] = True
                     video.update(metadata.basic(f.name))
 
+                if config.hasTStivo(tsn):
+                    video['mime'] = 'video/x-tivo-mpeg-ts'
+                else:
+                    video['mime'] = 'video/x-tivo-mpeg'
+
                 video['textSize'] = ( '%.3f GB' %
                     (float(f.size) / (1024 ** 3)) )
 
@@ -386,7 +400,11 @@ class Video(Plugin):
             self.tvbus_cache[(tsn, file_path)] = details
         return details
 
-    def tivo_header(self, tsn, path, flag=13):
+    def tivo_header(self, tsn, path, mime):
+        if mime == 'video/x-tivo-mpeg-ts':
+            flag = 45
+        else:
+            flag = 13
         details = self.get_details_xml(tsn, path)
         ld = len(details)
         chunklen = ld * 2 + 44

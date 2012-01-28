@@ -305,7 +305,8 @@ def from_container(xmldoc):
     keys = {'title': 'Title', 'episodeTitle': 'EpisodeTitle',
             'description': 'Description', 'seriesId': 'SeriesId',
             'episodeNumber': 'EpisodeNumber', 'tvRating': 'TvRating',
-            'displayMajorNumber': 'SourceChannel', 'callsign': 'SourceStation'}
+            'displayMajorNumber': 'SourceChannel', 'callsign': 'SourceStation',
+            'showingBits': 'ShowingBits', 'mpaaRating': 'MpaaRating'}
 
     details = xmldoc.getElementsByTagName('Details')[0]
 
@@ -381,7 +382,8 @@ def from_tivo(full_path):
 
     tdcat_path = config.get_bin('tdcat')
     tivo_mak = config.get_server('tivo_mak')
-    if tdcat_path and tivo_mak:
+    try:
+        assert(tdcat_path and tivo_mak)
         fname = unicode(full_path, 'utf-8')
         if mswindows:
             fname = fname.encode('iso8859-1')
@@ -389,7 +391,7 @@ def from_tivo(full_path):
         tdcat = subprocess.Popen(tcmd, stdout=subprocess.PIPE)
         metadata = from_details(tdcat.stdout)
         tivo_cache[full_path] = metadata
-    else:
+    except:
         metadata = {}
 
     return metadata

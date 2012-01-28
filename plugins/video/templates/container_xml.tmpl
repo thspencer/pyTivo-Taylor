@@ -4,8 +4,8 @@
     <ItemCount>#echo len($videos) #</ItemCount>
     <Details>
         <Title>$escape($name)</Title>
-        <ContentType>x-container/tivo-videos</ContentType>
-        <SourceFormat>x-container/folder</SourceFormat>
+        <ContentType>x-tivo-container/folder</ContentType>
+        <SourceFormat>x-tivo-container/folder</SourceFormat>
         <TotalItems>$total</TotalItems>
         <UniqueId>$crc($guid + $name)</UniqueId>
     </Details>
@@ -14,8 +14,8 @@
     <Item>
         <Details>
             <Title>$escape($video.title)</Title>
-            <ContentType>x-container/folder</ContentType>
-            <SourceFormat>x-tivo-container/tivo-dvr</SourceFormat>
+            <ContentType>x-tivo-container/tivo-videos</ContentType>
+            <SourceFormat>x-tivo-container/folder</SourceFormat>
             <UniqueId>$crc($guid + $video.small_path)</UniqueId>
             <TotalItems>$video.total_items</TotalItems>
             <LastCaptureDate>$video.captureDate</LastCaptureDate> 
@@ -31,11 +31,11 @@
     <Item>
         <Details>
             <Title>$escape($video.title)</Title>
-            <ContentType>video/x-tivo-mpeg</ContentType>
+            <ContentType>$video.mime</ContentType>
             #if not $video.valid
             <CopyProtected>Yes</CopyProtected>
             #end if
-            <SourceFormat>video/x-ms-wmv</SourceFormat>
+            <SourceFormat>$video.mime</SourceFormat>
             <SourceSize>$video.size</SourceSize>
             <Duration>$video.duration</Duration>
             #if $video.isEpisode != 'false' and $video.episodeTitle
@@ -45,12 +45,18 @@
             <SourceChannel>$escape($video.displayMajorNumber)</SourceChannel>
             <SourceStation>$escape($video.callsign)</SourceStation>
             <SeriesId>$video.seriesId</SeriesId>
+            #if $video.tvRating
+            <TvRating>$video.tvRating</TvRating>
+            #end if
+            #if $video.mpaaRating
+            <MpaaRating>$video.mpaaRating</MpaaRating>
+            #end if
+            <ShowingBits>$video.showingBits</ShowingBits>
             <CaptureDate>$video.captureDate</CaptureDate> 
         </Details>
         <Links>
             <Content>
-                <ContentType>video/x-tivo-mpeg</ContentType>
-                    <AcceptsParams>No</AcceptsParams>
+                <ContentType>$video.mime</ContentType>
                     <Url>/$quote($container)$quote($video.part_path)</Url>
                 </Content>
                 <CustomIcon>
