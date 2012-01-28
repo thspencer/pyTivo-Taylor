@@ -14,6 +14,7 @@ import mutagen
 from lrucache import LRUCache
 
 import config
+import plugins.video.transcode
 
 # Something to strip
 TRIBUNE_CR = ' Copyright Tribune Media Services, Inc.'
@@ -153,19 +154,8 @@ def from_moov(full_path):
     mp4_cache[full_path] = metadata
     return metadata
 
-def from_dvrms(full_path):
-    if full_path in dvrms_cache:
-        return dvrms_cache[full_path]
-
+def from_mscore(rawmeta):
     metadata = {}
-
-    try:
-        meta = mutagen.File(unicode(full_path, 'utf-8'))
-        assert(meta)
-    except:
-        dvrms_cache[full_path] = {}
-        return {}
-
     keys = {'title': ['Title'],
             'description': ['Description', 'WM/SubTitleDescription'],
             'episodeTitle': ['WM/SubTitle'],
@@ -178,8 +168,8 @@ def from_dvrms(full_path):
     for tagname in keys:
         for tag in keys[tagname]:
             try:
-                if tag in meta:
-                    value = str(meta[tag][0])
+                if tag in rawmeta:
+                    value = str(rawmeta[tag][0])
                     if value:
                         metadata[tagname] = value
             except:
@@ -204,6 +194,20 @@ def from_dvrms(full_path):
             metadata['tvRating'] = TV_RATINGS[rating]
         del metadata['rating']
 
+    return metadata
+
+def from_dvrms(full_path):
+    if full_path in dvrms_cache:
+        return dvrms_cache[full_path]
+
+    try:
+        rawmeta = mutagen.File(unicode(full_path, 'utf-8'))
+        assert(rawmeta)
+    except:
+        dvrms_cache[full_path] = {}
+        return {}
+
+    metadata = from_mscore(rawmeta)
     dvrms_cache[full_path] = metadata
     return metadata
 
@@ -431,4 +435,7 @@ if __name__ == '__main__':
             metadata.update(from_moov(fname))
         elif ext in ['.dvr-ms', '.asf', '.wmv']:
             metadata.update(from_dvrms(fname))
+        elif ext == '.wtv':
+            vInfo = plugins.video.transcode.video_info(fname)
+            metadata.update(from_mscore(vInfo['rawmeta']))
         dump(sys.stdout, metadata)
