@@ -1,4 +1,4 @@
-# Copyright 2006 Joe Wreschnig <piman@sacredchao.net>
+# Copyright 2006 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,7 +25,7 @@ import sys
 
 from mutagen import FileType, Metadata
 from mutagen._constants import GENRES
-from mutagen._util import cdata, insert_bytes, delete_bytes, DictProxy
+from mutagen._util import cdata, insert_bytes, delete_bytes, DictProxy, utf8
 
 class error(IOError): pass
 class MP4MetadataError(error): pass
@@ -44,15 +44,18 @@ class MP4Cover(str):
     """A cover artwork.
     
     Attributes:
-    format -- format of the image (either FORMAT_JPEG or FORMAT_PNG)
+    imageformat -- format of the image (either FORMAT_JPEG or FORMAT_PNG)
     """
     FORMAT_JPEG = 0x0D
     FORMAT_PNG = 0x0E
 
-    def __new__(cls, data, format=None):
+    def __new__(cls, data, imageformat=None):
         self = str.__new__(cls, data)
-        if format is None: format= MP4Cover.FORMAT_JPEG
-        self.format = format
+        if imageformat is None: imageformat = MP4Cover.FORMAT_JPEG
+        self.imageformat = imageformat
+        try: self.format
+        except AttributeError:
+            self.format = imageformat
         return self
 
 class Atom(object):
@@ -244,10 +247,12 @@ class MP4Tags(DictProxy, Metadata):
         for atom in ilst.children:
             fileobj.seek(atom.offset + 8)
             data = fileobj.read(atom.length - 8)
-            info = self.__atoms.get(atom.name, (MP4Tags.__parse_text, None))
+            info = self.__atoms.get(atom.name, (type(self).__parse_text, None))
             info[0](self, atom, data, *info[2:])
 
-    def __key_sort((key1, v1), (key2, v2)):
+    def __key_sort(item1, item2):
+        (key1, v1) = item1
+        (key2, v2) = item2
         # iTunes always writes the tags in order of "relevance", try
         # to copy it as closely as possible.
         order = ["\xa9nam", "\xa9ART", "\xa9wrt", "\xa9alb",
@@ -269,7 +274,7 @@ class MP4Tags(DictProxy, Metadata):
         items = self.items()
         items.sort(self.__key_sort)
         for key, value in items:
-            info = self.__atoms.get(key[:4], (None, MP4Tags.__render_text))
+            info = self.__atoms.get(key[:4], (None, type(self).__render_text))
             try:
                 values.append(info[1](self, key, value, *info[2:]))
             except (TypeError, ValueError), s:
@@ -277,7 +282,7 @@ class MP4Tags(DictProxy, Metadata):
         data = Atom.render("ilst", "".join(values))
 
         # Find the old atoms.
-        fileobj = file(filename, "rb+")
+        fileobj = open(filename, "rb+")
         try:
             atoms = Atoms(fileobj)
             try:
@@ -352,9 +357,15 @@ class MP4Tags(DictProxy, Metadata):
         """Update all parent atoms with the new size."""
         for atom in path:
             fileobj.seek(atom.offset)
-            size = cdata.uint_be(fileobj.read(4)) + delta
-            fileobj.seek(atom.offset)
-            fileobj.write(cdata.to_uint_be(size))
+            size = cdata.uint_be(fileobj.read(4))
+            if size == 1: # 64bit
+                # skip name (4B) and read size (8B)
+                size = cdata.ulonglong_be(fileobj.read(12)[4:])
+                fileobj.seek(atom.offset + 8)
+                fileobj.write(cdata.to_ulonglong_be(size + delta))
+            else: # 32bit
+                fileobj.seek(atom.offset)
+                fileobj.write(cdata.to_uint_be(size + delta))
 
     def __update_offset_table(self, fileobj, fmt, atom, delta, offset):
         """Update offset table in the specified atom."""
@@ -496,22 +507,26 @@ class MP4Tags(DictProxy, Metadata):
         self[atom.name] = []
         pos = 0
         while pos < atom.length - 8:
-            length, name, format = struct.unpack(">I4sI", data[pos:pos+12])
+            length, name, imageformat = struct.unpack(">I4sI", data[pos:pos+12])
             if name != "data":
+                if name == "name":
+                    pos += length
+                    continue
                 raise MP4MetadataError(
                     "unexpected atom %r inside 'covr'" % name)
-            if format not in (MP4Cover.FORMAT_JPEG, MP4Cover.FORMAT_PNG):
-                format = MP4Cover.FORMAT_JPEG
-            cover = MP4Cover(data[pos+16:pos+length], format)
-            self[atom.name].append(MP4Cover(data[pos+16:pos+length], format))
+            if imageformat not in (MP4Cover.FORMAT_JPEG, MP4Cover.FORMAT_PNG):
+                imageformat = MP4Cover.FORMAT_JPEG
+            cover = MP4Cover(data[pos+16:pos+length], imageformat)
+            self[atom.name].append(
+                MP4Cover(data[pos+16:pos+length], imageformat))
             pos += length
     def __render_cover(self, key, value):
         atom_data = []
         for cover in value:
-            try: format = cover.format
-            except AttributeError: format = MP4Cover.FORMAT_JPEG
+            try: imageformat = cover.imageformat
+            except AttributeError: imageformat = MP4Cover.FORMAT_JPEG
             atom_data.append(
-                Atom.render("data", struct.pack(">2I", format, 0) + cover))
+                Atom.render("data", struct.pack(">2I", imageformat, 0) + cover))
         return Atom.render(key, "".join(atom_data))
 
     def __parse_text(self, atom, data, expected_flags=1):
@@ -524,7 +539,7 @@ class MP4Tags(DictProxy, Metadata):
         if isinstance(value, basestring):
             value = [value]
         return self.__render_data(
-            key, flags, [text.encode('utf-8') for text in value])
+            key, flags, map(utf8, value))
 
     def delete(self, filename):
         self.clear()
@@ -588,12 +603,12 @@ class MP4Info(object):
         data = fileobj.read(mdhd.length)
         if ord(data[8]) == 0:
             offset = 20
-            format = ">2I"
+            fmt = ">2I"
         else:
             offset = 28
-            format = ">IQ"
-        end = offset + struct.calcsize(format)
-        unit, length = struct.unpack(format, data[offset:end])
+            fmt = ">IQ"
+        end = offset + struct.calcsize(fmt)
+        unit, length = struct.unpack(fmt, data[offset:end])
         self.length = float(length) / unit
 
         try:
@@ -638,17 +653,19 @@ class MP4(FileType):
     Only audio ('soun') tracks will be read.
     """
 
+    MP4Tags = MP4Tags
+    
     _mimes = ["audio/mp4", "audio/x-m4a", "audio/mpeg4", "audio/aac"]
 
     def load(self, filename):
         self.filename = filename
-        fileobj = file(filename, "rb")
+        fileobj = open(filename, "rb")
         try:
             atoms = Atoms(fileobj)
             try: self.info = MP4Info(atoms, fileobj)
             except StandardError, err:
                 raise MP4StreamInfoError, err, sys.exc_info()[2]
-            try: self.tags = MP4Tags(atoms, fileobj)
+            try: self.tags = self.MP4Tags(atoms, fileobj)
             except MP4MetadataError:
                 self.tags = None
             except StandardError, err:
@@ -657,7 +674,7 @@ class MP4(FileType):
             fileobj.close()
 
     def add_tags(self):
-        self.tags = MP4Tags()
+        self.tags = self.MP4Tags()
 
     def score(filename, fileobj, header):
         return ("ftyp" in header) + ("mp4" in header)

@@ -1,4 +1,4 @@
-# Copyright 2006 Joe Wreschnig <piman@sacredchao.net>
+# Copyright 2006 Joe Wreschnig
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,6 +13,8 @@ intended for internal use in Mutagen only.
 """
 
 import struct
+
+from fnmatch import fnmatchcase
 
 class DictMixin(object):
     """Implement the dict API using keys() and __*item__ methods.
@@ -93,6 +95,8 @@ class DictMixin(object):
     def __cmp__(self, other):
         if other is None: return 1
         else: return cmp(dict(self.items()), other)
+
+    __hash__ = object.__hash__
 
     def __len__(self):
         return len(self.keys())
@@ -301,3 +305,12 @@ def utf8(data):
     elif isinstance(data, unicode):
         return data.encode("utf-8")
     else: raise TypeError("only unicode/str types can be converted to UTF-8")
+
+def dict_match(d, key, default=None):
+    try:
+        return d[key]
+    except KeyError:
+        for pattern, value in d.iteritems():
+            if fnmatchcase(key, pattern):
+                return value
+    return default
