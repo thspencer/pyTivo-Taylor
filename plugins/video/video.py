@@ -106,7 +106,7 @@ class Video(Plugin):
         fname = unicode(path, 'utf-8')
         thead = ''
         if faking:
-            thead = self.tivo_header(tsn, fname, mime)
+            thead = self.tivo_header(tsn, path, mime)
         if compatible:
             size = os.stat(fname).st_size + len(thead)
             handler.send_response(200)
