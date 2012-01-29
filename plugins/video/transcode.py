@@ -242,7 +242,7 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
             if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
-            if vInfo['aCodec'] != 'ac3' and (aCh == 'N/A' or aCh > 2):
+            if vInfo['aCodec'] != 'ac3' and (aCh == None or aCh > 2):
                 codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
@@ -268,7 +268,7 @@ def select_audioch(inFile, tsn):
     if ch:
         return '-ac ' + ch
     #AC-3 max channels is 5.1
-    if vInfo['aCh'] != 'N/A' and vInfo['aCh'] > 6:
+    if vInfo['aCh'] != None and vInfo['aCh'] > 6:
         debug('Too many audio channels for AC-3, using 5.1 instead')
         return '-ac ' + '6'
     return ''
@@ -652,7 +652,7 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
                              'ac3', 'liba52'):
                 message = (False, 'aCodec %s not compatible' % codec)
                 break
-            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and (vInfo['aCh'] == 'N/A' or vInfo['aCh'] > 2):
+            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and (vInfo['aCh'] == None or vInfo['aCh'] > 2):
                 message = (False, 'aCodec %s is only supported with 2 or less channels, the track has %s channels' % (codec, vInfo['aCh']))
                 break
             
@@ -866,9 +866,9 @@ def video_info(inFile, cache=True):
         elif x.group(1):
             vInfo['aCh'] = int(x.group(1))
         else:
-            vInfo['aCh'] = 'N/A'
+            vInfo['aCh'] = None
     else:
-        vInfo['aCh'] = 'N/A'
+        vInfo['aCh'] = None
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
