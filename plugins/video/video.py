@@ -1,3 +1,4 @@
+import calendar
 import cgi
 import logging
 import os
@@ -53,6 +54,12 @@ except:
     use_extensions = False
 
 queue = []  # Recordings to push
+
+def uniso(isotime):
+    return datetime.strptime(isotime[:19], '%Y-%m-%dT%H:%M:%S')
+
+def isogm(isotime):
+    return int(calendar.timegm(uniso(isotime).timetuple()))
 
 class Video(Plugin):
 
@@ -264,12 +271,10 @@ class Video(Plugin):
                 except:
                     logger.warning('Bad file time on ' + full_path)
             elif data['time'].lower() == 'oad':
-                    now = datetime.strptime(data['originalAirDate'][:19],
-                                            '%Y-%m-%dT%H:%M:%S')
+                    now = uniso(data['originalAirDate'])
             else:
                 try:
-                    now = datetime.strptime(data['time'][:19],
-                                            '%Y-%m-%dT%H:%M:%S')
+                    now = uniso(data['time'])
                 except:
                     logger.warning('Bad time format: ' + data['time'] +
                                    ' , using current time')
@@ -338,6 +343,8 @@ class Video(Plugin):
                     video['valid'] = transcode.supported_format(f.name)
                     if video['valid']:
                         video.update(self.metadata_full(f.name, tsn))
+                        if len(files) == 1:
+                            video['captureDate'] = hex(isogm(video['time']))
                 else:
                     video['valid'] = True
                     video.update(metadata.basic(f.name))
