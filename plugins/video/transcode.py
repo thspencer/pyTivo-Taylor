@@ -643,7 +643,7 @@ def tivo_compatible_container(vInfo, inFile, mime=''):
     message = (True, '')
     container = vInfo['container']
     if ((mime == 'video/mp4' and
-         (container != 'mov' or inFile.endswith('.mov'))) or
+         (container != 'mov' or inFile.lower().endswith('.mov'))) or
         (mime == 'video/bif' and container != 'asf') or
         (mime == 'video/x-tivo-mpeg-ts' and container != 'mpegts') or
         (mime in ['video/x-tivo-mpeg', 'video/mpeg', ''] and
