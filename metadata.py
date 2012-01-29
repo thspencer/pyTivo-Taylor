@@ -290,7 +290,7 @@ def basic(full_path):
     mtime = os.stat(unicode(full_path, 'utf-8')).st_mtime
     if (mtime < 0):
         mtime = 0
-    originalAirDate = datetime.fromtimestamp(mtime)
+    originalAirDate = datetime.utcfromtimestamp(mtime)
 
     metadata = {'title': title,
                 'originalAirDate': originalAirDate.isoformat()}
