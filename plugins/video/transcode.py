@@ -867,8 +867,10 @@ def video_info(inFile, cache=True):
             vInfo['aCh'] = int(x.group(1))
         else:
             vInfo['aCh'] = None
+            debug('failed at aCh')
     else:
         vInfo['aCh'] = None
+        debug('failed at aCh')
 
     rezre = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
     x = rezre.search(output)
