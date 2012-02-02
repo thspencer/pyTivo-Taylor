@@ -56,6 +56,7 @@ if 'listen' in config.getBeaconAddresses():
     b.listen()
 
 logger.info('pyTivo is ready.')
+logger.debug('pyTivo/iluvatar')
 
 try:
     httpd.set_beacon(b)
