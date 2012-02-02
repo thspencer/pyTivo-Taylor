@@ -869,7 +869,7 @@ def video_info(inFile, cache=True):
                 vInfo[attr] = None
             debug('failed at ' + attr)
 
-    rezre = re.compile(r'.*Audio: .+, (?:(\d+)(?:(?:\.(\d))?(?: channels.*)?)|(stereo)|(mono)),.*')
+    rezre = re.compile(r'.*Audio: .+, (?:(\d+)(?:(?:\.(\d).*)?(?: channels.*)?)|(stereo)|(mono)),.*')
     x = rezre.search(output)
     if x:
         if x.group(4) and x.group(4) == 'mono':
