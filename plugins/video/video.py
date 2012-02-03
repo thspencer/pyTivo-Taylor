@@ -55,11 +55,14 @@ except:
 
 queue = []  # Recordings to push
 
-def uniso(isotime):
-    return datetime.strptime(isotime[:19], '%Y-%m-%dT%H:%M:%S')
+def uniso(iso):
+    return time.strptime(iso[:19], '%Y-%m-%dT%H:%M:%S')
 
-def isogm(isotime):
-    return int(calendar.timegm(uniso(isotime).timetuple()))
+def isodt(iso):
+    return datetime(*uniso(iso)[:6])
+
+def isogm(iso):
+    return int(calendar.timegm(uniso(iso)))
 
 class Video(Plugin):
 
@@ -271,10 +274,10 @@ class Video(Plugin):
                 except:
                     logger.warning('Bad file time on ' + full_path)
             elif data['time'].lower() == 'oad':
-                    now = uniso(data['originalAirDate'])
+                    now = isodt(data['originalAirDate'])
             else:
                 try:
-                    now = uniso(data['time'])
+                    now = isodt(data['time'])
                 except:
                     logger.warning('Bad time format: ' + data['time'] +
                                    ' , using current time')
