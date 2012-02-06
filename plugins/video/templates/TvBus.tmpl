@@ -32,7 +32,9 @@
             <element>$escape($element)</element>
             #end for
       </vDirector>
+      #if $video.episodeNumber
       <episodeNumber>$escape($video.episodeNumber)</episodeNumber>
+      #end if
       #if $video.isEpisode != 'false' and $video.episodeTitle
       <episodeTitle>$escape($video.episodeTitle)</episodeTitle>
       #end if
