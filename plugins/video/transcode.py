@@ -717,7 +717,10 @@ def mp4_remuxable(inFile, tsn=''):
     return tivo_compatible_video(vInfo, tsn, 'video/mp4')[0]
 
 def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
-    unique_id = '_' + config.get_random()
+    temp_add = config.get_server('temp_add', '')
+    unique_id = ''
+    if temp_add:
+        unique_id = '_' + config.get_random()
     outFile = inFile  + unique_id + '.pyTivo-temp'
     newname = basename  + unique_id + '.pyTivo-temp'
     
