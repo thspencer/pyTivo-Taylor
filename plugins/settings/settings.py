@@ -29,7 +29,8 @@ class Settings(Plugin):
     CONTENT_TYPE = 'text/html'
 
     def Quit(self, handler, query):
-        if hasattr(handler.server, 'shutdown'):
+        if (hasattr(handler.server, 'shutdown') and
+            not handler.server.in_service):
             GOODBYE = 'Goodbye\n'
             handler.send_response(200)
             handler.send_header('Content-Type', 'text/plain')
@@ -87,7 +88,8 @@ class Settings(Plugin):
                         and not section.startswith('_tivo_HD')]
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
-        t.has_shutdown = hasattr(handler.server, 'shutdown')
+        t.has_shutdown = (hasattr(handler.server, 'shutdown') and
+                          not handler.server.in_service)
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html; charset=utf-8')
         handler.send_header('Expires', '0')
