@@ -17,7 +17,7 @@ def exceptionLogger(*args):
     sys.excepthook = sys.__excepthook__
     logging.getLogger('pyTivo').error('Exception in pyTivo', exc_info=args)
 
-def main():
+def setup():
     config.init(sys.argv[1:])
     config.init_logging()
     sys.excepthook = exceptionLogger
@@ -57,13 +57,17 @@ def main():
     if 'listen' in config.getBeaconAddresses():
         b.listen()
 
-    logger.info('pyTivo is ready.')
+    httpd.set_beacon(b)
 
+    logger.info('pyTivo is ready.')
+    return httpd
+
+def serve(httpd):
     try:
-        httpd.set_beacon(b)
         httpd.serve_forever()
     except KeyboardInterrupt:
-        b.stop()
+        httpd.beacon.stop()
 
 if __name__ == '__main__':
-    main()
+    httpd = setup()
+    serve(httpd)

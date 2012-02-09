@@ -5,9 +5,7 @@ import win32event
 import win32service 
 import win32serviceutil 
 
-import beacon
-import config
-import httpserver
+import pyTivo
 
 class PyTivoService(win32serviceutil.ServiceFramework):
     _svc_name_ = 'pyTivo'
@@ -18,39 +16,22 @@ class PyTivoService(win32serviceutil.ServiceFramework):
         self.stop_event = win32event.CreateEvent(None, 0, 0, None)
     
     def SvcDoRun(self): 
-        config.init([])
-        config.init_logging()
-
         p = os.path.dirname(__file__)
     
         f = open(os.path.join(p, 'log.txt'), 'w')
         sys.stdout = f
         sys.stderr = f
 
-        port = config.getPort()
-
-        httpd = httpserver.TivoHTTPServer(('', int(port)),
-                                          httpserver.TivoHTTPHandler)
-
-        for section, settings in config.getShares():
-            httpd.add_container(section, settings)
-
-        b = beacon.Beacon()
-        b.add_service('TiVoMediaServer:%s/http' % port)
-        b.start()
-        if 'listen' in config.getBeaconAddresses():
-            b.listen()
-
-        httpd.set_beacon(b)
-        
-        while 1:
+        httpd = pyTivo.setup()
+ 
+        while True:
             sys.stdout.flush()
             (rx, tx, er) = select.select((httpd,), (), (), 5)
             for sck in rx:
                 sck.handle_request()
             rc = win32event.WaitForSingleObject(self.stop_event, 5)
             if rc == win32event.WAIT_OBJECT_0:
-                b.stop()
+                httpd.beacon.stop()
                 break
 
     def SvcStop(self):
