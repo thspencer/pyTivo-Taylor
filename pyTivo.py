@@ -66,8 +66,9 @@ def serve(httpd):
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        httpd.beacon.stop()
+        pass
 
 if __name__ == '__main__':
     httpd = setup()
     serve(httpd)
+    httpd.beacon.stop()
