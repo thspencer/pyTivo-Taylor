@@ -53,6 +53,15 @@ function resetpyTivo()
     }
 }
 
+function shutdownpyTivo()
+{
+    var answer = confirm("Are you sure you wish to shut down the pyTivo " +
+                         "Server?")
+    if (answer) {
+        window.location = "/TiVoConnect?Command=Quit&Container=Settings"
+    }
+}
+
 function showData(form)
 {
     var section = "";

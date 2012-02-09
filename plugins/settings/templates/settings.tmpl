@@ -109,10 +109,16 @@
 
       <hr>Administration
       <form action="NOTUSED">
-        <p><input name="B1" id="B1" value="Save Changes" 
+        <p>
+        <input name="B1" id="B1" value="Save Changes" 
          type="button" onclick="showData(document.config); return true;">
         <input id="B2" name="B2" value="Soft Reset pyTivo" type="button" 
-         onclick="resetpyTivo();"></p>
+         onclick="resetpyTivo();">
+        #if $has_shutdown
+        <input id="B3" name="B3" value="Shutdown pyTivo" type="button"
+         onclick="shutdownpyTivo();">
+        #end if
+        </p>
       </form>
 
       </div>

@@ -28,6 +28,19 @@ SETTINGS_TEMPLATE = file(tsname, 'rb').read()
 class Settings(Plugin):
     CONTENT_TYPE = 'text/html'
 
+    def Quit(self, handler, query):
+        if hasattr(handler.server, 'shutdown'):
+            GOODBYE = 'Goodbye\n'
+            handler.send_response(200)
+            handler.send_header('Content-Type', 'text/plain')
+            handler.send_header('Content-Length', len(GOODBYE))
+            handler.send_header('Connection', 'close')
+            handler.end_headers()
+            handler.wfile.write(GOODBYE)
+            handler.server.shutdown()
+        else:
+            handler.send_error(501)
+
     def Reset(self, handler, query):
         config.reset()
         handler.server.reset()
@@ -74,6 +87,7 @@ class Settings(Plugin):
                         and not section.startswith('_tivo_HD')]
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
+        t.has_shutdown = hasattr(handler.server, 'shutdown')
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html; charset=utf-8')
         handler.send_header('Expires', '0')
