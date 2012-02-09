@@ -22,7 +22,7 @@ class PyTivoService(win32serviceutil.ServiceFramework):
         sys.stdout = f
         sys.stderr = f
 
-        httpd = pyTivo.setup()
+        httpd = pyTivo.setup(True)
  
         while True:
             sys.stdout.flush()

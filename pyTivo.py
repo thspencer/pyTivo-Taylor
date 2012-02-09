@@ -17,7 +17,7 @@ def exceptionLogger(*args):
     sys.excepthook = sys.__excepthook__
     logging.getLogger('pyTivo').error('Exception in pyTivo', exc_info=args)
 
-def setup():
+def setup(in_service=False):
     config.init(sys.argv[1:])
     config.init_logging()
     sys.excepthook = exceptionLogger
@@ -58,6 +58,7 @@ def setup():
         b.listen()
 
     httpd.set_beacon(b)
+    httpd.set_service_status(in_service)
 
     logger.info('pyTivo is ready.')
     logger.debug('pyTivo/iluvatar')
