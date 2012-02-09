@@ -63,7 +63,7 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     def set_beacon(self, beacon):
         self.beacon = beacon
 
-    def set_service_status(self, status)
+    def set_service_status(self, status):
         self.in_service = status
 
 class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
