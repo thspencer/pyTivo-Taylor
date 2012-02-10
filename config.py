@@ -10,8 +10,6 @@ import string
 import sys
 from ConfigParser import NoOptionError
 
-guid = ''.join([random.choice(string.letters) for i in range(10)])
-our_ip = ''
 config = ConfigParser.ConfigParser()
 
 config_win_default = ''
@@ -32,18 +30,25 @@ if sys.platform == "win32":
     except WindowsError:
         print "Can't access Windows Registry to find common Application Data path."
 
-p = os.path.dirname(__file__)
-config_files = ['/etc/pyTivo.conf', config_win_default, os.path.join(p, 'pyTivo.conf')]
-configs_found = []
-
-tivos = {}
-tivo_names = {}
-bin_paths = {}
-
 def init(argv):
+    global guid
+    global our_ip
     global config_files
     global configs_found
+    global tivos
     global tivo_names
+    global bin_paths
+
+    guid = ''.join([random.choice(string.letters) for i in range(10)])
+    our_ip = ''
+
+    p = os.path.dirname(__file__)
+    config_files = ['/etc/pyTivo.conf', os.path.join(p, 'pyTivo.conf')]
+    configs_found = []
+
+    tivos = {}
+    tivo_names = {}
+    bin_paths = {}
 
     try:
         opts, _ = getopt.getopt(argv, 'c:e:', ['config=', 'extraconf='])

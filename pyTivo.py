@@ -3,6 +3,7 @@
 import logging
 import os
 import sys
+import time
 
 if sys.version_info[0] != 2 or sys.version_info[1] < 4:
     print ('ERROR: pyTivo requires Python >= 2.4, < 3.0.\n')
@@ -70,7 +71,12 @@ def serve(httpd):
     except KeyboardInterrupt:
         pass
 
-if __name__ == '__main__':
+def mainloop():
     httpd = setup()
     serve(httpd)
     httpd.beacon.stop()
+    return httpd.restart 
+
+if __name__ == '__main__':
+    while mainloop():
+        time.sleep(5) 
