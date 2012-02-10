@@ -76,12 +76,11 @@ class ZCBroadcast:
         self.rz.close()
 
 class Beacon:
-
-    UDPSock = socket(AF_INET, SOCK_DGRAM)
-    UDPSock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-    services = []
-
     def __init__(self):
+        self.UDPSock = socket(AF_INET, SOCK_DGRAM)
+        self.UDPSock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        self.services = []
+
         if config.get_zc():
             logger = logging.getLogger('pyTivo.beacon')
             try:

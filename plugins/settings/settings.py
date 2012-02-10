@@ -17,6 +17,10 @@ CLASS_NAME = 'Settings'
 RESET_MSG = """<h3>Soft Reset</h3> <p>pyTivo has reloaded the 
 pyTivo.conf file and all changes should now be in effect.</p>"""
 
+RESTART_MSG = """<h3>Restart</h3> <p>pyTivo will now restart.</p>"""
+
+GOODBYE_MSG = 'Goodbye.\n'
+
 SETTINGS_MSG = """<h3>Settings Saved</h3> <p>Your settings have been 
 saved to the pyTivo.conf file. However you will need to do a <b>Soft 
 Reset</b> before these changes will take effect.</p>"""
@@ -31,13 +35,21 @@ class Settings(Plugin):
     def Quit(self, handler, query):
         if (hasattr(handler.server, 'shutdown') and
             not handler.server.in_service):
-            GOODBYE = 'Goodbye\n'
             handler.send_response(200)
             handler.send_header('Content-Type', 'text/plain')
-            handler.send_header('Content-Length', len(GOODBYE))
+            handler.send_header('Content-Length', len(GOODBYE_MSG))
             handler.send_header('Connection', 'close')
             handler.end_headers()
-            handler.wfile.write(GOODBYE)
+            handler.wfile.write(GOODBYE_MSG)
+            handler.server.shutdown()
+        else:
+            handler.send_error(501)
+
+    def Restart(self, handler, query):
+        if (hasattr(handler.server, 'shutdown') and
+            not handler.server.in_service):
+            handler.redir(RESTART_MSG, 10)
+            handler.server.restart = True
             handler.server.shutdown()
         else:
             handler.send_error(501)
