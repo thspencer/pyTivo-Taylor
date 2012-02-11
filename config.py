@@ -22,7 +22,7 @@ def init(argv):
 
     config = ConfigParser.ConfigParser()
 
-    guid = ''.join([random.choice(string.letters) for i in range(10)])
+    guid = ''.join([random.choice(string.ascii_letters) for i in range(10)])
     our_ip = ''
 
     p = os.path.dirname(__file__)
