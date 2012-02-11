@@ -10,8 +10,6 @@ import string
 import sys
 from ConfigParser import NoOptionError
 
-config = ConfigParser.ConfigParser()
-
 config_win_default = ''
 
 if sys.platform == "win32":
@@ -31,6 +29,7 @@ if sys.platform == "win32":
         print "Can't access Windows Registry to find common Application Data path."
 
 def init(argv):
+    global config
     global guid
     global our_ip
     global config_files
@@ -38,6 +37,8 @@ def init(argv):
     global tivos
     global tivo_names
     global bin_paths
+
+    config = ConfigParser.ConfigParser()
 
     guid = ''.join([random.choice(string.letters) for i in range(10)])
     our_ip = ''
