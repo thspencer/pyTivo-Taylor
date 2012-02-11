@@ -540,7 +540,7 @@ def select_aspect(inFile, tsn = ''):
 def tivo_compatible_video(vInfo, tsn, mime=''):
     message = (True, '')
     while True:
-        codec = vInfo['vCodec']
+        codec = vInfo.get('vCodec', '')
         if mime == 'video/mp4':
             if codec != 'h264':
                 message = (False, 'vCodec %s not compatible' % codec)
@@ -599,7 +599,7 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
 def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
     message = (True, '')
     while True:
-        codec = vInfo['aCodec']
+        codec = vInfo.get('aCodec', '')
         if mime == 'video/mp4':
             if codec not in ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
                              'ac3', 'liba52'):
@@ -641,7 +641,7 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
 
 def tivo_compatible_container(vInfo, inFile, mime=''):
     message = (True, '')
-    container = vInfo['container']
+    container = vInfo.get('container', '')
     if ((mime == 'video/mp4' and
          (container != 'mov' or inFile.lower().endswith('.mov'))) or
         (mime == 'video/bif' and container != 'asf') or
