@@ -37,6 +37,7 @@ UNSUP = '<h3>Unsupported Command</h3> <p>Query:</p> <ul>%s</ul>'
 class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     def __init__(self, server_address, RequestHandlerClass):
         self.containers = {}
+        self.stop = False
         self.restart = False
         self.logger = logging.getLogger('pyTivo')
         BaseHTTPServer.HTTPServer.__init__(self, server_address,
