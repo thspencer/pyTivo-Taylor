@@ -33,24 +33,28 @@ class Settings(Plugin):
     CONTENT_TYPE = 'text/html'
 
     def Quit(self, handler, query):
-        if (hasattr(handler.server, 'shutdown') and
-            not handler.server.in_service):
+        if hasattr(handler.server, 'shutdown'):
             handler.send_response(200)
             handler.send_header('Content-Type', 'text/plain')
             handler.send_header('Content-Length', len(GOODBYE_MSG))
             handler.send_header('Connection', 'close')
             handler.end_headers()
             handler.wfile.write(GOODBYE_MSG)
-            handler.server.shutdown()
+            if handler.server.in_service:
+                handler.server.stop = True
+            else:
+                handler.server.shutdown()
         else:
             handler.send_error(501)
 
     def Restart(self, handler, query):
-        if (hasattr(handler.server, 'shutdown') and
-            not handler.server.in_service):
+        if hasattr(handler.server, 'shutdown'):
             handler.redir(RESTART_MSG, 10)
             handler.server.restart = True
-            handler.server.shutdown()
+            if handler.server.in_service:
+                handler.server.stop = True
+            else:
+                handler.server.shutdown()
         else:
             handler.send_error(501)
 
@@ -100,8 +104,7 @@ class Settings(Plugin):
                         and not section.startswith('_tivo_HD')]
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
-        t.has_shutdown = (hasattr(handler.server, 'shutdown') and
-                          not handler.server.in_service)
+        t.has_shutdown = hasattr(handler.server, 'shutdown')
         handler.send_response(200)
         handler.send_header('Content-Type', 'text/html; charset=utf-8')
         handler.send_header('Expires', '0')
