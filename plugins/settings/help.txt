@@ -43,14 +43,12 @@ blank.  If this is a known share the name will remain after a save. If
 the setting is a user defined setting the name will be deleted after the 
 save.
 Save Settings: Clicking Save Settings will write your changes to the 
-pyTivo.conf file. These settings will not have an effect on your pyTivo 
+pyTivo.conf file. These settings may not have an effect on your pyTivo 
 server until it is Soft Reset or restarted.
-Soft Reset: Soft Reset allows your new settings to take effect without 
-manually restarting the TiVo.  The Soft Reset will cause a re-read of 
-the pyTivo.conf file so your changes must be saved to the file before 
-the reset.
-Note: The only setting that will not take effect until a hard restart is 
-the Port setting.  Changing the Port setting requires a full restart.
+Soft Reset: Soft Reset allows most new settings to take effect without 
+restarting pyTivo.  The Soft Reset will cause a re-read of the
+pyTivo.conf file so your changes must be saved to the file before the
+reset.
 
 Add_a_New_Section
 
