@@ -501,7 +501,7 @@ class Video(Plugin):
         tivo_name = config.tivo_names.get(tsn, tsn)
 
         container = quote(query['Container'][0].split('/')[0])
-        ip = config.get_ip()
+        ip = config.get_ip(tsn)
         port = config.getPort()
 
         baseurl = 'http://%s:%s/%s' % (ip, port, container)
