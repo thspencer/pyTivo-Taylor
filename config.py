@@ -29,25 +29,13 @@ if sys.platform == "win32":
         print "Can't access Windows Registry to find common Application Data path."
 
 def init(argv):
-    global config
     global guid
     global config_files
-    global configs_found
-    global tivos
-    global tivo_names
-    global bin_paths
-
-    config = ConfigParser.ConfigParser()
 
     guid = ''.join([random.choice(string.ascii_letters) for i in range(10)])
 
     p = os.path.dirname(__file__)
     config_files = ['/etc/pyTivo.conf', os.path.join(p, 'pyTivo.conf')]
-    configs_found = []
-
-    tivos = {}
-    tivo_names = {}
-    bin_paths = {}
 
     try:
         opts, _ = getopt.getopt(argv, 'c:e:', ['config=', 'extraconf='])
@@ -60,11 +48,25 @@ def init(argv):
         elif opt in ('-e', '--extraconf'):
             config_files.append(value)
 
+    reset()
+
+def reset():
+    global config
+    global configs_found
+    global tivos
+    global tivo_names
+    global bin_paths
+
+    tivos = {}
+    tivo_names = {}
+    bin_paths = {}
+
+    config = ConfigParser.ConfigParser()
     configs_found = config.read(config_files)
     if not configs_found:
-        print ('ERROR: pyTivo.conf does not exist.\n' +
-               'You must create this file before running pyTivo.')
-        sys.exit(1)
+        print ('WARNING: pyTivo.conf does not exist.\n' +
+               'Assuming default values.')
+        configs_found = config_files[-1:]
 
     for section in config.sections():
         if section.startswith('_tivo_'):
@@ -77,13 +79,8 @@ def init(argv):
                 if config.has_option(section, 'address'):
                     tivos[tsn] = config.get(section, 'address')
 
-def reset():
-    global config
-    global bin_paths
-    bin_paths.clear()
-    newconfig = ConfigParser.ConfigParser()
-    newconfig.read(config_files)
-    config = newconfig
+    if not config.has_section('Server'):
+        config.add_section('Server')
 
 def write():
     f = open(configs_found[-1], 'w')
