@@ -79,8 +79,9 @@ def reset():
                 if config.has_option(section, 'address'):
                     tivos[tsn] = config.get(section, 'address')
 
-    if not config.has_section('Server'):
-        config.add_section('Server')
+    for section in ['Server', '_tivo_SD', '_tivo_HD']:
+        if not config.has_section(section):
+            config.add_section(section)
 
 def write():
     f = open(configs_found[-1], 'w')
@@ -210,21 +211,16 @@ def getDebug():
         return True
 
 def getOptres(tsn=None):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.getboolean('_tivo_' + tsn, 'optres')
-        except NoOptionError, ValueError:
-            pass
-    section_name = get_section(tsn)
-    if config.has_section(section_name):
-        try:
-            return config.getboolean(section_name, 'optres')
-        except NoOptionError, ValueError:
-            pass
     try:
-        return config.getboolean('Server', 'optres')
-    except NoOptionError, ValueError:
-        return False
+        return config.getboolean('_tivo_' + tsn, 'optres')
+    except:
+        try:
+            return config.getboolean(get_section(tsn), 'optres')
+        except:
+            try:
+                return config.getboolean('Server', 'optres')
+            except:
+                return False
 
 def getPixelAR(ref):
     if config.has_option('Server', 'par'):
@@ -400,22 +396,16 @@ def get_section(tsn):
     return ['_tivo_SD', '_tivo_HD'][isHDtivo(tsn)]
 
 def get_tsn(name, tsn=None, raw=False):
-    if tsn and config.has_section('_tivo_' + tsn):
-        try:
-            return config.get('_tivo_' + tsn, name, raw)
-        except NoOptionError:
-            pass
-    section_name = get_section(tsn)
-    if config.has_section(section_name):
-        try:
-            return config.get(section_name, name, raw)
-        except NoOptionError:
-            pass
     try:
-        return config.get('Server', name, raw)
-    except NoOptionError:
-        pass
-    return None
+        return config.get('_tivo_' + tsn, name, raw)
+    except:
+        try:
+            return config.get(get_section(tsn), name, raw)
+        except:
+            try:
+                return config.get('Server', name, raw)
+            except:
+                return None
 
 def get_random():
     return ''.join([random.choice(string.digits) for i in range(3)])
