@@ -85,15 +85,9 @@ class Settings(Plugin):
         t.quote = quote
         t.server_data = dict(config.config.items('Server', raw=True))
         t.server_known = buildhelp.getknown('server')
-        if config.config.has_section('_tivo_HD'):
-            t.hd_tivos_data = dict(config.config.items('_tivo_HD', raw=True))
-        else:
-            t.hd_tivos_data = {}
+        t.hd_tivos_data = dict(config.config.items('_tivo_HD', raw=True))
         t.hd_tivos_known = buildhelp.getknown('hd_tivos')
-        if config.config.has_section('_tivo_SD'):
-            t.sd_tivos_data = dict(config.config.items('_tivo_SD', raw=True))
-        else:
-            t.sd_tivos_data = {}
+        t.sd_tivos_data = dict(config.config.items('_tivo_SD', raw=True))
         t.sd_tivos_known = buildhelp.getknown('sd_tivos')
         t.shares_data = shares_data
         t.shares_known = buildhelp.getknown('shares')
