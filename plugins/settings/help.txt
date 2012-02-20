@@ -579,7 +579,7 @@ Description: Your username (email address) at tivo.com. This is required
 for the "Push" feature. If you don't plan to use Push, you don't need to 
 set this.
 Example Settings: user@example.com
-Available In: Server
+Available In: Server, Tivos, HD_tivos, SD_tivos
 
 tivo_password
 
@@ -590,7 +590,7 @@ Skill: Basic
 Description: Your password at tivo.com. This is required for the "Push" 
 feature. If you don't plan to use Push, you don't need to set this.
 Example Settings: password
-Available In: Server
+Available In: Server, Tivos, HD_tivos, SD_tivos
 
 tivo_mind
 
