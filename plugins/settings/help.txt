@@ -618,7 +618,7 @@ tivodecode (pushing .TiVo files, transcoding HD .TiVo files to SD
 TiVos). If you don't plan to use these features, you don't need to set 
 this.
 Example Settings: 012345678
-Available In: Server
+Available In: Server, Tivos, HD_tivos, SD_tivos
 
 togo_path
 
