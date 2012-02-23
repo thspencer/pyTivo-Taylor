@@ -75,11 +75,6 @@ class ToGo(Plugin):
                 # Throw the error otherwise
                 raise
 
-    def tivos_by_ip(tivoIP):
-        for key, value in config.tivos.items():
-            if value == tivoIP:
-                return key
-
     def NPL(self, handler, query):
         global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
@@ -89,7 +84,7 @@ class ToGo(Plugin):
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
-            tsn = tivos_by_ip(tivoIP)
+            tsn = config.tivos_by_ip(tivoIP)
             tivo_name = config.tivo_names[tsn]
             tivo_mak = config.get_tsn('tivo_mak', tsn)
             theurl = ('https://' + tivoIP +
@@ -237,7 +232,7 @@ class ToGo(Plugin):
             status[url]['error'] = e.code
             return
 
-        tivo_name = config.tivo_names[tivos_by_ip(tivoIP)]
+        tivo_name = config.tivo_names[config.tivos_by_ip(tivoIP)]
 
         logger.info('[%s] Start getting "%s" from %s' %
                     (time.strftime('%d/%b/%Y %H:%M:%S'), outfile, tivo_name))
@@ -311,7 +306,7 @@ class ToGo(Plugin):
                 togo_path = data.get('path')
         if togo_path:
             tivoIP = query['TiVo'][0]
-            tsn = tivos_by_ip(tivoIP)
+            tsn = config.tivos_by_ip(tivoIP)
             tivo_mak = config.get_tsn('tivo_mak', tsn)
             urls = query.get('Url', [])
             decode = 'decode' in query

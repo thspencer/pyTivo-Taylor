@@ -70,6 +70,11 @@ def write():
     config.write(f)
     f.close()
 
+def tivos_by_ip(tivoIP):
+    for key, value in tivos.items():
+        if value == tivoIP:
+            return key
+
 def get_server(name, default=None):
     if config.has_option('Server', name):
         return config.get('Server', name)
