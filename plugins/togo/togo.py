@@ -240,9 +240,15 @@ class ToGo(Plugin):
                 handle = self.tivo_open('%s&Format=video/x-tivo-mpeg-ts' % url)
             else:
                 handle = self.tivo_open(url)
-        except IOError, e:
+        except urllib2.HTTPError, e:
             status[url]['running'] = False
             status[url]['error'] = e.code
+            logger.error(e.code)
+            return
+        except urllib2.URLError, e:
+            status[url]['running'] = False
+            status[url]['error'] = e.reason
+            logger.error(e.reason)
             return
 
         tivo_name = config.tivo_names[config.tivos_by_ip(tivoIP)]
