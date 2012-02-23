@@ -227,9 +227,15 @@ class ToGo(Plugin):
         auth_handler.add_password('TiVo DVR', url, 'tivo', mak)
         try:
             handle = self.tivo_open(url)
-        except IOError, e:
+        except urllib2.HTTPError, e:
             status[url]['running'] = False
             status[url]['error'] = e.code
+            logger.error(e.code)
+            return
+        except urllib2.URLError, e:
+            status[url]['running'] = False
+            status[url]['error'] = e.reason
+            logger.error(e.reason)
             return
 
         tivo_name = config.tivo_names[config.tivos_by_ip(tivoIP)]
