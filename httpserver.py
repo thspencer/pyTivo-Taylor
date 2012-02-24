@@ -71,12 +71,8 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wbufsize = 0x10000
         self.server_version = 'pyTivo/1.0'
         self.sys_version = ''
-        try:
-            BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
-                client_address, server)
-        except Exception, msg:
-            self.logger = logging.getLogger('pyTivo')
-            self.logger.error(msg)
+        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
+            client_address, server)
 
     def address_string(self):
         host, port = self.client_address[:2]
