@@ -220,7 +220,7 @@ class Music(Plugin):
                     item['ArtistName'] = artist
                     item['SongTitle'] = title
                     item['AlbumTitle'] = get_tag('album', audioFile)
-                    item['AlbumYear'] = get_tag('date', audioFile)
+                    item['AlbumYear'] = get_tag('date', audioFile)[:4]
                     item['MusicGenre'] = get_tag('genre', audioFile)
             except Exception, msg:
                 print msg
