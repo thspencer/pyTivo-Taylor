@@ -96,9 +96,10 @@ class Video(Plugin):
         compatible = (not needs_tivodecode and
                       transcode.tivo_compatible(path, tsn, mime)[0])
 
-        offset = handler.headers.getheader('Range', 'bytes=0-')
-        if offset:
-            offset = int(offset[6:-1])  # "bytes=XXX-"
+        try:  # "bytes=XXX-"
+            offset = int(handler.headers.getheader('Range')[6:-1])
+        except:
+            offset = 0
 
         if needs_tivodecode:
             valid = bool(config.get_bin('tivodecode') and
