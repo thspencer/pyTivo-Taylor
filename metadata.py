@@ -263,10 +263,24 @@ def from_text(full_path):
     path, name = os.path.split(full_path)
     title, ext = os.path.splitext(name)
 
-    for metafile in [os.path.join(path, title) + '.properties',
-                     os.path.join(path, 'default.txt'), full_path + '.txt',
-                     os.path.join(path, '.meta', 'default.txt'),
-                     os.path.join(path, '.meta', name) + '.txt']:
+    search_paths = []
+    ptmp = full_path
+    while ptmp:
+        parent = os.path.dirname(ptmp)
+        if ptmp != parent:
+            ptmp = parent
+        else:
+            break
+        search_paths.append(os.path.join(ptmp, 'default.txt'))
+
+    search_paths.append(os.path.join(path, title) + '.properties')
+    search_paths.reverse()
+
+    search_paths += [ full_path + '.txt',
+                      os.path.join(path, '.meta', 'default.txt'),
+                      os.path.join(path, '.meta', name) + '.txt']
+
+    for metafile in search_paths:
         if os.path.exists(metafile):
             sep = ':='[metafile.endswith('.properties')]
             for line in file(metafile, 'U'):
