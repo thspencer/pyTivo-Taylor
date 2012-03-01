@@ -12,6 +12,8 @@ import config
 from plugin import GetPlugin
 
 SHARE_TEMPLATE = '/TiVoConnect?Command=QueryContainer&Container=%s'
+PLATFORM_MAIN = 'pyTivo'
+PLATFORM_VIDEO = 'pc'    # For the nice icon
 
 class ZCListener:
     def __init__(self, names):
@@ -36,10 +38,14 @@ class ZCBroadcast:
         for section, settings in config.getShares():
             ct = GetPlugin(settings['type']).CONTENT_TYPE
             if ct.startswith('x-container/'):
+                if 'video' in ct:
+                    platform = PLATFORM_VIDEO
+                else:
+                    platform = PLATFORM_MAIN
                 logger.info('Registering: %s' % section)
                 self.share_names.append(section)
                 desc = {'path': SHARE_TEMPLATE % quote(section),
-                        'platform': 'pc', 'protocol': 'http'}
+                        'platform': platform, 'protocol': 'http'}
                 tt = ct.split('/')[1]
                 info = Zeroconf.ServiceInfo('_%s._tcp.local.' % tt,
                     '%s._%s._tcp.local.' % (section, tt),
@@ -108,7 +114,7 @@ class Beacon:
                   'method=%s' % conntype,
                   'identity=%s' % config.getGUID(),
                   'machine=%s' % gethostname(),
-                  'platform=pc']
+                  'platform=%s' % PLATFORM_MAIN]
 
         if services:
             beacon.append('services=' + self.format_services())
