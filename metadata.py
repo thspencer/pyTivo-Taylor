@@ -58,6 +58,11 @@ def get_tv(rating):
 def get_stars(rating):
     return HUMAN['starRating'].get(rating, '')
 
+def convert_rating_scale(rating, scale):
+    stars = len(HUMAN['starRating']) - 1
+    result = ((float(rating) * stars) / float(scale)) + 1
+    return int(result)
+
 def tag_data(element, tag):
     for name in tag.split('/'):
         new_element = element.getElementsByTagName(name)
@@ -407,93 +412,174 @@ def from_details(xml):
 
     return metadata
 
-def from_nfo(full_path):
-    if full_path in nfo_cache:
-        return nfo_cache[full_path]
-    metadata = {}
-    nfo_path = "%s.nfo" % os.path.splitext(full_path)[0]
-    if not os.path.exists(nfo_path):
-        nfo_cache[full_path] = metadata
-        return metadata
-
-    showitems = {'description': 'plot',
-                 'title': 'title',
-                 'seriesId': 'id',
-                 'seriesTitle': 'showtitle'}
-
-    epitems = {'description': 'plot',
-               'episodeTitle': 'title',
-               'seriesTitle': 'showtitle',
-               'originalAirDate': 'aired'}
+def _nfo_vitems(source, metadata):
 
     vItems = {'vGenre': 'genre',
               'vWriter': 'credits',
               'vDirector': 'director',
               'vActor': 'actor/name'}
 
-    xmldoc = minidom.parse(file(nfo_path, 'rU'))
+    for key in vItems:
+        data = _vtag_data_alternate(source, vItems[key])
+        if data:
+            metadata.setdefault(key, [])
+            for dat in data:
+                if not dat in metadata[key]:
+                    metadata[key].append(dat)
 
-    # is it an episode?
+    if 'vGenre' in metadata:
+        metadata['vSeriesGenre'] = metadata['vProgramGenre'] = metadata['vGenre']
+
+    return metadata
+
+
+def _from_tvshow_nfo(tvshow_nfo_path):
+    if tvshow_nfo_path in nfo_cache:
+        return nfo_cache[tvshow_nfo_path]
+
+    items = {'description': 'plot',
+             'title': 'title',
+             'seriesTitle': 'showtitle',
+             'starRating': 'rating',
+             'tvRating': 'mpaa'}
+
+    nfo_cache[tvshow_nfo_path] = metadata = {}
+
+    xmldoc = minidom.parse(file(tvshow_nfo_path, 'rU'))
+    tvshow = xmldoc.getElementsByTagName('tvshow')
+    if len(tvshow) > 0:
+        tvshow = tvshow[0]
+    else:
+        return metadata
+
+    for item in items:
+        data = tag_data(tvshow, items[item])
+        if data:
+            metadata[item] = data
+
+    metadata = _nfo_vitems(tvshow, metadata)
+
+    nfo_cache[tvshow_nfo_path] = metadata
+    return metadata
+
+def _from_episode_nfo(nfo_path, xmldoc=None):
+    metadata = {}
+
+    items = {'description': 'plot',
+             'episodeTitle': 'title',
+             'seriesTitle': 'showtitle',
+             'originalAirDate': 'aired',
+             'starRating': 'rating',
+             'tvRating': 'mpaa'}
+
+    # find tvshow.nfo
+    path = nfo_path
+    while True:
+        basepath = os.path.dirname(path)
+        if path == basepath:
+            break
+        path = basepath
+        tv_nfo = os.path.join(path, 'tvshow.nfo')
+        if os.path.exists(tv_nfo):
+            metadata.update(_from_tvshow_nfo(tv_nfo))
+            break
+
+    if not xmldoc:
+        xmldoc = minidom.parse(file(nfo_path, 'rU'))
+
     episode = xmldoc.getElementsByTagName('episodedetails')
     if len(episode) > 0:
-        metadata['isEpisode'] = 'true'
         episode = episode[0]
-        # find tvshow.nfo
-        path = full_path
-        tvshow = None
-        while not tvshow:
-            basepath = os.path.dirname(path)
-            if path == basepath:
-                break
-            path = basepath
-            tv_nfo = os.path.join(path, 'tvshow.nfo')
-            if os.path.exists(tv_nfo):
-                tvdoc = minidom.parse(file(tv_nfo, 'rU'))
-                tvshow = tvdoc.getElementsByTagName('tvshow')
-                if len(tvshow) > 0:
-                    tvshow = tvshow[0]
-                else:
-                    tvshow = None
-        if tvshow:
-            for item in showitems:
-                data = tag_data(tvshow, showitems[item])
-                if data:
-                    metadata[item] = data
+    else:
+        return metadata
 
-        for item in epitems:
-            data = tag_data(episode, epitems[item])
-            if data:
-                metadata[item] = data
-        season = tag_data(episode, 'displayseason')
-        if not season or season == "-1":
-            season = tag_data(episode, 'season')
-        if not season:
-            season = 1
+    metadata['isEpisode'] = 'true'
+    for item in items:
+        data = tag_data(episode, items[item])
+        if data:
+            metadata[item] = data
 
-        ep_num = tag_data(episode, 'displayepisode')
-        if not ep_num or ep_num == "-1":
-            ep_num = tag_data(episode, 'episode')
-        if ep_num and ep_num != "-1":
-            metadata['episodeNumber'] = "%d%02d" % (int(season), int(ep_num))
+    season = tag_data(episode, 'displayseason')
+    if not season or season == "-1":
+        season = tag_data(episode, 'season')
+    if not season:
+        season = 1
 
-        for vsource in [tvshow, episode]:
-            if vsource:
-                for key in vItems:
-                    data = _vtag_data_alternate(vsource, vItems[key])
-                    if data:
-                        metadata.setdefault(key, [])
-                        for dat in data:
-                            if not dat in metadata[key]:
-                                metadata[key].append(dat)
+    ep_num = tag_data(episode, 'displayepisode')
+    if not ep_num or ep_num == "-1":
+        ep_num = tag_data(episode, 'episode')
+    if ep_num and ep_num != "-1":
+        metadata['episodeNumber'] = "%d%02d" % (int(season), int(ep_num))
 
-        if 'episodeTitle' in metadata:
-            metadata['title'] = metadata['episodeTitle']
+    if 'originalAirDate' in metadata:
+        metadata['originalAirDate'] += 'T00:00:00Z'
 
-        if 'vGenre' in metadata:
-            metadata['vSeriesGenre'] = metadata['vProgramGenre'] = metadata['vGenre']
+    metadata = _nfo_vitems(episode, metadata)
 
-        if 'originalAirDate' in metadata:
-            metadata['originalAirDate'] += 'T00:00:00Z'
+    return metadata
+
+
+def _from_movie_nfo(nfo_path, xmldoc=None):
+    metadata = {}
+
+    if not xmldoc:
+        xmldoc = minidom.parse(file(nfo_path, 'rU'))
+    movie = xmldoc.getElementsByTagName('movie')
+    if len(movie) > 0:
+        movie = movie[0]
+    else:
+        return metadata
+
+    items = {'description': 'plot',
+             'title': 'title',
+             'movieYear': 'year',
+             'starRating': 'rating',
+             'mpaaRating': 'mpaa'}
+
+    metadata['isEpisode'] = 'false'
+
+    for item in items:
+        data = tag_data(movie, items[item])
+        if data:
+            metadata[item] = data
+
+    metadata['movieYear'] = "%04d" % int(metadata.get('movieYear', 0))
+
+    metadata = _nfo_vitems(movie, metadata)
+    return metadata
+
+def from_nfo(full_path):
+    if full_path in nfo_cache:
+        return nfo_cache[full_path]
+
+    metadata = nfo_cache[full_path] = {}
+
+    nfo_path = "%s.nfo" % os.path.splitext(full_path)[0]
+    if not os.path.exists(nfo_path):
+        return metadata
+
+    xmldoc = minidom.parse(file(nfo_path, 'rU'))
+
+    if len(xmldoc.getElementsByTagName('episodedetails')) > 0:
+        # it's an episode
+        metadata.update(_from_episode_nfo(nfo_path, xmldoc))
+    elif len(xmldoc.getElementsByTagName('movie')) > 0:
+        # it's a movie
+        metadata.update(_from_movie_nfo(nfo_path, xmldoc))
+
+    # common nfo cleanup
+    if 'starRating' in metadata:
+        metadata['starRating'] = str(convert_rating_scale(metadata['starRating'], 10))
+
+    for key, mapping in [('mpaaRating', MPAA_RATINGS),
+                     ('tvRating', TV_RATINGS)]:
+        if key in metadata:
+            rating = mapping.get(metadata[key], None)
+            if rating:
+                metadata[key] = str(rating)
+            else:
+                del metadata[key]
+
     nfo_cache[full_path] = metadata
     return metadata
 
