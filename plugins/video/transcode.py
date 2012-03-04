@@ -306,7 +306,7 @@ def select_audiolang(inFile, tsn):
         if len(langmatch_prev) > 1:
             stream = langmatch_prev[0][0]
     #don't let FFmpeg auto select audio stream, pyTivo defaults to first detected
-    if stream is not '':
+    if stream:
         debug('selected audio stream: %s' % stream)
         return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
     #if no audio is found
