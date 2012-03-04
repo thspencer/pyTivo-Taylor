@@ -278,8 +278,10 @@ def select_audiolang(inFile, tsn):
     vInfo = video_info(inFile)
     audio_lang = config.get_tsn('audio_lang', tsn)
     debug('audio_lang: %s' % audio_lang)
-    if audio_lang != None and vInfo['mapVideo'] != None:
+    if vInfo['mapAudio']:
+        #default to first detected audio stream to begin with
         stream = vInfo['mapAudio'][0][0]
+    if audio_lang != None and vInfo['mapVideo'] != None:
         langmatch_curr = []
         langmatch_prev = vInfo['mapAudio'][:]
         for lang in audio_lang.replace(' ','').lower().split(','):
@@ -303,10 +305,12 @@ def select_audiolang(inFile, tsn):
         #if we drop out of the loop with more than 1 item default to the first item
         if len(langmatch_prev) > 1:
             stream = langmatch_prev[0][0]
-        if stream is not '':
-            debug('selected audio stream: %s' % stream)
-            return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
-    debug('selected audio stream: %s' % '')
+    #don't let FFmpeg auto select audio stream, pyTivo defaults to first detected
+    if stream is not '':
+        debug('selected audio stream: %s' % stream)
+        return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
+    #if no audio is found
+    debug('selected audio stream: None detected')
     return ''
 
 def select_videofps(inFile, tsn):
