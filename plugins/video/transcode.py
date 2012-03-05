@@ -895,15 +895,18 @@ def video_info(inFile, cache=True):
                 if line.startswith('  Duration:'):
                     flag = False
                 else:
-                    key, value = [x.strip() for x in line.split(':', 1)]
                     try:
-                        value = value.decode('utf-8')
+                        key, value = [x.strip() for x in line.split(':', 1)]
+                        try:
+                            value = value.decode('utf-8')
+                        except:
+                            if sys.platform == 'darwin':
+                                value = value.decode('macroman')
+                            else:
+                                value = value.decode('iso8859-1')
+                        rawmeta[key] = [value]
                     except:
-                        if sys.platform == 'darwin':
-                            value = value.decode('macroman')
-                        else:
-                            value = value.decode('iso8859-1')
-                    rawmeta[key] = [value]
+                        pass
 
     vInfo['rawmeta'] = rawmeta
 
