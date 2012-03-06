@@ -60,13 +60,13 @@
         <Links>
             <Content>
                 <ContentType>$video.mime</ContentType>
-                    <Url>/$quote($container)$quote($video.part_path)</Url>
-                </Content>
-                <CustomIcon>
-                    <ContentType>video/*</ContentType>
-                    <AcceptsParams>No</AcceptsParams>
-                    <Url>urn:tivo:image:save-until-i-delete-recording</Url>
-                </CustomIcon>
+                <Url>/$quote($container)$quote($video.part_path)</Url>
+            </Content>
+            <CustomIcon>
+                <ContentType>image/*</ContentType>
+                <AcceptsParams>No</AcceptsParams>
+                <Url>urn:tivo:image:save-until-i-delete-recording</Url>
+            </CustomIcon>
             <TiVoVideoDetails>
                 <ContentType>text/xml</ContentType>
                 <AcceptsParams>No</AcceptsParams>
