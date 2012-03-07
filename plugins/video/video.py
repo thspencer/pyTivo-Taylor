@@ -261,7 +261,7 @@ class Video(Plugin):
                  for k, v in sorted(vInfo.items(), reverse=True)] +
                 ['TRANSCODE OPTIONS: '] +
                 ["%s" % (v) for k, v in transcode_options.items()] +
-                ['SOURCE FILE: ', os.path.split(full_path)[1]]
+                ['SOURCE FILE: ', os.path.basename(full_path)]
             )
 
         now = datetime.utcnow()
@@ -332,12 +332,12 @@ class Video(Plugin):
                 ltime = time.localtime(mtime)
             video['captureDate'] = hex(mtime)
             video['textDate'] = time.strftime('%b %d, %Y', ltime)
-            video['name'] = os.path.split(f.name)[1]
+            video['name'] = os.path.basename(f.name)
             video['path'] = f.name
             video['part_path'] = f.name.replace(local_base_path, '', 1)
             if not video['part_path'].startswith(os.path.sep):
                 video['part_path'] = os.path.sep + video['part_path']
-            video['title'] = os.path.split(f.name)[1]
+            video['title'] = os.path.basename(f.name)
             video['is_dir'] = f.isdir
             if video['is_dir']:
                 video['small_path'] = subcname + '/' + video['name']
