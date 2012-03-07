@@ -159,7 +159,7 @@ class Music(Plugin):
             item = {}
             item['path'] = f.name
             item['part_path'] = f.name.replace(local_base_path, '', 1)
-            item['name'] = os.path.split(f.name)[1]
+            item['name'] = os.path.basename(f.name)
             item['is_dir'] = f.isdir
             item['is_playlist'] = f.isplay
             item['params'] = 'No'

@@ -59,11 +59,6 @@ def get_tv(rating):
 def get_stars(rating):
     return HUMAN['starRating'].get(rating, '')
 
-def convert_rating_scale(rating, scale):
-    stars = len(HUMAN['starRating']) - 1
-    result = ((float(rating) * stars) / float(scale)) + 1
-    return int(result)
-
 def tag_data(element, tag):
     for name in tag.split('/'):
         new_element = element.getElementsByTagName(name)
@@ -234,7 +229,7 @@ def from_eyetv(full_path):
             'DESCRIPTION': 'description', 'YEAR': 'movieYear',
             'EPISODENUM': 'episodeNumber'}
     metadata = {}
-    path, name = os.path.split(unicode(full_path, 'utf-8'))
+    path = os.path.dirname(unicode(full_path, 'utf-8'))
     eyetvp = [x for x in os.listdir(path) if x.endswith('.eyetvp')][0]
     eyetvp = os.path.join(path, eyetvp)
     eyetv = plistlib.readPlist(eyetvp)
@@ -282,9 +277,9 @@ def from_text(full_path):
     search_paths.append(os.path.join(path, title) + '.properties')
     search_paths.reverse()
 
-    search_paths += [ full_path + '.txt',
-                      os.path.join(path, '.meta', 'default.txt'),
-                      os.path.join(path, '.meta', name) + '.txt']
+    search_paths += [full_path + '.txt',
+                     os.path.join(path, '.meta', 'default.txt'),
+                     os.path.join(path, '.meta', name) + '.txt']
 
     for metafile in search_paths:
         if os.path.exists(metafile):
@@ -475,7 +470,7 @@ def _from_tvshow_nfo(tvshow_nfo_path):
         return metadata
 
     tvshow = xmldoc.getElementsByTagName('tvshow')
-    if len(tvshow) > 0:
+    if tvshow:
         tvshow = tvshow[0]
     else:
         return metadata
@@ -490,7 +485,7 @@ def _from_tvshow_nfo(tvshow_nfo_path):
     nfo_cache[tvshow_nfo_path] = metadata
     return metadata
 
-def _from_episode_nfo(nfo_path, xmldoc=None):
+def _from_episode_nfo(nfo_path, xmldoc):
     metadata = {}
 
     items = {'description': 'plot',
@@ -512,13 +507,8 @@ def _from_episode_nfo(nfo_path, xmldoc=None):
             metadata.update(_from_tvshow_nfo(tv_nfo))
             break
 
-    if not xmldoc:
-        xmldoc = _parse_nfo(nfo_path)
-        if not xmldoc:
-            return metadata
-
     episode = xmldoc.getElementsByTagName('episodedetails')
-    if len(episode) > 0:
+    if episode:
         episode = episode[0]
     else:
         return metadata
@@ -548,17 +538,11 @@ def _from_episode_nfo(nfo_path, xmldoc=None):
 
     return metadata
 
-
-def _from_movie_nfo(nfo_path, xmldoc=None):
+def _from_movie_nfo(xmldoc):
     metadata = {}
 
-    if not xmldoc:
-        xmldoc = _parse_nfo(nfo_path)
-        if not xmldoc:
-            return metadata
-
     movie = xmldoc.getElementsByTagName('movie')
-    if len(movie) > 0:
+    if movie:
         movie = movie[0]
     else:
         return metadata
@@ -595,19 +579,21 @@ def from_nfo(full_path):
     if not xmldoc:
         return metadata
 
-    if len(xmldoc.getElementsByTagName('episodedetails')) > 0:
+    if xmldoc.getElementsByTagName('episodedetails'):
         # it's an episode
         metadata.update(_from_episode_nfo(nfo_path, xmldoc))
-    elif len(xmldoc.getElementsByTagName('movie')) > 0:
+    elif xmldoc.getElementsByTagName('movie'):
         # it's a movie
-        metadata.update(_from_movie_nfo(nfo_path, xmldoc))
+        metadata.update(_from_movie_nfo(xmldoc))
 
     # common nfo cleanup
     if 'starRating' in metadata:
-        metadata['starRating'] = str(convert_rating_scale(metadata['starRating'], 10))
+        # .NFO 0-10 -> TiVo 1-7
+        rating = int(float(metadata['starRating']) * 6 / 10 + 1.5)
+        metadata['starRating'] = rating
 
     for key, mapping in [('mpaaRating', MPAA_RATINGS),
-                     ('tvRating', TV_RATINGS)]:
+                         ('tvRating', TV_RATINGS)]:
         if key in metadata:
             rating = mapping.get(metadata[key], None)
             if rating:
