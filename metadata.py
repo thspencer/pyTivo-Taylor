@@ -233,7 +233,7 @@ def from_eyetv(full_path):
             'DESCRIPTION': 'description', 'YEAR': 'movieYear',
             'EPISODENUM': 'episodeNumber'}
     metadata = {}
-    path, name = os.path.split(unicode(full_path, 'utf-8'))
+    path = os.path.dirname(unicode(full_path, 'utf-8'))
     eyetvp = [x for x in os.listdir(path) if x.endswith('.eyetvp')][0]
     eyetvp = os.path.join(path, eyetvp)
     eyetv = plistlib.readPlist(eyetvp)

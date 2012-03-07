@@ -149,7 +149,7 @@ class WebVideo(Video):
 
                 data['url'] = ('http://%s:%s' % (ip, port) +
                                urllib.quote('/%s/%s' % (share_name,
-                                            os.path.split(file_name)[-1])))
+                                            os.path.basename(file_name))))
                 data['duration'] = file_info['duration'] / 1000
                 data['size'] = file_info['size']
 
