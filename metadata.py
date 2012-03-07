@@ -5,6 +5,7 @@ import subprocess
 import sys
 from datetime import datetime
 from xml.dom import minidom
+from xml.parsers import expat
 try:
     import plistlib
 except:
@@ -427,6 +428,31 @@ def _nfo_vitems(source, metadata):
 
     return metadata
 
+def _parse_nfo(nfo_path, nfo_data=None):
+    # nfo files can contain XML or a URL to seed the XBMC metadata scrapers
+    # It's also possible to have both (a URL after the XML metadata)
+    # pyTivo only parses the XML metadata, but we'll try to stip the URL
+    # from mixed XML/URL files.  Returns `None` when XML can't be parsed.
+    if nfo_data is None:
+        nfo_data = [line.strip() for line in file(nfo_path, 'rU')]
+    xmldoc = None
+    try:
+        xmldoc = minidom.parseString(os.linesep.join(nfo_data))
+    except expat.ExpatError, err:
+        import ipdb; ipdb.set_trace()
+        if expat.ErrorString(err.code) == expat.errors.XML_ERROR_INVALID_TOKEN:
+            # might be a URL outside the xml
+            while len(nfo_data) > err.lineno:
+                if len(nfo_data[-1]) == 0:
+                    nfo_data.pop()
+                else:
+                    break
+            if len(nfo_data) == err.lineno:
+                # last non-blank line contains the error
+                nfo_data.pop()
+                return _parse_nfo(nfo_path, nfo_data)
+    return xmldoc
+
 def _from_tvshow_nfo(tvshow_nfo_path):
     if tvshow_nfo_path in nfo_cache:
         return nfo_cache[tvshow_nfo_path]
@@ -439,9 +465,8 @@ def _from_tvshow_nfo(tvshow_nfo_path):
 
     nfo_cache[tvshow_nfo_path] = metadata = {}
 
-    try:
-        xmldoc = minidom.parse(file(tvshow_nfo_path, 'U'))
-    except:
+    xmldoc = _parse_nfo(tvshow_nfo_path)
+    if not xmldoc:
         return metadata
 
     tvshow = xmldoc.getElementsByTagName('tvshow')
@@ -482,6 +507,11 @@ def _from_episode_nfo(nfo_path, xmldoc):
             metadata.update(_from_tvshow_nfo(tv_nfo))
             break
 
+    if not xmldoc:
+        xmldoc = _parse_nfo(nfo_path)
+        if not xmldoc:
+            return metadata
+
     episode = xmldoc.getElementsByTagName('episodedetails')
     if episode:
         episode = episode[0]
@@ -515,6 +545,11 @@ def _from_episode_nfo(nfo_path, xmldoc):
 
 def _from_movie_nfo(xmldoc):
     metadata = {}
+
+    if not xmldoc:
+        xmldoc = _parse_nfo(nfo_path)
+        if not xmldoc:
+            return metadata
 
     movie = xmldoc.getElementsByTagName('movie')
     if movie:
@@ -550,9 +585,8 @@ def from_nfo(full_path):
     if not os.path.exists(nfo_path):
         return metadata
 
-    try:
-        xmldoc = minidom.parse(file(nfo_path, 'U'))
-    except:
+    xmldoc = _parse_nfo(nfo_path)
+    if not xmldoc:
         return metadata
 
     if xmldoc.getElementsByTagName('episodedetails'):
