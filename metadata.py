@@ -439,7 +439,11 @@ def _from_tvshow_nfo(tvshow_nfo_path):
 
     nfo_cache[tvshow_nfo_path] = metadata = {}
 
-    xmldoc = minidom.parse(file(tvshow_nfo_path, 'U'))
+    try:
+        xmldoc = minidom.parse(file(tvshow_nfo_path, 'U'))
+    except:
+        return metadata
+
     tvshow = xmldoc.getElementsByTagName('tvshow')
     if tvshow:
         tvshow = tvshow[0]
@@ -546,7 +550,10 @@ def from_nfo(full_path):
     if not os.path.exists(nfo_path):
         return metadata
 
-    xmldoc = minidom.parse(file(nfo_path, 'U'))
+    try:
+        xmldoc = minidom.parse(file(nfo_path, 'U'))
+    except:
+        return metadata
 
     if xmldoc.getElementsByTagName('episodedetails'):
         # it's an episode
