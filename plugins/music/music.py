@@ -90,11 +90,12 @@ class Music(Plugin):
     def send_file(self, handler, path, query):
         seek = int(query.get('Seek', [0])[0])
         duration = int(query.get('Duration', [0])[0])
-
+        always = (handler.container.get('force_ffmpeg',
+                  'False').lower() == 'true' and config.get_bin('ffmpeg'))
         fname = unicode(path, 'utf-8')
 
         ext = os.path.splitext(fname)[1].lower()
-        needs_transcode = ext in TRANSCODE or seek or duration
+        needs_transcode = ext in TRANSCODE or seek or duration or always
 
         handler.send_response(200)
         handler.send_header('Content-Type', 'audio/mpeg')
