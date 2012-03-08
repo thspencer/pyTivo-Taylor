@@ -78,7 +78,6 @@ class ToGo(Plugin):
     def NPL(self, handler, query):
         global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
-        cname = query['Container'][0].split('/')[0]
         folder = ''
         has_tivodecode = bool(config.get_bin('tivodecode'))
 
@@ -172,7 +171,6 @@ class ToGo(Plugin):
             ItemCount = 0
             FirstAnchor = ''
 
-        cname = query['Container'][0].split('/')[0]
         t = Template(NPL_TEMPLATE, filter=EncodeUnicode)
         t.escape = escape
         t.quote = quote
@@ -183,7 +181,7 @@ class ToGo(Plugin):
         t.has_tivodecode = has_tivodecode
         t.tname = tivo_name
         t.tivoIP = tivoIP
-        t.container = cname
+        t.container = handler.cname
         t.data = data
         t.len = len
         t.TotalItems = int(TotalItems)

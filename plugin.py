@@ -76,18 +76,13 @@ class Plugin(object):
         f.close()
 
     def get_local_base_path(self, handler, query):
-
-        subcname = query['Container'][0]
-        container = handler.server.containers[subcname.split('/')[0]]
-
-        return os.path.normpath(container['path'])
+        return os.path.normpath(handler.container['path'])
 
     def get_local_path(self, handler, query):
 
         subcname = query['Container'][0]
-        container = handler.server.containers[subcname.split('/')[0]]
 
-        path = os.path.normpath(container['path'])
+        path = self.get_local_base_path(handler, query)
         for folder in subcname.split('/')[1:]:
             if folder == '..':
                 return False
@@ -185,7 +180,6 @@ class Plugin(object):
             return files
 
         subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
         path = self.get_local_path(handler, query)
 
         file_type = query.get('Filter', [''])[0]
@@ -241,8 +235,8 @@ class Plugin(object):
         files = filelist.files[:]
 
         # Trim the list
-        files, total, start = self.item_count(handler, query, cname, files,
-                                              filelist.last_start)
+        files, total, start = self.item_count(handler, query, handler.cname,
+                                              files, filelist.last_start)
         if len(files) > 1:
             filelist.last_start = start
         return files, total, start

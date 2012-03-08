@@ -303,14 +303,12 @@ class Video(Plugin):
     def QueryContainer(self, handler, query):
         tsn = handler.headers.getheader('tsn', '')
         subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
 
-        if (not cname in handler.server.containers or
-            not self.get_local_path(handler, query)):
+        if not self.get_local_path(handler, query):
             handler.send_error(404)
             return
 
-        container = handler.server.containers[cname]
+        container = handler.container
         precache = container.get('precache', 'False').lower() == 'true'
         force_alpha = container.get('force_alpha', 'False').lower() == 'true'
         use_html = query.get('Format', [''])[0].lower() == 'text/html'
@@ -367,7 +365,7 @@ class Video(Plugin):
             t = Template(XML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
         else:
             t = Template(HTML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
-        t.container = cname
+        t.container = handler.cname
         t.name = subcname
         t.total = total
         t.start = start

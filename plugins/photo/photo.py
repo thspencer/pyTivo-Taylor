@@ -273,11 +273,8 @@ class Photo(Plugin):
                 handler.send_error(404)
                 return
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
         local_base_path = self.get_local_base_path(handler, query)
-        if (not cname in handler.server.containers or
-            not self.get_local_path(handler, query)):
+        if not self.get_local_path(handler, query):
             handler.send_error(404)
             return
 
@@ -304,8 +301,8 @@ class Photo(Plugin):
             return item
 
         t = Template(PHOTO_TEMPLATE, filter=EncodeUnicode)
-        t.name = subcname
-        t.container = cname
+        t.name = query['Container'][0]
+        t.container = handler.cname
         t.files, t.total, t.start = self.get_files(handler, query,
             ImageFileFilter)
         t.files = map(media_data, t.files)
@@ -379,8 +376,6 @@ class Photo(Plugin):
             else:
                 return y.isdir - x.isdir
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
         path = self.get_local_path(handler, query)
 
         # Build the list
@@ -432,7 +427,7 @@ class Photo(Plugin):
                 if start:
                     local_base_path = self.get_local_base_path(handler, query)
                     start = unquote(start)
-                    start = start.replace(os.path.sep + cname,
+                    start = start.replace(os.path.sep + handler.cname,
                                           local_base_path, 1)
                     filenames = [x.name for x in filelist.files]
                     try:
@@ -469,8 +464,8 @@ class Photo(Plugin):
             elif usedir and not useimg:
                 files = [x for x in files if x.isdir]
 
-        files, total, start = self.item_count(handler, query, cname, files,
-                                              filelist.last_start)
+        files, total, start = self.item_count(handler, query, handler.cname,
+                                              files, filelist.last_start)
         filelist.last_start = start
         filelist.release()
         return files, total, start

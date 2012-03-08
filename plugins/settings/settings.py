@@ -79,9 +79,8 @@ class Settings(Plugin):
                                         dict(config.config.items(section,
                                                                  raw=True))))
 
-        cname = query['Container'][0].split('/')[0]
         t = Template(SETTINGS_TEMPLATE, filter=EncodeUnicode)
-        t.container = cname
+        t.container = handler.cname
         t.quote = quote
         t.server_data = dict(config.config.items('Server', raw=True))
         t.server_known = buildhelp.getknown('server')
