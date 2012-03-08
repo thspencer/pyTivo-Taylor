@@ -81,7 +81,6 @@ class ToGo(Plugin):
     def NPL(self, handler, query):
         global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
-        cname = query['Container'][0].split('/')[0]
         folder = ''
         has_tivodecode = bool(config.get_bin('tivodecode'))
         togo_mpegts = config.get_server('togo_mpegts', 'False').lower()
@@ -176,8 +175,6 @@ class ToGo(Plugin):
             ItemStart = 0
             ItemCount = 0
             FirstAnchor = ''
-
-        cname = query['Container'][0].split('/')[0]
         
         if useragent.lower().find('mobile') > 0:
             t = Template(CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
@@ -193,7 +190,7 @@ class ToGo(Plugin):
         t.togo_mpegts = togo_mpegts
         t.tname = tivo_name
         t.tivoIP = tivoIP
-        t.container = cname
+        t.container = handler.cname
         t.data = data
         t.len = len
         t.TotalItems = int(TotalItems)

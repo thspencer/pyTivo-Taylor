@@ -260,11 +260,9 @@ class Music(Plugin):
             return item
 
         subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
         local_base_path = self.get_local_base_path(handler, query)
 
-        if (not cname in handler.server.containers or
-            not self.get_local_path(handler, query)):
+        if not self.get_local_path(handler, query):
             handler.send_error(404)
             return
 
@@ -276,7 +274,7 @@ class Music(Plugin):
             t.files, t.total, t.start = self.get_files(handler, query,
                                                        AudioFileFilter)
         t.files = map(media_data, t.files)
-        t.container = cname
+        t.container = handler.cname
         t.name = subcname
         t.quote = quote
         t.escape = escape
@@ -428,8 +426,6 @@ class Music(Plugin):
         def name_sort(x, y):
             return cmp(x.name, y.name)
 
-        subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
         path = self.get_local_path(handler, query)
 
         file_type = query.get('Filter', [''])[0]
@@ -480,7 +476,7 @@ class Music(Plugin):
                 if start:
                     local_base_path = self.get_local_base_path(handler, query)
                     start = unquote(start)
-                    start = start.replace(os.path.sep + cname,
+                    start = start.replace(os.path.sep + handler.cname,
                                           local_base_path, 1)
                     filenames = [x.name for x in filelist.files]
                     try:
@@ -499,14 +495,13 @@ class Music(Plugin):
         files = filelist.files[:]
 
         # Trim the list
-        files, total, start = self.item_count(handler, query, cname, files,
-                                              filelist.last_start)
+        files, total, start = self.item_count(handler, query, handler.cname,
+                                              files, filelist.last_start)
         filelist.last_start = start
         return files, total, start
 
     def get_playlist(self, handler, query):
         subcname = query['Container'][0]
-        cname = subcname.split('/')[0]
 
         try:
             url = subcname.index('http://')
@@ -530,7 +525,7 @@ class Music(Plugin):
             if start:
                 local_base_path = self.get_local_base_path(handler, query)
                 start = unquote(start)
-                start = start.replace(os.path.sep + cname,
+                start = start.replace(os.path.sep + handler.cname,
                                       local_base_path, 1)
                 filenames = [x.name for x in playlist]
                 try:
@@ -541,4 +536,4 @@ class Music(Plugin):
                     handler.server.logger.warning('Start not found: ' + start)
 
         # Trim the list
-        return self.item_count(handler, query, cname, playlist)
+        return self.item_count(handler, query, handler.cname, playlist)
