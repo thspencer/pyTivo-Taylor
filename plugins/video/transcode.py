@@ -655,11 +655,11 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
     message = (True, '')
     while True:
         codec = vInfo.get('aCodec', '')
-        
+
         if codec == None:
             debug('No audio stream detected')
             break
-        
+
         if mime == 'video/mp4':
             if codec not in ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
                              'ac3', 'liba52'):
