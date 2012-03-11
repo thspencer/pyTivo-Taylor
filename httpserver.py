@@ -42,6 +42,7 @@ class TivoHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
         self.logger = logging.getLogger('pyTivo')
         BaseHTTPServer.HTTPServer.__init__(self, server_address,
                                            RequestHandlerClass)
+        self.daemon_threads = True
 
     def add_container(self, name, settings):
         if name in self.containers or name == 'TiVoConnect':
