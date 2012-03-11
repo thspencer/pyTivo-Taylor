@@ -239,9 +239,11 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         tsncontainers = []
         for section, settings in tsnshares:
             try:
-                settings['content_type'] = \
-                    GetPlugin(settings['type']).CONTENT_TYPE
-                tsncontainers.append((section, settings))
+                mime = GetPlugin(settings['type']).CONTENT_TYPE
+                if mime.split('/')[1] in ('tivo-videos', 'tivo-music',
+                                          'tivo-photos'):
+                    settings['content_type'] = mime
+                    tsncontainers.append((section, settings))
             except Exception, msg:
                 self.server.logger.error(section + ' - ' + str(msg))
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
