@@ -292,11 +292,13 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             'Command=NPL&amp;Container=' + quote(section) +  
                             '&amp;TiVo=' + config.tivos[tsn] + '">' + 
                             escape(config.tivo_names[tsn]) + '</a><br>')
-            elif plugin_type == 'video' and t.shares:
-                t.shares += ('<a href="/TiVoConnect?Command=' +
-                             'QueryContainer&amp;Container=' +
-                             quote(section) + '&Format=text/html">' +
-                             section + '</a><br>')
+            elif plugin_type and t.shares:
+                plugin = GetPlugin(plugin_type)
+                if hasattr(plugin, 'Push'):
+                    t.shares += ('<a href="/TiVoConnect?Command=' +
+                                 'QueryContainer&amp;Container=' +
+                                 quote(section) + '&Format=text/html">' +
+                                 section + '</a><br>')
 
         self.wfile.write(t)
 
