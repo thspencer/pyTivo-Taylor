@@ -300,10 +300,12 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                             escape(config.tivo_names[tsn]) + '</a><br>')
             elif ( plugin_type == 'video' or plugin_type == 'dvdvideo' ) \
                     and t.shares:
-                t.shares += ('<a href="/TiVoConnect?Command=' +
-                             'QueryContainer&amp;Container=' +
-                             quote(section) + '&Format=text/html">' +
-                             section + '</a><br>')
+                plugin = GetPlugin(plugin_type)
+                if hasattr(plugin, 'Push'):
+                    t.shares += ('<a href="/TiVoConnect?Command=' +
+                                'QueryContainer&amp;Container=' +
+                                 quote(section) + '&Format=text/html">' +
+                                 section + '</a><br>')
 
         self.wfile.write(t)
 
