@@ -20,12 +20,12 @@ except ImportError:
 import xmpp
 import mind
 import config
-from plugins.video.video import Video, VideoDetails
+from plugins.video.video import BaseVideo, VideoDetails
 from plugins.video.transcode import tivo_compatible
 
 CLASS_NAME = 'WebVideo'
 
-class WebVideo(Video):
+class WebVideo(BaseVideo):
 
     CONTENT_TYPE = 'x-not-for/tivo'
 

@@ -165,7 +165,7 @@ class Pushable(object):
         files = [unicode(f, 'utf-8') for f in files]
         handler.redir(PUSHED % (tivo_name, '<br>'.join(files)), 5)
 
-class Video(Plugin, Pushable):
+class BaseVideo(Plugin):
 
     CONTENT_TYPE = 'x-container/tivo-videos'
 
@@ -537,6 +537,9 @@ class Video(Plugin, Pushable):
         handler.send_header('Expires', '0')
         handler.end_headers()
         handler.wfile.write(details)
+
+class Video(BaseVideo, Pushable):
+        pass
 
 class VideoDetails(DictMixin):
 
