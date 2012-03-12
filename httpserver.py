@@ -123,6 +123,20 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             query = cgi.parse_qs(qs, keep_blank_values=1)
         self.handle_query(query, tsn)
 
+    def do_command(self, query, command, target, tsn):
+        for name, container in config.getShares(tsn):
+            if target == name:
+                plugin = GetPlugin(container['type'])
+                if hasattr(plugin, command):
+                    self.cname = name
+                    self.container = container
+                    method = getattr(plugin, command)
+                    method(self, query)
+                    return True
+                else:
+                    break
+        return False
+
     def handle_query(self, query, tsn):
         mname = False
         if 'Command' in query and len(query['Command']) >= 1:
@@ -138,17 +152,15 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if 'Container' in query:
                 # Dispatch to the container plugin
                 basepath = query['Container'][0].split('/')[0]
-                for name, container in config.getShares(tsn):
-                    if basepath == name:
-                        plugin = GetPlugin(container['type'])
-                        if hasattr(plugin, command):
-                            self.cname = name
-                            self.container = container
-                            method = getattr(plugin, command)
-                            method(self, query)
-                            return
-                        else:
-                            break
+                if self.do_command(query, command, basepath, tsn):
+                    return
+
+            elif command == 'QueryItem':
+                path = query.get('Url', [''])[0]
+                splitpath = [x for x in unquote_plus(path).split('/') if x]
+                if splitpath and not '..' in splitpath:
+                    if self.do_command(query, command, splitpath[0], tsn):
+                        return
 
             elif (command == 'QueryFormats' and 'SourceFormat' in query and
                   query['SourceFormat'][0].startswith('video')):
