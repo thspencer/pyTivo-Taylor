@@ -164,13 +164,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             elif (command == 'QueryFormats' and 'SourceFormat' in query and
                   query['SourceFormat'][0].startswith('video')):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/xml')
-                self.end_headers()
                 if config.hasTStivo(tsn):
-                    self.wfile.write(VIDEO_FORMATS_TS)
+                    self.send_xml(VIDEO_FORMATS_TS)
                 else:
-                    self.wfile.write(VIDEO_FORMATS)
+                    self.send_xml(VIDEO_FORMATS)
                 return
 
             elif command == 'FlushServer':
@@ -236,15 +233,29 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if client_ip.startswith(allowedip):
                 return True
 
-        self.send_response(404)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write("Unauthorized.")
+        self.send_fixed('Unauthorized.', 'text/plain', 403)
         return False
 
     def log_message(self, format, *args):
         self.server.logger.info("%s [%s] %s" % (self.address_string(),
                                 self.log_date_time_string(), format%args))
+
+    def send_fixed(self, page, mime, code=200, refresh=''):
+        self.send_response(code)
+        self.send_header('Content-Type', mime)
+        self.send_header('Content-Length', len(page))
+        self.send_header('Connection', 'close')
+        self.send_header('Expires', '0')
+        if refresh:
+            self.send_header('Refresh', refresh)
+        self.end_headers()
+        self.wfile.write(page)
+
+    def send_xml(self, page):
+        self.send_fixed(page, 'text/xml')
+
+    def send_html(self, page, code=200, refresh=''):
+        self.send_fixed(page, 'text/html; charset=utf-8', code, refresh)
 
     def root_container(self):
         tsn = self.headers.getheader('TiVo_TCD_ID', '')
@@ -266,16 +277,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t.hostname = socket.gethostname()
         t.escape = escape
         t.quote = quote
-        self.send_response(200)
-        self.send_header('Content-type', 'text/xml')
-        self.end_headers()
-        self.wfile.write(t)
+        self.send_xml(str(t))
 
     def infopage(self):
         useragent = self.headers.getheader('User-Agent', '')
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html; charset=utf-8')
-        self.end_headers()
         if useragent.lower().find('mobile') > 0:
             t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'info_page_mob.tmpl'),
@@ -319,29 +324,21 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                  quote(section) + '&Format=text/html">' +
                                  section + '</a><br>')
 
-        self.wfile.write(t)
+        self.send_html(str(t))
 
     def unsupported(self, query):
         message = UNSUP % '\n'.join(['<li>%s: %s</li>' % (escape(key),
                                                           escape(repr(value)))
                                      for key, value in query.items()])
         text = BASE_HTML % message
-        self.send_response(404)
-        self.send_header('Content-Type', 'text/html; charset=utf-8')
-        self.send_header('Content-Length', len(text))
-        self.end_headers()
-        self.wfile.write(text)
+        self.send_html(text, code=404)
 
     def redir(self, message, seconds=2):
         url = self.headers.getheader('Referer')
         if url:
             message += RELOAD % (escape(url), seconds)
+            refresh = '%d; url=%s' % (seconds, url)
+        else:
+            refresh = ''
         text = (BASE_HTML % message).encode('utf-8')
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html; charset=utf-8')
-        self.send_header('Content-Length', len(text))
-        self.send_header('Expires', '0')
-        if url:
-            self.send_header('Refresh', '%d; url=%s' % (seconds, url))
-        self.end_headers()
-        self.wfile.write(text)
+        self.send_html(text, refresh=refresh)

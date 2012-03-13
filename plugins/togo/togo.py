@@ -198,12 +198,7 @@ class ToGo(Plugin):
         t.ItemCount = int(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/html; charset=utf-8')
-        handler.send_header('Refresh', '300')
-        handler.send_header('Expires', '0')
-        handler.end_headers()
-        handler.wfile.write(t)
+        handler.send_html(str(t), refresh='300')
 
     def get_tivo_file(self, tivoIP, url, mak, togo_path):
         # global status

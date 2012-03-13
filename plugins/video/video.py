@@ -483,12 +483,12 @@ class BaseVideo(Plugin):
 
         logger.debug('mobileagent: %d useragent: %s' % (useragent.lower().find('mobile'), useragent.lower()))
 
-        if not use_html:
-            t = Template(XML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
-        elif useragent.lower().find('mobile') > 0:
+        if useragent.lower().find('mobile') > 0:
             t = Template(HTML_CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
-        else:
+        elif use_html:
             t = Template(HTML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
+        else:
+            t = Template(XML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
         t.container = handler.cname
         t.name = subcname
         t.total = total
@@ -500,14 +500,10 @@ class BaseVideo(Plugin):
         t.guid = config.getGUID()
         t.tivos = config.tivos
         t.tivo_names = config.tivo_names
-        handler.send_response(200)
-        if not use_html:
-            handler.send_header('Content-Type', 'text/xml')
+        if use_html:
+            handler.send_html(str(t))
         else:
-            handler.send_header('Content-Type', 'text/html; charset=utf-8')
-        handler.send_header('Expires', '0')
-        handler.end_headers()
-        handler.wfile.write(t)
+            handler.send_xml(str(t))
 
     def get_details_xml(self, tsn, file_path):
         if (tsn, file_path) in self.tvbus_cache:
@@ -553,13 +549,7 @@ class BaseVideo(Plugin):
 
         details = self.get_details_xml(tsn, file_path)
 
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/xml')
-        handler.send_header('Content-Length', len(details))
-        handler.send_header('Connection', 'close')
-        handler.send_header('Expires', '0')
-        handler.end_headers()
-        handler.wfile.write(details)
+        handler.send_xml(details)
 
 class Video(BaseVideo, Pushable):
         pass
