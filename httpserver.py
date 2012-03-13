@@ -183,7 +183,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_xml(SERVER_INFO)
                 return
 
-            elif command == 'FlushServer':
+            elif command in ('FlushServer', 'ResetServer'):
                 # Does nothing -- included for completeness
                 self.send_response(200)
                 self.end_headers()
