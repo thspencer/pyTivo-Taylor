@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<TiVoItem>
+    <Item>
+        <Details>
+            #set $title = '.'.join($file['name'].split('.')[:-1])
+            <Title>$escape($title)</Title>
+            <FileName>$escape($file['name'])</FileName>
+            <ContentType>image/jpeg</ContentType>
+            #if 'odate' in $file
+            <CaptureDate>$file['odate']</CaptureDate>
+            #end if
+            <CreationDate>$file['cdate']</CreationDate>
+            <LastChangeDate>$file['mdate']</LastChangeDate>
+        </Details>
+    </Item>
+</TiVoItem>
