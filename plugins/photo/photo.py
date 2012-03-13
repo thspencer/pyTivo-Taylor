@@ -103,12 +103,7 @@ class Photo(Plugin):
     def send_file(self, handler, path, query):
 
         def send_jpeg(data):
-            handler.send_response(200)
-            handler.send_header('Content-Type', 'image/jpeg')
-            handler.send_header('Content-Length', len(data))
-            handler.send_header('Connection', 'close')
-            handler.end_headers()
-            handler.wfile.write(data)
+            handler.send_fixed(data, 'image/jpeg')
 
         if 'Format' in query and query['Format'][0] != 'image/jpeg':
             handler.send_error(415)
@@ -310,14 +305,8 @@ class Photo(Plugin):
         t.files = map(media_data, t.files)
         t.quote = quote
         t.escape = escape
-        page = str(t)
 
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'text/xml')
-        handler.send_header('Content-Length', len(page))
-        handler.send_header('Connection', 'close')
-        handler.end_headers()
-        handler.wfile.write(page)
+        handler.send_xml(str(t))
 
     def QueryItem(self, handler, query):
         uq = urllib.unquote_plus
@@ -328,14 +317,7 @@ class Photo(Plugin):
             t = Template(ITEM_TEMPLATE, filter=EncodeUnicode)
             t.file = self.media_data_cache[path]
             t.escape = escape
-            page = str(t)
-
-            handler.send_response(200)
-            handler.send_header('Content-Type', 'text/xml')
-            handler.send_header('Content-Length', len(page))
-            handler.send_header('Connection', 'close')
-            handler.end_headers()
-            handler.wfile.write(page)
+            handler.send_xml(str(t))
         else:
             handler.send_error(404)
 
