@@ -861,6 +861,21 @@ def video_info(inFile, cache=True):
     err_tmp.close()
     debug('ffmpeg output=%s' % output)
 
+    #get libavcodec major and minor versions from FFmpeg output
+    rezre = re.compile(r'libavcodec \s+([0-9]+).?\s*([0-9]+)')
+    x = rezre.search(output)
+    if x:
+        vInfo['avcodecMAJ'], vInfo['avcodecMIN'] = int(x.group(1)), int(x.group(2))
+    else:
+        #should catch very old builds which are formatted differently
+        rezre = re.compile(r'libavcodec.*:\s+([0-9]+).?\s*([0-9]+)')
+        x = rezre.search(output)
+        if x:
+            vInfo['avcodecMAJ'], vInfo['avcodecMIN'] = int(x.group(1)), int(x.group(2))
+        else:
+            vInfo['avcodecMAJ'], vInfo['avcodecMIN'] = None, None
+            debug('failed at avcodec check')
+
     attrs = {'container': r'Input #0, ([^,]+),',
              'vCodec': r'Video: ([^, ]+)',             # video codec
              'aKbps': r'.*Audio: .+, (.+) (?:kb/s).*',     # audio bitrate
