@@ -16,6 +16,15 @@ from plugin import GetPlugin, EncodeUnicode
 
 SCRIPTDIR = os.path.dirname(__file__)
 
+SERVER_INFO = """<?xml version="1.0" encoding="utf-8"?>
+<TiVoServer>
+<Version>1.6</Version>
+<InternalName>pyTivo</InternalName>
+<InternalVersion>1.0</InternalVersion>
+<Organization>pyTivo Developers</Organization>
+<Comment>http://pytivo.sf.net/</Comment>
+</TiVoServer>"""
+
 VIDEO_FORMATS = """<?xml version="1.0" encoding="utf-8"?>
 <TiVoFormats>
 <Format><ContentType>video/x-tivo-mpeg</ContentType><Description/></Format>
@@ -168,6 +177,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_xml(VIDEO_FORMATS_TS)
                 else:
                     self.send_xml(VIDEO_FORMATS)
+                return
+
+            elif command == 'QueryServer':
+                self.send_xml(SERVER_INFO)
                 return
 
             elif command == 'FlushServer':
