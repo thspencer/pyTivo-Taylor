@@ -49,8 +49,10 @@ durre = re.compile(r'.*Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+),').search
 # Preload the templates
 tfname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
 tpname = os.path.join(SCRIPTDIR, 'templates', 'm3u.tmpl')
+iname = os.path.join(SCRIPTDIR, 'templates', 'item.tmpl')
 FOLDER_TEMPLATE = file(tfname, 'rb').read()
 PLAYLIST_TEMPLATE = file(tpname, 'rb').read()
+ITEM_TEMPLATE = file(iname, 'rb').read()
 
 # XXX BIG HACK
 # subprocess is broken for me on windows so super hack
@@ -281,6 +283,19 @@ class Music(Plugin):
         t.escape = escape
 
         handler.send_xml(str(t))
+
+    def QueryItem(self, handler, query):
+        uq = urllib.unquote_plus
+        splitpath = [x for x in uq(query['Url'][0]).split('/') if x]
+        path = os.path.join(handler.container['path'], *splitpath[1:])
+
+        if path in self.media_data_cache:
+            t = Template(ITEM_TEMPLATE, filter=EncodeUnicode)
+            t.file = self.media_data_cache[path]
+            t.escape = escape
+            handler.send_xml(str(t))
+        else:
+            handler.send_error(404)
 
     def parse_playlist(self, list_name, recurse):
 
