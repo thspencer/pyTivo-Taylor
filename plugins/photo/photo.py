@@ -61,7 +61,9 @@ exif_orient_m = \
 
 # Preload the template
 tname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
+iname = os.path.join(SCRIPTDIR, 'templates', 'item.tmpl')
 PHOTO_TEMPLATE = file(tname, 'rb').read()
+ITEM_TEMPLATE = file(iname, 'rb').read()
 
 class Photo(Plugin):
     
@@ -316,6 +318,26 @@ class Photo(Plugin):
         handler.send_header('Connection', 'close')
         handler.end_headers()
         handler.wfile.write(page)
+
+    def QueryItem(self, handler, query):
+        uq = urllib.unquote_plus
+        splitpath = [x for x in uq(query['Url'][0]).split('/') if x]
+        path = os.path.join(handler.container['path'], *splitpath[1:])
+
+        if path in self.media_data_cache:
+            t = Template(ITEM_TEMPLATE, filter=EncodeUnicode)
+            t.file = self.media_data_cache[path]
+            t.escape = escape
+            page = str(t)
+
+            handler.send_response(200)
+            handler.send_header('Content-Type', 'text/xml')
+            handler.send_header('Content-Length', len(page))
+            handler.send_header('Connection', 'close')
+            handler.end_headers()
+            handler.wfile.write(page)
+        else:
+            handler.send_error(404)
 
     def get_files(self, handler, query, filterFunction):
 
