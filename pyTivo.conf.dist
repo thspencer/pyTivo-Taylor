@@ -5,12 +5,14 @@
 # you get pyTivo up and running.  You can access the tool by pointing your
 # browser to http://localhost:9032/
 
-#Read the pyTivo support wiki for additional help at http://pytivo.sourceforge.net
+# Read the pyTivo support wiki for additional help at 
+# http://pytivo.sourceforge.net
 
 [Server]
 port=9032
 
-# FFmpeg is a required tool but downloaded separately.  See pyTivo wiki for help.
+# FFmpeg is a required tool but downloaded separately.  See pyTivo wiki 
+# for help.
 # Full path to ffmpeg including filename
 # For windows: ffmpeg=c:\Program Files\pyTivo\bin\ffmpeg.exe
 # For linux:   ffmpeg=/usr/bin/ffmpeg
