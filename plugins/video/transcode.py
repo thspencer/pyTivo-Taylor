@@ -106,7 +106,7 @@ def transcode(isQuery, inFile, outFile, tsn='', mime='', thead=''):
         debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
         debug(' '.join(cmd))
 
-    ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0, 
+    ffmpeg_procs[inFile] = {'process': ffmpeg, 'start': 0, 'end': 0,
                             'last_read': time.time(), 'blocks': []}
     if thead:
         ffmpeg_procs[inFile]['blocks'].append(thead)
@@ -217,8 +217,8 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
         # Default, compatible with all TiVo's
         codec = 'ac3'
         if mime == 'video/mp4':
-            compatiblecodecs = ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
-                             'ac3', 'liba52')
+            compatiblecodecs = ('mpeg4aac', 'libfaad', 'mp4a', 'aac',
+                                'ac3', 'liba52')
         else:
             compatiblecodecs = ('ac3', 'liba52', 'mp2')
 
@@ -227,8 +227,9 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
             aCh = vInfo['aCh']
             if aKbps == None:
                 if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac'):
-                    #along with the channel check below this should pass any AAC audio 
-                    #that has undefined 'aKbps' and is <= 2 channels.  Should be TiVo compatible.
+                    # along with the channel check below this should
+                    # pass any AAC audio that has undefined 'aKbps' and
+                    # is <= 2 channels.  Should be TiVo compatible.
                     codec = 'copy'
                 elif not isQuery:
                     vInfoQuery = audio_check(inFile, tsn)
@@ -240,7 +241,7 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
                         aCh = vInfoQuery['aCh']
                 else:
                     codec = 'TBA'
-            if aKbps != None and int(aKbps) <= config.getMaxAudioBR(tsn):
+            if aKbps and int(aKbps) <= config.getMaxAudioBR(tsn):
                 # compatible codec and bitrate, do not reencode audio
                 codec = 'copy'
             if vInfo['aCodec'] != 'ac3' and (aCh == None or aCh > 2):
@@ -253,9 +254,9 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
     return '-acodec ' + codec + copyts
 
 def select_audiofr(inFile, tsn):
-    freq = '48000'  #default
+    freq = '48000'  # default
     vInfo = video_info(inFile)
-    if not vInfo['aFreq'] == None and vInfo['aFreq'] in ('44100', '48000'):
+    if vInfo['aFreq'] == '44100':
         # compatible frequency
         freq = vInfo['aFreq']
     audio_fr = config.get_tsn('audio_fr', tsn)
@@ -265,13 +266,12 @@ def select_audiofr(inFile, tsn):
 
 def select_audioch(inFile, tsn):
     ch = config.get_tsn('audio_ch', tsn)
-    vInfo = video_info(inFile)
     if ch:
         return '-ac ' + ch
-    #AC-3 max channels is 5.1
-    if vInfo['aCh'] != None and vInfo['aCh'] > 6:
+    # AC-3 max channels is 5.1
+    if video_info(inFile)['aCh'] > 6:
         debug('Too many audio channels for AC-3, using 5.1 instead')
-        return '-ac ' + '6'
+        return '-ac 6'
     return ''
 
 def select_audiolang(inFile, tsn):
@@ -279,37 +279,41 @@ def select_audiolang(inFile, tsn):
     audio_lang = config.get_tsn('audio_lang', tsn)
     debug('audio_lang: %s' % audio_lang)
     if vInfo['mapAudio']:
-        #default to first detected audio stream to begin with
+        # default to first detected audio stream to begin with
         stream = vInfo['mapAudio'][0][0]
     if audio_lang != None and vInfo['mapVideo'] != None:
         langmatch_curr = []
         langmatch_prev = vInfo['mapAudio'][:]
-        for lang in audio_lang.replace(' ','').lower().split(','):
+        for lang in audio_lang.replace(' ', '').lower().split(','):
             for s, l in langmatch_prev:
-                if lang in s + (l).replace(' ','').lower():
+                if lang in s + l.replace(' ', '').lower():
                     langmatch_curr.append((s, l))
                     stream = s
-            #if only 1 item matched we're done
+            # if only 1 item matched we're done
             if len(langmatch_curr) == 1:
                 del langmatch_prev[:]
                 break
-            #if more than 1 item matched copy the curr area to the prev array
-            #we only need to look at the new shorter list from now on
+            # if more than 1 item matched copy the curr area to the prev
+            # array we only need to look at the new shorter list from
+            # now on
             elif len(langmatch_curr) > 1:
                 del langmatch_prev[:]
                 langmatch_prev = langmatch_curr[:]
                 del langmatch_curr[:]
-            #if nothing matched we'll keep the prev array and clear the curr array
+            # if nothing matched we'll keep the prev array and clear the
+            # curr array
             else:
                 del langmatch_curr[:]
-        #if we drop out of the loop with more than 1 item default to the first item
+        # if we drop out of the loop with more than 1 item default to
+        # the first item
         if len(langmatch_prev) > 1:
             stream = langmatch_prev[0][0]
-    #don't let FFmpeg auto select audio stream, pyTivo defaults to first detected
+    # don't let FFmpeg auto select audio stream, pyTivo defaults to
+    # first detected
     if stream:
         debug('selected audio stream: %s' % stream)
         return '-map ' + vInfo['mapVideo'] + ' -map ' + stream
-    #if no audio is found
+    # if no audio is found
     debug('selected audio stream: None detected')
     return ''
 
@@ -421,7 +425,7 @@ def pad_TB(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
         return ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
 def pad_LR(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
-    endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) / 
+    endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) /
                    (vInfo['vHeight'] * multiplier))
     if endWidth % 2:
         endWidth -= 1
@@ -438,7 +442,7 @@ def pad_LR(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
             return ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT),
                     '-padleft', str(leftPadding),
                     '-padright', str(rightPadding)]
-    else: # if only very small amount of padding needed, then 
+    else: # if only very small amount of padding needed, then
           # just stretch it
         return ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
@@ -500,7 +504,7 @@ def select_aspect(inFile, tsn = ''):
                                          vInfo['vHeight'])]
 
         if vInfo['vHeight'] <= TIVO_HEIGHT:
-            # pass all resolutions to S3, except heights greater than 
+            # pass all resolutions to S3, except heights greater than
             # conf height
             return []
         # else, resize video.
@@ -513,18 +517,18 @@ def select_aspect(inFile, tsn = ''):
         debug('File + PAR is within 4:3.')
         return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
-    elif ((rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54), 
+    elif ((rwidth, rheight) in [(4, 3), (10, 11), (15, 11), (59, 54),
                                 (59, 72), (59, 36), (59, 54)] or
           vInfo['dar1'] == '4:3'):
         debug('File is within 4:3 list.')
         return ['-aspect', '4:3', '-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
 
-    elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81), 
+    elif (((rwidth, rheight) in [(16, 9), (20, 11), (40, 33), (118, 81),
                                 (59, 27)] or vInfo['dar1'] == '16:9')
           and (aspect169 or config.get169Letterbox(tsn))):
         debug('File is within 16:9 list and 16:9 allowed.')
 
-        if config.get169Blacklist(tsn) or (aspect169 and 
+        if config.get169Blacklist(tsn) or (aspect169 and
                                            config.get169Letterbox(tsn)):
             aspect = '4:3'
         else:
@@ -542,10 +546,10 @@ def select_aspect(inFile, tsn = ''):
 
         # If video is wider than 4:3 add top and bottom padding
 
-        if ratio > 133: # Might be 16:9 file, or just need padding on 
+        if ratio > 133: # Might be 16:9 file, or just need padding on
                         # top and bottom
 
-            if aspect169 and ratio > 135: # If file would fall in 4:3 
+            if aspect169 and ratio > 135: # If file would fall in 4:3
                                           # assume it is supposed to be 4:3
 
                 if (config.get169Blacklist(tsn) or
@@ -580,8 +584,8 @@ def select_aspect(inFile, tsn = ''):
                 debug(('File is wider than 4:3 padding ' +
                        'top and bottom\n%s') % ' '.join(settings))
 
-        # If video is taller than 4:3 add left and right padding, this 
-        # is rare. All of these files will always be sent in an aspect 
+        # If video is taller than 4:3 add left and right padding, this
+        # is rare. All of these files will always be sent in an aspect
         # ratio of 4:3 since they are so narrow.
 
         else:
@@ -614,7 +618,7 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
 
         if vInfo['kbps'] != None:
             abit = max('0', vInfo['aKbps'])
-            if (int(vInfo['kbps']) - int(abit) > 
+            if (int(vInfo['kbps']) - int(abit) >
                 config.strtod(config.getMaxVideoBR(tsn)) / 1000):
                 message = (False, '%s kbps exceeds max video bitrate' %
                                   vInfo['kbps'])
@@ -661,18 +665,18 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
             break
 
         if mime == 'video/mp4':
-            if codec not in ('mpeg4aac', 'libfaad', 'mp4a', 'aac', 
+            if codec not in ('mpeg4aac', 'libfaad', 'mp4a', 'aac',
                              'ac3', 'liba52'):
                 message = (False, 'aCodec %s not compatible' % codec)
                 break
             if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac') and (vInfo['aCh'] == None or vInfo['aCh'] > 2):
                 message = (False, 'aCodec %s is only supported with 2 or less channels, the track has %s channels' % (codec, vInfo['aCh']))
                 break
-            
+
             audio_lang = config.get_tsn('audio_lang', tsn)
             if audio_lang:
                 if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
-                    message = (False, '%s preferred audio track exists' % 
+                    message = (False, '%s preferred audio track exists' %
                                       audio_lang)
             break
 
@@ -702,7 +706,7 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
         audio_lang = config.get_tsn('audio_lang', tsn)
         if audio_lang:
             if vInfo['mapAudio'][0][0] != select_audiolang(inFile, tsn)[-3:]:
-                message = (False, '%s preferred audio track exists' % 
+                message = (False, '%s preferred audio track exists' %
                                   audio_lang)
         break
 
@@ -933,7 +937,7 @@ def video_info(inFile, cache=True):
         if '.' not in vInfo['vFps']:
             vInfo['vFps'] += '.00'
 
-        # Allow override only if it is mpeg2 and frame rate was doubled 
+        # Allow override only if it is mpeg2 and frame rate was doubled
         # to 59.94
 
         if vInfo['vCodec'] == 'mpeg2video' and vInfo['vFps'] != '29.97':
@@ -993,7 +997,7 @@ def video_info(inFile, cache=True):
         vInfo['par2'] = float(x.group(1)) / float(x.group(2))
     else:
         vInfo['par1'], vInfo['par2'] = None, None
- 
+
     # get dar.
     rezre = re.compile(r'.*Video: .+DAR ([0-9]+):([0-9]+).*')
     x = rezre.search(output)
@@ -1008,7 +1012,7 @@ def video_info(inFile, cache=True):
     amap = []
     if x:
         for x in rezre.finditer(output):
-            amap.append((x.group(1), x.group(2)+x.group(3)))
+            amap.append((x.group(1), x.group(2) + x.group(3)))
     else:
         amap.append(('', ''))
         debug('failed at mapAudio')
