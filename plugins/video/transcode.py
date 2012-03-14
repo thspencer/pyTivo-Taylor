@@ -874,7 +874,7 @@ def video_info(inFile, cache=True):
         vInfo['dar1'] = None
 
     # get Audio Stream mapping.
-    rezre = re.compile(r'([0-9]+[.:]+[0-9]+)(.*): Audio:.*')
+    rezre = re.compile(r'([0-9]+\.[0-9]+)(.*): Audio:.*')
     x = rezre.search(output)
     amap = []
     if x:
