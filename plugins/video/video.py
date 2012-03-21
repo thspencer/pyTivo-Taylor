@@ -87,7 +87,7 @@ class Pushable(object):
                 if transcode.tivo_compatible(f['path'], f['tsn'], m)[0]:
                     mime = m
                     break
-            
+
             if (mime == 'video/mpeg' and
                 transcode.mp4_remuxable(f['path'], f['tsn']) and config.get_freeSpace(remux_path, f['path'])):
                 
@@ -103,34 +103,34 @@ class Pushable(object):
         
         if file_info['valid']:
             file_info.update(self.metadata_full(f['path'], f['tsn'], mime))
-        
+
         url = f['url'] + quote(f['name'])
-        
+
         title = file_info['seriesTitle']
         if not title:
             title = file_info['title']
-        
+
         source = file_info['seriesId']
         if not source:
             source = title
-        
+
         subtitle = file_info['episodeTitle']
         try:
             m = mind.getMind(f['tsn'])
             m.pushVideo(
-                        tsn = f['tsn'],
-                        url = url,
-                        description = file_info['description'],
-                        duration = file_info['duration'] / 1000,
-                        size = file_info['size'],
-                        title = title,
-                        subtitle = subtitle,
-                        source = source,
-                        mime = mime,
-                        tvrating = file_info['tvRating'])
+                tsn = f['tsn'],
+                url = url,
+                description = file_info['description'],
+                duration = file_info['duration'] / 1000,
+                size = file_info['size'],
+                title = title,
+                subtitle = subtitle,
+                source = source,
+                mime = mime,
+                tvrating = file_info['tvRating'])
         except Exception, msg:
             logger.error(msg)
-    
+
     def process_queue(self):
         while queue:
             time.sleep(5)
@@ -151,11 +151,11 @@ class Pushable(object):
                 tsn = key
                 break
         tivo_name = config.tivo_names.get(tsn, tsn)
-        
+
         container = quote(query['Container'][0].split('/')[0])
         ip = config.get_ip(tsn)
         port = config.getPort()
-        
+
         baseurl = 'http://%s:%s/%s' % (ip, port, container)
         if config.getIsExternal(tsn):
             exturl = config.get_server('externalurl')
@@ -164,21 +164,21 @@ class Pushable(object):
             else:
                 ip = self.readip()
                 baseurl = 'http://%s:%s/%s' % (ip, port, container)
-        
+ 
         path = self.get_local_base_path(handler, query)
-        
+
         files = query.get('File', [])
         for f in files:
             file_path = path + os.path.normpath(f)
             queue.append({'path': file_path, 'name': f, 'tsn': tsn,
-                         'url': baseurl})
+                          'url': baseurl})
             if len(queue) == 1:
                 thread.start_new_thread(Video.process_queue, (self,))
-            
+
             logger.info('[%s] Queued "%s" for Push to %s' %
                         (time.strftime('%d/%b/%Y %H:%M:%S'),
                          unicode(file_path, 'utf-8'), tivo_name))
-        
+
         files = [unicode(f, 'utf-8') for f in files]
         handler.redir(PUSHED % (tivo_name, '<br>'.join(files)), 5)
 
