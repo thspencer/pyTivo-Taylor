@@ -175,7 +175,7 @@ class ToGo(Plugin):
             ItemStart = 0
             ItemCount = 0
             FirstAnchor = ''
-        
+
         if useragent.lower().find('mobile') > 0:
             t = Template(CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
         else:

@@ -70,7 +70,7 @@ class Pushable(object):
     def push_one_file(self, f):
         file_info = VideoDetails()
         file_info['valid'] = transcode.supported_format(f['path'])
-        
+
         temp_share = config.get_server('temp_share', '')
         temp_share_path = ''
         if temp_share:
@@ -80,7 +80,7 @@ class Pushable(object):
                     remux_path = temp_share_path
         else:
             remux_path = os.path.dirname(f['path'])
-        
+
         mime = 'video/mpeg'
         if config.isHDtivo(f['tsn']):
             for m in ['video/mp4', 'video/bif']:
@@ -89,8 +89,8 @@ class Pushable(object):
                     break
 
             if (mime == 'video/mpeg' and
-                transcode.mp4_remuxable(f['path'], f['tsn']) and config.get_freeSpace(remux_path, f['path'])):
-                
+                transcode.mp4_remuxable(f['path'], f['tsn']) and
+                config.get_freeSpace(remux_path, f['path'])):
                 new_path = transcode.mp4_remux(f['path'], f['name'], f['tsn'], temp_share_path)
                 if new_path:
                     mime = 'video/mp4'
@@ -100,7 +100,7 @@ class Pushable(object):
                         port = config.getPort()
                         container = quote(temp_share) + '/'
                         f['url'] = 'http://%s:%s/%s' % (ip, port, container)
-        
+
         if file_info['valid']:
             file_info.update(self.metadata_full(f['path'], f['tsn'], mime))
 

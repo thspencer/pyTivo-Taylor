@@ -736,11 +736,11 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
         unique_id = '_' + config.get_random()
     outFile = inFile  + unique_id + '.pyTivo-temp'
     newname = basename  + unique_id + '.pyTivo-temp'
-    
+
     if temp_share_path:
         newname = os.path.splitext(os.path.split(basename)[1])[0]  + unique_id + '.mp4.pyTivo-temp'
         outFile = os.path.join(temp_share_path, newname)
-        
+
     if os.path.exists(outFile):
         debug('File already exists.  Performing full transcode instead')
         return None
@@ -770,7 +770,7 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
     cmd_string = config.getFFmpegTemplate(tsn) % settings
 
     cmd = [ffmpeg_path] + select_ffmpegthreads().split() + ['-i', fname] + cmd_string.split() + [oname]
-   
+
     debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
     debug(' '.join(cmd))
 

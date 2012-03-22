@@ -333,7 +333,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 plugin = GetPlugin(plugin_type)
                 if hasattr(plugin, 'Push'):
                     t.shares += ('<a href="/TiVoConnect?Command=' +
-                                'QueryContainer&amp;Container=' +
+                                 'QueryContainer&amp;Container=' +
                                  quote(section) + '&Format=text/html">' +
                                  section + '</a><br>')
 
