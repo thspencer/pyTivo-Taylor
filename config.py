@@ -420,11 +420,15 @@ def get_freeSpace(share, inFile):
 
     # checks free space of given output path
     if sys.platform=="win32":
-        import ctypes
-        freeSize = ctypes.c_ulonglong(0)
-        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(share), None, None, ctypes.pointer(freeSize))
-        freeSize = freeSize.value
-        
+        try:
+            import ctypes
+            freeSize = ctypes.c_ulonglong(0)
+            ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(share), None, None, ctypes.pointer(freeSize))
+            freeSize = freeSize.value
+        except ImportError:
+            # ctypes requires Python 2.5 or higher
+            # skips check
+            return True
     else:
         s = os.statvfs(share)
         freeSize = s.f_bavail * s.f_frsize
