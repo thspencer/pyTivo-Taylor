@@ -507,11 +507,6 @@ def _from_episode_nfo(nfo_path, xmldoc):
             metadata.update(_from_tvshow_nfo(tv_nfo))
             break
 
-    if not xmldoc:
-        xmldoc = _parse_nfo(nfo_path)
-        if not xmldoc:
-            return metadata
-
     episode = xmldoc.getElementsByTagName('episodedetails')
     if episode:
         episode = episode[0]
@@ -545,11 +540,6 @@ def _from_episode_nfo(nfo_path, xmldoc):
 
 def _from_movie_nfo(xmldoc):
     metadata = {}
-
-    if not xmldoc:
-        xmldoc = _parse_nfo(nfo_path)
-        if not xmldoc:
-            return metadata
 
     movie = xmldoc.getElementsByTagName('movie')
     if movie:
