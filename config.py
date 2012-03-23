@@ -430,11 +430,14 @@ def get_freeSpace(share, inFile):
             # skips check
             return True
     else:
-        s = os.statvfs(share)
-        freeSize = s.f_bavail * s.f_frsize
-        
+        try:
+            s = os.statvfs(share)
+            freeSize = s.f_bavail * s.f_frsize
+        except OSError:
+            return True
+
     temp_fileSize = os.stat(inFile).st_size
-    
+
     # checks if enough free space exists on drive for temp file (plus padding)
     if freeSize < temp_fileSize*1.1:
        logger.error('Not enough disk space to remux')
