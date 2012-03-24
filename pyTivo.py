@@ -60,6 +60,7 @@ def setup(in_service=False):
 
     httpd.set_beacon(b)
     httpd.set_service_status(in_service)
+    config.config_check()
 
     logger.info('pyTivo is ready.')
     logger.debug('pyTivo/iluvatar')

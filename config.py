@@ -58,6 +58,7 @@ def reset():
     global bin_paths
     global config
     global configs_found
+    global config_exist
 
     bin_paths = {}
 
@@ -67,6 +68,9 @@ def reset():
         print ('WARNING: pyTivo.conf does not exist.\n' +
                'Assuming default values.')
         configs_found = config_files[-1:]
+        config_exist = False
+    else:
+        config_exist = True
 
     for section in config.sections():
         if section.startswith('_tivo_'):
@@ -82,6 +86,26 @@ def reset():
     for section in ['Server', '_tivo_SD', '_tivo_HD']:
         if not config.has_section(section):
             config.add_section(section)
+
+def config_check():
+    global config_exist
+
+    # if no config file exists open browser to web admin for user
+    if not config_exist:
+        url = 'http://' + get_ip()
+        port = 9032
+        query = '/TiVoConnect?Command=Settings&Container=Settings'
+
+        try:
+            import webbrowser
+            try:
+                browser = webbrowser.get()
+                browser.open("%s:%s%s" % (url,port,query),
+                            new=0, autoraise=True)
+            except webbrowser.Error:
+                print ('INFO:Open %s:%s to configure pyTivo using the web interface' % (url, port))
+        except ImportError:
+            print ('INFO:Open %s:%s to configure pyTivo using the web interface' % (url, port))
 
 def write():
     f = open(configs_found[-1], 'w')
