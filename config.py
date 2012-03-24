@@ -440,8 +440,6 @@ def get_random():
     return ''.join([random.choice(string.digits) for i in range(3)])
 
 def get_freeSpace(share, inFile):
-    logger = logging.getLogger('pyTivo.config')
-
     # checks free space of given output path
     if sys.platform=="win32":
         try:
@@ -462,9 +460,9 @@ def get_freeSpace(share, inFile):
 
     temp_fileSize = os.stat(inFile).st_size
 
-    # checks if enough free space exists on drive for temp file (plus padding)
+    # checks if enough free space exists
+    # on drive for output file (plus padding)
     if freeSize < temp_fileSize*1.1:
-       logger.error('Not enough disk space to remux')
        return False
 
     return True

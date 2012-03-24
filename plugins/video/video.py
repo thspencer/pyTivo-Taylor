@@ -100,6 +100,9 @@ class Pushable(object):
                         port = config.getPort()
                         container = quote(temp_share) + '/'
                         f['url'] = 'http://%s:%s/%s' % (ip, port, container)
+            else:
+                logger.warning('Not enough disk space to perform remux, ' +
+                               'transcoding instead.')
 
         if file_info['valid']:
             file_info.update(self.metadata_full(f['path'], f['tsn'], mime))
