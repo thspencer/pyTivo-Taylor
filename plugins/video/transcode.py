@@ -904,9 +904,9 @@ def video_info(inFile, cache=True):
     x = rezre.search(output)
     if x:
         if x.group(3):
-            if x.group(3) == 'stereo':
+            if x.group(3).lower() == 'stereo':
                 vInfo['aCh'] = 2
-            elif x.group(3) == 'mono':
+            elif x.group(3).lower() == 'mono':
                 vInfo['aCh'] = 1
         elif x.group(2):
             vInfo['aCh'] = int(x.group(1)) + int(x.group(2))
