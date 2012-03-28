@@ -2,6 +2,7 @@
 
 import logging
 import os
+import platform
 import sys
 import time
 
@@ -41,6 +42,8 @@ def setup(in_service=False):
 
     logger = logging.getLogger('pyTivo')
     logger.info('Last modified: ' + last_date())
+    logger.info('Python: ' + platform.python_version())
+    logger.info('System: ' + platform.platform())
 
     for section, settings in config.getShares():
         httpd.add_container(section, settings)
