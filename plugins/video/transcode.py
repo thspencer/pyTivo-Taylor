@@ -285,19 +285,12 @@ def select_audiolang(inFile, tsn):
                     stream = s
             # if only 1 item matched we're done
             if len(langmatch_curr) == 1:
-                del langmatch_prev[:]
                 break
             # if more than 1 item matched copy the curr area to the prev
             # array we only need to look at the new shorter list from
             # now on
             elif len(langmatch_curr) > 1:
-                del langmatch_prev[:]
                 langmatch_prev = langmatch_curr[:]
-                del langmatch_curr[:]
-            # if nothing matched we'll keep the prev array and clear the
-            # curr array
-            else:
-                del langmatch_curr[:]
         # if we drop out of the loop with more than 1 item default to
         # the first item
         if len(langmatch_prev) > 1:
