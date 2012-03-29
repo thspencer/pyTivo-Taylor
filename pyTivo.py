@@ -21,7 +21,10 @@ def exceptionLogger(*args):
 
 def last_date():
     lasttime = -1
-    for root, dirs, files in os.walk('.'):
+    path = os.path.dirname(__file__)
+    if not path:
+        path = '.'
+    for root, dirs, files in os.walk(path):
         for name in files:
             if name.endswith('.py'):
                 tm = os.stat(os.path.join(root, name)).st_mtime
