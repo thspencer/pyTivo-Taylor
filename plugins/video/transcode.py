@@ -865,20 +865,30 @@ def video_info(inFile, cache=True):
     err_tmp.close()
     debug('ffmpeg output=%s' % output)
 
-    #get libavcodec major and minor versions from FFmpeg output
-    rezre = re.compile(r'libavcodec \s+([0-9]+).?\s*([0-9]+)')
-    x = rezre.search(output)
-    if x:
-        vInfo['avcodecMAJ'], vInfo['avcodecMIN'] = int(x.group(1)), int(x.group(2))
-    else:
-        #should catch very old builds which are formatted differently
-        rezre = re.compile(r'libavcodec.*:\s+([0-9]+).?\s*([0-9]+)')
+    # get FFmpeg(avcodec, avfilter, avformat) versions from output
+    attrs = {'lavcVer': r'libavcodec \s+([0-9]+).?\s*([0-9]+)',
+             'lavfiVer': r'libavfilter \s+([0-9]+).?\s*([0-9]+)',
+             'lavfoVer': r'libavformat \s+([0-9]+).?\s*([0-9]+)'}
+
+    for attr in attrs:
+        rezre = re.compile(attrs[attr])
         x = rezre.search(output)
         if x:
-            vInfo['avcodecMAJ'], vInfo['avcodecMIN'] = int(x.group(1)), int(x.group(2))
+            vInfo[attr] = float('%s.%s' % (x.group(1), x.group(2)))
         else:
-            vInfo['avcodecMAJ'], vInfo['avcodecMIN'] = None, None
-            debug('failed at avcodec check')
+            # should catch very old builds that are formatted differently
+            attrs = {'lavcVer': r'libavcodec.*:\s+([0-9]+).?\s*([0-9]+)',
+                     'lavfiVer': r'libavcodec.*:\s+([0-9]+).?\s*([0-9]+)',
+                     'lavfoVer': r'libavcodec.*:\s+([0-9]+).?\s*([0-9]+)'}
+
+            for attr in attrs:
+                rezre = re.compile(attrs[attr])
+                x = rezre.search(output)
+                if x:
+                    vInfo[attr] = float('%s.%s' % (x.group(1), x.group(2)))
+                else:
+                    vInfo[attr] = None
+                    debug('failed at %s' % attr)
 
     attrs = {'container': r'Input #0, ([^,]+),',
              'vCodec': r'Video: ([^, ]+)',             # video codec
