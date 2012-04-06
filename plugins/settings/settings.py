@@ -7,6 +7,7 @@ from Cheetah.Template import Template
 import buildhelp
 import config
 from plugin import EncodeUnicode, Plugin
+import update
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -148,3 +149,33 @@ class Settings(Plugin):
         config.write()
 
         handler.redir(SETTINGS_MSG, 5)
+    
+    def Update(self, handler, query):
+        try: # should always be a list: (BOOL, STRING)
+            result = update.update_request()
+        except: # catch-all for exceptions, prints last traceback
+            import sys, traceback
+            update_msg = """<h3>Update Failed</h3> <p>Message:<ul>
+                          <li>Update process failed for unknown reasons.
+                          See debug log for possible cause.
+                          </li></ul></p>"""
+            handler.redir(update_msg, 20)
+            traceback.print_exc()
+            sys.exc_clear()
+            return
+
+        # update has failed with reasons
+        if not result[0]:
+            update_msg = ("""<h3>Update Failed</h3><p>Message:<ul>
+                          <li>%s   See debug log for additional details.
+                          </li></ul></p>""" % result[1])
+            handler.redir(update_msg, 20)
+            return
+
+        # update was successful
+        ### auto restart code not finished so require user to manual restart
+        update_msg = """<h3>Update Successful</h3><p>Message:<ul>
+                     <li>A manual restart of pyTivo is required 
+                     to complete the update process.</li></ul></p>"""
+
+        handler.redir(update_msg, 20)
