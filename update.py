@@ -1,4 +1,4 @@
-import os
+import os, sys
 import logging
 import tarfile
 import urllib2
@@ -17,6 +17,14 @@ PACKAGE_URL = ('https://github.com/%s/%s/tarball/%s/' %
 
 # returns 'result'(bool, string) to video.settings.settings.py
 def update_request():
+
+    # tarfile.extractall() requires Python 2.5 or higher
+    if sys.version_info[0] != 2 or sys.version_info[1] < 5:
+        message = 'ERROR: pyTivo updater requires Python 2.5 or any higher 2.x version.'
+        logger.error(message)
+        result = (False, '%s' % message)
+        return result
+
     pyTivo_dir = os.path.dirname(__file__)
     version_file = os.path.join(pyTivo_dir, 'version.txt')
 
