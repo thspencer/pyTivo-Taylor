@@ -100,8 +100,6 @@ def find_current_version(pyTivo_dir, version_file, type):
         logger.error('** Git installs are not currently supported.')
         return None
     else:
-        version_file = os.path.join(pyTivo_dir, 'version.txt')
-
         try:
             f = open(version_file, 'rt')
             cur_hash = f.read().strip('\r\n') # strip out unwanted chars
