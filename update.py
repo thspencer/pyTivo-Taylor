@@ -107,7 +107,13 @@ def find_current_version(pyTivo_dir, version_file, type):
     else:
         try:
             f = open(version_file, 'rt')
-            cur_hash = f.read().strip('\r\n') # strip out unwanted chars
+            try: # should not contain unicode chars but test just in case
+                cur_hash = f.read().decode('utf-8')
+            except:
+                if sys.platform == 'darwin':
+                    cur_hash = f.read().decode('macroman')
+                else:
+                    cur_hash = f.read().decode('iso8859-1')
             f.close()
         except IOError:
             logger.error('Version file not found')
@@ -116,6 +122,9 @@ def find_current_version(pyTivo_dir, version_file, type):
         if not cur_hash:
             logger.error('Version file was empty')
             return None
+
+        # strip out unwanted leading chars
+        cur_hash = cur_hash.strip('\r\n ')
 
     logger.info('Current version is %s' % cur_hash[:7])
     logger.debug('Current commit - long hash: %s' % cur_hash)
