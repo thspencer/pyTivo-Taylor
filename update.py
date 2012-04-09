@@ -25,7 +25,12 @@ def update_request():
         result = (False, '%s' % message)
         return result
 
-    pyTivo_dir = os.path.dirname(__file__)
+    if sys.platform == 'win32':
+        encoding = 'iso8859-1'
+    else:
+        encoding = 'utf-8'
+
+    pyTivo_dir = unicode(os.path.dirname(__file__), encoding)
     version_file = os.path.join(pyTivo_dir, 'version.txt')
 
     # determine if previous install was git or manual
