@@ -33,6 +33,20 @@ def last_date():
 
     return time.asctime(time.localtime(lasttime))
 
+def get_cur_commit():
+    pyTivo_dir = os.path.dirname(__file__)
+    version_file = os.path.join(pyTivo_dir, 'version.txt')
+    try:
+        f = open(version_file, 'rt')
+        cur_commit = f.read().strip('\r\n ') # strip out unwanted leading chars
+        f.close()
+        if not cur_commit:
+            cur_commit = 'unknown'
+    except:
+        cur_commit = 'unknown'
+
+    return cur_commit
+
 def setup(in_service=False):
     config.init(sys.argv[1:])
     config.init_logging()
@@ -44,6 +58,8 @@ def setup(in_service=False):
         httpserver.TivoHTTPHandler)
 
     logger = logging.getLogger('pyTivo')
+    commit = get_cur_commit()
+    logger.info('Using commit: %s' % commit[:7])
     logger.info('Last modified: ' + last_date())
     logger.info('Python: ' + platform.python_version())
     logger.info('System: ' + platform.platform())
