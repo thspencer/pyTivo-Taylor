@@ -59,7 +59,7 @@ def setup(in_service=False):
 
     logger = logging.getLogger('pyTivo')
     commit = get_cur_commit()
-    logger.info('Using commit: %s' % commit[:7])
+    logger.info('Using commit: iluvatar-%s' % commit[:7])
     logger.info('Last modified: ' + last_date())
     logger.info('Python: ' + platform.python_version())
     logger.info('System: ' + platform.platform())
@@ -97,7 +97,6 @@ def setup(in_service=False):
     config.config_check()
 
     logger.info('pyTivo is ready.')
-    logger.debug('pyTivo/iluvatar')
     return httpd
 
 def serve(httpd):
