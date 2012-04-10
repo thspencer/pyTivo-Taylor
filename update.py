@@ -4,8 +4,6 @@ import tarfile
 import urllib2
 from pygithub import github # obtained from https://github.com/dustin/py-github
 
-import config
-
 logger = logging.getLogger('pyTivo.update')
 
 # uses github api, customize for desired fork
@@ -16,7 +14,7 @@ PACKAGE_URL = ('https://github.com/%s/%s/tarball/%s/' %
                (GIT_MEMBER, GIT_PROJECT, GIT_BRANCH))
 
 # returns 'result'(bool, string) to video.settings.settings.py
-def update_request():
+def update_request(forced):
 
     # tarfile.extractall() requires Python 2.5 or higher
     if sys.version_info[0] != 2 or sys.version_info[1] < 5:
@@ -39,12 +37,14 @@ def update_request():
 
     while True:        
         # determine installed commit version from local git or version.txt
-        cur_hash = find_current_version(pyTivo_dir, version_file, type)
+        cur_hash = find_current_version(pyTivo_dir, version_file, type, forced)
 
         if not cur_hash:
             message = 'Installed version could not be determined.'
             logger.error(message)
-            result = (False, '%s' % message)
+            result = (False, """%s<li>The update can be forced by setting
+                               'force_update' to True in the Server 
+                               settings.</li>""" % message)
             break
 
         # determine lastest available commit from pyTivo repository
@@ -100,10 +100,11 @@ def install_type(pyTivo_dir):
     return type
 
 # search version file for current commit hash
-def find_current_version(pyTivo_dir, version_file, type):
+def find_current_version(pyTivo_dir, version_file, type, forced):
+    cur_hash = None
     if type == 'git':
         logger.error('** Git installs are not currently supported.')
-        return None
+        return cur_hash
     else:
         try:
             f = open(version_file, 'rt')
@@ -117,16 +118,22 @@ def find_current_version(pyTivo_dir, version_file, type):
             f.close()
         except IOError:
             logger.error('Version file not found')
-            return None
+            if not forced: # if force_update in conf file is True then update
+                return cur_hash
+            cur_hash = 'unknown'
+            logger.info('Forcing update')
 
         if not cur_hash:
             logger.error('Version file was empty')
-            return None
+            if not forced: # if force_update in conf file is True then update
+                return cur_hash
+            cur_hash = 'unknown'
+            logger.info('Forcing update')
 
         # strip out unwanted leading chars
         cur_hash = cur_hash.strip('\r\n ')
 
-    logger.info('Current version is %s' % cur_hash[:7])
+    logger.info('Current version is: %s' % cur_hash[:7])
     logger.debug('Current commit - long hash: %s' % cur_hash)
     return cur_hash	
 

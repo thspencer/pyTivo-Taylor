@@ -152,7 +152,7 @@ class Settings(Plugin):
     
     def Update(self, handler, query):
         try: # should always be a list: (BOOL, STRING)
-            result = update.update_request()
+            result = update.update_request(config.getForceUpdate())
         except: # catch-all for exceptions, prints last traceback
             import sys, traceback
             update_msg = """<h3>Update Failed</h3> <p>Message:<ul>

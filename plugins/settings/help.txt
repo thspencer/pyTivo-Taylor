@@ -697,3 +697,14 @@ True = display tick box. False = do not display tick box. Default = display tick
 default to having it ticked.
 Example Settings: True/False/Default
 Available In: Server
+
+force_update
+
+Default Setting: False
+Valid Entries: True/False
+Required: No
+Skill: Basic
+Description: Setting this to True is required to update pyTivo using the self-update feature if a version.txt file is missing or is empty.  If you have never used the self-update feature before enabling this setting will force pyTivo to update to the latest commit available and create a version.txt file with the commit hash stored inside.  After setting to True and restarting pyTivo, press the 'Update' button to start the process.
+pyTivo will not update if already running the latest commit, regardless of setting.
+Example Settings: True/False
+Available In: Server

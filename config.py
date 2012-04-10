@@ -467,6 +467,12 @@ def get_freeSpace(share, inFile):
 
     return True
 
+def getForceUpdate():
+    try:
+        return config.getboolean('Server', 'force_update')
+    except NoOptionError, ValueError:
+        return False
+
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216
 # Algorithm: http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/eval.c
