@@ -2,7 +2,10 @@ import os, sys
 import logging
 import tarfile
 import urllib2
+import subprocess
 from pygithub import github # obtained from https://github.com/dustin/py-github
+
+import config
 
 logger = logging.getLogger('pyTivo.update')
 
@@ -42,9 +45,12 @@ def update_request(forced):
         if not cur_hash:
             message = 'Installed version could not be determined.'
             logger.error(message)
-            result = (False, """%s<li>The update can be forced by setting
-                               'force_update' to True in the Server 
-                               settings.</li>""" % message)
+            if type == 'git':
+                result = (False, '%s' % message)
+            else:
+                result = (False, """%s<li>The update can be forced by setting
+                                    'force_update' to True in the Server 
+                                    settings.</li>""" % message)
             break
 
         # determine lastest available commit from pyTivo repository
@@ -64,12 +70,8 @@ def update_request(forced):
             break
         # proceed with update
         else:
-            if type == 'git': # UPDATE WHEN GIT SUPPORT ADDED
-                message = 'Git installs are not currently supported.'
-                logger.error(message)
-                result = (False, '%s' % message)
-                break
-                #update = do_update_git(pyTivo_dir, newest_hash)
+            if type == 'git':
+                update = do_update_git(pyTivo_dir, newest_hash)
             else:
                 update = do_update_manual(pyTivo_dir, version_file, newest_hash)
             if update == 'no_permission':
@@ -99,14 +101,46 @@ def install_type(pyTivo_dir):
     logger.debug('Type of install detected is: %s' % type)
     return type
 
-# search version file for current commit hash
+# search for current commit hash
 def find_current_version(pyTivo_dir, version_file, type, forced):
     cur_hash = None
+
     if type == 'git':
-        logger.error('** Git installs are not currently supported.')
-        return cur_hash
+        git_dir = os.path.join(pyTivo_dir, '.git')
+        head_file = os.path.join(git_dir, 'HEAD')
+
+        if os.path.isfile(head_file):
+            f = open(head_file, 'rt')
+            try: # should not contain unicode chars but test just in case
+                git_ref = f.read().decode('utf-8')
+            except:
+                if sys.platform == 'darwin':
+                    git_ref = f.read().decode('macroman')
+                else:
+                    git_ref = f.read().decode('iso8859-1')
+            f.close()
+        else:
+            logger.error('Git HEAD file not located')
+            return cur_hash
+
+        git_ref = git_ref.split()
+        if len(git_ref) > 1 and git_ref[1].startswith('refs'):
+            git_ver_file = os.path.join(git_dir, git_ref[1])
+            if os.path.isfile(git_ver_file):
+                f = open(git_ver_file, 'rt')
+                try: # should not contain unicode chars but test just in case
+                    cur_hash = f.read().decode('utf-8')
+                except:
+                    if sys.platform == 'darwin':
+                        cur_hash = f.read().decode('macroman')
+                    else:
+                        cur_hash = f.read().decode('iso8859-1')
+                f.close()
+
+        if not cur_hash:
+            logger.error('Current commit not found; local repository may be corrupt')
     else:
-        try:
+        if os.path.isfile(version_file):
             f = open(version_file, 'rt')
             try: # should not contain unicode chars but test just in case
                 cur_hash = f.read().decode('utf-8')
@@ -116,25 +150,25 @@ def find_current_version(pyTivo_dir, version_file, type, forced):
                 else:
                     cur_hash = f.read().decode('iso8859-1')
             f.close()
-        except IOError:
+        else:
             logger.error('Version file not found')
-            if not forced: # if force_update in conf file is True then update
+            if forced: # if force_update in conf file is True then update
+                cur_hash = 'unknown'
+                logger.info('Forcing update')
+            else:
                 return cur_hash
-            cur_hash = 'unknown'
-            logger.info('Forcing update')
 
         if not cur_hash:
-            logger.error('Version file was empty')
-            if not forced: # if force_update in conf file is True then update
-                return cur_hash
-            cur_hash = 'unknown'
-            logger.info('Forcing update')
-
-        # strip out unwanted leading chars
+            logger.error('Version file was empty or corrupt')
+            if forced: # if force_update in conf file is True then update
+                cur_hash = 'unknown'
+                logger.info('Forcing update')
+    if cur_hash:
+        # strip out unwanted chars
         cur_hash = cur_hash.strip('\r\n ')
+        logger.info('Current version is: %s' % cur_hash[:7])
+        logger.debug('Current commit - long hash: %s' % cur_hash)
 
-    logger.info('Current version is: %s' % cur_hash[:7])
-    logger.debug('Current commit - long hash: %s' % cur_hash)
     return cur_hash	
 
 # uses github api to find latest commit hash
@@ -159,9 +193,68 @@ def find_newest_commit(cur_hash):
                 % newest_commit[:7])
     return newest_commit
 
+# use system Git executable to pull latest pyTivo commit
+# version info will be updated by Git
 def do_update_git(pyTivo_dir, latest):
-    logger.error('** Git update not implemented yet')
-    return None
+    git_path = config.get_bin('git')
+    output, err = None, None
+
+    logger.debug('Git executable path is: %s' % git_path)
+
+    if git_path:
+        try:
+            # this may not be syncing with GitHub but another remote
+            # it depends on the local git repository configuration
+            exec_git = subprocess.Popen([git_path, 'pull origin', GIT_BRANCH],
+                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                        cwd=pyTivo_dir)
+            output, err = exec_git.communicate()
+            if 'not a git command' in output: # try alternate method if pull origin fails
+                exec_git = subprocess.Popen([git_path, 'pull'], stdout=subprocess.PIPE,
+                                            stderr=subprocess.STDOUT, cwd=pyTivo_dir)
+                output, err = exec_git.communicate()
+            logger.debug('Git output:\n%s' % output)
+            if err:
+                logger.debug('Git error output: %s' % err)
+        except OSError, e:
+            logger.error('There was an error during Git execution: %s' % e)
+            return False
+
+        if not output or err:
+            logger.error('Git produced no output')
+            return False
+
+        # catch fatal error from Git
+        # reason is usually cwd is not a proper git install or is corrupt
+        if 'fatal:' in output or err:
+            logger.error('Install corrupt or not a git repository:\n%s' % pyTivo_dir)
+            return False
+
+        if 'error:' in output or err:
+            logger.error('Unable to update existing files')
+            return 'no_permission'
+
+        # catch already up-to-date git status
+        # if user sees this there may be a bug in the current version detection
+        # or are using an out of date remote repository that is out of sync with GitHub.
+        if 'Already up-to-date' in output:
+            logger.error('Version mismatch. Local git may be fetching ' +
+                         'from an outdated remote repository.')
+            logger.info('Recommended to use GitHub repository instead from:\n%s' %
+                         PACKAGE_URL.split('tarball')[0])
+            return False
+
+        # check for successful output at end of git pull.
+        # typically will be indication of files changed, insertions, or deletions
+        if ('changed' and 'insertions' and 'deletions') in output:
+            return True
+        else:
+            logger.error('Can not determine if Git pull was successful; assuming failure')
+            return False
+    else:
+        logger.error('Git executable not found; set git path in pyTivo.conf')
+
+    return False
 
 # update manual install type
 def do_update_manual(pyTivo_dir, version_file, latest):
