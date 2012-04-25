@@ -280,12 +280,16 @@ def get_bin(fname):
     else:
         fext = ''
 
-    for path in ([os.path.join(os.path.dirname(__file__), 'bin')] +
-                 os.getenv('PATH').split(os.pathsep)):
-        fpath = os.path.join(path, fname + fext)
-        if os.path.exists(fpath) and os.path.isfile(fpath):
-            bin_paths[fname] = fpath
-            return fpath
+    try:
+        for path in ([os.path.join(os.path.dirname(__file__), 'bin')] +
+                     os.getenv('PATH').split(os.pathsep)):
+            fpath = os.path.join(path, fname + fext)
+            if os.path.exists(fpath) and os.path.isfile(fpath):
+                bin_paths[fname] = fpath
+                return fpath
+    except AttributeError:
+        logger.error('Unable to read PATH from environment variables')
+        pass
 
     logger.warn('%s not found' % fname)
     return None
