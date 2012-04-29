@@ -749,6 +749,22 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
 
     debug('remuxing ' + inFile + ' to ' + outFile)
 
+    # attempt to overcome certain FFmpeg audio timestamp errors
+    # by forcing the audio stream to be transcoded
+    # works more reliably with versions of FFmpeg >= 0.11.x
+    # large amounts of warnings during mux are expected
+    if ffmpeg.wait() and 'acodec copy' in settings['audio_codec']:
+        debug('FFmpeg error, attempting to transcode audio as workaround')
+        
+        settings['audio_codec'] = '-acodec ac3' # don't use -copyts
+        cmd_string = config.getFFmpegTemplate(tsn) % settings
+        cmd = [ffmpeg_path] + select_ffmpegthreads().split() + ['-y', '-i', fname] + cmd_string.split() + [oname]
+        
+        debug('transcoding to tivo model ' + tsn[:3] + ' using ffmpeg command:')
+        debug(' '.join(cmd))
+        
+        ffmpeg = subprocess.Popen(cmd)
+
     if ffmpeg.wait():
         os.remove(outFile)
         debug('FFmpeg error, temp file has been removed: ' + outFile)
