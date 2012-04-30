@@ -73,13 +73,12 @@ class Pushable(object):
 
         temp_share = config.get_server('temp_share', '')
         temp_share_path = ''
+        remux_path = os.path.dirname(f['path'])
         if temp_share:
             for name, data in config.getShares():
                 if temp_share == name:
                     temp_share_path = data.get('path')
                     remux_path = temp_share_path
-        else:
-            remux_path = os.path.dirname(f['path'])
 
         mime = 'video/mpeg'
         if config.isHDtivo(f['tsn']):
