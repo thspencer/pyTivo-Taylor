@@ -237,7 +237,9 @@ def getDebug():
     try:
         return config.getboolean('Server', 'debug')
     except NoOptionError, ValueError:
-        return True
+        pass
+
+    return True
 
 def getOptres(tsn=None):
     try:
@@ -289,7 +291,6 @@ def get_bin(fname):
                 return fpath
     except AttributeError:
         logger.error('Unable to read PATH from environment variables')
-        pass
 
     logger.warn('%s not found' % fname)
     return None
@@ -318,17 +319,14 @@ def getFFmpegThreads():
             #threads max is 16
             if 1 <= int(threads) <= 16:
                     return threads
-
             else:
-                logger.debug(threads + ' is an invalid ffmpeg_threads setting, must be between 1 and 16, using default')
-                return None
-
+                logger.debug('%s is an invalid ffmpeg_threads setting, ' +
+                             'must be between 1 and 16, using default' +
+                              % threads)
         except ValueError:
-            logger.debug(threads + ' is an invalid ffmpeg_threads setting, using defaults')
-            return None
-
-    else:
-        return None
+            logger.debug('%s is an invalid ffmpeg_threads setting, ' +
+                         'using default' % threads)
+    return None
 
 def getFFmpegPrams(tsn):
     return get_tsn('ffmpeg_pram', tsn, True)
@@ -475,7 +473,8 @@ def getForceUpdate():
     try:
         return config.getboolean('Server', 'force_update')
     except NoOptionError, ValueError:
-        return False
+        pass
+    return False
 
 # Parse a bitrate using the SI/IEEE suffix values as if by ffmpeg
 # For example, 2K==2000, 2Ki==2048, 2MB==16000000, 2MiB==16777216
