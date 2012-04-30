@@ -320,12 +320,11 @@ def getFFmpegThreads():
             if 1 <= int(threads) <= 16:
                     return threads
             else:
-                logger.debug('%s is an invalid ffmpeg_threads setting, ' +
-                             'must be between 1 and 16, using default' +
-                              % threads)
+                logger.debug('%s is an invalid ffmpeg_threads ' % threads +
+                             'setting, must be between 1 and 16, using default')
         except ValueError:
-            logger.debug('%s is an invalid ffmpeg_threads setting, ' +
-                         'using default' % threads)
+            logger.debug('%s is an invalid ffmpeg_threads ' % threads +
+                         'setting, using default')
     return None
 
 def getFFmpegPrams(tsn):
