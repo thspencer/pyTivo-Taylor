@@ -766,8 +766,13 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
         ffmpeg = subprocess.Popen(cmd)
 
     if ffmpeg.wait():
-        os.remove(outFile)
-        debug('FFmpeg error, temp file has been removed: ' + outFile)
+        try:
+        	os.remove(outFile)
+        	debug('FFmpeg error, temp file has been removed: ' + outFile)
+        except:
+            logger.error('FFmpeg returned a fatal error, ' +
+                         'check debug log and configuration settings')
+            pass
         return None
 
     return newname
@@ -850,6 +855,16 @@ def video_info(inFile, cache=True):
     err_tmp.seek(0)
     output = err_tmp.read()
     err_tmp.close()
+    
+    # ffmpeg or os encountered some fatal error if exit code > 1
+    if ffmpeg.wait() > 1:
+        logger.error('FFmpeg returned a fatal error, check for system compatability')
+        logger.error('FFmpeg output:\n\n%s' % output)
+        vInfo['Supported'] = False
+        if cache:
+            info_cache[inFile] = (mtime, vInfo)
+        return vInfo
+
     debug('ffmpeg output=%s' % output)
 
     # get FFmpeg(avcodec, avfilter, avformat) versions from output
