@@ -753,7 +753,7 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
     # by forcing the audio stream to be transcoded
     # works more reliably with versions of FFmpeg >= 0.11.x
     # large amounts of warnings during mux are expected
-    if ffmpeg.wait() and 'acodec copy' in settings['audio_codec']:
+    if ffmpeg.wait() == 1 and 'acodec copy' in settings['audio_codec']:
         debug('FFmpeg error, attempting to transcode audio as workaround')
 
         settings['audio_codec'] = '-acodec ac3' # don't use -copyts
