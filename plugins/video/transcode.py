@@ -753,6 +753,11 @@ def mp4_remux(inFile, basename, tsn='', temp_share_path=''):
     # by forcing the audio stream to be transcoded
     # works more reliably with versions of FFmpeg >= 0.11.x
     # large amounts of warnings during mux are expected
+
+    # also bypasses ac3 stream copy regression in FFmpeg
+    # error: 'codec frame size is not set'
+    # 02/20/2012 - lavc ver >= 54.x.x
+    # commit 16e54ac7255d47e70ba9ba60d5ce5d0a0e44b223
     if ffmpeg.wait() == 1 and 'acodec copy' in settings['audio_codec']:
         debug('FFmpeg error, attempting to transcode audio as workaround')
 
