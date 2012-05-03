@@ -219,8 +219,11 @@ else:
 
             xml = self.__dict_request({}, 'pcBodySearch')
             id = xml.findtext('.//pcBodyId')
-            if not id:
-                xml = self.__pcBodyStore('pyTivo', True)
+            curName = xml.findtext('.//name')
+            ourName = 'pyTivo'
+
+            if not id or curName != ourName:
+                xml = self.__pcBodyStore(ourName, True)
                 id = xml.findtext('.//pcBodyId')
 
             return id
