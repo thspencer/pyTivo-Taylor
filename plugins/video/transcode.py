@@ -242,8 +242,8 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
                 codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
-    if (copy_flag and copy_flag.lower() == 'false' or
-        (codec == 'copy' and codectype in ('mpeg2video', 'h264') and not copy_flag)):
+    if ((codec == 'copy' and codectype == 'mpeg2video' and not copy_flag) or
+        (copy_flag and copy_flag.lower() == 'false')):
         copyts = ''
     return '-acodec ' + codec + copyts
 
