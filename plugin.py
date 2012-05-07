@@ -165,18 +165,22 @@ class Plugin(object):
             path = unicode(path, 'utf-8')
             try:
                 for f in os.listdir(path):
-                    if f.startswith('.'):
-                        continue
-                    f = os.path.join(path, f)
-                    isdir = os.path.isdir(f)
-                    f = f.encode('utf-8')
-                    if recurse and isdir:
-                        files.extend(build_recursive_list(f))
-                    else:
-                       if not filterFunction or filterFunction(f, file_type):
-                           files.append(FileData(f, isdir))
-            except:
-                pass
+                    try:
+                        if f.startswith('.'):
+                            continue
+                        f = os.path.join(path, f)
+                        isdir = os.path.isdir(f)
+                        f = f.encode('utf-8')
+                        if recurse and isdir:
+                            files.extend(build_recursive_list(f))
+                        else:
+                            if not filterFunction or filterFunction(f, file_type):
+                                files.append(FileData(f, isdir))
+                    except UnicodeDecodeError, err: # log err and continue
+                        handler.server.logger.error('error decoding name, skipping: ' +
+                            '%s\n%s' % (os.path.join(path.encode('utf-8'),f), err))
+            except Exception, err: # probably permissions error on share
+                handler.server.logger.error(err)
             return files
 
         subcname = query['Container'][0]
