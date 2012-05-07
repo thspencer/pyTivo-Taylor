@@ -130,6 +130,13 @@ class Pushable(object):
                 source = source,
                 mime = mime,
                 tvrating = file_info['tvRating'])
+        except ValueError, msg:
+            if 'usernamePasswordError' in msg:
+                if f['name'].endswith('.pyTivo-temp'):
+                    fname = os.path.join(remux_path, os.path.basename(f['name']))
+                    fname = unicode(fname, 'utf-8')
+                    os.remove(fname)
+                    logger.debug(fname + ' has been removed')
         except Exception, msg:
             logger.error(msg)
 
