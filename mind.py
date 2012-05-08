@@ -161,7 +161,9 @@ else:
             try:
                 result = self.__opener.open(r)
                 xml = ElementTree.parse(result).find('.')
-                if xml.findtext('.//code') == 'usernamePasswordError':
+                if (xml.findtext('.//code') == 'usernamePasswordError' or
+                                              'badCookie' or
+                                              'unknownError'):
                     self.__logger.error('Check tivo.com username ' +
                         'and password: %s, %s' % (data['cams_cb_username'], data['cams_cb_password']))
                     self.__logger.error('%s' % ElementTree.tostring(xml))
