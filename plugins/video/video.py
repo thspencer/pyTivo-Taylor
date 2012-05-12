@@ -339,7 +339,7 @@ class BaseVideo(Plugin):
         return count
 
     def __est_size(self, full_path, tsn='', mime=''):
-        # Size is estimated by taking audio and video bit rate adding 2%
+        # Size is estimated by taking audio and video bit rate adding 3%
 
         if transcode.tivo_compatible(full_path, tsn, mime)[0]:
             return int(os.stat(unicode(full_path, 'utf-8')).st_size)
@@ -352,7 +352,7 @@ class BaseVideo(Plugin):
             videoBPS = transcode.select_videostr(full_path, tsn)
             bitrate =  audioBPS + videoBPS
             return int((self.__duration(full_path) / 1000) *
-                       (bitrate * 1.02 / 8))
+                       (bitrate * 1.03 / 8))
 
     def metadata_full(self, full_path, tsn='', mime=''):
         data = {}
