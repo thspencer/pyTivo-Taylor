@@ -166,7 +166,8 @@ class Plugin(object):
             try:
                 for f in os.listdir(path):
                     try:
-                        if f.startswith('.'):
+                        # '@eaDir' = Synology NAS metadata directory
+                        if f.startswith('.') or f.startswith('@eaDir'):
                             continue
                         f = os.path.join(path, f)
                         isdir = os.path.isdir(f)
