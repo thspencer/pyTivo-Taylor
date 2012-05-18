@@ -439,7 +439,6 @@ def _parse_nfo(nfo_path, nfo_data=None):
     try:
         xmldoc = minidom.parseString(os.linesep.join(nfo_data))
     except expat.ExpatError, err:
-        import ipdb; ipdb.set_trace()
         if expat.ErrorString(err.code) == expat.errors.XML_ERROR_INVALID_TOKEN:
             # might be a URL outside the xml
             while len(nfo_data) > err.lineno:
