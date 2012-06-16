@@ -36,9 +36,9 @@ TAGNAMES = {'artist': ['\xa9ART', 'Author'],
             'genre': ['\xa9gen', u'WM/Genre']}
 
 # Search strings for different playlist types
-asxfile = re.compile('ref +href *= *"(.+)"', re.IGNORECASE).search
-wplfile = re.compile('media +src *= *"(.+)"', re.IGNORECASE).search
-b4sfile = re.compile('Playstring="file:(.+)"').search
+asxfile = re.compile('ref +href *= *"([^"]*)"', re.IGNORECASE).search
+wplfile = re.compile('media +src *= *"([^"]*)"', re.IGNORECASE).search
+b4sfile = re.compile('Playstring="file:([^"]*)"').search
 plsfile = re.compile('[Ff]ile(\d+)=(.+)').match
 plstitle = re.compile('[Tt]itle(\d+)=(.+)').match
 plslength = re.compile('[Ll]ength(\d+)=(\d+)').match
