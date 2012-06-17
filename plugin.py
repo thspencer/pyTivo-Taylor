@@ -4,6 +4,7 @@ import shutil
 import sys
 import threading
 import time
+import unicodedata
 import urllib
 
 from Cheetah.Filters import Filter
@@ -169,6 +170,8 @@ class Plugin(object):
                         continue
                     f = os.path.join(path, f)
                     isdir = os.path.isdir(f)
+                    if sys.platform == 'darwin':
+                        f = unicodedata.normalize('NFC', f)
                     f = f.encode('utf-8')
                     if recurse and isdir:
                         files.extend(build_recursive_list(f))
