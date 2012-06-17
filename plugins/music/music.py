@@ -7,6 +7,7 @@ import socket
 import subprocess
 import sys
 import time
+import unicodedata
 import urllib
 from xml.sax.saxutils import escape
 
@@ -411,6 +412,8 @@ class Music(Plugin):
                         continue
                     f = os.path.join(path, f)
                     isdir = os.path.isdir(f)
+                    if sys.platform == 'darwin':
+                        f = unicodedata.normalize('NFC', f)
                     f = f.encode('utf-8')
                     if recurse and isdir:
                         files.extend(build_recursive_list(f))
