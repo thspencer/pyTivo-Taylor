@@ -169,7 +169,9 @@ class Pushable(object):
         if config.getIsExternal(tsn):
             exturl = config.get_server('externalurl')
             if exturl:
-                baseurl = exturl
+                if not exturl.endswith('/'):
+                    exturl += '/'
+                baseurl = exturl + container
             else:
                 ip = self.readip()
                 baseurl = 'http://%s:%s/%s' % (ip, port, container)
