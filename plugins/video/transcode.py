@@ -291,10 +291,11 @@ def select_audiolang(inFile, tsn):
             # now on
             elif len(langmatch_curr) > 1:
                 langmatch_prev = langmatch_curr[:]
+                langmatch_curr = []
         # if we drop out of the loop with more than 1 item default to
         # the first item
-        if len(langmatch_prev) > 1:
-            stream = langmatch_prev[0][0]
+        if len(langmatch_curr) > 1:
+            stream = langmatch_curr[0][0]
     # don't let FFmpeg auto select audio stream, pyTivo defaults to
     # first detected
     if stream:
