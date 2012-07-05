@@ -173,7 +173,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             elif (command == 'QueryFormats' and 'SourceFormat' in query and
                   query['SourceFormat'][0].startswith('video')):
-                if config.hasTStivo(tsn):
+                if config.is_ts_capable(tsn):
                     self.send_xml(VIDEO_FORMATS_TS)
                 else:
                     self.send_xml(VIDEO_FORMATS)

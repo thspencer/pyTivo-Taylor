@@ -482,7 +482,7 @@ class BaseVideo(Plugin):
                     video['valid'] = True
                     video.update(metadata.basic(f.name))
 
-                if config.hasTStivo(tsn):
+                if self.use_ts(tsn, f.name):
                     video['mime'] = 'video/x-tivo-mpeg-ts'
                 else:
                     video['mime'] = 'video/x-tivo-mpeg'
@@ -515,6 +515,20 @@ class BaseVideo(Plugin):
             handler.send_html(str(t))
         else:
             handler.send_xml(str(t))
+
+    def use_ts(self, tsn, file_path):
+        if config.is_ts_capable(tsn):
+            if file_path[-5:].lower() == '.tivo':
+                try:
+                    flag = file(file_path).read(8)
+                except:
+                    return False
+                if ord(flag[7]) & 0x20:
+                    return True
+            elif config.has_ts_flag():
+                return True
+
+        return False
 
     def get_details_xml(self, tsn, file_path):
         if (tsn, file_path) in self.tvbus_cache:
