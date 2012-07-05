@@ -392,44 +392,36 @@ def pad_TB(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
                       vInfo['vWidth']) * multiplier)
     if endHeight % 2:
         endHeight -= 1
-    if endHeight < TIVO_HEIGHT * 0.99:
-        topPadding = (TIVO_HEIGHT - endHeight) / 2
-        if topPadding % 2:
-            topPadding -= 1
-        newpad = pad_check()
-        if newpad:
-            return ['-s', '%sx%s' % (TIVO_WIDTH, endHeight), '-vf',
-                    'pad=%d:%d:0:%d' % (TIVO_WIDTH, TIVO_HEIGHT, topPadding)]
-        else:
-            bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
-            return ['-s', '%sx%s' % (TIVO_WIDTH, endHeight),
-                    '-padtop', str(topPadding),
-                    '-padbottom', str(bottomPadding)]
-    else: # if only very small amount of padding needed, then
-          # just stretch it
-        return ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+    topPadding = (TIVO_HEIGHT - endHeight) / 2
+    if topPadding % 2:
+        topPadding -= 1
+    newpad = pad_check()
+    if newpad:
+        return ['-vf', 'scale=%d:%d,pad=%d:%d:0:%d' % (TIVO_WIDTH,
+                endHeight, TIVO_WIDTH, TIVO_HEIGHT, topPadding)]
+    else:
+        bottomPadding = (TIVO_HEIGHT - endHeight) - topPadding
+        return ['-s', '%sx%s' % (TIVO_WIDTH, endHeight),
+                '-padtop', str(topPadding),
+                '-padbottom', str(bottomPadding)]
 
 def pad_LR(TIVO_WIDTH, TIVO_HEIGHT, multiplier, vInfo):
     endWidth = int((TIVO_HEIGHT * vInfo['vWidth']) /
                    (vInfo['vHeight'] * multiplier))
     if endWidth % 2:
         endWidth -= 1
-    if endWidth < TIVO_WIDTH * 0.99:
-        leftPadding = (TIVO_WIDTH - endWidth) / 2
-        if leftPadding % 2:
-            leftPadding -= 1
-        newpad = pad_check()
-        if newpad:
-            return ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT), '-vf',
-                    'pad=%d:%d:%d:0' % (TIVO_WIDTH, TIVO_HEIGHT, leftPadding)]
-        else:
-            rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
-            return ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT),
-                    '-padleft', str(leftPadding),
-                    '-padright', str(rightPadding)]
-    else: # if only very small amount of padding needed, then
-          # just stretch it
-        return ['-s', '%sx%s' % (TIVO_WIDTH, TIVO_HEIGHT)]
+    leftPadding = (TIVO_WIDTH - endWidth) / 2
+    if leftPadding % 2:
+        leftPadding -= 1
+    newpad = pad_check()
+    if newpad:
+        return ['-vf', 'scale=%d:%d,pad=%d:%d:%d:0' % (endWidth,
+                TIVO_HEIGHT, TIVO_WIDTH, TIVO_HEIGHT, leftPadding)]
+    else:
+        rightPadding = (TIVO_WIDTH - endWidth) - leftPadding
+        return ['-s', '%sx%s' % (endWidth, TIVO_HEIGHT),
+                '-padleft', str(leftPadding),
+                '-padright', str(rightPadding)]
 
 def select_aspect(inFile, tsn = ''):
     TIVO_WIDTH = config.getTivoWidth(tsn)
