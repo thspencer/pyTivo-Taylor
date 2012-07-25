@@ -1,27 +1,43 @@
+import config
 import os, sys
 import logging
 import tarfile
 import urllib2
 import subprocess
-from pygithub import github # obtained from https://github.com/dustin/py-github
-
-import config
 
 logger = logging.getLogger('pyTivo.update')
 
-# uses github api, customize for desired fork
+# uses GitHub API v3, customize for desired fork
 GIT_MEMBER  = 'thspencer'
 GIT_PROJECT = 'pyTivo-Taylor' 
 GIT_BRANCH  = 'master'
 PACKAGE_URL = ('https://github.com/%s/%s/tarball/%s/' %
                (GIT_MEMBER, GIT_PROJECT, GIT_BRANCH))
 
+# GitHub API v3
+class GitHub(object):
+    def _access_API(self, path, params=None):
+        # json requires Python 2.6 or higher
+        # can use simplejson if additional compatibility is required
+        import json
+
+        url = 'https://api.github.com/' + '/'.join(path)
+
+        if params and type(params) is dict:
+            url += '?' + '&'.join([str(x) + '=' + str(params[x]) for x in params.keys()])
+
+        return json.load(urllib2.urlopen(url))
+
+    def commits(self, member, project, branch='master'):
+        return self._access_API(['repos', member, project, 'commits'], {'sha': branch})
+
 # returns 'result'(bool, string) to video.settings.settings.py
 def update_request(forced):
 
     # tarfile.extractall() requires Python 2.5 or higher
-    if sys.version_info[0] != 2 or sys.version_info[1] < 5:
-        message = 'ERROR: pyTivo updater requires Python 2.5 or any higher 2.x version.'
+    # json requires Python 2.6 or higher
+    if sys.version_info[0] != 2 or sys.version_info[1] < 6:
+        message = 'ERROR: pyTivo updater requires Python 2.6 or any higher 2.x version.'
         logger.error(message)
         result = (False, '%s' % message)
         return result
@@ -171,26 +187,28 @@ def find_current_version(pyTivo_dir, version_file, type, forced):
 
     return cur_hash	
 
-# uses github api to find latest commit hash
+# uses GitHub API v3 to find latest commit hash
 def find_newest_commit(cur_hash):
     newest_commit = None
-    g = github.GitHub()
+    g = GitHub()
 
     try:
-        for ghCommit in g.commits.forBranch(GIT_MEMBER, GIT_PROJECT, GIT_BRANCH):
+        for ghCommit in g.commits(GIT_MEMBER, GIT_PROJECT, GIT_BRANCH):
             if not newest_commit:
-                newest_commit = ghCommit.id
+                newest_commit = ghCommit['sha']
                 if not cur_hash:
                     logger.debug('Current commit hash not found.')
                     break
-            if ghCommit.id == cur_hash:
+            if ghCommit['sha'] == cur_hash:
                 break
     except (urllib2.HTTPError, urllib2.URLError), e:
         logger.error('pyTivo repository not found. Network may be down.\n%s' % e)
         return False
 
-    logger.info('Latest commit found is: %s'
-                % newest_commit[:7])
+    if not newest_commit:
+        logger.error('Latest commit not found. Verify GitHub identity.')
+    else:
+    	logger.info('Latest commit found is: %s' % newest_commit[:7])
     return newest_commit
 
 # use system Git executable to pull latest pyTivo commit
