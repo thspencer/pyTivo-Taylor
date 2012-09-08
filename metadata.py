@@ -62,10 +62,14 @@ def get_stars(rating):
 
 def tag_data(element, tag):
     for name in tag.split('/'):
-        new_element = element.getElementsByTagName(name)
-        if not new_element:
+        found = False
+        for new_element in element.childNodes:
+            if new_element.nodeName == name:
+                found = True
+                element = new_element
+                break
+        if not found:
             return ''
-        element = new_element[0]
     if not element.firstChild:
         return ''
     return element.firstChild.data
