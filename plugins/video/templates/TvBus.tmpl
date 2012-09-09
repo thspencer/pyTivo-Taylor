@@ -98,6 +98,9 @@
             <element>$escape($element)</element>
             #end for
       </vWriter>
+      #if $video.programId
+      <uniqueId>$video.programId</uniqueId>
+      #end if
     </program>
     <channel>
       <displayMajorNumber>$video.displayMajorNumber</displayMajorNumber>

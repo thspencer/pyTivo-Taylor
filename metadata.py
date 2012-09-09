@@ -340,10 +340,11 @@ def from_container(xmldoc):
     metadata = {}
 
     keys = {'title': 'Title', 'episodeTitle': 'EpisodeTitle',
-            'description': 'Description', 'seriesId': 'SeriesId',
-            'episodeNumber': 'EpisodeNumber', 'tvRating': 'TvRating',
-            'displayMajorNumber': 'SourceChannel', 'callsign': 'SourceStation',
-            'showingBits': 'ShowingBits', 'mpaaRating': 'MpaaRating'}
+            'description': 'Description', 'programId': 'ProgramId',
+            'seriesId': 'SeriesId', 'episodeNumber': 'EpisodeNumber',
+            'tvRating': 'TvRating', 'displayMajorNumber': 'SourceChannel',
+            'callsign': 'SourceStation', 'showingBits': 'ShowingBits',
+            'mpaaRating': 'MpaaRating'}
 
     details = xmldoc.getElementsByTagName('Details')[0]
 
@@ -372,6 +373,7 @@ def from_details(xml):
              'title': 'program/title',
              'episodeTitle': 'program/episodeTitle',
              'episodeNumber': 'program/episodeNumber',
+             'programId': 'program/uniqueId',
              'seriesId': 'program/series/uniqueId',
              'seriesTitle': 'program/series/seriesTitle',
              'originalAirDate': 'program/originalAirDate',

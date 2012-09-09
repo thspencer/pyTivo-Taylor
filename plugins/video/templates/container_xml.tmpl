@@ -44,6 +44,9 @@
             <Description>$escape($video.description)</Description>
             <SourceChannel>$escape($video.displayMajorNumber)</SourceChannel>
             <SourceStation>$escape($video.callsign)</SourceStation>
+            #if $video.programId
+            <ProgramId>$video.programId</ProgramId>
+            #end if
             <SeriesId>$video.seriesId</SeriesId>
             #if $video.episodeNumber
             <EpisodeNumber>$video.episodeNumber</EpisodeNumber>
