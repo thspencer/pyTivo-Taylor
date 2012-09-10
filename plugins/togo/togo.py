@@ -117,25 +117,25 @@ class ToGo(Plugin):
 
             xmldoc = tivo_cache[theurl]['thepage']
             items = xmldoc.getElementsByTagName('Item')
-            TotalItems = tag_data(xmldoc, 'Details/TotalItems')
-            ItemStart = tag_data(xmldoc, 'ItemStart')
-            ItemCount = tag_data(xmldoc, 'ItemCount')
+            TotalItems = tag_data(xmldoc, 'TiVoContainer/Details/TotalItems')
+            ItemStart = tag_data(xmldoc, 'TiVoContainer/ItemStart')
+            ItemCount = tag_data(xmldoc, 'TiVoContainer/ItemCount')
             FirstAnchor = tag_data(items[0], 'Links/Content/Url')
 
             data = []
             for item in items:
                 entry = {}
-                entry['ContentType'] = tag_data(item, 'ContentType')
+                entry['ContentType'] = tag_data(item, 'Details/ContentType')
                 for tag in ('CopyProtected', 'UniqueId'):
-                    value = tag_data(item, tag)
+                    value = tag_data(item, 'Details/' + tag)
                     if value:
                         entry[tag] = value
                 if entry['ContentType'] == 'x-tivo-container/folder':
-                    entry['Title'] = tag_data(item, 'Title')
-                    entry['TotalItems'] = tag_data(item, 'TotalItems')
-                    lc = tag_data(item, 'LastCaptureDate')
+                    entry['Title'] = tag_data(item, 'Details/Title')
+                    entry['TotalItems'] = tag_data(item, 'Details/TotalItems')
+                    lc = tag_data(item, 'Details/LastCaptureDate')
                     if not lc:
-                        lc = tag_data(item, 'LastChangeDate')
+                        lc = tag_data(item, 'Details/LastChangeDate')
                     entry['LastChangeDate'] = time.strftime('%b %d, %Y',
                         time.localtime(int(lc, 16)))
                 else:
