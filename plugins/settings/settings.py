@@ -7,7 +7,6 @@ from Cheetah.Template import Template
 import buildhelp
 import config
 from plugin import EncodeUnicode, Plugin
-import update
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -151,6 +150,8 @@ class Settings(Plugin):
         handler.redir(SETTINGS_MSG, 5)
     
     def Update(self, handler, query):
+        import update
+
         try: # should always be a list: (BOOL, STRING)
             result = update.update_request(config.getForceUpdate())
         except: # catch-all for exceptions, prints last traceback
