@@ -88,6 +88,13 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         host, port = self.client_address[:2]
         return host
 
+    def version_string(self):
+        """ Override version_string() so it doesn't include the Python 
+            version.
+
+        """
+        return self.server_version
+
     def do_GET(self):
         tsn = self.headers.getheader('TiVo_TCD_ID',
                                      self.headers.getheader('tsn', ''))
