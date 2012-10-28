@@ -237,9 +237,7 @@ def getDebug():
     try:
         return config.getboolean('Server', 'debug')
     except NoOptionError, ValueError:
-        pass
-
-    return True
+        return False
 
 def getOptres(tsn=None):
     try:
