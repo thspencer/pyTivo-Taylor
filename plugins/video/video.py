@@ -493,13 +493,15 @@ class BaseVideo(Plugin):
             videos.append(video)
 
         logger.debug('mobileagent: %d useragent: %s' % (useragent.lower().find('mobile'), useragent.lower()))
-
-        if useragent.lower().find('mobile') > 0:
-            t = Template(HTML_CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
-        elif use_html:
-            t = Template(HTML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
+        use_mobile = useragent.lower().find('mobile') > 0
+        if use_html:
+            if use_mobile:
+                t = Template(HTML_CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
+            else:
+                t = Template(HTML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
         else:
             t = Template(XML_CONTAINER_TEMPLATE, filter=EncodeUnicode)
+
         t.container = handler.cname
         t.name = subcname
         t.total = total

@@ -10,24 +10,6 @@ import string
 import sys
 from ConfigParser import NoOptionError
 
-config_win_default = ''
-
-if sys.platform == "win32":
-    import _winreg
-
-    try:
-        explorerFolders = _winreg.OpenKey(
-        _winreg.HKEY_LOCAL_MACHINE,
-        'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-        )
-
-        winCommonAppDataVal, winCommonAppDataType = _winreg.QueryValueEx(explorerFolders, 'Common AppData')
-
-        config_win_default = os.path.join(winCommonAppDataVal, 'pyTivo', 'pyTivo.conf')
-
-    except WindowsError:
-        print "Can't access Windows Registry to find common Application Data path."
-
 def init(argv):
     global tivos
     global tivo_names
@@ -38,8 +20,19 @@ def init(argv):
     tivo_names = {}
     guid = ''.join([random.choice(string.ascii_letters) for i in range(10)])
 
+    config_win_default = ''
+    if sys.platform == "win32":
+        import _winreg
+        try:
+            explorerFolders = _winreg.OpenKey(
+            _winreg.HKEY_LOCAL_MACHINE, 'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders')
+            winCommonAppDataVal, winCommonAppDataType = _winreg.QueryValueEx(explorerFolders, 'Common AppData')
+            config_win_default = os.path.join(winCommonAppDataVal, 'pyTivo', 'pyTivo.conf')
+        except WindowsError:
+            print "Can't access Windows Registry to find common Application Data path."
+
     p = os.path.dirname(__file__)
-    config_files = ['/etc/pyTivo.conf', os.path.join(p, 'pyTivo.conf')]
+    config_files = ['/etc/pyTivo.conf', config_win_default, os.path.join(p, 'pyTivo.conf')]
 
     try:
         opts, _ = getopt.getopt(argv, 'c:e:', ['config=', 'extraconf='])

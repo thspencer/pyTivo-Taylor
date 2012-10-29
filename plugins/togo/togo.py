@@ -83,12 +83,14 @@ class ToGo(Plugin):
         shows_per_page = 50 # Change this to alter the number of shows returned
         folder = ''
         has_tivodecode = bool(config.get_bin('tivodecode'))
-        togo_mpegts = config.get_server('togo_mpegts', 'False').lower()
-        useragent = handler.headers.getheader('User-Agent', '')
 
         if 'TiVo' in query:
             tivoIP = query['TiVo'][0]
             tsn = config.tivos_by_ip(tivoIP)
+
+            togo_mpegts = config.is_ts_capable(tsn)
+            useragent = handler.headers.getheader('User-Agent', '')
+
             tivo_name = config.tivo_names[tsn]
             tivo_mak = config.get_tsn('tivo_mak', tsn)
             theurl = ('https://' + tivoIP +
