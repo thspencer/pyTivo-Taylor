@@ -13,7 +13,7 @@ from plugin import GetPlugin
 
 SHARE_TEMPLATE = '/TiVoConnect?Command=QueryContainer&Container=%s'
 PLATFORM_MAIN = 'pyTivo'
-PLATFORM_VIDEO = 'pc'    # For the nice icon
+PLATFORM_VIDEO = 'pc/pyTivo'    # For the nice icon
 
 class ZCListener:
     def __init__(self, names):
@@ -110,7 +110,6 @@ class Beacon:
 
     def format_beacon(self, conntype, services=True):
         beacon = ['tivoconnect=1',
-                  'swversion=1',
                   'method=%s' % conntype,
                   'identity=%s' % config.getGUID(),
                   'machine=%s' % gethostname(),
