@@ -584,6 +584,12 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
 
             break
 
+        if mime == 'video/x-tivo-mpeg-ts':
+            if codec not in ('h264', 'mpeg2video'):
+                message = (False, 'vCodec %s not compatible' % codec)
+
+            break
+
         if codec not in ('mpeg2video', 'mpeg1video'):
             message = (False, 'vCodec %s not compatible' % codec)
             break
