@@ -53,7 +53,7 @@ def debug(msg):
     logger.debug(msg)
 
 def transcode(isQuery, inFile, outFile, tsn='', mime='', thead=''):
-    settings = {'video_codec': select_videocodec(inFile, tsn),
+    settings = {'video_codec': select_videocodec(inFile, tsn, mime),
                 'video_br': select_videobr(inFile, tsn),
                 'video_fps': select_videofps(inFile, tsn),
                 'max_video_br': select_maxvideobr(tsn),
@@ -315,20 +315,23 @@ def select_videofps(inFile, tsn):
         fps = '-r ' + video_fps
     return fps
 
-def select_videocodec(inFile, tsn):
+def select_videocodec(inFile, tsn, mime=''):
     vInfo = video_info(inFile)
-    if tivo_compatible_video(vInfo, tsn)[0]:
+    if tivo_compatible_video(vInfo, tsn, mime)[0]:
         codec = 'copy'
+        if (mime == 'video/x-tivo-mpeg-ts' and
+            vInfo.get('vCodec', '') == 'h264'):
+            codec += ' -bsf h264_mp4toannexb'
     else:
         codec = 'mpeg2video'  # default
     return '-vcodec ' + codec
 
-def select_videobr(inFile, tsn):
-    return '-b ' + str(select_videostr(inFile, tsn) / 1000) + 'k'
+def select_videobr(inFile, tsn, mime=''):
+    return '-b ' + str(select_videostr(inFile, tsn, mime) / 1000) + 'k'
 
-def select_videostr(inFile, tsn):
+def select_videostr(inFile, tsn, mime=''):
     vInfo = video_info(inFile)
-    if tivo_compatible_video(vInfo, tsn)[0]:
+    if tivo_compatible_video(vInfo, tsn, mime)[0]:
         video_str = int(vInfo['kbps'])
         if vInfo['aKbps']:
             video_str -= int(vInfo['aKbps'])
