@@ -670,8 +670,10 @@ def tivo_compatible_audio(vInfo, inFile, tsn, mime=''):
         if inFile[-5:].lower() == '.tivo':
             break
 
-        if mime == 'video/x-tivo-mpeg-ts' and codec not in ('ac3', 'liba52'):
-            message = (False, 'aCodec %s not compatible' % codec)
+        if mime == 'video/x-tivo-mpeg-ts':
+            if codec not in ('ac3', 'liba52', 'mp2', 'aac_latm'):
+                message = (False, 'aCodec %s not compatible' % codec)
+
             break
 
         if codec not in ('ac3', 'liba52', 'mp2'):
