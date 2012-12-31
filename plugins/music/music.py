@@ -112,7 +112,7 @@ class Music(Plugin):
             if mswindows:
                 fname = fname.encode('iso8859-1')
 
-            cmd = [config.get_bin('ffmpeg'), '-i', fname]
+            cmd = [config.get_bin('ffmpeg'), '-i', fname, '-vn']
             if ext in ['.mp3', '.mp2']:
                 cmd += ['-acodec', 'copy']
             else:
