@@ -662,10 +662,10 @@ def dump(output, metadata):
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         metadata = {}
+        config.init([])
         fname = force_utf8(sys.argv[1])
         ext = os.path.splitext(fname)[1].lower()
         if ext == '.tivo':
-            config.init([])
             metadata.update(from_tivo(fname))
         elif ext in ['.mp4', '.m4v', '.mov']:
             metadata.update(from_moov(fname))
