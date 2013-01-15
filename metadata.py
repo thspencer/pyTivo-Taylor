@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import logging
 import os
 import subprocess
 import sys
@@ -663,6 +664,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         metadata = {}
         config.init([])
+        logging.basicConfig()
         fname = force_utf8(sys.argv[1])
         ext = os.path.splitext(fname)[1].lower()
         if ext == '.tivo':
