@@ -440,7 +440,6 @@ class BaseVideo(Plugin):
             return
 
         container = handler.container
-        precache = container.get('precache', 'False').lower() == 'true'
         force_alpha = container.get('force_alpha', 'False').lower() == 'true'
         use_html = query.get('Format', [''])[0].lower() == 'text/html'
 
@@ -472,7 +471,7 @@ class BaseVideo(Plugin):
                 video['small_path'] = subcname + '/' + video['name']
                 video['total_items'] = self.__total_items(f.name)
             else:
-                if precache or len(files) == 1 or f.name in transcode.info_cache:
+                if len(files) == 1 or f.name in transcode.info_cache:
                     video['valid'] = transcode.supported_format(f.name)
                     if video['valid']:
                         video.update(self.metadata_full(f.name, tsn))

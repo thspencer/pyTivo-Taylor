@@ -177,43 +177,6 @@ alpha-sorted, you need this option.
 Example Settings: True/False
 Available In: Shares
 
-precache
-
-Default Setting: False
-Valid Entries: True/False
-Required: No
-Skill: Moderate
-Description: In order to verify that the video files present on your
-computer were compatible with ffmpeg in older versions pyTivo would
-query ffmpeg for each file. While this information was cached it still
-caused a delay in the initial loading of a list of files. This precache
-setting forced pyTivo to inspect each video prior to starting the pyTivo
-server. However, this had two drawbacks. 1. It took time as much as two
-minutes before pyTivo was ready to accept requests. 2. It did not update
-the cache if new files were added while the pyTivo server was
-running.<br><br>
-In the more recent releases, anything after Feb 16, 2008, pyTivo no
-longer needs to query ffmpeg when creating a file list. Instead pyTivo
-has a list of accepted video format extensions. If the file extension
-falls within this list it is displayed on the TiVo. This achieves the
-same speed increase as the precache method without the delay in loading
-the pyTivo server.<br><br>
-There are still two drawbacks to this method. 1. The video file must
-have an extension that is in the list. There is a possibility that a new
-video file extension could come out before pyTivo is updated. 2.
-Incomplete or video files with errors will still appear in the TiVo
-listing if they have the correct extension, even though they are not
-valid files. Both of these concerns are minimal. 1. Very few new formats
-of video files come out very often. And all extensions are stored in the
-video.ext file which is easily edited. 2. When viewing the file details
-before transferring the pyTivo server queries ffmpeg to make sure it is
-valid. If the file is not valid it will show up as a copyrighted file
-and transferring it will be prevented by TiVo.<br><br>
-It is recommended that you leave precaching turned off as it is no
-longer needed.
-Example Settings: True/False
-Available In: Shares
-
 optres
 
 Default Setting: False
