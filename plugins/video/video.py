@@ -345,10 +345,8 @@ class BaseVideo(Plugin):
             return int(os.stat(unicode(full_path, 'utf-8')).st_size)
         else:
             # Must be re-encoded
-            if config.get_tsn('audio_codec', tsn) == None:
-                audioBPS = config.getMaxAudioBR(tsn) * 1000
-            else:
-                audioBPS = config.strtod(config.getAudioBR(tsn))
+            audioBPS = config.getMaxAudioBR(tsn) * 1000
+            #audioBPS = config.strtod(config.getAudioBR(tsn))
             videoBPS = transcode.select_videostr(full_path, tsn)
             bitrate =  audioBPS + videoBPS
             return int((self.__duration(full_path) / 1000) *

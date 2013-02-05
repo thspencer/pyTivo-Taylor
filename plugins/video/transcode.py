@@ -206,40 +206,38 @@ def select_audiocodec(isQuery, inFile, tsn='', mime=''):
         return '-acodec copy'
     vInfo = video_info(inFile)
     codectype = vInfo['vCodec']
-    codec = config.get_tsn('audio_codec', tsn)
-    if not codec:
-        # Default, compatible with all TiVo's
-        codec = 'ac3'
-        if mime == 'video/mp4':
-            compatiblecodecs = ('mpeg4aac', 'libfaad', 'mp4a', 'aac',
-                                'ac3', 'liba52')
-        else:
-            compatiblecodecs = ('ac3', 'liba52', 'mp2')
+    # Default, compatible with all TiVo's
+    codec = 'ac3'
+    if mime == 'video/mp4':
+        compatiblecodecs = ('mpeg4aac', 'libfaad', 'mp4a', 'aac',
+                            'ac3', 'liba52')
+    else:
+        compatiblecodecs = ('ac3', 'liba52', 'mp2')
 
-        if vInfo['aCodec'] in compatiblecodecs:
-            aKbps = vInfo['aKbps']
-            aCh = vInfo['aCh']
-            if aKbps == None:
-                if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac'):
-                    # along with the channel check below this should
-                    # pass any AAC audio that has undefined 'aKbps' and
-                    # is <= 2 channels.  Should be TiVo compatible.
-                    codec = 'copy'
-                elif not isQuery:
-                    vInfoQuery = audio_check(inFile, tsn)
-                    if vInfoQuery == None:
-                        aKbps = None
-                        aCh = None
-                    else:
-                        aKbps = vInfoQuery['aKbps']
-                        aCh = vInfoQuery['aCh']
-                else:
-                    codec = 'TBA'
-            if aKbps and int(aKbps) <= config.getMaxAudioBR(tsn):
-                # compatible codec and bitrate, do not reencode audio
+    if vInfo['aCodec'] in compatiblecodecs:
+        aKbps = vInfo['aKbps']
+        aCh = vInfo['aCh']
+        if aKbps == None:
+            if vInfo['aCodec'] in ('mpeg4aac', 'libfaad', 'mp4a', 'aac'):
+                # along with the channel check below this should
+                # pass any AAC audio that has undefined 'aKbps' and
+                # is <= 2 channels.  Should be TiVo compatible.
                 codec = 'copy'
-            if vInfo['aCodec'] != 'ac3' and (aCh == None or aCh > 2):
-                codec = 'ac3'
+            elif not isQuery:
+                vInfoQuery = audio_check(inFile, tsn)
+                if vInfoQuery == None:
+                    aKbps = None
+                    aCh = None
+                else:
+                    aKbps = vInfoQuery['aKbps']
+                    aCh = vInfoQuery['aCh']
+            else:
+                codec = 'TBA'
+        if aKbps and int(aKbps) <= config.getMaxAudioBR(tsn):
+            # compatible codec and bitrate, do not reencode audio
+            codec = 'copy'
+        if vInfo['aCodec'] != 'ac3' and (aCh == None or aCh > 2):
+            codec = 'ac3'
     copy_flag = config.get_tsn('copy_ts', tsn)
     copyts = ' -copyts'
     if ((codec == 'copy' and codectype == 'mpeg2video' and not copy_flag) or
