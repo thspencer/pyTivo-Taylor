@@ -233,31 +233,6 @@ resolution to an "S2 compatible" resolution.
 Example Settings: True/False
 Available In: Tivos, HD_tivos, SD_tivos
 
-par
-
-Default Setting: 1.0
-Valid Entries: any valid par
-Required: No
-Skill: Very Advanced
-Description: Set pixel aspect ratio. Applies to S3 Tivos only. OPTRES
-must be false to use PAR. For some videofiles (e.g., AVC files), ffmpeg
->cannot determine the pixel aspect ratio correctly and assumes 1:1 which
-leads to a distorted image on anamorphically encoded video files. This
-setting allows you to override this default. If you do not understand
-this setting, and you observe no distortions, you can ignore it. Set
-par=1.0 to tell pyTivo to automatically adjust the pixel aspect ratio
-whenever possible.<br><br>
->par=1.18518519 (32:27, usually the correct setting for wide-screen
-anamorphically encoded DVD content)<br><br>
->par=0.88888889 (8:9, usually the correct setting for anamorphically
-encoded DVDs from TV shows)
-Example Settings: 1.0, 1.18518519, 0.88888889
-Alternative option: Specify par in metadata txt files by adding
->"Override_par : x.xxxx" to a metadata file associated with the video
-file.  If all files in the folder have the same par, add the option to a
-file called default.txt instead of creating individual metadata files.
-Available In: Server
-
 video_fps
 
 Default Setting: 29.97 for S2 Tivo, same as source for S3/HD TiVo

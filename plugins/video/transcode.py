@@ -456,14 +456,8 @@ def select_aspect(inFile, tsn = ''):
           vInfo['millisecs'], TIVO_HEIGHT, TIVO_WIDTH))
 
     if config.isHDtivo(tsn) and not optres:
-        if config.getPixelAR(0) or vInfo['par']:
-            if vInfo['par2'] == None:
-                if vInfo['par']:
-                    npar = par2
-                else:
-                    npar = config.getPixelAR(1)
-            else:
-                npar = par2
+        if vInfo['par']:
+            npar = par2
 
             # adjust for pixel aspect ratio, if set
 
@@ -606,11 +600,6 @@ def tivo_compatible_video(vInfo, tsn, mime=''):
             break
 
         if config.isHDtivo(tsn):
-            if vInfo['par2'] != 1.0:
-                if config.getPixelAR(0):
-                    if vInfo['par2'] != None or config.getPixelAR(1) != 1.0:
-                        message = (False, '%s not correct PAR' % vInfo['par2'])
-                        break
             # HD Tivo detected, skipping remaining tests.
             break
 

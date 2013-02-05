@@ -244,14 +244,6 @@ def getOptres(tsn=None):
             except:
                 return False
 
-def getPixelAR(ref):
-    if config.has_option('Server', 'par'):
-        try:
-            return (True, config.getfloat('Server', 'par'))[ref]
-        except NoOptionError, ValueError:
-            pass
-    return (False, 1.0)[ref]
-
 def get_bin(fname):
     global bin_paths
 
