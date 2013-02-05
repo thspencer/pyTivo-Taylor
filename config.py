@@ -396,12 +396,6 @@ def getMaxVideoBR(tsn=None):
         return _k(rate)
     return '30000k'
 
-def getVideoPCT(tsn=None):
-    pct = get_tsn('video_pct', tsn)
-    if pct:
-        return float(pct)
-    return 85
-
 def getBuffSize(tsn=None):
     size = get_tsn('bufsize', tsn)
     if size:

@@ -338,11 +338,8 @@ def select_videostr(inFile, tsn, mime=''):
         video_str *= 1000
     else:
         video_str = config.strtod(config.getVideoBR(tsn))
-        if config.isHDtivo(tsn):
-            if vInfo['kbps'] != None and config.getVideoPCT(tsn) > 0:
-                video_percent = (int(vInfo['kbps']) * 10 *
-                                 config.getVideoPCT(tsn))
-                video_str = max(video_str, video_percent)
+        if config.isHDtivo(tsn) and vInfo['kbps']:
+            video_str = max(video_str, int(vInfo['kbps']) * 1000)
         video_str = int(min(config.strtod(config.getMaxVideoBR(tsn)) * 0.95,
                             video_str))
     return video_str
