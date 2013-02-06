@@ -24,7 +24,6 @@
 # Version 0.2,  Dec. 8  -- thumbnail caching, faster thumbnails
 # Version 0.1,  Dec. 7, 2007
 
-import cgi
 import os
 import re
 import random
