@@ -246,7 +246,7 @@ class Photo(Plugin):
         # Re-encode
         try:
             out = StringIO()
-            pic.save(out, 'JPEG')
+            pic.save(out, 'JPEG', quality=85)
             encoded = out.getvalue()
             out.close()
         except Exception, msg:
