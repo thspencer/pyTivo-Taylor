@@ -474,7 +474,7 @@ Description: Your username (email address) at tivo.com. This is required
 for the "Push" feature. If you don't plan to use Push, you don't need to 
 set this.
 Example Settings: user@example.com
-Available In: Server, Tivos, HD_tivos, SD_tivos
+Available In: Server, Tivos
 
 tivo_password
 
@@ -485,7 +485,7 @@ Skill: Basic
 Description: Your password at tivo.com. This is required for the "Push" 
 feature. If you don't plan to use Push, you don't need to set this.
 Example Settings: password
-Available In: Server, Tivos, HD_tivos, SD_tivos
+Available In: Server, Tivos
 
 tivo_mind
 
@@ -513,7 +513,7 @@ tivodecode (pushing .TiVo files, transcoding HD .TiVo files to SD
 TiVos). If you don't plan to use these features, you don't need to set 
 this.
 Example Settings: 012345678
-Available In: Server, Tivos, HD_tivos, SD_tivos
+Available In: Server, Tivos
 
 togo_path
 
