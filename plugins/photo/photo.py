@@ -207,8 +207,8 @@ class Photo(Plugin):
 
         # De-palletize
         try:
-            if pic.mode == 'P':
-                pic = pic.convert()
+            if pic.mode not in ('RGB', 'L'):
+                pic = pic.convert('RGB')
         except Exception, msg:
             handler.server.logger.error('Palette conversion failed ' +
                                         'on %s -- %s' % (path, msg))
