@@ -27,7 +27,9 @@
 import os
 import re
 import random
+import subprocess
 import sys
+import tempfile
 import threading
 import time
 import unicodedata
@@ -35,17 +37,21 @@ import urllib
 from cStringIO import StringIO
 from xml.sax.saxutils import escape
 
+use_pil = True
 try:
     from PIL import Image
 except ImportError:
     try:
         import Image
     except ImportError:
-        print 'Photo Plugin Error: The Python Imaging Library is not installed'
+        use_pil = False
+        print 'Python Imaging Library not found; using FFmpeg'
 
+import config
 from Cheetah.Template import Template
 from lrucache import LRUCache
 from plugin import EncodeUnicode, Plugin, quote, unquote
+from plugins.video.transcode import kill
 
 SCRIPTDIR = os.path.dirname(__file__)
 
@@ -59,6 +65,9 @@ exif_orient_i = \
     re.compile('\x12\x01\x03\x00\x01\x00\x00\x00(.)\x00\x00\x00').search
 exif_orient_m = \
     re.compile('\x01\x12\x00\x03\x00\x00\x00\x01\x00(.)\x00\x00').search
+
+# Find size in FFmpeg output
+ffmpeg_size = re.compile(r'.*Video: .+, (\d+)x(\d+)[, ].*')
 
 # Preload the template
 tname = os.path.join(SCRIPTDIR, 'templates', 'container.tmpl')
@@ -101,7 +110,7 @@ class Photo(Plugin):
     recurse_cache = LockedLRUCache(5)       # recursive directory lists
     dir_cache = LockedLRUCache(10)          # non-recursive lists
 
-    def get_image(self, path, width, height, pixw, pixh, rot, attrs):
+    def get_image_pil(self, path, width, height, pixw, pixh, rot, attrs):
         # Load
         try:
             pic = Image.open(unicode(path, 'utf-8'))
@@ -201,6 +210,106 @@ class Photo(Plugin):
 
         return True, encoded
 
+    def get_size_ffmpeg(self, ffmpeg_path, fname):
+        cmd = [ffmpeg_path, '-i', fname]
+        # Windows and other OS buffer 4096 and ffmpeg can output more
+        # than that.
+        err_tmp = tempfile.TemporaryFile()
+        ffmpeg = subprocess.Popen(cmd, stderr=err_tmp,
+                                  stdout=subprocess.PIPE,
+                                  stdin=subprocess.PIPE)
+
+        # wait configured # of seconds: if ffmpeg is not back give up
+        wait = config.getFFmpegWait()
+        for i in xrange(wait * 20):
+            time.sleep(.05)
+            if not ffmpeg.poll() == None:
+                break
+
+        if ffmpeg.poll() == None:
+            kill(ffmpeg)
+            return False, 'FFmpeg timed out'
+
+        err_tmp.seek(0)
+        output = err_tmp.read()
+        err_tmp.close()
+
+        x = ffmpeg_size.search(output)
+        if x:
+            width = int(x.group(1))
+            height = int(x.group(2))
+        else:
+            return False, "Couldn't parse size"
+
+        return True, (width, height)
+
+    def get_image_ffmpeg(self, path, width, height, pixw, pixh, rot):
+        ffmpeg_path = config.get_bin('ffmpeg')
+        if not ffmpeg_path:
+            return False, 'FFmpeg not found'
+
+        fname = unicode(path, 'utf-8')
+        if sys.platform == 'win32':
+            fname = fname.encode('iso8859-1')
+
+        status, result = self.get_size_ffmpeg(ffmpeg_path, fname)
+        if not status:
+            return False, result
+
+        if rot in (90, 270):
+            oldh, oldw = result
+        else:
+            oldw, oldh = result
+
+        if not width: width = oldw
+        if not height: height = oldh
+
+        # Correct aspect ratio
+        oldw *= pixh
+        oldh *= pixw
+
+        # New size
+        ratio = float(oldw) / oldh
+
+        if float(width) / height < ratio:
+            height = int(width / ratio)
+        else:
+            width = int(height * ratio)
+
+        if rot:
+            if rot == 270:
+                filters = 'transpose=1,'
+            elif rot == 180:
+                filters = 'hflip,vflip,'
+            else:
+                filters = 'transpose=2,'
+        else:
+            filters = ''
+
+        filters += 'format=yuv420p,scale=%d:%d' % (width, height)
+
+        cmd = [ffmpeg_path, '-i', fname, '-vf', filters, '-f', 'mjpeg', '-']
+        jpeg_tmp = tempfile.TemporaryFile()
+        ffmpeg = subprocess.Popen(cmd, stdout=jpeg_tmp,
+                                  stdin=subprocess.PIPE)
+
+        # wait configured # of seconds: if ffmpeg is not back give up
+        wait = config.getFFmpegWait()
+        for i in xrange(wait * 20):
+            time.sleep(.05)
+            if not ffmpeg.poll() == None:
+                break
+
+        if ffmpeg.poll() == None:
+            kill(ffmpeg)
+            return False, 'FFmpeg timed out'
+
+        jpeg_tmp.seek(0)
+        output = jpeg_tmp.read()
+        jpeg_tmp.close()
+
+        return True, output
+
     def send_file(self, handler, path, query):
 
         def send_jpeg(data):
@@ -242,8 +351,12 @@ class Photo(Plugin):
                       query.get('PixelShape', ['1:1'])[0].split(':')]
 
         # Build a new image
-        status, result = self.get_image(path, width, height, pixw, pixh,
-                                        rot, attrs)
+        if use_pil:
+            status, result = self.get_image_pil(path, width, height, 
+                                                pixw, pixh, rot, attrs)
+        else:
+            status, result = self.get_image_ffmpeg(path, width, height, 
+                                                   pixw, pixh, rot)
 
         if status:
             # Save thumbnails
