@@ -251,7 +251,7 @@ class Photo(Plugin):
 
         return True, (width, height)
 
-    def get_image_ffmpeg(self, path, width, height, pshape, rot):
+    def get_image_ffmpeg(self, path, width, height, pshape, rot, attrs):
         ffmpeg_path = config.get_bin('ffmpeg')
         if not ffmpeg_path:
             return False, 'FFmpeg not found'
@@ -260,9 +260,14 @@ class Photo(Plugin):
         if sys.platform == 'win32':
             fname = fname.encode('iso8859-1')
 
-        status, result = self.get_size_ffmpeg(ffmpeg_path, fname)
-        if not status:
-            return False, result
+        if attrs and 'size' in attrs:
+            result = attrs['size']
+        else:
+            status, result = self.get_size_ffmpeg(ffmpeg_path, fname)
+            if not status:
+                return False, result
+            if attrs:
+                attrs['size'] = result
 
         if rot in (90, 270):
             oldh, oldw = result
@@ -281,7 +286,7 @@ class Photo(Plugin):
         else:
             filters = ''
 
-        filters += 'format=yuv420p,scale=%d:%d' % (width, height)
+        filters += 'format=yuvj420p,scale=%d:%d' % (width, height)
 
         cmd = [ffmpeg_path, '-i', fname, '-vf', filters, '-f', 'mjpeg', '-']
         jpeg_tmp = tempfile.TemporaryFile()
@@ -350,7 +355,7 @@ class Photo(Plugin):
                                                 pshape, rot, attrs)
         else:
             status, result = self.get_image_ffmpeg(path, width, height, 
-                                                   pshape, rot)
+                                                   pshape, rot, attrs)
 
         if status:
             # Save thumbnails
