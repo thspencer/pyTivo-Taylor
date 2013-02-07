@@ -128,6 +128,44 @@ class Photo(Plugin):
 
         return width, height
 
+    def parse_exif(self, exif, rot, attrs):
+        # Capture date
+        if attrs and not 'odate' in attrs:
+            date = exif_date(exif)
+            if date:
+                year, month, day, hour, minute, second = (int(x)
+                    for x in date.groups())
+                if year:
+                    odate = time.mktime((year, month, day, hour,
+                                         minute, second, -1, -1, -1))
+                    attrs['odate'] = '%#x' % int(odate)
+
+        # Orientation
+        if attrs and 'exifrot' in attrs:
+            rot = (rot + attrs['exifrot']) % 360
+        else:
+            if exif[6] == 'I':
+                orient = exif_orient_i(exif)
+            else:
+                orient = exif_orient_m(exif)
+
+            if orient:
+                exifrot = {
+                    1:   0, 
+                    2:   0,
+                    3: 180,
+                    4: 180,
+                    5:  90,
+                    6: -90,
+                    7: -90,
+                    8:  90}.get(ord(orient.group(1)), 0)
+
+                rot = (rot + exifrot) % 360
+                if attrs:
+                    attrs['exifrot'] = exifrot
+
+        return rot
+
     def get_image_pil(self, path, width, height, pshape, rot, attrs):
         # Load
         try:
@@ -143,42 +181,7 @@ class Photo(Plugin):
 
         # Read Exif data if possible
         if 'exif' in pic.info:
-            exif = pic.info['exif']
-
-            # Capture date
-            if attrs and not 'odate' in attrs:
-                date = exif_date(exif)
-                if date:
-                    year, month, day, hour, minute, second = (int(x)
-                        for x in date.groups())
-                    if year:
-                        odate = time.mktime((year, month, day, hour,
-                                             minute, second, -1, -1, -1))
-                        attrs['odate'] = '%#x' % int(odate)
-
-            # Orientation
-            if attrs and 'exifrot' in attrs:
-                rot = (rot + attrs['exifrot']) % 360
-            else:
-                if exif[6] == 'I':
-                    orient = exif_orient_i(exif)
-                else:
-                    orient = exif_orient_m(exif)
-
-                if orient:
-                    exifrot = {
-                        1:   0, 
-                        2:   0,
-                        3: 180,
-                        4: 180,
-                        5:  90,
-                        6: -90,
-                        7: -90,
-                        8:  90}.get(ord(orient.group(1)), 0)
-
-                    rot = (rot + exifrot) % 360
-                    if attrs:
-                        attrs['exifrot'] = exifrot
+            rot = self.parse_exif(pic.info['exif'], rot, attrs)
 
         # Rotate
         try:
