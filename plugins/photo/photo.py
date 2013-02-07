@@ -101,59 +101,18 @@ class Photo(Plugin):
     recurse_cache = LockedLRUCache(5)       # recursive directory lists
     dir_cache = LockedLRUCache(10)          # non-recursive lists
 
-    def send_file(self, handler, path, query):
-
-        def send_jpeg(data):
-            handler.send_fixed(data, 'image/jpeg')
-
-        if 'Format' in query and query['Format'][0] != 'image/jpeg':
-            handler.send_error(415)
-            return
-
-        try:
-            attrs = self.media_data_cache[path]
-        except:
-            attrs = None
-
-        # Set rotation
-        if attrs:
-            rot = attrs['rotation']
-        else:
-            rot = 0
-
-        if 'Rotation' in query:
-            rot = (rot - int(query['Rotation'][0])) % 360
-            if attrs:
-                attrs['rotation'] = rot
-                if 'thumb' in attrs:
-                    del attrs['thumb']
-
-        # Requested size
-        width = int(query.get('Width', ['0'])[0])
-        height = int(query.get('Height', ['0'])[0])
-
-        # Return saved thumbnail?
-        if attrs and 'thumb' in attrs and 0 < width < 100 and 0 < height < 100:
-            send_jpeg(attrs['thumb'])
-            return
-
+    def get_image(self, path, width, height, pixw, pixh, rot, attrs):
         # Load
         try:
             pic = Image.open(unicode(path, 'utf-8'))
         except Exception, msg:
-            handler.server.logger.error('Could not open %s -- %s' %
-                                        (path, msg))
-            handler.send_error(404)
-            return
+            return False, 'Could not open %s -- %s' % (path, msg)
 
         # Set draft mode
         try:
             pic.draft('RGB', (width, height))
         except Exception, msg:
-            handler.server.logger.error('Failed to set draft mode ' +
-                                        'for %s -- %s' % (path, msg))
-            handler.send_error(404)
-            return
+            return False, 'Failed to set draft mode for %s -- %s' % (path, msg)
 
         # Read Exif data if possible
         if 'exif' in pic.info:
@@ -199,20 +158,14 @@ class Photo(Plugin):
             if rot:
                 pic = pic.rotate(rot)
         except Exception, msg:
-            handler.server.logger.error('Rotate failed on %s -- %s' %
-                                        (path, msg))
-            handler.send_error(404)
-            return
+            return False, 'Rotate failed on %s -- %s' % (path, msg)
 
         # De-palletize
         try:
             if pic.mode not in ('RGB', 'L'):
                 pic = pic.convert('RGB')
         except Exception, msg:
-            handler.server.logger.error('Palette conversion failed ' +
-                                        'on %s -- %s' % (path, msg))
-            handler.send_error(404)
-            return
+            return False, 'Palette conversion failed on %s -- %s' % (path, msg)
 
         # Old size
         oldw, oldh = pic.size
@@ -221,10 +174,8 @@ class Photo(Plugin):
         if not height: height = oldh
 
         # Correct aspect ratio
-        if 'PixelShape' in query:
-            pixw, pixh = query['PixelShape'][0].split(':')
-            oldw *= int(pixh)
-            oldh *= int(pixw)
+        oldw *= pixh
+        oldh *= pixw
 
         # Resize
         ratio = float(oldw) / oldh
@@ -237,10 +188,7 @@ class Photo(Plugin):
         try:
             pic = pic.resize((width, height), Image.ANTIALIAS)
         except Exception, msg:
-            handler.server.logger.error('Resize failed on %s -- %s' %
-                                        (path, msg))
-            handler.send_error(404)
-            return
+            return False, 'Resize failed on %s -- %s' % (path, msg)
 
         # Re-encode
         try:
@@ -249,18 +197,65 @@ class Photo(Plugin):
             encoded = out.getvalue()
             out.close()
         except Exception, msg:
-            handler.server.logger.error('Encode failed on %s -- %s' %
-                                        (path, msg))
-            handler.send_error(404)
+            return False, 'Encode failed on %s -- %s' % (path, msg)
+
+        return True, encoded
+
+    def send_file(self, handler, path, query):
+
+        def send_jpeg(data):
+            handler.send_fixed(data, 'image/jpeg')
+
+        if 'Format' in query and query['Format'][0] != 'image/jpeg':
+            handler.send_error(415)
             return
 
-        # Save thumbnails
-        if attrs and width < 100 and height < 100:
-            attrs['thumb'] = encoded
+        try:
+            attrs = self.media_data_cache[path]
+        except:
+            attrs = None
 
-        # Send it
-        send_jpeg(encoded)
-        
+        # Set rotation
+        if attrs:
+            rot = attrs['rotation']
+        else:
+            rot = 0
+
+        if 'Rotation' in query:
+            rot = (rot - int(query['Rotation'][0])) % 360
+            if attrs:
+                attrs['rotation'] = rot
+                if 'thumb' in attrs:
+                    del attrs['thumb']
+
+        # Requested size
+        width = int(query.get('Width', ['0'])[0])
+        height = int(query.get('Height', ['0'])[0])
+
+        # Return saved thumbnail?
+        if attrs and 'thumb' in attrs and 0 < width < 100 and 0 < height < 100:
+            send_jpeg(attrs['thumb'])
+            return
+
+        # Requested aspect ratio
+        pixw, pixh = [int(x) for x in
+                      query.get('PixelShape', ['1:1'])[0].split(':')]
+
+        # Build a new image
+        status, result = self.get_image(path, width, height, pixw, pixh,
+                                        rot, attrs)
+
+        if status:
+            # Save thumbnails
+            if attrs and width < 100 and height < 100:
+                attrs['thumb'] = result
+
+            # Send it
+            send_jpeg(result)
+        else:
+            handler.server.logger.error(result)
+            handler.send_error(404)
+
     def QueryContainer(self, handler, query):
 
         # Reject a malformed request -- these attributes should only
