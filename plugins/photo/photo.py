@@ -110,7 +110,25 @@ class Photo(Plugin):
     recurse_cache = LockedLRUCache(5)       # recursive directory lists
     dir_cache = LockedLRUCache(10)          # non-recursive lists
 
-    def get_image_pil(self, path, width, height, pixw, pixh, rot, attrs):
+    def new_size(self, oldw, oldh, width, height, pshape):
+        pixw, pixh = [int(x) for x in pshape.split(':')]
+
+        if not width: width = oldw
+        if not height: height = oldh
+
+        oldw *= pixh
+        oldh *= pixw
+
+        ratio = float(oldw) / oldh
+
+        if float(width) / height < ratio:
+            height = int(width / ratio)
+        else:
+            width = int(height * ratio)
+
+        return width, height
+
+    def get_image_pil(self, path, width, height, pshape, rot, attrs):
         # Load
         try:
             pic = Image.open(unicode(path, 'utf-8'))
@@ -179,20 +197,7 @@ class Photo(Plugin):
         # Old size
         oldw, oldh = pic.size
 
-        if not width: width = oldw
-        if not height: height = oldh
-
-        # Correct aspect ratio
-        oldw *= pixh
-        oldh *= pixw
-
-        # Resize
-        ratio = float(oldw) / oldh
-
-        if float(width) / height < ratio:
-            height = int(width / ratio)
-        else:
-            width = int(height * ratio)
+        width, height = self.new_size(oldw, oldh, width, height, pshape)
 
         try:
             pic = pic.resize((width, height), Image.ANTIALIAS)
@@ -243,7 +248,7 @@ class Photo(Plugin):
 
         return True, (width, height)
 
-    def get_image_ffmpeg(self, path, width, height, pixw, pixh, rot):
+    def get_image_ffmpeg(self, path, width, height, pshape, rot):
         ffmpeg_path = config.get_bin('ffmpeg')
         if not ffmpeg_path:
             return False, 'FFmpeg not found'
@@ -261,20 +266,7 @@ class Photo(Plugin):
         else:
             oldw, oldh = result
 
-        if not width: width = oldw
-        if not height: height = oldh
-
-        # Correct aspect ratio
-        oldw *= pixh
-        oldh *= pixw
-
-        # New size
-        ratio = float(oldw) / oldh
-
-        if float(width) / height < ratio:
-            height = int(width / ratio)
-        else:
-            width = int(height * ratio)
+        width, height = self.new_size(oldw, oldh, width, height, pshape)
 
         if rot:
             if rot == 270:
@@ -346,17 +338,16 @@ class Photo(Plugin):
             send_jpeg(attrs['thumb'])
             return
 
-        # Requested aspect ratio
-        pixw, pixh = [int(x) for x in
-                      query.get('PixelShape', ['1:1'])[0].split(':')]
+        # Requested pixel shape
+        pshape = query.get('PixelShape', ['1:1'])[0]
 
         # Build a new image
         if use_pil:
             status, result = self.get_image_pil(path, width, height, 
-                                                pixw, pixh, rot, attrs)
+                                                pshape, rot, attrs)
         else:
             status, result = self.get_image_ffmpeg(path, width, height, 
-                                                   pixw, pixh, rot)
+                                                   pshape, rot)
 
         if status:
             # Save thumbnails
