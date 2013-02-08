@@ -287,7 +287,15 @@ class Photo(Plugin):
         else:
             filters = ''
 
-        filters += 'format=yuvj420p,scale=%d:%d' % (width, height)
+        filters += 'format=yuvj420p,'
+
+        neww, newh = oldw, oldh
+        while (neww / width >= 50) or (newh / height >= 50):
+            neww /= 2
+            newh /= 2
+            filters += 'scale=%d:%d,' % (neww, newh)
+
+        filters += 'scale=%d:%d' % (width, height)
 
         cmd = [ffmpeg_path, '-i', fname, '-vf', filters, '-f', 'mjpeg', '-']
         jpeg_tmp = tempfile.TemporaryFile()
