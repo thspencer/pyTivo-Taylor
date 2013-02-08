@@ -75,6 +75,8 @@ iname = os.path.join(SCRIPTDIR, 'templates', 'item.tmpl')
 PHOTO_TEMPLATE = file(tname, 'rb').read()
 ITEM_TEMPLATE = file(iname, 'rb').read()
 
+JFIF_TAG = '\xff\xe0\x00\x10JFIF\x00\x01\x02\x00\x00\x01\x00\x01\x00\x00'
+
 class Photo(Plugin):
     
     CONTENT_TYPE = 'x-container/tivo-photos'
@@ -307,6 +309,9 @@ class Photo(Plugin):
         jpeg_tmp.seek(0)
         output = jpeg_tmp.read()
         jpeg_tmp.close()
+
+        if 'JFIF' not in output:
+            output = output[:2] + JFIF_TAG + output[2:]
 
         return True, output
 
