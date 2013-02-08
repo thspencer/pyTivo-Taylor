@@ -278,13 +278,12 @@ class Photo(Plugin):
 
         width, height = self.new_size(oldw, oldh, width, height, pshape)
 
-        if rot:
-            if rot == 270:
-                filters = 'transpose=1,'
-            elif rot == 180:
-                filters = 'hflip,vflip,'
-            else:
-                filters = 'transpose=2,'
+        if rot == 270:
+            filters = 'transpose=1,'
+        elif rot == 180:
+            filters = 'hflip,vflip,'
+        elif rot == 90:
+            filters = 'transpose=2,'
         else:
             filters = ''
 
@@ -310,7 +309,7 @@ class Photo(Plugin):
         output = jpeg_tmp.read()
         jpeg_tmp.close()
 
-        if 'JFIF' not in output:
+        if 'JFIF' not in output[:10]:
             output = output[:2] + JFIF_TAG + output[2:]
 
         return True, output
