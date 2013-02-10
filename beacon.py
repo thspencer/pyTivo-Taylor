@@ -87,6 +87,14 @@ class Beacon:
         self.UDPSock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         self.services = []
 
+        self.platform = PLATFORM_VIDEO
+        for section, settings in config.getShares():
+            ct = GetPlugin(settings['type']).CONTENT_TYPE
+            if ct.startswith('x-container/'):
+                if 'music' in ct or 'photo' in ct:
+                    self.platform = PLATFORM_MAIN
+                    break
+
         if config.get_zc():
             logger = logging.getLogger('pyTivo.beacon')
             try:
@@ -113,7 +121,7 @@ class Beacon:
                   'method=%s' % conntype,
                   'identity=%s' % config.getGUID(),
                   'machine=%s' % gethostname(),
-                  'platform=%s' % PLATFORM_MAIN]
+                  'platform=%s' % self.platform]
 
         if services:
             beacon.append('services=' + self.format_services())
