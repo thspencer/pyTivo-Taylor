@@ -230,15 +230,18 @@ class Photo(Plugin):
                                   stdin=subprocess.PIPE)
 
         # wait configured # of seconds: if ffmpeg is not back give up
-        wait = config.getFFmpegWait()
-        for i in xrange(wait * 20):
-            time.sleep(.05)
-            if not ffmpeg.poll() == None:
-                break
+        limit = config.getFFmpegWait()
+        if limit:
+            for i in xrange(limit * 20):
+                time.sleep(.05)
+                if not ffmpeg.poll() == None:
+                    break
 
-        if ffmpeg.poll() == None:
-            kill(ffmpeg)
-            return False, 'FFmpeg timed out'
+            if ffmpeg.poll() == None:
+                kill(ffmpeg)
+                return False, 'FFmpeg timed out'
+        else:
+            ffmpeg.wait()
 
         err_tmp.seek(0)
         output = err_tmp.read()
@@ -303,15 +306,18 @@ class Photo(Plugin):
                                   stdin=subprocess.PIPE)
 
         # wait configured # of seconds: if ffmpeg is not back give up
-        wait = config.getFFmpegWait()
-        for i in xrange(wait * 20):
-            time.sleep(.05)
-            if not ffmpeg.poll() == None:
-                break
+        limit = config.getFFmpegWait()
+        if limit:
+            for i in xrange(limit * 20):
+                time.sleep(.05)
+                if not ffmpeg.poll() == None:
+                    break
 
-        if ffmpeg.poll() == None:
-            kill(ffmpeg)
-            return False, 'FFmpeg timed out'
+            if ffmpeg.poll() == None:
+                kill(ffmpeg)
+                return False, 'FFmpeg timed out'
+        else:
+            ffmpeg.wait()
 
         jpeg_tmp.seek(0)
         output = jpeg_tmp.read()

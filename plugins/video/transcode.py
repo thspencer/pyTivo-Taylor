@@ -839,19 +839,21 @@ def video_info(inFile, cache=True):
                               stdin=subprocess.PIPE)
 
     # wait configured # of seconds: if ffmpeg is not back give up
-    wait = config.getFFmpegWait()
-    debug('starting ffmpeg, will wait %s seconds for it to complete' % wait)
-    for i in xrange(wait * 20):
-        time.sleep(.05)
-        if not ffmpeg.poll() == None:
-            break
+    limit = config.getFFmpegWait()
+    if limit:
+        for i in xrange(limit * 20):
+            time.sleep(.05)
+            if not ffmpeg.poll() == None:
+                break
 
-    if ffmpeg.poll() == None:
-        kill(ffmpeg)
-        vInfo['Supported'] = False
-        if cache:
-            info_cache[inFile] = (mtime, vInfo)
-        return vInfo
+        if ffmpeg.poll() == None:
+            kill(ffmpeg)
+            vInfo['Supported'] = False
+            if cache:
+                info_cache[inFile] = (mtime, vInfo)
+            return vInfo
+    else:
+        ffmpeg.wait()
 
     err_tmp.seek(0)
     output = err_tmp.read()

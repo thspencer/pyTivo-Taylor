@@ -282,7 +282,7 @@ def getFFmpegWait():
     if config.has_option('Server', 'ffmpeg_wait'):
         return max(int(float(config.get('Server', 'ffmpeg_wait'))), 1)
     else:
-        return 10
+        return 0
 
 def getFFmpegTemplate(tsn):
     tmpl = get_tsn('ffmpeg_tmpl', tsn, True)
