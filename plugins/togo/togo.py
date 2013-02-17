@@ -55,7 +55,7 @@ queue = {} # Recordings to download -- list per TiVo
 basic_meta = {} # Data from NPL, parsed, indexed by progam URL
 
 auth_handler = urllib2.HTTPDigestAuthHandler()
-cj = cookielib.LWPCookieJar()
+cj = cookielib.CookieJar()
 tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), 
                                    auth_handler)
 
