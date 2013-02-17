@@ -454,13 +454,12 @@ Available In: Tivos
 
 ffmpeg_wait
 
-Default Setting: 10 (seconds)
+Default Setting: 0 (no limit)
 Valid Entries: any integer
 Required: No
 Skill: Advanced
-Description: Slow computers or NAS servers may result in pytivo
-reporting supported videos as not supported (copy protected).
-Increasing this setting will give ffmpeg more time to scan the file.
+Description: Limits the amount of time FFmpeg can run (when used to 
+check file info, not for transcoding), in seconds.
 Example Settings: 10, 15, 20.
 Available In: Server
 
