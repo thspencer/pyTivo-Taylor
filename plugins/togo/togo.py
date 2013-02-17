@@ -54,8 +54,13 @@ tivo_cache = {} # Cache of TiVo NPL
 queue = {} # Recordings to download -- list per TiVo
 basic_meta = {} # Data from NPL, parsed, indexed by progam URL
 
+def null_cookie(name, value):
+    return cookielib.Cookie(0, name, value, None, False, '', False, 
+        False, '', False, False, None, False, None, None, None)
+
 auth_handler = urllib2.HTTPDigestAuthHandler()
 cj = cookielib.CookieJar()
+cj.set_cookie(null_cookie('sid', 'thisisafake'))
 tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), 
                                    auth_handler)
 
