@@ -90,10 +90,9 @@ class Beacon:
         self.platform = PLATFORM_VIDEO
         for section, settings in config.getShares():
             ct = GetPlugin(settings['type']).CONTENT_TYPE
-            if ct.startswith('x-container/'):
-                if 'music' in ct or 'photo' in ct:
-                    self.platform = PLATFORM_MAIN
-                    break
+            if ct in ('x-container/tivo-music', 'x-container/tivo-photos'):
+                self.platform = PLATFORM_MAIN
+                break
 
         if config.get_zc():
             logger = logging.getLogger('pyTivo.beacon')
