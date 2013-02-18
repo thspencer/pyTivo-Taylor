@@ -60,7 +60,7 @@ def null_cookie(name, value):
 
 auth_handler = urllib2.HTTPDigestAuthHandler()
 cj = cookielib.CookieJar()
-cj.set_cookie(null_cookie('sid', 'thisisafake'))
+cj.set_cookie(null_cookie('sid', 'ADEADDA7EDEBAC1E'))
 tivo_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), 
                                    auth_handler)
 
