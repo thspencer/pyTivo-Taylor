@@ -163,10 +163,14 @@ def from_moov(full_path):
               'plistlib' in sys.modules):
             items = {'cast': 'vActor', 'directors': 'vDirector',
                      'producers': 'vProducer', 'screenwriters': 'vWriter'}
-            data = plistlib.readPlistFromString(value)
-            for item in items:
-                if item in data:
-                    metadata[items[item]] = [x['name'] for x in data[item]]
+            try:
+                data = plistlib.readPlistFromString(value)
+            except:
+                pass
+            else:
+                for item in items:
+                    if item in data:
+                        metadata[items[item]] = [x['name'] for x in data[item]]
 
     mp4_cache[full_path] = metadata
     return metadata
@@ -238,7 +242,10 @@ def from_eyetv(full_path):
     path = os.path.dirname(unicode(full_path, 'utf-8'))
     eyetvp = [x for x in os.listdir(path) if x.endswith('.eyetvp')][0]
     eyetvp = os.path.join(path, eyetvp)
-    eyetv = plistlib.readPlist(eyetvp)
+    try:
+        eyetv = plistlib.readPlist(eyetvp)
+    except:
+        return metadata
     if 'epg info' in eyetv:
         info = eyetv['epg info']
         for key in keys:
