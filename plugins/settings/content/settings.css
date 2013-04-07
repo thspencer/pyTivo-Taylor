@@ -14,7 +14,7 @@ table#main {
 }
 
 div#settings, div#sidesections {
-    border-left: 1px dotted rgb(153, 153, 153)
+    border-left: 1px dotted #999
 }
 
 td.panel {
@@ -23,7 +23,7 @@ td.panel {
 }
 
 td.ulined {
-    border-bottom: 1px solid rgb(153, 153, 153)
+    border-bottom: 1px solid #999
 }
 
 div#leftframe {
