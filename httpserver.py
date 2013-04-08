@@ -293,6 +293,10 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         t = Template(file=os.path.join(SCRIPTDIR, 'templates',
                                        'root_container.tmpl'),
                      filter=EncodeUnicode)
+        if self.server.beacon.bd:
+            t.renamed = self.server.beacon.bd.renamed
+        else:
+            t.renamed = {}
         t.containers = tsncontainers
         t.hostname = socket.gethostname()
         t.escape = escape

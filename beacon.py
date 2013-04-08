@@ -32,6 +32,7 @@ class ZCBroadcast:
         self.share_info = []
         self.logger = logger
         self.rz = Zeroconf.Zeroconf()
+        self.renamed = {}
         old_titles = self.scan()
         address = inet_aton(config.get_ip())
         port = int(config.getPort())
@@ -53,6 +54,7 @@ class ZCBroadcast:
                 while title in old_titles:
                     count += 1
                     title = '%s [%d]' % (section, count)
+                    self.renamed[section] = title
                 info = Zeroconf.ServiceInfo('_%s._tcp.local.' % tt,
                     '%s._%s._tcp.local.' % (title, tt),
                     address, port, 0, 0, desc)

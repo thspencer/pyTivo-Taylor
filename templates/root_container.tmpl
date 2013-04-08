@@ -8,9 +8,14 @@
     </Details>
 
     #for $name, $details in $containers
+      #if $name in $renamed
+        #set $title = $renamed[name]
+      #else
+        #set $title = $name
+      #end if
     <Item>
         <Details>
-            <Title>$escape($name)</Title>
+            <Title>$escape($title)</Title>
             <ContentType>$escape($details.content_type)</ContentType>
             <SourceFormat>x-container/folder</SourceFormat>
         </Details>
