@@ -20,11 +20,10 @@ class ZCListener:
         self.names = names
 
     def removeService(self, server, type, name):
-        if name in self.names:
-            self.names.remove(name)
+        self.names.remove(name.replace('.' + type, ''))
 
     def addService(self, server, type, name):
-        self.names.append(name)
+        self.names.append(name.replace('.' + type, ''))
 
 class ZCBroadcast:
     def __init__(self, logger):
@@ -33,8 +32,10 @@ class ZCBroadcast:
         self.share_info = []
         self.logger = logger
         self.rz = Zeroconf.Zeroconf()
+        old_titles = self.scan()
         address = inet_aton(config.get_ip())
         port = int(config.getPort())
+        logger.info('Announcing shares...')
         for section, settings in config.getShares():
             ct = GetPlugin(settings['type']).CONTENT_TYPE
             if ct.startswith('x-container/'):
@@ -47,8 +48,13 @@ class ZCBroadcast:
                 desc = {'path': SHARE_TEMPLATE % quote(section),
                         'platform': platform, 'protocol': 'http'}
                 tt = ct.split('/')[1]
+                title = section
+                count = 1
+                while title in old_titles:
+                    count += 1
+                    title = '%s [%d]' % (section, count)
                 info = Zeroconf.ServiceInfo('_%s._tcp.local.' % tt,
-                    '%s._%s._tcp.local.' % (section, tt),
+                    '%s._%s._tcp.local.' % (title, tt),
                     address, port, 0, 0, desc)
                 self.rz.registerService(info)
                 self.share_info.append(info)
@@ -58,6 +64,8 @@ class ZCBroadcast:
         VIDS = '_tivo-videos._tcp.local.'
         names = []
 
+        self.logger.info('Scanning for TiVos...')
+
         # Get the names of servers offering TiVo videos
         browser = Zeroconf.ServiceBrowser(self.rz, VIDS, ZCListener(names))
 
@@ -66,14 +74,15 @@ class ZCBroadcast:
 
         # Now get the addresses -- this is the slow part
         for name in names:
-            info = self.rz.getServiceInfo(VIDS, name)
+            info = self.rz.getServiceInfo(VIDS, name + '.' + VIDS)
             if info and 'TSN' in info.properties:
                 tsn = info.properties['TSN']
                 address = inet_ntoa(info.getAddress())
                 config.tivos[tsn] = address
-                name = name.replace('.' + VIDS, '')
                 self.logger.info(name)
                 config.tivo_names[tsn] = name
+
+        return names
 
     def shutdown(self):
         self.logger.info('Unregistering: %s' % ' '.join(self.share_names))
@@ -97,14 +106,10 @@ class Beacon:
         if config.get_zc():
             logger = logging.getLogger('pyTivo.beacon')
             try:
-                logger.info('Announcing shares...')
                 self.bd = ZCBroadcast(logger)
             except:
                 logger.error('Zeroconf failure')
                 self.bd = None
-            else:
-                logger.info('Scanning for TiVos...')
-                self.bd.scan()
         else:
             self.bd = None
 
