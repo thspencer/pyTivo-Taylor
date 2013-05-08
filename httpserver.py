@@ -1,12 +1,14 @@
 import BaseHTTPServer
 import SocketServer
 import cgi
+import gzip
 import logging
 import mimetypes
 import os
 import shutil
 import socket
 import time
+from cStringIO import StringIO
 from urllib import unquote_plus, quote
 from xml.sax.saxutils import escape
 
@@ -80,6 +82,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         self.wbufsize = 0x10000
         self.server_version = 'pyTivo/1.0'
+        self.protocol_version = 'HTTP/1.1'
         self.sys_version = ''
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
             client_address, server)
@@ -261,10 +264,18 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 self.log_date_time_string(), format%args))
 
     def send_fixed(self, page, mime, code=200, refresh=''):
+        squeeze = (len(page) > 256 and mime.startswith('text') and
+            'gzip' in self.headers.getheader('Accept-Encoding', ''))
+        if squeeze:
+            out = StringIO()
+            gzip.GzipFile(mode='wb', fileobj=out).write(page)
+            page = out.getvalue()
+            out.close()
         self.send_response(code)
         self.send_header('Content-Type', mime)
         self.send_header('Content-Length', len(page))
-        self.send_header('Connection', 'close')
+        if squeeze:
+            self.send_header('Content-Encoding', 'gzip')
         self.send_header('Expires', '0')
         if refresh:
             self.send_header('Refresh', refresh)
