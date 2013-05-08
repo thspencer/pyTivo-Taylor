@@ -257,7 +257,6 @@ class BaseVideo(Plugin):
             handler.send_response(206)
             handler.send_header('Transfer-Encoding', 'chunked')
         handler.send_header('Content-Type', mime)
-        handler.send_header('Connection', 'close')
         handler.end_headers()
 
         logger.info('[%s] Start sending "%s" to %s' %
