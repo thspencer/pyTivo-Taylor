@@ -36,6 +36,8 @@ TAGNAMES = {'artist': ['\xa9ART', 'Author'],
             'date': ['\xa9day', u'WM/Year'],
             'genre': ['\xa9gen', u'WM/Genre']}
 
+BLOCKSIZE = 64 * 1024
+
 # Search strings for different playlist types
 asxfile = re.compile('ref +href *= *"([^"]*)"', re.IGNORECASE).search
 wplfile = re.compile('media +src *= *"([^"]*)"', re.IGNORECASE).search
@@ -100,12 +102,14 @@ class Music(Plugin):
         ext = os.path.splitext(fname)[1].lower()
         needs_transcode = ext in TRANSCODE or seek or duration or always
 
-        handler.send_response(200)
-        handler.send_header('Content-Type', 'audio/mpeg')
         if not needs_transcode:
             fsize = os.path.getsize(fname)
+            handler.send_response(200)
             handler.send_header('Content-Length', fsize)
-        handler.send_header('Connection', 'close')
+        else:
+            handler.send_response(206)
+            handler.send_header('Transfer-Encoding', 'chunked')
+        handler.send_header('Content-Type', 'audio/mpeg')
         handler.end_headers()
 
         if needs_transcode:
@@ -123,12 +127,23 @@ class Music(Plugin):
             if duration:
                 cmd[-1:] = ['-t', '%.3f' % (duration / 1000.0), '-']
 
-            ffmpeg = subprocess.Popen(cmd, bufsize=(64 * 1024),
+            ffmpeg = subprocess.Popen(cmd, bufsize=BLOCKSIZE,
                                       stdout=subprocess.PIPE)
-            try:
-                shutil.copyfileobj(ffmpeg.stdout, handler.wfile)
-            except:
-                kill(ffmpeg)
+            while True:
+                try:
+                    block = ffmpeg.stdout.read(BLOCKSIZE)
+                    handler.wfile.write('%x\r\n' % len(block))
+                    handler.wfile.write(block)
+                    handler.wfile.write('\r\n')
+                    if not block:
+                        handler.wfile.flush()
+                except Exception, msg:
+                    handler.server.logger.info(msg)
+                    kill(ffmpeg)
+                    break
+
+                if not block:
+                    break
         else:
             f = open(fname, 'rb')
             try:
