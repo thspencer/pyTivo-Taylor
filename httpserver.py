@@ -197,12 +197,37 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif command in ('FlushServer', 'ResetServer'):
                 # Does nothing -- included for completeness
                 self.send_response(200)
+                self.send_header('Content-Length', '0')
                 self.end_headers()
                 return
 
         # If we made it here it means we couldn't match the request to
         # anything.
         self.unsupported(query)
+
+    def send_content_file(self, path):
+        lmdate = os.path.getmtime(path)
+        try:
+            handle = open(path, 'rb')
+        except:
+            self.send_error(404)
+            return
+
+        # Send the header
+        mime = mimetypes.guess_type(path)[0]
+        self.send_response(200)
+        if mime:
+            self.send_header('Content-Type', mime)
+        self.send_header('Content-Length', os.path.getsize(path))
+        self.send_header('Last-Modified', formatdate(lmdate))
+        self.end_headers()
+
+        # Send the body of the file
+        try:
+            shutil.copyfileobj(handle, self.wfile)
+        except:
+            pass
+        handle.close()
 
     def handle_file(self, query, splitpath):
         if '..' not in splitpath:    # Protect against path exploits
@@ -222,28 +247,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             path = os.path.join(base, 'content', splitpath[-1])
 
             if os.path.isfile(path):
-                lmdate = os.path.getmtime(path)
-                try:
-                    handle = open(path, 'rb')
-                except:
-                    self.send_error(404)
-                    return
-
-                # Send the header
-                mime = mimetypes.guess_type(path)[0]
-                self.send_response(200)
-                if mime:
-                    self.send_header('Content-Type', mime)
-                self.send_header('Content-Length', os.path.getsize(path))
-                self.send_header('Last-Modified', formatdate(lmdate))
-                self.end_headers()
-
-                # Send the body of the file
-                try:
-                    shutil.copyfileobj(handle, self.wfile)
-                except:
-                    pass
-                handle.close()
+                self.send_content_file(path)
                 return
 
         ## Give up

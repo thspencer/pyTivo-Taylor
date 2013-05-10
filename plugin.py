@@ -70,11 +70,7 @@ class Plugin(object):
         pass
 
     def send_file(self, handler, path, query):
-        handler.send_response(200)
-        handler.end_headers()
-        f = open(unicode(path, 'utf-8'), 'rb')
-        shutil.copyfileobj(f, handler.wfile)
-        f.close()
+        handler.send_content_file(unicode(path, 'utf-8'))
 
     def get_local_base_path(self, handler, query):
         return os.path.normpath(handler.container['path'])
