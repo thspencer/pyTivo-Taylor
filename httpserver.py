@@ -9,6 +9,7 @@ import shutil
 import socket
 import time
 from cStringIO import StringIO
+from email.utils import formatdate
 from urllib import unquote_plus, quote
 from xml.sax.saxutils import escape
 
@@ -221,6 +222,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             path = os.path.join(base, 'content', splitpath[-1])
 
             if os.path.isfile(path):
+                lmdate = os.path.getmtime(path)
                 try:
                     handle = open(path, 'rb')
                 except:
@@ -231,8 +233,9 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 mime = mimetypes.guess_type(path)[0]
                 self.send_response(200)
                 if mime:
-                    self.send_header('Content-type', mime)
-                self.send_header('Content-length', os.path.getsize(path))
+                    self.send_header('Content-Type', mime)
+                self.send_header('Content-Length', os.path.getsize(path))
+                self.send_header('Last-Modified', formatdate(lmdate))
                 self.end_headers()
 
                 # Send the body of the file
