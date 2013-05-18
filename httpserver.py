@@ -199,6 +199,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Length', '0')
                 self.end_headers()
+                self.wfile.flush()
                 return
 
         # If we made it here it means we couldn't match the request to
@@ -228,6 +229,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except:
             pass
         handle.close()
+        self.wfile.flush()
 
     def handle_file(self, query, splitpath):
         if '..' not in splitpath:    # Protect against path exploits
@@ -288,6 +290,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_header('Refresh', refresh)
         self.end_headers()
         self.wfile.write(page)
+        self.wfile.flush()
 
     def send_xml(self, page):
         self.send_fixed(page, 'text/xml')

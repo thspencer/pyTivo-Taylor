@@ -135,8 +135,6 @@ class Music(Plugin):
                     handler.wfile.write('%x\r\n' % len(block))
                     handler.wfile.write(block)
                     handler.wfile.write('\r\n')
-                    if not block:
-                        handler.wfile.flush()
                 except Exception, msg:
                     handler.server.logger.info(msg)
                     kill(ffmpeg)
@@ -151,6 +149,11 @@ class Music(Plugin):
             except:
                 pass
             f.close()
+
+        try:
+            handler.wfile.flush()
+        except Exception, msg:
+            handler.server.logger.info(msg)
 
     def QueryContainer(self, handler, query):
 
