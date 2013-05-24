@@ -1,5 +1,7 @@
 body {
-    background: #fafafa
+    color: black;
+    background: #fafafa;
+    font-family: Helvetica, sans-serif
 }
 
 #titlep {
@@ -47,7 +49,14 @@ tr.header {
 
 #main {
     border: 1px solid #dcdcdc;
-    background: white
+    background: white;
+    padding: 4px;
+    border-spacing: 0;
+    border-collapse: collapse
+}
+
+td {
+    padding: 4px
 }
 
 td.progmain {
