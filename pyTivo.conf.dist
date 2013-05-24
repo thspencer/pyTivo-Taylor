@@ -73,11 +73,11 @@ ffmpeg=/usr/bin/ffmpeg
 
 #[_tivo_HD]
 # section for default video options applicable to all HD TiVos
-# see pyTivo Web Configuration for all available settings
+# see pyTivo Settings for all available settings
 
 #[_tivo_SD]
 # section for default video options applicable to all SD TiVos
-# see pyTivo Web Configuration for all available settings
+# see pyTivo Settings for all available settings
 
 [MyMovies]
 # Type can be 'video', 'music', or 'photo'

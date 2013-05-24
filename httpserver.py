@@ -352,7 +352,7 @@ class TivoHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if plugin_type == 'settings':
                 t.admin += ('<a href="/TiVoConnect?Command=Settings&amp;' +
                             'Container=' + quote(section) +
-                            '">Web Configuration</a><br>')
+                            '">Settings</a><br>')
             elif plugin_type == 'togo' and t.togo:
                 for tsn in config.tivos:
                     if tsn:

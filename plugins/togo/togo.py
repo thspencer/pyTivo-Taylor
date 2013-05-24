@@ -39,8 +39,8 @@ from the queue.</p>"""
 
 UNABLE = """<h3>Unable to Connect to TiVo</h3> <p>pyTivo was unable to 
 connect to the TiVo at %s.</p> <p>This is most likely caused by an 
-incorrect Media Access Key. Please return to the Web Configuration page 
-and double check your <b>tivo_mak</b> setting.</p>"""
+incorrect Media Access Key. Please return to the Settings page and 
+double check your <b>tivo_mak</b> setting.</p>"""
 
 # Preload the templates
 def tmpl(name):
