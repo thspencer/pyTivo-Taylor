@@ -160,7 +160,7 @@ class ToGo(Plugin):
                     entry['SourceSize'] = metadata.human_size(rawsize)
 
                     dur = int(entry['Duration']) / 1000
-                    entry['Duration'] = ( '%02d:%02d:%02d' %
+                    entry['Duration'] = ( '%d:%02d:%02d' %
                         (dur / 3600, (dur % 3600) / 60, dur % 60) )
 
                     entry['CaptureDate'] = time.strftime('%b %d, %Y',
