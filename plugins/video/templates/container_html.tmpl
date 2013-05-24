@@ -52,10 +52,10 @@ function toggle(source) {
 	  #if $video.is_dir
 	    ## This is a folder
 		<td></td>
-        <td><img src="/folder.png" alt=""></td>
-		<td class="progmain"><a href='/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)&amp;Format=text/html'>$video.title </a></td>
-		<td class="unbreak">$video.total_items Items</td>
-		<td class="unbreak">$video.textDate</td>
+		<td><img src="/folder.png" alt=""></td>
+		<td class="progmain"><a href="/TiVoConnect?Command=QueryContainer&amp;Container=$quote($name)/$quote($video.name)&amp;Format=text/html">$video.title</a></td>
+		<td class="progsize">$video.total_items Items</td>
+		<td class="progdate">$video.textDate</td>
 	  #else
 	    ## This is a show
 		<td>
@@ -77,9 +77,8 @@ function toggle(source) {
 			#end if
 			</span>
 		</td>
-		<td class="unbreak">$video.textSize
-		</td>
-		<td class="unbreak">$video.textDate</td>
+		<td class="progsize">$video.textSize</td>
+		<td class="progdate">$video.textDate</td>
 	  #end if
 	  </tr>
   #end for

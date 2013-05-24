@@ -58,8 +58,8 @@ function toggle(source) {
 		<td></td>
 		<td><img src="/folder.png" alt=""></td>
 		<td class="progmain"><a href='/TiVoConnect?Command=NPL&amp;Container=$quote($container)&amp;Folder=$(row["UniqueId"])&amp;TiVo=$tivoIP'>$row['Title'] </a></td>
-		<td class="unbreak">$(row["TotalItems"]) Items</td>
-		<td class="unbreak">$row["LastChangeDate"]</td>
+		<td class="progsize">$(row["TotalItems"]) Items</td>
+		<td class="progdate">$row["LastChangeDate"]</td>
 	  #else
 	    ## This is a show
 		<td>
@@ -125,10 +125,10 @@ function toggle(source) {
 				#end if
 			#end if
 		</td>
-		<td class="unbreak">$row['SourceSize'] <br>
+		<td class="progsize">$row['SourceSize'] <br>
 		$row['Duration']
 		</td>
-		<td class="unbreak">$row['CaptureDate']</td>
+		<td class="progdate">$row['CaptureDate']</td>
 	  #end if
 	  </tr>
   #end for
