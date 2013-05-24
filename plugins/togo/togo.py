@@ -156,8 +156,8 @@ class ToGo(Plugin):
                         if value:
                             entry[key] = value
 
-                    entry['SourceSize'] = ( '%.3f GB' %
-                        (float(entry['SourceSize']) / (1024 ** 3)) )
+                    rawsize = entry['SourceSize']
+                    entry['SourceSize'] = metadata.human_size(rawsize)
 
                     dur = int(entry['Duration']) / 1000
                     entry['Duration'] = ( '%02d:%02d:%02d' %

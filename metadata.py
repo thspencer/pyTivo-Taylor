@@ -45,6 +45,10 @@ HUMAN = {'mpaaRating': {1: 'G', 2: 'PG', 3: 'PG-13', 4: 'R', 5: 'X',
 
 BOM = '\xef\xbb\xbf'
 
+GB = 1024 ** 3
+MB = 1024 ** 2
+KB = 1024
+
 tivo_cache = LRUCache(50)
 mp4_cache = LRUCache(50)
 dvrms_cache = LRUCache(50)
@@ -60,6 +64,18 @@ def get_tv(rating):
 
 def get_stars(rating):
     return HUMAN['starRating'].get(rating, '')
+
+def human_size(raw):
+    raw = float(raw)
+    if raw > GB:
+        tsize = '%.2f GB' % (raw / GB)
+    elif raw > MB:
+        tsize = '%.2f MB' % (raw / MB)
+    elif raw > KB:
+        tsize = '%.2f KB' % (raw / KB)
+    else:
+        tsize = '%d Bytes' % raw
+    return tsize
 
 def tag_data(element, tag):
     for name in tag.split('/'):

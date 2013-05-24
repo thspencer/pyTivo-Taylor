@@ -483,8 +483,7 @@ class BaseVideo(Plugin):
                 else:
                     video['mime'] = 'video/x-tivo-mpeg'
 
-                video['textSize'] = ( '%.3f GB' %
-                    (float(f.size) / (1024 ** 3)) )
+                video['textSize'] = metadata.human_size(f.size)
 
             videos.append(video)
 
