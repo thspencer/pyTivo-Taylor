@@ -77,7 +77,7 @@ no ffmpeg is found, pyTivo will operate in a limited mode, serving only
 MPEG and TiVo files in video shares, and only MP3 files in music shares, 
 with no seek capability.
 Example Settings: Linux = /usr/bin/ffmpeg |
->Windows = c:\Program Files\pyTivo\bin\ffmpeg.exe
+>Windows = C:\pyTivo\bin\ffmpeg.exe
 Available In: Server
 
 tivodecode
@@ -90,7 +90,7 @@ set, pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
 tivodecode is only needed for certain functions (currently pushing .TiVo 
 files or transcoding HD .TiVo files to SD).
 Example Settings: Linux = /usr/bin/tivodecode |
->Windows = c:\Program Files\pyTivo\bin\tivodecode.exe
+>Windows = C:\pyTivo\bin\tivodecode.exe
 Available In: Server
 
 tdcat
@@ -103,7 +103,7 @@ pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
 tdcat is only needed to view the data from a .TiVo file in the details 
 screen. It comes with tivodecode.
 Example Settings: Linux = /usr/bin/tdcat |
->Windows = c:\Program Files\pyTivo\bin\tdcat.exe
+>Windows = C:\pyTivo\bin\tdcat.exe
 Available In: Server
 
 beacon
@@ -180,8 +180,8 @@ transcoded has smaller dimensions that are closer to other acceptable
 TiVo dimensions then pyTivo will use these dimensions. This allows for
 faster transcoding and small files when the initial video is a lower
 quality. pyTivo uses the same resolution as the source file on HD Tivos
-for optimal transcoding efficiency. It is not necessay to to set this
-option with HD TiVos unles you wish to force pyTivo to change the
+for optimal transcoding efficiency. It is not necessary to to set this
+option with HD TiVos unless you wish to force pyTivo to change the
 resolution to an "S2 compatible" resolution.
 Example Settings: True/False
 Available In: Tivos, HD_tivos, SD_tivos
@@ -250,7 +250,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 width
 
-Default Setting: 544 for S2, 1920 for S3
+Default Setting: 544 for S2, 1920 for S3+
 Valid Entries: Any valid pixel dimension. Setting will be rounded to
 nearest acceptable TiVo dimension.
 Required: No
@@ -264,7 +264,7 @@ Available In: Tivos, HD_tivos, SD_tivos
 
 height
 
-Default Setting: 480 for S2, 1080 for S3
+Default Setting: 480 for S2, 1080 for S3+
 Valid Entries: Any valid pixel dimension. Setting will be rounded to
 nearest acceptable TiVo dimension
 Required: No
