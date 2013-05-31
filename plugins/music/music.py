@@ -437,9 +437,7 @@ class Music(Plugin):
                         files.extend(build_recursive_list(f))
                     else:
                         fd = FileData(f, isdir)
-                        if recurse and fd.isplay:
-                            files.extend(self.parse_playlist(f, recurse))
-                        elif isdir or filterFunction(f, file_type):
+                        if isdir or filterFunction(f, file_type):
                             files.append(fd)
             except:
                 pass
