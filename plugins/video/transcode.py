@@ -2,6 +2,7 @@ import logging
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -1072,12 +1073,10 @@ def video_info(inFile, cache=True):
             vInfo['Supported'] = True
             if key.startswith('Override_mapAudio'):
                 audiomap = dict(vInfo['mapAudio'])
-                stream = key.replace('Override_mapAudio', '').strip()
-                if stream in audiomap:
-                    newaudiomap = (stream, data[key])
-                    audiomap.update([newaudiomap])
-                    vInfo['mapAudio'] = sorted(audiomap.items(),
-                                               key=lambda (k,v): (k,v))
+                newmap = shlex.split(data[key])
+                audiomap.update(zip(newmap[::2], newmap[1::2]))
+                vInfo['mapAudio'] = sorted(audiomap.items(),
+                                           key=lambda (k,v): (k,v))
             elif key.startswith('Override_millisecs'):
                 vInfo[key.replace('Override_', '')] = int(data[key])
             else:
