@@ -346,7 +346,7 @@ The syntax is<br>
 Override_mapAudio: 0.1 eng<br>
 Where 0.1 is the audio stream number reported by ffmpeg and eng is the 
 new audio tag to assign to that stream.  You can specify multiple 
-streams with one Override line:<br>
+streams with one Override line --<br>
 Override_mapAudio: 0:1 eng 0:2 "long tag" 0:3 foo<br>
 Example Settings: eng, ger, spa, en, ge, 0.0, 0.1, 0.2, 0x80, 0x81 etc...
 Available In: Tivos, HD_tivos, SD_tivos
