@@ -161,6 +161,24 @@ class Beacon:
         if self.bd:
             self.bd.shutdown()
 
+    def recv_packet(self, sock):
+        length = struct.unpack('!I', sock.recv(4))[0]
+        packet = ''
+        while len(packet) < length:
+            add = sock.recv(length - len(packet))
+            if not add:
+                break
+            packet += add
+        return packet
+
+    def send_packet(self, sock, packet):
+        sock.send(struct.pack('!I', len(packet)))
+        while packet:
+            sent = sock.send(packet)
+            if sent < 0:
+                break
+            packet = packet[sent:]
+
     def listen(self):
         """ For the direct-connect, TCP-style beacon """
         import thread
@@ -174,14 +192,12 @@ class Beacon:
                 # Wait for a connection
                 client, address = TCPSock.accept()
 
-                # Accept the client's beacon
-                client_length = struct.unpack('!I', client.recv(4))[0]
-                client_message = client.recv(client_length)
+                # Accept (and discard) the client's beacon
+                self.recv_packet(client)
 
                 # Send ours
-                message = self.format_beacon('connected')
-                client.send(struct.pack('!I', len(message)))
-                client.send(message)
+                self.send_packet(client, self.format_beacon('connected'))
+
                 client.close()
 
         thread.start_new_thread(server, ())
@@ -194,15 +210,9 @@ class Beacon:
         try:
             tsock = socket()
             tsock.connect((address, 2190))
-
-            tsock.send(struct.pack('!I', len(our_beacon)))
-            tsock.send(our_beacon)
-
-            length = struct.unpack('!I', tsock.recv(4))[0]
-            tivo_beacon = tsock.recv(length)
-
+            self.send_packet(tsock, our_beacon)
+            tivo_beacon = self.recv_packet(tsock)
             tsock.close()
-
             name = machine_name(tivo_beacon).groups()[0]
         except:
             name = address
