@@ -138,11 +138,16 @@ class Beacon:
 
     def send_beacon(self):
         beacon_ips = config.getBeaconAddresses()
+        beacon = self.format_beacon('broadcast')
         for beacon_ip in beacon_ips.split():
             if beacon_ip != 'listen':
                 try:
-                    self.UDPSock.sendto(self.format_beacon('broadcast'),
-                                        (beacon_ip, 2190))
+                    packet = beacon
+                    while packet:
+                        result = self.UDPSock.sendto(packet, (beacon_ip, 2190))
+                        if result < 0:
+                            break
+                        packet = packet[result:]
                 except error, e:
                     print e
 
