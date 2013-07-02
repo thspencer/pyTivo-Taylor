@@ -134,7 +134,7 @@ class Beacon:
         else:
             beacon.append('services=TiVoMediaServer:0/http')
 
-        return '\n'.join(beacon)
+        return '\n'.join(beacon) + '\n'
 
     def send_beacon(self):
         beacon_ips = config.getBeaconAddresses()
