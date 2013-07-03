@@ -161,23 +161,29 @@ class Beacon:
         if self.bd:
             self.bd.shutdown()
 
-    def recv_packet(self, sock):
-        length = struct.unpack('!I', sock.recv(4))[0]
-        packet = ''
-        while len(packet) < length:
-            add = sock.recv(length - len(packet))
+    def recv_bytes(self, sock, length):
+        block = ''
+        while len(block) < length:
+            add = sock.recv(length - len(block))
             if not add:
                 break
-            packet += add
-        return packet
+            block += add
+        return block
 
-    def send_packet(self, sock, packet):
-        sock.send(struct.pack('!I', len(packet)))
-        while packet:
-            sent = sock.send(packet)
+    def recv_packet(self, sock):
+        length = struct.unpack('!I', self.recv_bytes(sock, 4))[0]
+        return self.recv_bytes(sock, length)
+
+    def send_bytes(self, sock, block):
+        while block:
+            sent = sock.send(block)
             if sent < 0:
                 break
-            packet = packet[sent:]
+            block = block[sent:]
+
+    def send_packet(self, sock, packet):
+        self.send_bytes(sock, struct.pack('!I', len(packet)))
+        self.send_bytes(sock, packet)
 
     def listen(self):
         """ For the direct-connect, TCP-style beacon """
