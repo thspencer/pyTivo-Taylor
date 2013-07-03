@@ -182,8 +182,7 @@ class Beacon:
             block = block[sent:]
 
     def send_packet(self, sock, packet):
-        self.send_bytes(sock, struct.pack('!I', len(packet)))
-        self.send_bytes(sock, packet)
+        self.send_bytes(sock, struct.pack('!I', len(packet)) + packet)
 
     def listen(self):
         """ For the direct-connect, TCP-style beacon """
