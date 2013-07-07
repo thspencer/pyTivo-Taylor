@@ -97,14 +97,15 @@ class Settings(Plugin):
 
     def UpdateSettings(self, handler, query):
         config.reset()
+        for key in query.keys():
+            if key.startswith('opts.'):
+                data = query[key]
+                del query[key]
+                key = key[5:]
+                query[key] = data
         for section in ['Server', '_tivo_SD', '_tivo_HD']:
             new_setting = new_value = ' '
             for key in query:
-                if key.startswith('opts.'):
-                    data = query[key]
-                    del query[key]
-                    key = key[5:]
-                    query[key] = data
                 if key.startswith(section + '.'):
                     _, option = key.split('.')
                     if not config.config.has_section(section):
