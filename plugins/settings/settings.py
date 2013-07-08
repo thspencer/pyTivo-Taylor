@@ -97,27 +97,23 @@ class Settings(Plugin):
 
     def UpdateSettings(self, handler, query):
         config.reset()
-        for key in query.keys():
-            if key.startswith('opts.'):
-                data = query[key]
-                del query[key]
-                key = key[5:]
-                query[key] = data
         for section in ['Server', '_tivo_SD', '_tivo_HD']:
             new_setting = new_value = ' '
-            for key in query:
+            for key, value in query.items():
+                key = key.lstrip('opts.')
                 if key.startswith(section + '.'):
                     _, option = key.split('.')
+                    value = value[0]
                     if not config.config.has_section(section):
                         config.config.add_section(section)
                     if option == 'new__setting':
-                        new_setting = query[key][0]
+                        new_setting = value
                     elif option == 'new__value':
-                        new_value = query[key][0]
-                    elif query[key][0] == ' ':
+                        new_value = value
+                    elif value == ' ':
                         config.config.remove_option(section, option)
                     else:
-                        config.config.set(section, option, query[key][0])
+                        config.config.set(section, option, value)
             if not(new_setting == ' ' and new_value == ' '):
                 config.config.set(section, new_setting, new_value)
 
