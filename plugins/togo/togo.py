@@ -87,6 +87,7 @@ class ToGo(Plugin):
         global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
         folder = ''
+        FirstAnchor = ''
         has_tivodecode = bool(config.get_bin('tivodecode'))
 
         if 'TiVo' in query:
@@ -127,7 +128,9 @@ class ToGo(Plugin):
             TotalItems = tag_data(xmldoc, 'TiVoContainer/Details/TotalItems')
             ItemStart = tag_data(xmldoc, 'TiVoContainer/ItemStart')
             ItemCount = tag_data(xmldoc, 'TiVoContainer/ItemCount')
-            FirstAnchor = tag_data(items[0], 'Links/Content/Url')
+            title = tag_data(xmldoc, 'TiVoContainer/Details/Title')
+            if items:
+                FirstAnchor = tag_data(items[0], 'Links/Content/Url')
 
             data = []
             for item in items:
@@ -181,7 +184,7 @@ class ToGo(Plugin):
             TotalItems = 0
             ItemStart = 0
             ItemCount = 0
-            FirstAnchor = ''
+            title = ''
 
         if useragent.lower().find('mobile') > 0:
             t = Template(CONTAINER_TEMPLATE_MOBILE, filter=EncodeUnicode)
