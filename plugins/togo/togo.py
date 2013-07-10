@@ -84,6 +84,14 @@ class ToGo(Plugin):
                 raise
 
     def NPL(self, handler, query):
+
+        def getint(thing):
+            try:
+                result = int(thing)
+            except:
+                result = 0
+            return result
+
         global basic_meta
         shows_per_page = 50 # Change this to alter the number of shows returned
         folder = ''
@@ -162,7 +170,7 @@ class ToGo(Plugin):
                     rawsize = entry['SourceSize']
                     entry['SourceSize'] = metadata.human_size(rawsize)
 
-                    dur = int(entry['Duration']) / 1000
+                    dur = getint(entry['Duration']) / 1000
                     entry['Duration'] = ( '%d:%02d:%02d' %
                         (dur / 3600, (dur % 3600) / 60, dur % 60) )
 
@@ -203,9 +211,9 @@ class ToGo(Plugin):
         t.container = handler.cname
         t.data = data
         t.len = len
-        t.TotalItems = int(TotalItems)
-        t.ItemStart = int(ItemStart)
-        t.ItemCount = int(ItemCount)
+        t.TotalItems = getint(TotalItems)
+        t.ItemStart = getint(ItemStart)
+        t.ItemCount = getint(ItemCount)
         t.FirstAnchor = quote(FirstAnchor)
         t.shows_per_page = shows_per_page
         handler.send_html(str(t), refresh='300')
