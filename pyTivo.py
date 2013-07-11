@@ -13,7 +13,6 @@ if sys.version_info[0] != 2 or sys.version_info[1] < 4:
 import beacon
 import config
 import httpserver
-from plugin import GetPlugin
 
 def exceptionLogger(*args):
     sys.excepthook = sys.__excepthook__
