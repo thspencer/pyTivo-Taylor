@@ -38,7 +38,10 @@ class ZCBroadcast:
         port = int(config.getPort())
         logger.info('Announcing shares...')
         for section, settings in config.getShares():
-            ct = GetPlugin(settings['type']).CONTENT_TYPE
+            try:
+                ct = GetPlugin(settings['type']).CONTENT_TYPE
+            except:
+                continue
             if ct.startswith('x-container/'):
                 if 'video' in ct:
                     platform = PLATFORM_VIDEO
@@ -100,7 +103,10 @@ class Beacon:
 
         self.platform = PLATFORM_VIDEO
         for section, settings in config.getShares():
-            ct = GetPlugin(settings['type']).CONTENT_TYPE
+            try:
+                ct = GetPlugin(settings['type']).CONTENT_TYPE
+            except:
+                continue
             if ct in ('x-container/tivo-music', 'x-container/tivo-photos'):
                 self.platform = PLATFORM_MAIN
                 break
