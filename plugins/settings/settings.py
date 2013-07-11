@@ -100,7 +100,7 @@ class Settings(Plugin):
         for section in ['Server', '_tivo_SD', '_tivo_HD']:
             new_setting = new_value = ' '
             for key, value in query.items():
-                key = key.lstrip('opts.')
+                key = key.replace('opts.', '', 1)
                 if key.startswith(section + '.'):
                     _, option = key.split('.')
                     value = value[0]
@@ -117,8 +117,7 @@ class Settings(Plugin):
             if not(new_setting == ' ' and new_value == ' '):
                 config.config.set(section, new_setting, new_value)
 
-        sections = query['Section_Map'][0].split(']')
-        sections.pop() # last item is junk
+        sections = query['Section_Map'][0].split(']')[:-1]
         for section in sections:
             ID, name = section.split('|')
             if query[ID][0] == 'Delete_Me':
@@ -127,17 +126,19 @@ class Settings(Plugin):
             if query[ID][0] != name:
                 config.config.remove_section(name)
                 config.config.add_section(query[ID][0])
-            for key in query:
+            for key, value in query.items():
+                key = key.replace('opts.', '', 1)
                 if key.startswith(ID + '.'):
                     _, option = key.split('.')
+                    value = value[0]
                     if option == 'new__setting':
-                        new_setting = query[key][0]
+                        new_setting = value
                     elif option == 'new__value':
-                        new_value = query[key][0]
-                    elif query[key][0] == ' ':
+                        new_value = value
+                    elif value == ' ':
                         config.config.remove_option(query[ID][0], option)
                     else:
-                        config.config.set(query[ID][0], option, query[key][0])
+                        config.config.set(query[ID][0], option, value)
             if not(new_setting == ' ' and new_value == ' '):
                 config.config.set(query[ID][0], new_setting, new_value)
         if query['new_Section'][0] != ' ':
