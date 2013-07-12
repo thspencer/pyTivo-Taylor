@@ -97,27 +97,30 @@ class Settings(Plugin):
         t.has_shutdown = hasattr(handler.server, 'shutdown')
         handler.send_html(str(t))
 
+    def each_section(self, query, label, section):
+        new_setting = new_value = ' '
+        for key, value in query.items():
+            key = key.replace('opts.', '', 1)
+            if key.startswith(label + '.'):
+                _, option = key.split('.')
+                value = value[0]
+                if not config.config.has_section(section):
+                    config.config.add_section(section)
+                if option == 'new__setting':
+                    new_setting = value
+                elif option == 'new__value':
+                    new_value = value
+                elif value == ' ':
+                    config.config.remove_option(section, option)
+                else:
+                    config.config.set(section, option, value)
+        if not(new_setting == ' ' and new_value == ' '):
+            config.config.set(section, new_setting, new_value)
+
     def UpdateSettings(self, handler, query):
         config.reset()
         for section in ['Server', '_tivo_SD', '_tivo_HD']:
-            new_setting = new_value = ' '
-            for key, value in query.items():
-                key = key.replace('opts.', '', 1)
-                if key.startswith(section + '.'):
-                    _, option = key.split('.')
-                    value = value[0]
-                    if not config.config.has_section(section):
-                        config.config.add_section(section)
-                    if option == 'new__setting':
-                        new_setting = value
-                    elif option == 'new__value':
-                        new_value = value
-                    elif value == ' ':
-                        config.config.remove_option(section, option)
-                    else:
-                        config.config.set(section, option, value)
-            if not(new_setting == ' ' and new_value == ' '):
-                config.config.set(section, new_setting, new_value)
+            self.each_section(query, section, section)
 
         sections = query['Section_Map'][0].split(']')[:-1]
         for section in sections:
@@ -128,21 +131,8 @@ class Settings(Plugin):
             if query[ID][0] != name:
                 config.config.remove_section(name)
                 config.config.add_section(query[ID][0])
-            for key, value in query.items():
-                key = key.replace('opts.', '', 1)
-                if key.startswith(ID + '.'):
-                    _, option = key.split('.')
-                    value = value[0]
-                    if option == 'new__setting':
-                        new_setting = value
-                    elif option == 'new__value':
-                        new_value = value
-                    elif value == ' ':
-                        config.config.remove_option(query[ID][0], option)
-                    else:
-                        config.config.set(query[ID][0], option, value)
-            if not(new_setting == ' ' and new_value == ' '):
-                config.config.set(query[ID][0], new_setting, new_value)
+            self.each_section(query, ID, query[ID][0])
+
         if query['new_Section'][0] != ' ':
             config.config.add_section(query['new_Section'][0])
         config.write()
