@@ -39,6 +39,7 @@ class Settings(Plugin):
                 handler.server.stop = True
             else:
                 handler.server.shutdown()
+            handler.server.socket.close()
         else:
             handler.send_error(501)
 
@@ -50,6 +51,7 @@ class Settings(Plugin):
                 handler.server.stop = True
             else:
                 handler.server.shutdown()
+            handler.server.socket.close()
         else:
             handler.send_error(501)
 
