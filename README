@@ -11,7 +11,7 @@ OS = Anything that will run python and ffmpeg, which I think is
 anything. Known to work on Linux, Mac OS X and Windows.
 
 Python - http://www.python.org/download/
-- You need at least version 2.4 of python
+- You need at least version 2.5 of python
 
 pywin32 (only to install as a service) - 
 http://sourceforge.net/project/showfiles.php?group_id=78018&package_id=79063

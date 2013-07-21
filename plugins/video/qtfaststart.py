@@ -69,7 +69,6 @@ from StringIO import StringIO
 
 VERSION = "1.7wjm3"
 CHUNK_SIZE = 8192
-SEEK_CUR = 1  # Not defined in Python 2.4, so we define it here -- WJM3
 
 log = logging.getLogger('pyTivo.video.qt-faststart')
 
@@ -128,7 +127,7 @@ def get_index(datastream):
                 # Weird, but just continue to try to find more atoms
                 atom_size = skip
 
-        datastream.seek(atom_size - skip, SEEK_CUR)
+        datastream.seek(atom_size - skip, os.SEEK_CUR)
 
     # Make sure the atoms we need exist
     top_level_atoms = set([item[0] for item in index])
@@ -167,7 +166,7 @@ def find_atoms(size, datastream):
             yield atom_type
         else:
             # Ignore this atom, seek to the end of it.
-            datastream.seek(atom_size - 8, SEEK_CUR)
+            datastream.seek(atom_size - 8, os.SEEK_CUR)
 
 def output(outfile, skip, data):
     global count
@@ -248,7 +247,7 @@ def process(datastream, outfile, skip=0):
                                 moov.read(csize * entry_count))
 
         # Patch and write entries
-        moov.seek(-csize * entry_count, SEEK_CUR)
+        moov.seek(-csize * entry_count, os.SEEK_CUR)
         moov.write(struct.pack(">" + ctype * entry_count,
                                *[entry + offset for entry in entries]))
 

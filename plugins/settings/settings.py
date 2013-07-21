@@ -67,8 +67,7 @@ class Settings(Plugin):
 
         shares_data = []
         for section in config.config.sections():
-            if not (section.startswith('_tivo_')
-                    or section.startswith('Server')):
+            if not section.startswith(('_tivo_', 'Server')):
                 if (not (config.config.has_option(section, 'type')) or
                     config.config.get(section, 'type').lower() not in
                     ['settings', 'togo']):
@@ -90,8 +89,7 @@ class Settings(Plugin):
         t.tivos_data = [(section, dict(config.config.items(section, raw=True)))
                         for section in config.config.sections()
                         if section.startswith('_tivo_')
-                        and not section.startswith('_tivo_SD')
-                        and not section.startswith('_tivo_HD')]
+                        and not section.startswith(('_tivo_SD', '_tivo_HD'))]
         t.tivos_known = buildhelp.getknown('tivos')
         t.help_list = buildhelp.gethelp()
         t.has_shutdown = hasattr(handler.server, 'shutdown')
