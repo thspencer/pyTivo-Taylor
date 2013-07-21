@@ -131,7 +131,7 @@ class Beacon:
     def format_beacon(self, conntype, services=True):
         beacon = ['tivoconnect=1',
                   'method=%s' % conntype,
-                  'identity=%s' % config.getGUID(),
+                  'identity={%s}' % config.getGUID(),
                   'machine=%s' % gethostname(),
                   'platform=%s' % self.platform]
 

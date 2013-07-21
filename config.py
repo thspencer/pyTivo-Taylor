@@ -4,10 +4,9 @@ import logging
 import logging.config
 import os
 import re
-import random
 import socket
-import string
 import sys
+import uuid
 from ConfigParser import NoOptionError
 
 def init(argv):
@@ -18,7 +17,7 @@ def init(argv):
 
     tivos = {}
     tivo_names = {}
-    guid = ''.join([random.choice(string.ascii_letters) for i in range(10)])
+    guid = uuid.uuid4()
 
     config_win_default = ''
     if sys.platform == "win32":
