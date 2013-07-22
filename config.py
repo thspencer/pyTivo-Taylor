@@ -116,7 +116,7 @@ def get_server(name, default=None):
         return default
 
 def getGUID():
-    return guid
+    return str(guid)
 
 def get_ip(tsn=None):
     dest_ip = tivos.get(tsn, '4.2.2.1')
