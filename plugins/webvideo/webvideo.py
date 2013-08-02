@@ -7,15 +7,7 @@ import time
 import urllib
 import urllib2
 import warnings
-
-try:
-    import xml.etree.ElementTree as ElementTree
-except ImportError:
-    try:
-        import elementtree.ElementTree as ElementTree
-    except ImportError:
-        warnings.warn('Python 2.5 or higher or elementtree is ' +
-                      'needed to use the TivoPush')
+import xml.etree.ElementTree as ElementTree
 
 import xmpp
 import mind
