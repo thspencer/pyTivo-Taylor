@@ -63,6 +63,7 @@
 """
 
 import logging
+import os
 import struct
 
 from StringIO import StringIO
