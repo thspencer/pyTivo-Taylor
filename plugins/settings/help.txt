@@ -168,6 +168,20 @@ alpha-sorted, you need this option.
 Example Settings: True/False
 Available In: Shares
 
+force_ffmpeg
+
+Default Setting: False
+Valid Entries: True/False
+Required: No
+Description: Only meaningful in shares of type "music". When false, 
+pyTivo will pass through TiVo-compatible MP3 files as-is (unless you 
+seek within them). When true, even these files will be processed by 
+FFmpeg, in order to strip out album artwork that the TiVo would 
+otherwise try to play as sound, producing a squeal. This is done with 
+the "copy" codec, so it's low-overhead.
+Example Settings: True/False
+Available In: Shares
+
 optres
 
 Default Setting: False
