@@ -74,8 +74,11 @@ class Settings(Plugin):
                     shares_data.append((section,
                                         dict(config.config.items(section,
                                                                  raw=True))))
+        plugins = [p for p in os.listdir(os.path.dirname(SCRIPTDIR))
+                   if not p.startswith(('__init__', 'togo', 'settings'))]
 
         t = Template(SETTINGS_TEMPLATE, filter=EncodeUnicode)
+        t.plugins = plugins
         t.container = handler.cname
         t.quote = quote
         t.server_data = dict(config.config.items('Server', raw=True))

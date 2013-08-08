@@ -14,14 +14,27 @@
     <tr class="row$(j)">
     <td style="text-align: left">$key:</td>
     <td>
-    <input size="20" id="opts.$section.$key" name="opts.$section.$key"
     #if $key in $source
-        value="$source[$key]"
+      #set $value=$source[$key]
     #else
-        value=""
+      #set $value=''
     #end if
+    #if $key == 'type'
+    <select name="opts.$section.$key" onChange="saveNotify();"
+     onfocus="switchDiv('help-$key', 'help-'); return true;">
+    #for $p in $plugins
+      #if $p == $value
+        <option selected>$p</option>
+      #else
+        <option>$p</option>
+      #end if
+    #end for
+    </select>
+    #else
+    <input size="20" id="opts.$section.$key" name="opts.$section.$key"
      onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');
-     return true;" type="text">
+     return true;" value="$value" type="text">
+    #end if
     </td>
     </tr>
 #end def
