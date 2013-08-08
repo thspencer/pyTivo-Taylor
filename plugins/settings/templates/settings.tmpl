@@ -11,7 +11,8 @@
 
 #def row($i, $key, $section, $source)
     #set $j = $i%2
-    <tr class="row$(j)">
+    <tr class="row$(j)" onmouseover="switchDiv('help-$key', 'help-');
+     return true;">
     <td style="text-align: left">$key:</td>
     <td>
     #if $key in $source
@@ -20,8 +21,7 @@
       #set $value=''
     #end if
     #if $key == 'type'
-    <select name="opts.$section.$key" onChange="saveNotify();"
-     onfocus="switchDiv('help-$key', 'help-'); return true;">
+    <select name="opts.$section.$key" onChange="saveNotify();">
     #for $p in $plugins
       #if $p == $value
         <option selected>$p</option>
@@ -32,8 +32,7 @@
     </select>
     #else
     <input size="20" id="opts.$section.$key" name="opts.$section.$key"
-     onChange="saveNotify();" onfocus="switchDiv('help-$key', 'help-');
-     return true;" value="$value" type="text">
+     onChange="saveNotify();" value="$value" type="text">
     #end if
     </td>
     </tr>
