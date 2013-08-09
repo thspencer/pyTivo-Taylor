@@ -22,13 +22,13 @@
     #end if
     #if $mode.get($key, '') == 'select'
     <select name="opts.$section.$key" onChange="saveNotify();">
-    #for $p in $options[$key]
-      #if $p.lower() == $value.lower()
-        <option selected>$p</option>
-      #else
-        <option>$p</option>
-      #end if
-    #end for
+      #for $p in $options[$key]
+        #if $p.lower() == $value.lower()
+          <option selected>$p</option>
+        #else
+          <option>$p</option>
+        #end if
+      #end for
     </select>
     #elif $mode.get($key, '') == 'checkbox'
     <input id="opts.$section.$key" name="opts.$section.$key"
@@ -49,9 +49,24 @@
     <hr style="width: 100%; height: 2px">
     <table style="margin-left: auto; margin-right: auto">
     #set $i = 0
-    #for $key in $source_known
-        #set $i += 1
-        $row($i, $key, $section, $source_data)
+    #set $source_select = []
+    #set $source_text = []
+    #set $source_checkbox = []
+    #for $k in $source_known
+        #set $m = $mode.get($k, 'text')
+        #if $m == 'select'
+            #set $source_select += [$k]
+        #elif $m == 'checkbox'
+            #set $source_checkbox += [$k]
+        #else
+            #set $source_text += [$k]
+        #end if
+    #end for
+    #for $l in [$source_select, $source_text, $source_checkbox]
+        #for $key in $l
+            #set $i += 1
+            $row($i, $key, $section, $source_data)
+        #end for
     #end for
 
     <tr><td colspan="2" align="center" class="ulined">User Defined 
