@@ -20,16 +20,23 @@
     #else
       #set $value=''
     #end if
-    #if $key == 'type'
+    #if $mode.get($key, '') == 'select'
     <select name="opts.$section.$key" onChange="saveNotify();">
-    #for $p in $plugins
-      #if $p == $value
+    #for $p in $options[$key]
+      #if $p.lower() == $value.lower()
         <option selected>$p</option>
       #else
         <option>$p</option>
       #end if
     #end for
     </select>
+    #elif $mode.get($key, '') == 'checkbox'
+    <input id="opts.$section.$key" name="opts.$section.$key"
+     type="checkbox"
+      #if $value.lower() in ["1", "yes", "true", "on"]
+        checked
+      #end if
+     onChange="saveNotify();">
     #else
     <input size="20" id="opts.$section.$key" name="opts.$section.$key"
      onChange="saveNotify();" value="$value" type="text">

@@ -125,6 +125,7 @@ Available In: Server
 
 debug
 
+Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
@@ -134,6 +135,7 @@ Available In: Server
 
 type
 
+Mode: select
 Default Setting: None
 Valid Entries: video, music, photo, or any other valid plugin name.
 Required: Yes
@@ -155,6 +157,7 @@ Available In: Shares
 
 force_alpha
 
+Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
@@ -170,6 +173,7 @@ Available In: Shares
 
 force_ffmpeg
 
+Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
@@ -184,6 +188,7 @@ Available In: Shares
 
 optres
 
+Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
@@ -377,7 +382,7 @@ unless you wish to disable it. pyTivo defaults to True except when
 pyTivo uses acodec copy, in which case copyts is not needed, and a
 conflict could also occur if the source file has really corrupt
 sections.
-Example Settings: True, False
+Example Settings: True/False
 Available In: Tivos, HD_tivos, SD_tivos
 
 ffmpeg_threads
@@ -512,6 +517,8 @@ Available In: Server
 
 zeroconf
 
+Mode: select
+Options: Auto/True/False
 Default Setting: Auto
 Valid Entries: True/False/Auto
 Required: No
@@ -526,6 +533,7 @@ Available In: Server
 
 nosettings
 
+Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No

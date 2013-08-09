@@ -6,6 +6,9 @@ SCRIPTDIR = os.path.dirname(__file__)
 help_list = {}
 title = ''
 settings_known = {}
+mode = {}
+options = {}
+default = {}
 titlemode = True
 f = open(os.path.join(SCRIPTDIR, 'help.txt'))
 try:
@@ -33,11 +36,20 @@ try:
                     if section not in settings_known:
                         settings_known[section] = []
                     settings_known[section].append(title)
+            elif value.lower() == 'mode':
+                mode[title] = data
+            elif value.lower() == 'options':
+                options[title] = data.split('/')
             else:
                 help_list[title].append(line)
+                if value.lower() == 'default setting':
+                    default[title] = data
 finally:
     f.close()
 ## Done building help list
+plugins = [p for p in os.listdir(os.path.dirname(SCRIPTDIR))
+           if not p.startswith(('__init__', 'togo', 'settings'))]
+options['type'] = plugins
 
 def gethelp():
     return help_list

@@ -74,11 +74,10 @@ class Settings(Plugin):
                     shares_data.append((section,
                                         dict(config.config.items(section,
                                                                  raw=True))))
-        plugins = [p for p in os.listdir(os.path.dirname(SCRIPTDIR))
-                   if not p.startswith(('__init__', 'togo', 'settings'))]
 
         t = Template(SETTINGS_TEMPLATE, filter=EncodeUnicode)
-        t.plugins = plugins
+        t.mode = buildhelp.mode
+        t.options = buildhelp.options
         t.container = handler.cname
         t.quote = quote
         t.server_data = dict(config.config.items('Server', raw=True))
@@ -100,10 +99,14 @@ class Settings(Plugin):
 
     def each_section(self, query, label, section):
         new_setting = new_value = ' '
+        if config.config.has_section(section):
+            config.config.remove_section(section)
+        config.config.add_section(section)
         for key, value in query.items():
             key = key.replace('opts.', '', 1)
             if key.startswith(label + '.'):
                 _, option = key.split('.')
+                default = buildhelp.default.get(option, ' ')
                 value = value[0]
                 if not config.config.has_section(section):
                     config.config.add_section(section)
@@ -111,9 +114,7 @@ class Settings(Plugin):
                     new_setting = value
                 elif option == 'new__value':
                     new_value = value
-                elif value == ' ':
-                    config.config.remove_option(section, option)
-                else:
+                elif value not in (' ', default):
                     config.config.set(section, option, value)
         if not(new_setting == ' ' and new_value == ' '):
             config.config.set(section, new_setting, new_value)
