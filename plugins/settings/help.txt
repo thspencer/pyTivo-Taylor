@@ -518,9 +518,9 @@ Available In: Server
 zeroconf
 
 Mode: select
-Options: Auto/True/False
+Options: Auto/On/Off
 Default Setting: Auto
-Valid Entries: True/False/Auto
+Valid Entries: On/Off/Auto
 Required: No
 Description: Controls whether or not new-style, zeroconf-based beacons 
 are used. The default is to use them, unless there's a "_tivo_" section 
@@ -528,7 +528,7 @@ with "shares" defined. The zeroconf beacons bypass the usual mechanism
 whereby only the allowed shares are announced to specific TiVos; the 
 contents of the shares will still not appear on unauthorized TiVos, but 
 the names will.
-Example Settings: True/False/Auto
+Example Settings: On/Off/Auto
 Available In: Server
 
 nosettings
