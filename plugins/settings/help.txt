@@ -13,8 +13,8 @@
 # don't mark a new subhead must be escaped by placing '>' in the
 # first position.
 #
-# In order for the web config plugin to know which settings are 
-# available in which sections, the following line should be present in 
+# In order for the web config plugin to know which settings are
+# available in which sections, the following line should be present in
 # each setting:
 #
 # Available In:
@@ -29,31 +29,31 @@
 Instructions
 
 To Edit a Share: Select the share in the left hand menu.
-To Delete a Share: Select the share in the left hand menu and click 
+To Delete a Share: Select the share in the left hand menu and click
 delete.
-To Add a Share/Tivo/Section: Click the "Add Section" button.  Then 
-provide the name of the share or TiVo. You must save your changes before 
+To Add a Share/Tivo/Section: Click the "Add Section" button.  Then
+provide the name of the share or TiVo. You must save your changes before
 you can edit settings in the new share.
-To Add a Setting: Select your share first.  If the setting is a known 
-setting simply add the value to the appropriate setting. If the setting 
-is not listed you can add a "User Defined Setting".  Simple click add 
+To Add a Setting: Select your share first.  If the setting is a known
+setting simply add the value to the appropriate setting. If the setting
+is not listed you can add a "User Defined Setting".  Simple click add
 setting and provide the name and value of this new setting.
-To Delete a Setting: Delete the value of the setting so that it is 
-blank.  If this is a known share the name will remain after a save. If 
-the setting is a user defined setting the name will be deleted after the 
+To Delete a Setting: Delete the value of the setting so that it is
+blank.  If this is a known share the name will remain after a save. If
+the setting is a user defined setting the name will be deleted after the
 save.
-Save Settings: Clicking Save Settings will write your changes to the 
-pyTivo.conf file. These settings may not have an effect on your pyTivo 
+Save Settings: Clicking Save Settings will write your changes to the
+pyTivo.conf file. These settings may not have an effect on your pyTivo
 server until it is Soft Reset or restarted.
-Soft Reset: Soft Reset allows most new settings to take effect without 
+Soft Reset: Soft Reset allows most new settings to take effect without
 restarting pyTivo.  The Soft Reset will cause a re-read of the
 pyTivo.conf file so your changes must be saved to the file before the
 reset.
 
 Add_a_New_Section
 
-Add the name of a new section: If you want to add a TiVo section, 
-remember it must start with "_tivo_". You must save your settings before 
+Add the name of a new section: If you want to add a TiVo section,
+remember it must start with "_tivo_". You must save your settings before
 the new section will be editable.
 
 port
@@ -71,10 +71,10 @@ ffmpeg
 Default Setting: None
 Valid Entries: Operating system path
 Required: No
-Description: This is the full path to your ffmpeg binary. If not set, 
-pyTivo checks for it in a "bin" subdirectory, and then in the PATH. If 
-no ffmpeg is found, pyTivo will operate in a limited mode, serving only 
-MPEG and TiVo files in video shares, and only MP3 files in music shares, 
+Description: This is the full path to your ffmpeg binary. If not set,
+pyTivo checks for it in a "bin" subdirectory, and then in the PATH. If
+no ffmpeg is found, pyTivo will operate in a limited mode, serving only
+MPEG and TiVo files in video shares, and only MP3 files in music shares,
 with no seek capability.
 Example Settings: Linux = /usr/bin/ffmpeg |
 >Windows = C:\pyTivo\bin\ffmpeg.exe
@@ -85,9 +85,9 @@ tivodecode
 Default Setting: None
 Valid Entries: Operating system path
 Required: No
-Description: This is the full path to your tivodecode binary. If not 
+Description: This is the full path to your tivodecode binary. If not
 set, pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
-tivodecode is only needed for certain functions (currently pushing .TiVo 
+tivodecode is only needed for certain functions (currently pushing .TiVo
 files or transcoding HD .TiVo files to SD).
 Example Settings: Linux = /usr/bin/tivodecode |
 >Windows = C:\pyTivo\bin\tivodecode.exe
@@ -98,9 +98,9 @@ tdcat
 Default Setting: None
 Valid Entries: Operating system path
 Required: No
-Description: This is the full path to your tdcat binary. If not set, 
-pyTivo checks for it in a "bin" subdirectory, and then in the PATH. 
-tdcat is only needed to view the data from a .TiVo file in the details 
+Description: This is the full path to your tdcat binary. If not set,
+pyTivo checks for it in a "bin" subdirectory, and then in the PATH.
+tdcat is only needed to view the data from a .TiVo file in the details
 screen. It comes with tivodecode.
 Example Settings: Linux = /usr/bin/tdcat |
 >Windows = C:\pyTivo\bin\tdcat.exe
@@ -161,12 +161,12 @@ Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
-Description: Only meaningful in shares of type "video". When false, 
-pyTivo will display videos in the order requested by the TiVo, as 
-described at the bottom of the screen. When true, pyTivo will ignore the 
-sort options and revert to its "classic" behavior, using an alphabetical 
-sort always, with folders listed first. Note that the TiVo doesn't 
-request alpha sorts for folders below the top level, so if you want them 
+Description: Only meaningful in shares of type "video". When false,
+pyTivo will display videos in the order requested by the TiVo, as
+described at the bottom of the screen. When true, pyTivo will ignore the
+sort options and revert to its "classic" behavior, using an alphabetical
+sort always, with folders listed first. Note that the TiVo doesn't
+request alpha sorts for folders below the top level, so if you want them
 alpha-sorted, you need this option.
 Example Settings: True/False
 Available In: Shares
@@ -177,11 +177,11 @@ Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
-Description: Only meaningful in shares of type "music". When false, 
-pyTivo will pass through TiVo-compatible MP3 files as-is (unless you 
-seek within them). When true, even these files will be processed by 
-FFmpeg, in order to strip out album artwork that the TiVo would 
-otherwise try to play as sound, producing a squeal. This is done with 
+Description: Only meaningful in shares of type "music". When false,
+pyTivo will pass through TiVo-compatible MP3 files as-is (unless you
+seek within them). When true, even these files will be processed by
+FFmpeg, in order to strip out album artwork that the TiVo would
+otherwise try to play as sound, producing a squeal. This is done with
 the "copy" codec, so it's low-overhead.
 Example Settings: True/False
 Available In: Shares
@@ -363,8 +363,8 @@ lines to your metadata txt files.  This will enable pytivo to detect
 your audio language setting in files that do not contain language tags.
 The syntax is<br>
 Override_mapAudio: 0.1 eng<br>
-Where 0.1 is the audio stream number reported by ffmpeg and eng is the 
-new audio tag to assign to that stream.  You can specify multiple 
+Where 0.1 is the audio stream number reported by ffmpeg and eng is the
+new audio tag to assign to that stream.  You can specify multiple
 streams with one Override line --<br>
 Override_mapAudio: 0:1 eng 0:2 "long tag" 0:3 foo<br>
 Example Settings: eng, ger, spa, en, ge, 0.0, 0.1, 0.2, 0x80, 0x81 etc...
@@ -439,9 +439,9 @@ Default Setting: None (allow all shares on this TiVo).
 Valid Entries: The names of any shares in your pyTivo.conf file, in a
 comma-separated list.
 Required: No
-Description: Only the shares listed in this setting will be visible on 
-this TiVo. Will ignore invalid shares. If no valid shares are listed, no 
-shares will be visible on this TiVo. If the "shares" line is not 
+Description: Only the shares listed in this setting will be visible on
+this TiVo. Will ignore invalid shares. If no valid shares are listed, no
+shares will be visible on this TiVo. If the "shares" line is not
 present, all shares are visible.
 Example Settings: Movies, Kids Stuff
 Available In: Tivos
@@ -451,7 +451,7 @@ ffmpeg_wait
 Default Setting: 0 (no limit)
 Valid Entries: any integer
 Required: No
-Description: Limits the amount of time FFmpeg can run (when used to 
+Description: Limits the amount of time FFmpeg can run (when used to
 check file info, not for transcoding), in seconds.
 Example Settings: 10, 15, 20.
 Available In: Server
@@ -461,8 +461,8 @@ tivo_username
 Default Setting: None
 Valid Entries: tivo.com username
 Required: No
-Description: Your username (email address) at tivo.com. This is required 
-for the "Push" feature. If you don't plan to use Push, you don't need to 
+Description: Your username (email address) at tivo.com. This is required
+for the "Push" feature. If you don't plan to use Push, you don't need to
 set this.
 Example Settings: user@example.com
 Available In: Server, Tivos
@@ -472,7 +472,7 @@ tivo_password
 Default Setting: None
 Valid Entries: tivo.com password
 Required: No
-Description: Your password at tivo.com. This is required for the "Push" 
+Description: Your password at tivo.com. This is required for the "Push"
 feature. If you don't plan to use Push, you don't need to set this.
 Example Settings: password
 Available In: Server, Tivos
@@ -482,9 +482,9 @@ tivo_mind
 Default Setting: mind.tivo.com:8181
 Valid Entries: address:port
 Required: No
-Description: The TiVo "mind" server and port to use. This is the server 
-that pyTivo connects to in order to make Push requests. For most users 
-in the U.S., the default is the correct value. Australian users will 
+Description: The TiVo "mind" server and port to use. This is the server
+that pyTivo connects to in order to make Push requests. For most users
+in the U.S., the default is the correct value. Australian users will
 need to use "symind", while users in a beta program need "stagingmind".
 Example Settings: symind.tivo.com:8181
 Available In: Server
@@ -494,11 +494,11 @@ tivo_mak
 Default Setting: None
 Valid Entries: Your Media Access Key
 Required: No
-Description: Your Media Access Key -- find it on your TiVo under 
-Messages and Settings, Account and System information, Media Access Key. 
-This is required for the "ToGo" feature, and for anything that uses 
-tivodecode (pushing .TiVo files, transcoding HD .TiVo files to SD 
-TiVos). If you don't plan to use these features, you don't need to set 
+Description: Your Media Access Key -- find it on your TiVo under
+Messages and Settings, Account and System information, Media Access Key.
+This is required for the "ToGo" feature, and for anything that uses
+tivodecode (pushing .TiVo files, transcoding HD .TiVo files to SD
+TiVos). If you don't plan to use these features, you don't need to set
 this.
 Example Settings: 012345678
 Available In: Server, Tivos
@@ -508,9 +508,9 @@ togo_path
 Default Setting: None
 Valid Entries: System path or share name
 Required: No
-Description: The path used to save programs downloaded via the ToGo 
-menu. It can be either a direct path, or the name of a share, in which 
-case pyTivo will use the path specified for the share. If you don't plan 
+Description: The path used to save programs downloaded via the ToGo
+menu. It can be either a direct path, or the name of a share, in which
+case pyTivo will use the path specified for the share. If you don't plan
 to use the ToGo feature, you need not set this.
 Example Settings: My Videos, /home/user/Videos
 Available In: Server
@@ -522,11 +522,11 @@ Options: Auto/On/Off
 Default Setting: Auto
 Valid Entries: On/Off/Auto
 Required: No
-Description: Controls whether or not new-style, zeroconf-based beacons 
-are used. The default is to use them, unless there's a "_tivo_" section 
-with "shares" defined. The zeroconf beacons bypass the usual mechanism 
-whereby only the allowed shares are announced to specific TiVos; the 
-contents of the shares will still not appear on unauthorized TiVos, but 
+Description: Controls whether or not new-style, zeroconf-based beacons
+are used. The default is to use them, unless there's a "_tivo_" section
+with "shares" defined. The zeroconf beacons bypass the usual mechanism
+whereby only the allowed shares are announced to specific TiVos; the
+contents of the shares will still not appear on unauthorized TiVos, but
 the names will.
 Example Settings: On/Off/Auto
 Available In: Server
@@ -537,9 +537,9 @@ Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
-Description: Disable the "Settings" item in the infopage (i.e. the very 
-thing you're using now). Note that you can't turn this off the way you 
-turned it on, since the settings page will not be available! You'll have 
+Description: Disable the "Settings" item in the infopage (i.e. the very
+thing you're using now). Note that you can't turn this off the way you
+turned it on, since the settings page will not be available! You'll have
 to remove it from pyTivo.conf with a text editor.
 Example Settings: True/False
 Available In: Server
@@ -550,11 +550,11 @@ Default Setting: None
 Valid Entries: Share name
 Required: No
 Skill: Moderate
-Description: Sets a temporarily share to store your media content 
-that is being remuxed before being sent to your TiVo.  If content exists 
-on network share, setting this to a local share on the computer running 
-pyTivo will significantly speed up the process. If not set or share is not 
-valid pyTivo will use the original path of your media content for temporary storage. 
+Description: Sets a temporarily share to store your media content
+that is being remuxed before being sent to your TiVo.  If content exists
+on network share, setting this to a local share on the computer running
+pyTivo will significantly speed up the process. If not set or share is not
+valid pyTivo will use the original path of your media content for temporary storage.
 Example Settings: Videos, Movies, TV Shows, etc.
 Available In: Server
 
@@ -565,12 +565,13 @@ Valid Entries: on/off
 Required: No
 Skill: Advanced
 Description: For Tivos that support mpeg-ts transfer. Setting 'ts' to 'on' will
-enable transport streams 
+enable transport streams
 Example Settings: on/off
 Available In: Server
 
 force_update
 
+Mode: checkbox
 Default Setting: False
 Valid Entries: True/False
 Required: No
