@@ -9,6 +9,10 @@ import sys
 import uuid
 from ConfigParser import NoOptionError
 
+class Bdict(dict):
+    def getboolean(self, x):
+        return self.get(x, 'False').lower() in ('1', 'yes', 'true', 'on')
+
 def init(argv):
     global tivos
     global tivo_names
@@ -195,7 +199,7 @@ def isTsnInConfig(tsn):
     return ('_tivo_' + tsn) in config.sections()
 
 def getShares(tsn=''):
-    shares = [(section, dict(config.items(section)))
+    shares = [(section, Bdict(config.items(section)))
               for section in config.sections()
               if not (section.startswith(('_tivo_', 'logger_', 'handler_',
                                           'formatter_'))

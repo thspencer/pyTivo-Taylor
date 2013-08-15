@@ -95,8 +95,8 @@ class Music(Plugin):
     def send_file(self, handler, path, query):
         seek = int(query.get('Seek', [0])[0])
         duration = int(query.get('Duration', [0])[0])
-        always = (handler.container.get('force_ffmpeg',
-                  'False').lower() == 'true' and config.get_bin('ffmpeg'))
+        always = (handler.container.getboolean('force_ffmpeg') and
+                  config.get_bin('ffmpeg'))
         fname = unicode(path, 'utf-8')
 
         ext = os.path.splitext(fname)[1].lower()

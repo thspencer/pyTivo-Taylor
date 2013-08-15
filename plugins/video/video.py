@@ -437,7 +437,7 @@ class BaseVideo(Plugin):
             return
 
         container = handler.container
-        force_alpha = container.get('force_alpha', 'False').lower() == 'true'
+        force_alpha = container.getboolean('force_alpha')
         use_html = query.get('Format', [''])[0].lower() == 'text/html'
 
         files, total, start = self.get_files(handler, query,
